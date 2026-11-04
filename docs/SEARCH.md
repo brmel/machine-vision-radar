@@ -49,8 +49,8 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   registry points every use at Muse Spark (`muse-spark-1.3`, Standard mode) through the Meta Model API
   (`radar/adapters/ai/meta/runner.py`): its OpenAI-compatible chat completions, the prompt's instruction as the system
   message, its output schema as `response_format`, a datasheet as a `file` part and an image as an `image_url` part,
-  with minimal reasoning; the key is `MODEL_API_KEY`, from the environment on the CLI and from Secret Manager on the
-  function, never a file. A model whose `provider` is `vertex` runs on Gemini on the project's Vertex AI through ADK
+  with minimal reasoning; the key is `MODEL_API_KEY`, from the environment, never a file. The function has no Meta key
+  yet, so production's `AiCap` records keep each use on Gemini. A model whose `provider` is `vertex` runs on Gemini on the project's Vertex AI through ADK
   (`radar/adapters/ai/adk/runner.py`) instead, with the service account's credentials or the CLI's access token; the
   match on `provider` is in `radar/adapters/wiring/models.py`. The full request is logged at debug level only. On
   the emulators, for the tests, the gates and the CLI, the scripted models (`radar/adapters/ai/scripted.py`) stand
