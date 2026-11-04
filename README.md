@@ -16,7 +16,8 @@ three parts:
   2 m/s, camera 40 cm away") and get it split into needs, each answered with catalog products whose specs fit, and
   every claim cited.
 
-Live at **[mvradar.web.app](https://mvradar.web.app)**, in English and French.
+Live at **[mvradar.web.app](https://mvradar.web.app)**, in English and French. Demo, 2 minutes:
+**[youtu.be/_aXJb3SvHYI](https://youtu.be/_aXJb3SvHYI)**.
 
 ## AI that grows the knowledge and puts it to work
 
