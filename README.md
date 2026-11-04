@@ -13,9 +13,10 @@ Live at **[mvradar.web.app](https://mvradar.web.app)**, in English and French.
 ## The AI layer
 
 Every AI use (Ask, research extraction from vendor pages and datasheets, news drafts) renders a versioned prompt from
-`data/prompts/` and runs it through one `ModelRunner` port. This build's registry (`data/registry/ai.json`) runs every
-use on **Muse Spark** through the Meta Model API (`radar/adapters/ai/meta/runner.py`); a model's `provider` entry
-picks its runner, and Gemini through Google ADK stays a choice. Every call is metered against per-use caps before it is
+`data/prompts/` and runs it through one `ModelRunner` port. This build's registry (`data/registry/ai.json`) points
+every use at **Muse Spark** through the Meta Model API (`radar/adapters/ai/meta/runner.py`); a model's `provider` entry
+picks its runner, and Gemini through Google ADK stays a choice. The live site moves to Muse Spark once its Meta key is
+set; until then its Ask runs on Gemini. Every call is metered against per-use caps before it is
 made and logged after, with its tokens and cost.
 
 Outside agents can also work the catalog directly: the MCP server gives agents like Muse propose-only access. They file
