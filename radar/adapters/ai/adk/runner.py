@@ -2,28 +2,11 @@ from __future__ import annotations
 
 import asyncio
 import json
-from dataclasses import dataclass
-from typing import Any, Callable, TypeVar
+from typing import Any
 
 from radar.adapters.console import log
 from radar.domain.ai.prompts import Prompt
-from radar.domain.ports.ai.usage_log import Unparsed
-
-T = TypeVar("T")
-
-@dataclass(frozen=True, slots=True)
-class Reply:
-    text: str
-    tokens_in: int
-    tokens_out: int
-    prompt: str
-
-    def read(self, shape: Callable[[Any], T]) -> T:
-        try:
-            return shape(json.loads(self.text))
-        except (ValueError, LookupError, TypeError) as exc:
-            raise Unparsed(f"{self.prompt}: the reply does not fit its shape: {type(exc).__name__}: {exc}",
-                           self.tokens_in, self.tokens_out) from exc
+from radar.domain.ports.ai.prompts import Reply
 
 def _tokens(usage: Any) -> tuple[int, int]:
     if not usage:
@@ -72,8 +55,8 @@ class AdkRunner:
                 text = "".join(p.text or "" for p in event.content.parts)
         return Reply(text, tokens_in, tokens_out, prompt.id)
 
-    def run(self, agent: str, prompt: Prompt, request: str, max_tokens: int,
-            file: tuple[bytes, str] | None = None) -> Reply:
+    def reply(self, agent: str, prompt: Prompt, request: str, max_tokens: int,
+              file: tuple[bytes, str] | None = None) -> Reply:
         if self._project.startswith("demo-"):
             raise RuntimeError("a model call needs Gemini on Vertex AI in the project: pass --project")
         log.debug("model request", prompt=prompt.id, model=self.model, request=request)

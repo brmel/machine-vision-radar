@@ -45,13 +45,15 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   output, with that reason, and the asker gets the `not_enough_evidence` refusal.
 - **The AI uses** (their ports: AGENTS.md rule 15) are answers, web research with its image judge (on research's model
   and caps), datasheet extraction and news drafts, each on its prompt (`ask`, `research`, `image_judge`, `datasheet`,
-  `draft`) and its registry model (Gemini on the project's Vertex AI) through ADK (`radar/adapters/ai/adk/runner.py`),
-  server-side with the service account's credentials or the CLI's access token, never a key; the full request is logged
-  at debug level only. On the emulators, for the tests, the gates and the CLI, the scripted models
-  (`radar/adapters/ai/scripted.py`) stand in, metered at the use's model's price.
+  `draft`) and its registry model, run through the `ModelRunner` port (`radar/domain/ports/ai/prompts.py`). Its one
+  provider is Gemini on the project's Vertex AI through ADK (`radar/adapters/ai/adk/runner.py`), chosen in
+  `radar/adapters/wiring/models.py`, so another provider is one new runner. It runs server-side with the service
+  account's credentials or the CLI's access token, never a key; the full request is logged at debug level only. On
+  the emulators, for the tests, the gates and the CLI, the scripted models (`radar/adapters/ai/scripted.py`) stand
+  in, metered at the use's model's price.
 - **Prompts** are files, `data/prompts/<id>.md`, one each, with its inputs, output schema, instruction and message,
   loaded through the `PromptRegistry`; `test_prompts` renders every one against its inputs. Research and datasheet
-  extraction read the registry's specs (`radar/adapters/ai/adk/specs.py`): each one's label, aliases, and a quantity's
+  extraction read the registry's specs (`radar/adapters/ai/prompted/specs.py`): each one's label, aliases, and a quantity's
   units and bounds; research reads only the profiles of its cards' categories (every one for a maker with no card yet),
   their specs and filters, and names the links its run reads next.
 - **Each use's model and caps** (`radar/domain/ai/budget.py`, `meter.py`). `data/registry/ai.json` lists the
@@ -60,8 +62,8 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   its use's (one per use, the `ai_caps` rule), read on the next call; `radar ai-caps set` and the admin file it. A use's
   port is reachable only through its `Meter`, which on each call checks the use's caps and all uses' against the
   `Budget`'s ledgers and refuses a call past one with the reason (`ask: CAD 2 a month, spent`), opens the port on the
-  use's model, and charges the call's tokens at that model's price. Each ADK adapter reads its reply once, into its
-  port's types (`Reply.read`); a reply that does not fit is `Unparsed`, which the `Meter` records as an `error` and
+  use's model, and charges the call's tokens at that model's price. Each prompted adapter reads its reply once, into its
+  port's types (`read`, `radar/adapters/ai/prompted/reply.py`); a reply that does not fit is `Unparsed`, which the `Meter` records as an `error` and
   charges at its tokens' cost, as Vertex AI bills it.
 - **The usage log.** Every model call, and every one a cap refused, is a `model call` line of the shared logger and an
   `ai_calls` doc: use, prompt, model, tokens in and out, cost, latency, correlation id and outcome (`answered`,

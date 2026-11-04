@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from radar.adapters.ai.adk.runner import AdkRunner
-from radar.adapters.ai.adk.specs import specs_json
+from radar.adapters.ai.prompted.specs import specs_json
 from radar.domain.ai.prompts import Prompt
+from radar.adapters.ai.prompted.reply import read
+from radar.domain.ports.ai.prompts import ModelRunner
 from radar.domain.model.entities import ProductCard
 from radar.domain.model.history.projection import plain
 from radar.domain.model.registry import Registry
@@ -30,8 +31,8 @@ def _read_against(registry: Registry, known: tuple[ProductCard, ...]) -> tuple[s
                                    "filters": [f.field for f in p.facets]} for p in profiles}
     return specs_json(registry, keys), json.dumps(by_category, ensure_ascii=False)
 
-class AdkResearchAgent:
-    def __init__(self, prompt: Prompt, runner: AdkRunner, registry: Registry) -> None:
+class PromptedResearchAgent:
+    def __init__(self, prompt: Prompt, runner: ModelRunner, registry: Registry) -> None:
         self._prompt, self._runner, self._registry = prompt, runner, registry
 
     def research(self, reading: Reading) -> Findings:
@@ -41,6 +42,6 @@ class AdkResearchAgent:
                                       known=known, terms=json.dumps(reading.terms, ensure_ascii=False), specs=specs,
                                       profiles=profiles, page=reading.page.text[:PAGE],
                                       links="\n".join(reading.page.links))
-        reply = self._runner.run("research_agent", self._prompt, request, MAX_TOKENS)
-        return reply.read(lambda raw: Findings(tuple(_draft(p) for p in raw["proposals"]), tuple(raw["follow"]),
+        reply = self._runner.reply("research_agent", self._prompt, request, MAX_TOKENS)
+        return read(reply, lambda raw: Findings(tuple(_draft(p) for p in raw["proposals"]), tuple(raw["follow"]),
                                                reply.tokens_in, reply.tokens_out))

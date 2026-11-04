@@ -10,7 +10,7 @@ from radar.domain.ai.budget import Use, cap_draft
 from radar.domain.ai.meter import Capped, Meter, caps_today
 from radar.domain.model.registry import Registry
 from radar.domain.model.history.ids import keyed
-from radar.domain.ports.ai.prompt_registry import PromptRegistry
+from radar.domain.ports.ai.prompts import PromptRegistry
 from radar.domain.ports.ai.usage_log import Budget
 from radar.domain.ports.search.ask_ledger import AskLedger
 from radar.domain.ports.search.index_runs import Action

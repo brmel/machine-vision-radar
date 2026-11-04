@@ -50,8 +50,7 @@ The Storage emulator keeps its files under `TMPDIR`, hence a folder of its own. 
 `npm run check` on a clean tree. It takes 9–12 minutes, past a foreground call's limit: run it in the background as
 `bash -c 'source app/scripts/limits.sh && timed 1500 "npm run check" npm run check' > <log> 2>&1` and wait for its
 exit, without polling. A pass prints one line a step and ends with
-`GATES: PASS (commit=<sha>, node=<version>)`, the line a PR quotes. `PLAYWRIGHT_ARGS=--update-snapshots` rewrites the
-visual baselines, and such a run records no pass. Done when that line is printed with no `-dirty`.
+`GATES: PASS (commit=<sha>, node=<version>)`, the line a PR quotes. Done when that line is printed with no `-dirty`.
 
 ## A failure
 

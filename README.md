@@ -25,13 +25,16 @@ change only.
 
 ```text
 maker sites ──► research agent ──► proposals ──► review (a person approves) ──► store ──► read model ──► site, API, MCP
-                (Gemini via ADK)                    validator on every write      Firestore   prerendered
+                (any model runner)                  validator on every write      Firestore   prerendered
 ```
 
 - **Provenance first.** A value without a source is never published; a missing product beats a wrong one.
 - **Agents suggest, people decide.** Nothing an agent finds reaches the catalog without approval.
 - **One typed model.** `contracts/model/` generates the Python dataclasses, the TypeScript types and the Zod
   schemas, so every layer agrees on the shape.
+- **Any model.** Every AI use renders its prompt (`data/prompts/`) and runs it through one `ModelRunner` port. Gemini
+  on Vertex AI through Google ADK is today's runner; another provider is one new runner file, chosen in
+  `radar/adapters/wiring/models.py`.
 - **Search and Ask** rank on words, then on meaning (fastembed), on the server. Ask answers only from catalog
   records and cites them.
 

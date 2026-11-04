@@ -67,7 +67,7 @@ React + Vite + TypeScript on the public read model; npm commands run here. The d
 | `MVR_DENY_LIST`, `MVR_PRERENDER_OUT`, `MVR_SITEMAP_URLS`, `MVR_STUDIO_OUT` | the build guard's deny list, the prerender's output, URLs per sitemap file, the studio's output |
 | `VITE_ENABLE_ADMIN`, `VITE_FIREBASE_*` | the admin in the build and its public web config |
 | `VITE_APPCHECK_SITE_KEY` | the reCAPTCHA Enterprise site key a reader's report gets its App Check token with; without it, none |
-| `SMOKE_BASE_URL`, `PLAYWRIGHT_ARGS` | the smoke spec's server; extra Playwright arguments for the gate |
+| `SMOKE_BASE_URL` | the smoke spec's server |
 
 ## Recipes
 

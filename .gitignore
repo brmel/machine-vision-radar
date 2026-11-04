@@ -10,6 +10,7 @@ node_modules/
 # Python
 .venv/
 .pytest_cache/
+.mypy_cache/
 __pycache__/
 
 # OS / editor noise, logs, local env

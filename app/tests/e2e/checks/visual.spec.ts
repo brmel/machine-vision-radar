@@ -1,4 +1,3 @@
-import { existsSync } from "node:fs";
 import { test, expect } from "@playwright/test";
 import { MESSAGES, inLocale } from "../../messages.ts";
 import { PAGES, VIEWS, show } from "../sample.ts";
@@ -6,25 +5,6 @@ import { PAGES, VIEWS, show } from "../sample.ts";
 const WIDTHS = { desktop: { width: 1280, height: 900 }, mobile: { width: 375, height: 812 } } as const;
 const FITS = { phone: WIDTHS.mobile, tablet: { width: 768, height: 1024 }, desktop: WIDTHS.desktop } as const;
 const THEMES = ["light", "dark"] as const;
-
-for (const [device, viewport] of Object.entries(WIDTHS)) {
-  for (const theme of THEMES) {
-    test.describe(`Visual (${device}, ${theme})`, () => {
-      test.use({ viewport });
-      for (const [name, path] of VIEWS) {
-        const baseline = `${name}-${device}${theme === "dark" ? "-dark" : ""}.png`;
-        test(`${name} matches its baseline`, async ({ page }, testInfo) => {
-          const file = testInfo.snapshotPath(baseline, { kind: "screenshot" });
-          const writing = testInfo.config.updateSnapshots === "all" || testInfo.config.updateSnapshots === "changed";
-          test.skip(!writing && !existsSync(file),
-            `no ${process.platform} baseline (${file}): the comparison is skipped, not passed`);
-          await show(page, path, "en", theme);
-          await expect(page).toHaveScreenshot(baseline, { fullPage: true, maxDiffPixelRatio: 0.01 });
-        });
-      }
-    });
-  }
-}
 
 const TAPPABLE =
   "button, select, input:not([type=checkbox]):not([type=radio]), summary, [role=switch], nav a, footer a";

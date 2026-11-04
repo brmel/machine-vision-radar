@@ -22,7 +22,7 @@ from radar.domain.ports.web.endpoint import Request
 from radar.adapters.firestore.ledgers.ai import (CALLS, FirestoreAskLedger, FirestoreBudget, FirestoreUsageLog, METRICS,
                                                  usage_collection)
 from radar.adapters.wiring.root import Wiring
-from radar.adapters.ai.adk.answer_model import AdkAnswerModel
+from radar.adapters.ai.prompted.answer_model import PromptedAnswerModel
 from radar.adapters.ai.adk.runner import AdkRunner
 from radar.adapters.ai.scripted import ScriptedAnswerModel
 from radar.adapters.files.prompts import FilesPromptRegistry
@@ -131,8 +131,8 @@ def test_a_reply_out_of_shape_is_unavailable_and_charged_as_billed(
     model = model_of(FX.registry.ai, Use.ASK, None)
     with serving(vertex_saying(said, []), keep_alive=True) as url:
         runner = AdkRunner(model.id, "mvradar", model.location, "recorded", f"{url}/")
-        res = _ask(_endpoint(ledger, "api-00001",
-                             AdkAnswerModel(FilesPromptRegistry(paths.PROMPTS).prompt("ask"), runner)), "glossy widget")
+        model = PromptedAnswerModel(FilesPromptRegistry(paths.PROMPTS).prompt("ask"), runner)
+        res = _ask(_endpoint(ledger, "api-00001", model), "glossy widget")
     [call] = [f for _, f in ledger.list(CALLS)]
     assert (res.status, res.body["reason"], call["outcome"], call["reason"]) == (
         503, "unavailable", "error", "Unparsed")
