@@ -6,7 +6,7 @@ what gets built; the gates decide whether it's done. This file binds every chang
 
 **Two repos**: this one, public, holds the code and `data/`, what the code is driven by (the registry, the
 agents' prompts, the banned words). The catalog itself lives in the store, and its snapshot, the plan and the issues in
-the maintainers' private `brmel/MVRadar`. Every path here is relative to this repo's root, and every command runs from
+the maintainers' private tracker. Every path here is relative to this repo's root, and every command runs from
 there. Code finds `data/` through `radar/paths.py` and `app/scripts/head.ts` alone (`DATA`: `MVR_DATA`, else `data`;
 `test_layout`).
 
@@ -18,7 +18,7 @@ validation), `docs/SYSTEM.md` (the store, read and write paths), `docs/SEARCH.md
 
 ## How work happens
 
-1. **The plan is the maintainers' private tracker, `brmel/MVRadar`.** A milestone is a sprint, `Sprint N · <goal>`: its
+1. **The plan is the maintainers' private tracker.** A milestone is a sprint, `Sprint N · <goal>`: its
    description is the goal, its issues the stories. The current sprint is the open one with the lowest number; nothing
    outside it starts without the founder, and one issue at a time is finished before the next starts. Open issues
    without a milestone are the backlog. Every issue has an area label (`model`, `acquisition`, `review`, `site`,
@@ -166,8 +166,8 @@ Binding for every change. A rule a tool enforces names it in parentheses; the to
 
 ### Commits
 
-- Conventional Commits (`type(scope): subject`), one issue per commit; the body ends with `Refs brmel/MVRadar#N` for
-  the private tracker, or `Refs #N` for this repo's issues (or `Closes …`)
+- Conventional Commits (`type(scope): subject`), one issue per commit; the body ends with `Refs #N` for this repo's
+  issues (or `Closes …`)
   and a `Lines: +A/-D` trailer (`.githooks/commit-msg`).
 - Never commit secrets, `node_modules/`, build output or local env files.
 - A PR description quotes the clean `GATES: PASS (commit=<sha>, node=<version>)` line; a `-dirty` one is rejected.

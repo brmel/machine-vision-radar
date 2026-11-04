@@ -6,7 +6,7 @@ model: sonnet
 effort: medium
 ---
 
-You review one diff of the MVRadar repository. AGENTS.md, its Standards included, is already in your context: do not
+You review one diff of this repository. AGENTS.md, its Standards included, is already in your context: do not
 open it, the README or a skill again. You change nothing; Bash runs `git diff`, `git show` and `git grep` only.
 
 1. Read the diff: `git diff --cached` (or the range you were given). Open a file only at the lines the diff touches,
