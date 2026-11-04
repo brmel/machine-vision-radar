@@ -45,10 +45,14 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   output, with that reason, and the asker gets the `not_enough_evidence` refusal.
 - **The AI uses** (their ports: AGENTS.md rule 15) are answers, web research with its image judge (on research's model
   and caps), datasheet extraction and news drafts, each on its prompt (`ask`, `research`, `image_judge`, `datasheet`,
-  `draft`) and its registry model, run through the `ModelRunner` port (`radar/domain/ports/ai/prompts.py`). Its one
-  provider is Gemini on the project's Vertex AI through ADK (`radar/adapters/ai/adk/runner.py`), chosen in
-  `radar/adapters/wiring/models.py`, so another provider is one new runner. It runs server-side with the service
-  account's credentials or the CLI's access token, never a key; the full request is logged at debug level only. On
+  `draft`) and its registry model, run through the `ModelRunner` port (`radar/domain/ports/ai/prompts.py`). This
+  build runs every use on Muse Spark (`muse-spark-1.3`, Standard mode) through the Meta Model API
+  (`radar/adapters/ai/meta/runner.py`): its OpenAI-compatible chat completions, the prompt's instruction as the system
+  message, its output schema as `response_format`, a datasheet as a `file` part and an image as an `image_url` part,
+  with minimal reasoning; the key is `MODEL_API_KEY`, from the environment on the CLI and from Secret Manager on the
+  function, never a file. A model whose `provider` is `vertex` runs on Gemini on the project's Vertex AI through ADK
+  (`radar/adapters/ai/adk/runner.py`) instead, with the service account's credentials or the CLI's access token; the
+  match on `provider` is in `radar/adapters/wiring/models.py`. The full request is logged at debug level only. On
   the emulators, for the tests, the gates and the CLI, the scripted models (`radar/adapters/ai/scripted.py`) stand
   in, metered at the use's model's price.
 - **Prompts** are files, `data/prompts/<id>.md`, one each, with its inputs, output schema, instruction and message,
@@ -57,14 +61,15 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   units and bounds; research reads only the profiles of its cards' categories (every one for a maker with no card yet),
   their specs and filters, and names the links its run reads next.
 - **Each use's model and caps** (`radar/domain/ai/budget.py`, `meter.py`). `data/registry/ai.json` lists the
-  models a use may run, each with its Vertex AI region and its price per million tokens in and out, with its source and
+  models a use may run, each with its provider (a Vertex AI region or the Meta Model API's base URL) and its price per
+  million tokens in and out, with its source and
   the day read; the CAD rate; and each use's default model and caps, and all uses' together. An `AiCap` record replaces
   its use's (one per use, the `ai_caps` rule), read on the next call; `radar ai-caps set` and the admin file it. A use's
   port is reachable only through its `Meter`, which on each call checks the use's caps and all uses' against the
   `Budget`'s ledgers and refuses a call past one with the reason (`ask: CAD 2 a month, spent`), opens the port on the
   use's model, and charges the call's tokens at that model's price. Each prompted adapter reads its reply once, into its
   port's types (`read`, `radar/adapters/ai/prompted/reply.py`); a reply that does not fit is `Unparsed`, which the `Meter` records as an `error` and
-  charges at its tokens' cost, as Vertex AI bills it.
+  charges at its tokens' cost, as its provider bills it.
 - **The usage log.** Every model call, and every one a cap refused, is a `model call` line of the shared logger and an
   `ai_calls` doc: use, prompt, model, tokens in and out, cost, latency, correlation id and outcome (`answered`,
   `refused`, `capped`, `error`), redacted like every log line; never the question or the answer.

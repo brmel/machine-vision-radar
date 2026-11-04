@@ -11,7 +11,7 @@ import pytest
 
 from radar import paths
 from radar.adapters.ai.prompted.research_agent import PromptedResearchAgent
-from radar.adapters.ai.adk.runner import AdkRunner
+from radar.adapters.ai.meta.runner import MetaRunner
 from radar.adapters.ai.scripted import ScriptedDatasheetExtractor, ScriptedImageJudge, ScriptedResearchAgent
 from radar.adapters.console import log
 from radar.adapters.files.prompts import FilesPromptRegistry
@@ -37,7 +37,7 @@ from radar.domain.review.agents.research.sites import CategoryScope, MakerScope,
 from radar.domain.review.agents.runs import run_view
 from radar.domain.review.proposal import Proposal
 from radar.domain.review.requests import Approval, Founder, Picked, Revision
-from radar.tests.adapters.stub_server import Answer, Pages, serving, vertex_saying
+from radar.tests.adapters.stub_server import Answer, Pages, meta_saying, serving
 from radar.tests.fixtures.fixture_category import recorded_page
 from radar.tests.store import stores
 
@@ -144,18 +144,18 @@ def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
     assert (len([n for n in lines if n["event"].startswith("research: ")]) == len(run.lines) + 1
             and {n["correlation_id"] for n in lines} == {run.id})
 
-def _on_adk(base: str, chosen: AiModel) -> ResearchAgent:
-    runner = AdkRunner(chosen.id, "mvradar", chosen.location, "recorded", f"{base}/")
+def _on_runner(base: str, chosen: AiModel) -> ResearchAgent:
+    runner = MetaRunner(chosen.id, f"{base}/v1", "recorded")
     return PromptedResearchAgent(FilesPromptRegistry(paths.PROMPTS).prompt("research"), runner, FX.registry)
 
 def test_a_reply_cut_short_refuses_its_page_and_counts_in_the_run_s_cost(docs: tuple[Docs, Any]) -> None:
-    run = _run(docs, [], [], agent=_on_adk, model=vertex_saying('{"proposals": [{"files_on": "upd', []))
+    run = _run(docs, [], [], agent=_on_runner, model=meta_saying('{"proposals": [{"files_on": "upd', []))
     refused = run.said(Step.REJECTED)
     assert len(refused) == len(run.said(Step.READ)) > 0 and all("the model's answer is refused: research: " in r
                                                                 for r in refused)
     assert run.said(Step.FILED) == () and run.cad > 0
 
-def test_a_run_on_adk_gives_it_the_catalog_s_terms_and_refuses_a_draft_naming_what_it_was_not_given(
+def test_a_run_on_its_model_gives_it_the_catalog_s_terms_and_refuses_a_draft_naming_what_it_was_not_given(
         docs: tuple[Docs, Any]) -> None:
     card = next(p.id for p in FX.read.index().products if p.vendor == MAKER["slug"])
     model_id = "prd_0000000099"
@@ -172,9 +172,9 @@ def test_a_run_on_adk_gives_it_the_catalog_s_terms_and_refuses_a_draft_naming_wh
                            "records": json.dumps(stray)}],
             "follow": [f"{SITE}/widget-two", f"{SITE}/products/widget-ten"]}
     heard: list[str] = []
-    run = _run(docs, [], [], agent=_on_adk, model=vertex_saying(json.dumps(said), heard))
+    run = _run(docs, [], [], agent=_on_runner, model=meta_saying(json.dumps(said), heard))
 
-    asked = json.loads(heard[0])["contents"][0]["parts"][0]["text"]
+    asked = json.loads(heard[0])["messages"][1]["content"][0]["text"]
     assert all(f'"{term}"' in asked for term in (*FX.registry.categories, *FX.registry.spec_definitions)), (
         "every category and spec key")
     assert '"slug*": []' in asked and '"name' not in asked.split('"Product"', 1)[1].split("}", 1)[0], (

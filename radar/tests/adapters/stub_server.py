@@ -11,7 +11,8 @@ from typing import Callable, Iterator, Mapping
 
 Answer = Callable[[str, bytes], tuple[int, bytes]]
 Pages = Callable[[str, Mapping[str, str]], tuple[int, Mapping[str, str], bytes]]
-EXCHANGE = json.loads((Path(__file__).parents[1] / "fixtures" / "adk_exchange.json").read_text(encoding="utf-8"))
+EXCHANGES = json.loads((Path(__file__).parents[1] / "fixtures" / "exchanges.json").read_text(encoding="utf-8"))
+EXCHANGE, META_EXCHANGE = EXCHANGES["vertex"], EXCHANGES["meta"]
 
 def vertex_saying(text: str, heard: list[str]) -> Answer:
     reply = copy.deepcopy(EXCHANGE["response"])
@@ -21,6 +22,17 @@ def vertex_saying(text: str, heard: list[str]) -> Answer:
         heard.append(sent.decode())
         return ((200, json.dumps(reply).encode()) if path == EXCHANGE["path"]
                 else (404, b'{"error": {"code": 404, "message": "no such model"}}'))
+
+    return answer
+
+def meta_saying(text: str, heard: list[str]) -> Answer:
+    reply = copy.deepcopy(META_EXCHANGE["response"])
+    reply["choices"][0]["message"]["content"] = text
+
+    def answer(path: str, sent: bytes) -> tuple[int, bytes]:
+        heard.append(sent.decode())
+        return ((200, json.dumps(reply).encode()) if path == META_EXCHANGE["path"]
+                else (404, b'{"error": {"code": 404, "message": "no such route"}}'))
 
     return answer
 

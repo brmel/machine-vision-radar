@@ -165,7 +165,7 @@
   "adminSettingsPromptWhat": "Prompt: the instructions the model follows, and their version, in data/prompts/. Changed by a new version and a deploy.",
   "adminSettingsCapsWhat": "Caps: the most a use may spend in a month and call in a day, and for Ask, one visitor's calls a day. A call past one is refused before the model is asked. Changed here; the next call reads them.",
   "adminSettingsModels": "The models a use may run",
-  "adminSettingsRegion": "Region",
+  "adminSettingsRegion": "Runs on",
   "adminSettingsPriceIn": "US$ per million tokens in",
   "adminSettingsPriceOut": "US$ per million tokens out",
   "adminSettingsPriceRead": "Price read",

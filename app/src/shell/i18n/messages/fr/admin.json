@@ -165,7 +165,7 @@
   "adminSettingsPromptWhat": "Consigne : les instructions que suit le modèle, et leur version, dans data/prompts/. Se change par une nouvelle version et un déploiement.",
   "adminSettingsCapsWhat": "Plafonds : le plus qu'un usage peut dépenser par mois et appeler par jour, et pour Interroger, les appels d'un visiteur par jour. Un appel au-delà est refusé avant d'interroger le modèle. Se changent ici ; l'appel suivant les lit.",
   "adminSettingsModels": "Les modèles qu'un usage peut utiliser",
-  "adminSettingsRegion": "Région",
+  "adminSettingsRegion": "Exécuté sur",
   "adminSettingsPriceIn": "$ US par million de jetons en entrée",
   "adminSettingsPriceOut": "$ US par million de jetons en sortie",
   "adminSettingsPriceRead": "Prix relevé",

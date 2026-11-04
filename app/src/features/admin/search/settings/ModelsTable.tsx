@@ -17,7 +17,7 @@ export const ModelsTable: FC<{ caps: AiCaps }> = ({ caps }) => {
             <th scope="row" className={ROW_HEAD}>
               {m.label} <span className="font-mono text-muted whitespace-nowrap">{m.id}</span>
             </th>
-            <td className={`${CELL} font-mono whitespace-nowrap`}>{m.location}</td>
+            <td className={`${CELL} font-mono whitespace-nowrap`}>{Object.entries(m.provider).flat().join(" · ")}</td>
             <td className={`${CELL} ${NUM}`}>{formatNumber(m.usd_in, locale)}</td>
             <td className={`${CELL} ${NUM}`}>{formatNumber(m.usd_out, locale)}</td>
             <td className={`${CELL} whitespace-nowrap`}><a href={m.source} className="underline" target="_blank"

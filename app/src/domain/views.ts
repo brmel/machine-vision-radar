@@ -458,11 +458,14 @@ export interface SearchSettings {
   readonly stopwords: readonly string[];
 }
 
-/** A language model an AI use may run: Gemini on the project's Vertex AI, in its region, and its online price in US dollars per million tokens in (text and files) and out (text and thinking), as its source stated it on the day it was read. */
+/** Where a model runs, tagged by the runner that calls it. */
+export type AiProvider = { readonly vertex: string } | { readonly meta: string };
+
+/** A language model an AI use may run, where it runs, and its online price in US dollars per million tokens in (text and files) and out (text and thinking), as its source stated it on the day it was read. */
 export interface AiModel {
   readonly id: string;
   readonly label: string;
-  readonly location: string;
+  readonly provider: AiProvider;
   readonly usd_in: number;
   readonly usd_out: number;
   readonly source: string;
