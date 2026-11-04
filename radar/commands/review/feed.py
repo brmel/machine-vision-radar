@@ -93,7 +93,7 @@ def register(commands: Commands) -> None:
                           "under the draft cap: a draft at the end of the publishing order")
     draft.add_argument("id", help="the product's or organization's id or slug")
     draft.add_argument("--ai", action="store_true", required=True,
-                       help="the article model writes it (Gemini on the project, with --yes)")
+                       help="the article model writes it (the draft use's model, with --yes)")
     commands.verb("feed", "list", func=_list,
                   help=f"the drafts in publishing order, and the published articles, newest first, {ROWS} a "
                        "page").add_argument(

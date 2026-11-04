@@ -121,7 +121,8 @@ Binding for every change. A rule a tool enforces names it in parentheses; the to
 
 ### Design
 
-14. **One provider per port**, declared apart from its implementation. A new provider replaces the old one in the same
+14. **One provider per port**, declared apart from its implementation (the `ModelRunner`'s model entries choose
+    theirs: rule 15). A new provider replaces the old one in the same
     change, as one new adapter and no domain change; none runs beside it as a fallback or backup. Only `adapters/`
     imports a provider SDK (Firebase, Google Cloud, `fastembed`, ADK, Gen AI, `zod`, generated schemas) or makes a raw
     HTTP call (depcruise, `providers.test.ts`, `test_boundaries`).

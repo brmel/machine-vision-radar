@@ -10,7 +10,7 @@ from radar.adapters.console import log
 from radar.domain.ai.prompts import Prompt
 from radar.domain.ports.ai.prompts import Reply
 
-TIMEOUT = 120
+TIMEOUT = 55
 
 def _part(file: tuple[bytes, str]) -> dict[str, Any]:
     content, mime = file
@@ -47,6 +47,8 @@ class MetaRunner:
                 said = json.load(res)
         except urllib.error.HTTPError as exc:
             raise OSError(f"Meta Model API: HTTP {exc.code} {exc.read()[:300]!r}") from exc
-        usage = said.get("usage") or {}
-        return Reply(said["choices"][0]["message"].get("content") or "", usage.get("prompt_tokens", 0),
+        usage, choices = said.get("usage") or {}, said.get("choices") or ()
+        if not choices:
+            raise ValueError(f"Meta Model API: a reply with no message: {str(said)[:300]}")
+        return Reply(choices[0]["message"].get("content") or "", usage.get("prompt_tokens", 0),
                      usage.get("completion_tokens", 0), prompt.id)

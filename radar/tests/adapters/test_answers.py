@@ -258,7 +258,7 @@ def test_a_reply_out_of_its_port_s_shape_is_unparsed_naming_its_prompt_with_its_
         USES[use](opened(f"{url}/"))
     assert refused.value.tokens_in > 0 and refused.value.tokens_out > 0
 
-def test_the_meta_runner_asks_for_the_prompt_s_shape_and_meets_the_contract_on_a_recorded_exchange() -> None:
+def test_the_meta_runner_asks_for_the_prompt_s_shape_and_meets_the_contract_on_meta_s_documented_reply() -> None:
     heard: list[str] = []
     prompt = PROMPTS.prompt("ask")
     with serving(meta_saying(META_EXCHANGE["response"]["choices"][0]["message"]["content"], heard),
