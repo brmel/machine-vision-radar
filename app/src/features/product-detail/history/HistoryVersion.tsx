@@ -28,7 +28,7 @@ export const HistoryVersion: FC<{ version: HistoryEntry; productId: string }> = 
         <span className="tabular-nums">{formatDate(v.recorded_at, locale)}</span>
         <Badge>{actor[v.actor_kind]}</Badge>
       </p>
-      <p lang={DEFAULT_LANGUAGE.code} className="text-body text-fg">{v.reason}</p>
+      <p lang={DEFAULT_LANGUAGE.code} className="text-body text-fg break-words">{v.reason}</p>
       <Facts layout="grid" className="text-caption"
         facts={v.changed.map((c) => ({ key: c.path, label: field(c.path), value: change(c) }))} />
       {v.sources.length > 0 && (

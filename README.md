@@ -1,27 +1,42 @@
 # Machine Vision Radar
 
-All machine vision knowledge, in one place.
+**All machine vision knowledge, in one place.**
 
-Choosing a machine-vision camera, lens or light means opening one tab per maker, reading the same spec under three
-names and digging through PDF datasheets. Machine Vision Radar puts those products in one catalog with one vocabulary:
-950 products from 433 vendors in 22 categories, each published value citing the page or datasheet it came from. Ask a
-question in plain words ("small barcodes on bottles moving at 2 m/s, camera 40 cm away") and get products whose specs
-fit, each sentence citing the records it rests on.
+Machine vision engineers choose cameras, lenses, lighting, frame grabbers, code readers and software from hundreds of
+makers. Each one names the same spec its own way, hides half of it in a PDF datasheet and changes its range without
+notice. Machine Vision Radar turns that scattered knowledge into one sourced, searchable body of knowledge, built on
+three parts:
+
+- **The catalog.** Every product and every maker, in one vocabulary, with each published value citing the page or
+  datasheet it came from. Today: 950 products from 433 vendors in 22 categories, browsed by category, filtered on
+  their specs and compared side by side.
+- **The news.** What the industry launches and changes, written from the records the catalog holds, every sentence
+  citing the products, makers and sources it rests on.
+- **Application solving.** Describe an inspection task in plain words ("read small barcodes on bottles moving at
+  2 m/s, camera 40 cm away") and get it split into needs, each answered with catalog products whose specs fit, and
+  every claim cited.
 
 Live at **[mvradar.web.app](https://mvradar.web.app)**, in English and French.
 
-## The AI layer
+## AI that grows the knowledge and puts it to work
 
-Every AI use (Ask, research extraction from vendor pages and datasheets, news drafts) renders a versioned prompt from
-`data/prompts/` and runs it through one `ModelRunner` port. This build's registry (`data/registry/ai.json`) points
-every use at **Muse Spark** through the Meta Model API (`radar/adapters/ai/meta/runner.py`); a model's `provider` entry
-picks its runner, and Gemini through Google ADK stays a choice. The live site moves to Muse Spark once its Meta key is
-set; until then its Ask runs on Gemini. Every call is metered against per-use caps before it is
-made and logged after, with its tokens and cost.
+AI works on both sides of the catalog, and a person stays in charge of what it publishes.
 
-Outside agents can also work the catalog directly: the MCP server gives agents like Muse propose-only access. They file
-proposals, a person approves them, and a validator guards every write ([docs/MCP.md](docs/MCP.md)). Nothing an agent
-or a model writes reaches the site without a person's approval: a missing product beats a wrong one.
+- **Growing the knowledge.** Research agents read makers' product pages and datasheets, extract each spec in the
+  catalog's vocabulary with its source, and file proposals. A person approves each one in the review desk, and a
+  validator checks every write. A missing product beats a wrong one.
+- **Finding your way.** Search ranks on words and on meaning, in either language. Ask answers a question from catalog
+  records only and cites each one.
+- **Solving an application.** Ask turns a described problem into its needs and answers each from the catalog; a need
+  nothing meets is said to be unmet, not filled in.
+- **Opening it to other agents.** An MCP server lets outside agents read the catalog and propose changes to it under
+  the same review ([docs/MCP.md](docs/MCP.md)).
+
+Every AI use renders a versioned prompt from `data/prompts/` and runs it through one `ModelRunner` port, metered
+against per-use caps before each call and logged after it with its tokens and cost. This build adds **Muse Spark**,
+through the Meta Model API (`radar/adapters/ai/meta/runner.py`), and points every use at it in
+`data/registry/ai.json`; a model's `provider` entry picks its runner, so Muse Spark and Gemini (through Google ADK)
+are each one registry line away. The live site still runs Gemini: it switches to Muse Spark once its Meta key is set.
 
 Code: Apache-2.0. Catalog: CC BY-NC 4.0. The catalog lives in Firestore and Cloud Storage behind the app and is served
 through the site, the API and MCP; this repo holds the code and the registry it is driven by, not the data.
@@ -98,9 +113,9 @@ cd app && npm run emulators                # Firestore and Storage emulators, fo
 5. Sign in once at `/admin`, then run `python3 -m radar --project <id> --yes admin grant <email>` and sign in again:
    the review desk opens.
 
-The AI uses run on the model `data/registry/ai.json` names for each, metered against its caps: Muse Spark needs a
-Meta Model API key, as `MODEL_API_KEY` in the environment for the CLI and as the function's secret
-(`firebase functions:secrets:set MODEL_API_KEY`); a Gemini model runs on Vertex AI with your Google Cloud credentials.
+The AI uses run on the model `data/registry/ai.json` (or a use's `ai-caps` record) names for each, metered against
+its caps: Muse Spark needs a Meta Model API key as `MODEL_API_KEY` in the environment; a Gemini model runs on Vertex AI
+with your Google Cloud credentials.
 
 ## Contributing
 
