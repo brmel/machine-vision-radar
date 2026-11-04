@@ -43,6 +43,6 @@ cd app
 step 120 "production build" npm run build
 step 60 "byte-stable build" npx vitest run tests/build/build-deterministic.test.ts
 step 60 "prerender from Firestore" npx vitest run tests/build/prerender.test.ts -t "Firestore emulator"
-step 180 "Playwright" npx playwright test ${PLAYWRIGHT_ARGS:-}
+step 180 "Playwright" npx playwright test
 step 60 "smoke on the hosting emulator" env SMOKE_BASE_URL=http://127.0.0.1:5055 npx playwright test
 step 400 "Playwright, store writes" npx playwright test --config playwright.emulator.config.ts

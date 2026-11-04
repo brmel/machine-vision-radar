@@ -1,7 +1,7 @@
 # AGENTS.md — Machine Vision Radar
 
 A structured radar of the machine-vision industry, to be the source of truth about machine vision: validated product
-and vendor records, a React+Vite site, and a CLI-first agent interface. Solo project: Redouane, the founder, decides
+and vendor records, a React+Vite site, and a CLI-first agent interface. One maintainer, the founder, decides
 what gets built; the gates decide whether it's done. This file binds every change; it wins over an issue's text.
 
 **Two repos**: this one, public, holds the code and `data/`, what the code is driven by (the registry, the
@@ -126,10 +126,12 @@ Binding for every change. A rule a tool enforces names it in parentheses; the to
     imports a provider SDK (Firebase, Google Cloud, `fastembed`, ADK, Gen AI, `zod`, generated schemas) or makes a raw
     HTTP call (depcruise, `providers.test.ts`, `test_boundaries`).
 15. **Agent seam.** LLM code sits behind one SDK-agnostic port per role in `domain/ports/ai/`, our own types in and out,
-    each with a scripted model for tests and emulators. Google ADK (`adapters/ai/adk/`), on the registry's models, is
-    the only implementation, server-side only; every prompt is one file a use in `data/prompts/`
-    (`test_prompts`); every model call goes through the `Meter` (caps before, usage after). Outside agents' code is one package each side:
-    `radar/domain/review/agents/`, `app/src/domain/ports/review/agents/`.
+    each with a scripted model for tests and emulators. A use's adapter (`adapters/ai/prompted/`) renders its prompt
+    and runs it on the `ModelRunner` port; Google ADK on Vertex AI (`adapters/ai/adk/runner.py`) is that port's one
+    provider, chosen in `adapters/wiring/models.py`, server-side only, so another provider is one new runner. Every
+    prompt is one file a use in `data/prompts/` (`test_prompts`); every model call goes through the `Meter` (caps
+    before, usage after). Outside agents' code is one package each side: `radar/domain/review/agents/`,
+    `app/src/domain/ports/review/agents/`.
 16. **Real domain objects:** typed objects with tight interfaces and one responsibility each (Product, Organization,
     Claim, Catalog, SearchEngine…), not loose dicts, free functions or scattered commands. Values are immutable;
     export only what a caller needs.

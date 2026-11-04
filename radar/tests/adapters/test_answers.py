@@ -7,12 +7,12 @@ from typing import Callable, Collection, Iterator
 import pytest
 
 from radar import paths
-from radar.adapters.ai.adk.answer_model import AdkAnswerModel
+from radar.adapters.ai.prompted.answer_model import PromptedAnswerModel
 from radar.adapters.ai.scripted import ScriptedAnswerModel
-from radar.adapters.ai.adk.article_model import AdkArticleModel
-from radar.adapters.ai.adk.datasheet_extractor import AdkDatasheetExtractor
-from radar.adapters.ai.adk.image_judge import AdkImageJudge
-from radar.adapters.ai.adk.research_agent import AdkResearchAgent
+from radar.adapters.ai.prompted.article_model import PromptedArticleModel
+from radar.adapters.ai.prompted.datasheet_extractor import PromptedDatasheetExtractor
+from radar.adapters.ai.prompted.image_judge import PromptedImageJudge
+from radar.adapters.ai.prompted.research_agent import PromptedResearchAgent
 from radar.adapters.files.prompts import FilesPromptRegistry
 from radar.adapters.ai.adk.runner import AdkRunner
 from radar.domain.ai.answerer import Answerer
@@ -41,14 +41,15 @@ SHEET = Datasheet("prd_0000000002", b"%PDF-1.4\nfixture_mount: socket_b\n%%EOF\n
 CANDIDATE = CandidateImage("https://example.com/widget-two.png", b"\x89PNG\r\n\x1a\nfakeimage", "image/png")
 PROMPTS = FilesPromptRegistry(paths.PROMPTS)
 USES: dict[str, Callable[[AdkRunner], object]] = {
-    "ask": lambda runner: AdkAnswerModel(PROMPTS.prompt("ask"), runner).answer(
+    "ask": lambda runner: PromptedAnswerModel(PROMPTS.prompt("ask"), runner).answer(
         RECORDED[1], evidence_of(READ.products(RECORDED[0]), REGISTRY, "en"), "en"),
-    "draft": lambda runner: AdkArticleModel(PROMPTS.prompt("draft"), runner).draft(
+    "draft": lambda runner: PromptedArticleModel(PROMPTS.prompt("draft"), runner).draft(
         evidence_of(READ.products(RECORDED[0][:1]), REGISTRY, "en"), "Example Devices", "en"),
-    "datasheet": lambda runner: AdkDatasheetExtractor(PROMPTS.prompt("datasheet"), runner, REGISTRY).extract(SHEET),
-    "image_judge": lambda runner: AdkImageJudge(PROMPTS.prompt("image_judge"),
-                                                runner).judge("Widget Two", (CANDIDATE,)),
-    "research": lambda runner: AdkResearchAgent(PROMPTS.prompt("research"), runner, REGISTRY).research(
+    "datasheet": lambda runner: PromptedDatasheetExtractor(
+        PROMPTS.prompt("datasheet"), runner, REGISTRY).extract(SHEET),
+    "image_judge": lambda runner: PromptedImageJudge(
+        PROMPTS.prompt("image_judge"), runner).judge("Widget Two", (CANDIDATE,)),
+    "research": lambda runner: PromptedResearchAgent(PROMPTS.prompt("research"), runner, REGISTRY).research(
         Reading(PAGE, "org_0000000001", (), {})),
 }
 
@@ -92,7 +93,7 @@ def _contract(model: AnswerModel) -> None:
     assert all(s.text and s.cites and set(s.cites) <= evidence.ids() for s in text.sentences)
 
 def test_the_adk_adapter_meets_the_contract_on_a_recorded_exchange_every_time_it_is_asked(vertex: str) -> None:
-    model = AdkAnswerModel(PROMPTS.prompt("ask"), _adk(vertex))
+    model = PromptedAnswerModel(PROMPTS.prompt("ask"), _adk(vertex))
     _contract(model)
     _contract(model)
 
@@ -183,7 +184,7 @@ def test_the_adk_research_agent_returns_the_records_a_page_states_for_the_run_to
             "follow": ["https://example.com/products/widget-nine"]}
     heard: list[str] = []
     with _vertex_saying(json.dumps(said), heard) as url:
-        agent = AdkResearchAgent(PROMPTS.prompt("research"), _adk(url), REGISTRY)
+        agent = PromptedResearchAgent(PROMPTS.prompt("research"), _adk(url), REGISTRY)
         findings = agent.research(Reading(PAGE, "org_0000000001", (card,), {}))
         agent.research(Reading(PAGE, "org_0000000001", (), {}))
     with _vertex_saying(json.dumps({**said, "proposals": [{**said["proposals"][0], "records": '[{"value": 93}]'}]}),
@@ -206,7 +207,7 @@ def test_the_adk_article_model_returns_the_text_it_wrote_about_the_record_it_was
             "summary": "A glossy widget."}
     heard: list[str] = []
     with _vertex_saying(json.dumps(said), heard) as url:
-        text = AdkArticleModel(PROMPTS.prompt("draft"), _adk(url)).draft(
+        text = PromptedArticleModel(PROMPTS.prompt("draft"), _adk(url)).draft(
             evidence_of(READ.products(RECORDED[0][:1]), REGISTRY, "en"), "Example Devices", "en")
     assert (text.title, text.summary, text.sentences) == ("Widget Two", "A glossy widget.",
                                                           (Sentence("Widget Two is glossy.", (RECORDED[0][0],)),))
@@ -219,7 +220,7 @@ def test_the_adk_datasheet_extractor_reads_each_value_the_datasheet_states() -> 
                        {"spec_key": "fixture_reach", "quantity": 150, "unit": "mm"}]}
     heard: list[str] = []
     with _vertex_saying(json.dumps(said), heard) as url:
-        extraction = AdkDatasheetExtractor(PROMPTS.prompt("datasheet"), _adk(url), REGISTRY).extract(SHEET)
+        extraction = PromptedDatasheetExtractor(PROMPTS.prompt("datasheet"), _adk(url), REGISTRY).extract(SHEET)
     assert extraction.values == (SpecValue("fixture_mount", ClaimValueTerm(term="socket_b")),
                                  SpecValue("fixture_mass", ClaimValueQuantity(quantity=Quantity(value=93.0, unit="g"))))
     assert (extraction.tokens_in > 0 and base64.b64encode(SHEET.content).decode() in heard[0]
@@ -229,11 +230,11 @@ def test_the_adk_image_judge_ranks_candidates_and_picks_a_photo() -> None:
     said = {"kind": "photo", "confidence": 0.95, "reason": "A clear photo of Widget Two"}
     heard: list[str] = []
     with _vertex_saying(json.dumps(said), heard) as url:
-        eval_res = AdkImageJudge(PROMPTS.prompt("image_judge"), _adk(url)).judge("Widget Two", (CANDIDATE,))
+        eval_res = PromptedImageJudge(PROMPTS.prompt("image_judge"), _adk(url)).judge("Widget Two", (CANDIDATE,))
     replies = iter((vertex_saying(json.dumps(said), []), vertex_saying("{}", [])))
     with serving(lambda path, sent: next(replies)(path, sent),
                  keep_alive=True) as url, pytest.raises(Unparsed) as refused:
-        AdkImageJudge(PROMPTS.prompt("image_judge"), _adk(f"{url}/")).judge("Widget Two", (CANDIDATE, CANDIDATE))
+        PromptedImageJudge(PROMPTS.prompt("image_judge"), _adk(f"{url}/")).judge("Widget Two", (CANDIDATE, CANDIDATE))
     assert len(eval_res.judged) == 1 and eval_res.judged[0].kind == "photo"
     assert eval_res.tokens_in > 0 and base64.b64encode(CANDIDATE.content).decode() in heard[0]
     assert (refused.value.tokens_in, refused.value.tokens_out) == (2 * eval_res.tokens_in, 2 * eval_res.tokens_out)

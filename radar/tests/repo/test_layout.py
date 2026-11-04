@@ -106,7 +106,7 @@ def test_no_comments_but_the_guards_marks() -> None:
     assert not found, f"comments: {len(found)}, first {found[:5]}"
 
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
-ALLOWED = ("app/public/", "app/tests/e2e/baselines/")
+ALLOWED = ("app/public/",)
 
 def test_images_only_in_allowed_folders() -> None:
     tracked = subprocess.run(["git", "ls-files"], cwd=DEV, capture_output=True, text=True,

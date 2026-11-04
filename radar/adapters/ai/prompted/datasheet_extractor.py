@@ -3,9 +3,10 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any, Mapping
 
-from radar.adapters.ai.adk.runner import AdkRunner
 from radar.domain.ai.prompts import Prompt
-from radar.adapters.ai.adk.specs import specs_json
+from radar.adapters.ai.prompted.reply import read
+from radar.domain.ports.ai.prompts import ModelRunner
+from radar.adapters.ai.prompted.specs import specs_json
 from radar.domain.model.entities import (ClaimValue, ClaimValueNone, ClaimValueQuantity, ClaimValueString,
                                          ClaimValueTerm, ClaimValueTerms, Quantity, SpecDefinition)
 from radar.domain.model.registry import Registry
@@ -31,16 +32,16 @@ def _single(values: list[dict[str, Any]]) -> list[dict[str, Any]]:
     given = Counter(v["spec_key"] for v in values)
     return [v for v in values if given[v["spec_key"]] == 1]
 
-class AdkDatasheetExtractor:
-    def __init__(self, prompt: Prompt, runner: AdkRunner, registry: Registry) -> None:
+class PromptedDatasheetExtractor:
+    def __init__(self, prompt: Prompt, runner: ModelRunner, registry: Registry) -> None:
         self._prompt, self._runner, self._defs, self._specs = (prompt, runner, registry.spec_definitions,
                                                                specs_json(registry, registry.spec_definitions))
 
     def extract(self, datasheet: Datasheet) -> Extraction:
         request = self._prompt.render(product=datasheet.product, source=datasheet.source.id, specs=self._specs)
-        reply = self._runner.run("datasheet_extractor", self._prompt, request, MAX_TOKENS,
+        reply = self._runner.reply("datasheet_extractor", self._prompt, request, MAX_TOKENS,
                                  (datasheet.content, datasheet.mime))
-        return reply.read(
+        return read(reply, 
             lambda raw: Extraction(tuple(SpecValue(v["spec_key"], _value(v, self._defs.get(v["spec_key"])))
                                          for v in _single(raw["values"])),
                                    reply.tokens_in, reply.tokens_out))

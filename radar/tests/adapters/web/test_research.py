@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 import pytest
 
 from radar import paths
-from radar.adapters.ai.adk.research_agent import AdkResearchAgent
+from radar.adapters.ai.prompted.research_agent import PromptedResearchAgent
 from radar.adapters.ai.adk.runner import AdkRunner
 from radar.adapters.ai.scripted import ScriptedDatasheetExtractor, ScriptedImageJudge, ScriptedResearchAgent
 from radar.adapters.console import log
@@ -146,7 +146,7 @@ def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
 
 def _on_adk(base: str, chosen: AiModel) -> ResearchAgent:
     runner = AdkRunner(chosen.id, "mvradar", chosen.location, "recorded", f"{base}/")
-    return AdkResearchAgent(FilesPromptRegistry(paths.PROMPTS).prompt("research"), runner, FX.registry)
+    return PromptedResearchAgent(FilesPromptRegistry(paths.PROMPTS).prompt("research"), runner, FX.registry)
 
 def test_a_reply_cut_short_refuses_its_page_and_counts_in_the_run_s_cost(docs: tuple[Docs, Any]) -> None:
     run = _run(docs, [], [], agent=_on_adk, model=vertex_saying('{"proposals": [{"files_on": "upd', []))

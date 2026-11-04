@@ -5,11 +5,11 @@ from typing import Callable, TypeVar
 
 from radar import paths
 from radar.adapters.console import log
-from radar.adapters.ai.adk.answer_model import AdkAnswerModel
-from radar.adapters.ai.adk.article_model import AdkArticleModel
-from radar.adapters.ai.adk.datasheet_extractor import AdkDatasheetExtractor
-from radar.adapters.ai.adk.image_judge import AdkImageJudge
-from radar.adapters.ai.adk.research_agent import AdkResearchAgent
+from radar.adapters.ai.prompted.answer_model import PromptedAnswerModel
+from radar.adapters.ai.prompted.article_model import PromptedArticleModel
+from radar.adapters.ai.prompted.datasheet_extractor import PromptedDatasheetExtractor
+from radar.adapters.ai.prompted.image_judge import PromptedImageJudge
+from radar.adapters.ai.prompted.research_agent import PromptedResearchAgent
 from radar.adapters.ai.adk.runner import AdkRunner
 from radar.adapters.ai.scripted import (ScriptedAnswerModel, ScriptedArticleModel, ScriptedDatasheetExtractor,
                                         ScriptedImageJudge, ScriptedResearchAgent)
@@ -28,7 +28,7 @@ from radar.domain.model.entities import AiModel
 from radar.domain.ports.ai.article_model import ArticleModel
 from radar.domain.ports.ai.datasheet_extractor import DatasheetExtractor
 from radar.domain.ports.ai.image_judge import ImageJudge
-from radar.domain.ports.ai.prompt_registry import PromptRegistry
+from radar.domain.ports.ai.prompts import ModelRunner, PromptRegistry
 from radar.domain.ports.ai.research_agent import ResearchAgent
 from radar.domain.ports.ai.usage_log import Budget
 from radar.domain.ports.search.ask_ledger import AskLedger
@@ -58,41 +58,43 @@ class Models(Stores):
     def prompts(self) -> PromptRegistry:
         return FilesPromptRegistry(paths.PROMPTS)
 
-    def _meter(self, use: Use, adk: Callable[[Prompt, AdkRunner], M], scripted: M,
+    def _runner(self, model: AiModel, project: str) -> ModelRunner:
+        return AdkRunner(model.id, project, model.location, os.environ.get("MVR_ACCESS_TOKEN"))
+
+    def _meter(self, use: Use, prompted: Callable[[Prompt, ModelRunner], M], scripted: M,
                prompt_id: str | None = None) -> Meter[M]:
         prompt, project = self.prompts().prompt(prompt_id or use.value), self._real
         if project:
             self._token()
         else:
             self._demo()
-        token = os.environ.get("MVR_ACCESS_TOKEN")
 
         def opened(model: AiModel) -> M:
             if project and not self._yes:
                 raise NoStore("a model call is charged to the project's AI budget and recorded there: pass --yes")
-            return adk(prompt, AdkRunner(model.id, project, model.location, token)) if project else scripted
+            return prompted(prompt, self._runner(model, project)) if project else scripted
         return Meter(self.budget(), FirestoreUsageLog(self.store()), self.model()[1].ai, use, prompt.id, opened)
 
     def ask_meter(self, engine: SearchEngine) -> Meter[Answerer]:
         retriever = self.retriever(engine)
-        return self._meter(Use.ASK, lambda prompt, runner: Answerer(retriever, AdkAnswerModel(prompt, runner)),
+        return self._meter(Use.ASK, lambda prompt, runner: Answerer(retriever, PromptedAnswerModel(prompt, runner)),
                            Answerer(retriever, ScriptedAnswerModel()))
 
     def research_meter(self) -> Meter[ResearchAgent]:
         registry = self.model()[1]
-        return self._meter(Use.RESEARCH, lambda prompt, runner: AdkResearchAgent(prompt, runner, registry),
+        return self._meter(Use.RESEARCH, lambda prompt, runner: PromptedResearchAgent(prompt, runner, registry),
                            ScriptedResearchAgent())
 
     def image_judge_meter(self) -> Meter[ImageJudge]:
-        return self._meter(Use.RESEARCH, AdkImageJudge, ScriptedImageJudge(), prompt_id="image_judge")
+        return self._meter(Use.RESEARCH, PromptedImageJudge, ScriptedImageJudge(), prompt_id="image_judge")
 
     def datasheet_meter(self) -> Meter[DatasheetExtractor]:
         registry = self.model()[1]
-        return self._meter(Use.DATASHEET, lambda prompt, runner: AdkDatasheetExtractor(prompt, runner, registry),
+        return self._meter(Use.DATASHEET, lambda prompt, runner: PromptedDatasheetExtractor(prompt, runner, registry),
                            ScriptedDatasheetExtractor())
 
     def draft_meter(self) -> Meter[ArticleModel]:
-        return self._meter(Use.DRAFT, AdkArticleModel, ScriptedArticleModel())
+        return self._meter(Use.DRAFT, PromptedArticleModel, ScriptedArticleModel())
 
     def retriever(self, engine: SearchEngine) -> Retriever:
         return IndexRetriever(engine, self.repository(), self.model()[1])

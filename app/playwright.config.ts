@@ -6,7 +6,6 @@ export default defineConfig({
   testDir: "./tests/e2e",
   testMatch: smokeBaseUrl ? "**/smoke.spec.ts" : undefined,
   testIgnore: smokeBaseUrl ? "**/emulator/**" : ["**/smoke.spec.ts", "**/emulator/**"],
-  snapshotPathTemplate: "{testDir}/baselines/{arg}-{platform}{ext}",
   fullyParallel: true,
   reporter: "list",
   use: { baseURL: smokeBaseUrl ?? "http://127.0.0.1:4173" },

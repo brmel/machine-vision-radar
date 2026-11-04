@@ -15,8 +15,6 @@ DIRTY=""
 if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
   DIRTY="-dirty"
 fi
-# PLAYWRIGHT_ARGS (as --update-snapshots) changes what the run proves: it records no pass.
-[[ -z "${PLAYWRIGHT_ARGS:-}" ]] || DIRTY="${DIRTY}-args"
 
 # Each step's limit is about three times its usual run; its output goes to a log, kept when the gate fails.
 source "$REPO_ROOT/app/scripts/limits.sh"

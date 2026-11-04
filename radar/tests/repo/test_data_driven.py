@@ -44,7 +44,7 @@ HOMONYMS: dict[str, tuple[str, ...]] = {
     "ul": ("radar/adapters/web/pages.py",),
     "vendor": ("app/src/adapters/read-model/firestore.ts",
                "app/src/domain/filtering/browseView.ts", "app/src/domain/filtering/filterUrl.ts",
-               "app/src/domain/ports/CatalogRepository.ts", "radar/adapters/ai/adk/answer_model.py",
+               "app/src/domain/ports/CatalogRepository.ts", "radar/adapters/ai/prompted/answer_model.py",
                "radar/domain/read_model/derived/market.py", "radar/domain/read_model/listings.py",
                "radar/adapters/ai/search/records.py",
                "radar/domain/search/hits.py",

@@ -5,7 +5,7 @@ from typing import Callable, Generic, Mapping, Protocol, TypeVar
 
 from radar.domain.ai.budget import METERED, Cap, Use, caps_view, model_of, over_cap, total_usage
 from radar.domain.model.entities import AiCaps, AiModel, AiSettings
-from radar.domain.ports.ai.prompt_registry import PromptRegistry
+from radar.domain.ports.ai.prompts import PromptRegistry
 from radar.domain.ports.ai.usage_log import Budget, Ended, ModelCall, Outcome, Unparsed, UsageLog
 
 def cost(ai: AiSettings, model: AiModel, tokens_in: int, tokens_out: int) -> float:
