@@ -1,0 +1,71 @@
+{
+  "vertex": {
+    "path": "/v1beta1/projects/mvradar/locations/us-central1/publishers/google/models/gemini-2.5-flash-lite:generateContent",
+    "response": {
+      "candidates": [
+        {
+          "content": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "{\n  \"sentences\": [\n    {\n      \"text\": \"Widget Two has a glossy finish.\",\n      \"cites\": [\"prd_0000000002\", \"src_0000000001\"]\n    },\n    {\n      \"text\": \"Widget Three replaces Widget Two.\",\n      \"cites\": [\"prd_0000000005\"]\n    }\n  ]\n}"
+              }
+            ]
+          },
+          "finishReason": "STOP"
+        }
+      ],
+      "usageMetadata": {
+        "promptTokenCount": 591,
+        "candidatesTokenCount": 103,
+        "totalTokenCount": 694,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 591
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 103
+          }
+        ]
+      },
+      "modelVersion": "gemini-2.5-flash-lite",
+      "createTime": "2026-10-19T21:45:41.384354Z",
+      "responseId": "hY_WauK6F-3y-coPncfK0Ak"
+    }
+  },
+  "meta": {
+    "path": "/v1/chat/completions",
+    "response": {
+      "id": "chatcmpl-abc123",
+      "object": "chat.completion",
+      "created": 1762300800,
+      "model": "muse-spark-1.3",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"sentences\": [\n    {\n      \"text\": \"Widget Two has a glossy finish.\",\n      \"cites\": [\"prd_0000000002\", \"src_0000000001\"]\n    },\n    {\n      \"text\": \"Widget Three replaces Widget Two.\",\n      \"cites\": [\"prd_0000000005\"]\n    }\n  ]\n}"
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 612,
+        "completion_tokens": 131,
+        "total_tokens": 743,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 28
+        }
+      }
+    }
+  }
+}

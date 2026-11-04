@@ -1,14 +1,39 @@
 {
   "cad_per_usd": 1.45,
   "models": [
-    {"id": "gemini-2.5-flash-lite", "label": "Gemini 2.5 Flash-Lite", "location": "us-central1", "usd_in": 0.1, "usd_out": 0.4, "source": "https://cloud.google.com/vertex-ai/generative-ai/pricing", "read": "2026-10-22"},
-    {"id": "gemini-3.1-flash-lite", "label": "Gemini 3.1 Flash-Lite", "location": "global", "usd_in": 0.25, "usd_out": 1.5, "source": "https://cloud.google.com/vertex-ai/generative-ai/pricing", "read": "2026-10-28"}
+    {
+      "id": "gemini-2.5-flash-lite",
+      "label": "Gemini 2.5 Flash-Lite",
+      "provider": {"vertex": "us-central1"},
+      "usd_in": 0.1,
+      "usd_out": 0.4,
+      "source": "https://cloud.google.com/vertex-ai/generative-ai/pricing",
+      "read": "2026-10-22"
+    },
+    {
+      "id": "gemini-3.1-flash-lite",
+      "label": "Gemini 3.1 Flash-Lite",
+      "provider": {"vertex": "global"},
+      "usd_in": 0.25,
+      "usd_out": 1.5,
+      "source": "https://cloud.google.com/vertex-ai/generative-ai/pricing",
+      "read": "2026-10-28"
+    },
+    {
+      "id": "muse-spark-1.3",
+      "label": "Muse Spark 1.3",
+      "provider": {"meta": "https://api.meta.ai/v1"},
+      "usd_in": 1.25,
+      "usd_out": 4.25,
+      "source": "https://dev.meta.ai/docs/pricing-rate-limits",
+      "read": "2026-11-04"
+    }
   ],
   "uses": [
-    {"use": "all", "month_cad": 2, "day_calls": 200},
-    {"use": "ask", "model": "gemini-2.5-flash-lite", "month_cad": 2, "day_calls": 200, "client_calls": 20},
-    {"use": "research", "model": "gemini-2.5-flash-lite", "month_cad": 0, "day_calls": 0},
-    {"use": "datasheet", "model": "gemini-2.5-flash-lite", "month_cad": 0, "day_calls": 0},
-    {"use": "draft", "model": "gemini-2.5-flash-lite", "month_cad": 0, "day_calls": 0}
+    {"use": "all", "month_cad": 60, "day_calls": 1000},
+    {"use": "ask", "model": "muse-spark-1.3", "month_cad": 15, "day_calls": 200, "client_calls": 20},
+    {"use": "research", "model": "muse-spark-1.3", "month_cad": 30, "day_calls": 600},
+    {"use": "datasheet", "model": "muse-spark-1.3", "month_cad": 10, "day_calls": 150},
+    {"use": "draft", "model": "muse-spark-1.3", "month_cad": 2, "day_calls": 20}
   ]
 }

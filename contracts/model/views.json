@@ -490,13 +490,22 @@
     }
   },
   {
+    "id": "AiProvider",
+    "kind": "union",
+    "description": "Where a model runs, tagged by the runner that calls it.",
+    "variants": {
+      "vertex": {"type": "string", "description": "Google ADK on the project's Vertex AI, in this region"},
+      "meta": {"type": "string", "description": "The Meta Model API, at this base URL"}
+    }
+  },
+  {
     "id": "AiModel",
     "kind": "record",
-    "description": "A language model an AI use may run: Gemini on the project's Vertex AI, in its region, and its online price in US dollars per million tokens in (text and files) and out (text and thinking), as its source stated it on the day it was read.",
+    "description": "A language model an AI use may run, where it runs, and its online price in US dollars per million tokens in (text and files) and out (text and thinking), as its source stated it on the day it was read.",
     "fields": {
-      "id": {"type": "string", "description": "The model's id on Vertex AI"},
+      "id": {"type": "string", "description": "The model's id at its provider"},
       "label": {"type": "string"},
-      "location": {"type": "string", "description": "The Vertex AI region it is called in"},
+      "provider": {"type": "AiProvider"},
       "usd_in": {"type": "number", "minimum": 0},
       "usd_out": {"type": "number", "minimum": 0},
       "source": {"type": "string"},

@@ -48,6 +48,7 @@ MVR_DATA=<dir> python3 -m radar index rebuild
 | variable | sets |
 |---|---|
 | `MVR_PROJECT`, `MVR_ACCESS_TOKEN` | the project the CLI reaches and its token (`docs/CLI.md`) |
+| `MODEL_API_KEY` | the Meta Model API key a Muse Spark call sends (`docs/SEARCH.md`) |
 | `FIRESTORE_EMULATOR_HOST`, `FIREBASE_STORAGE_EMULATOR_HOST`, `FIREBASE_AUTH_EMULATOR_HOST` | the emulators the ports use |
 | `MVR_FIREBASE_PROJECT` | the emulators' `demo-` project (default `demo-mvradar`) |
 | `MVR_FIRESTORE_DATABASE` | the database, default `(default)`; another is a replay or restore target |

@@ -54,7 +54,8 @@ A private file's link is its `source_url`, never its Storage address, in the rea
   neither logged nor kept (`radar/adapters/web/api.py`);
 - the counters and Ask: `radar/adapters/web/api.py` (a client is a daily digest of its address) and
   `radar/adapters/firestore/ledgers/ai.py` (the answer cache, the counters, the usage and the call log), none with an
-  expiry; a question not answered before goes, with the records it matches, to Gemini on Vertex AI
+  expiry; a question not answered before goes, with the records it matches, to Ask's model: Muse
+  Spark on the Meta Model API in Standard mode, in which Meta does not train on what it is sent, or Gemini on Vertex AI
   ([SEARCH.md](SEARCH.md));
 - the error report: `app/src/adapters/review/HttpReportInbox.ts` (what the form sends, and reCAPTCHA through App
   Check, loaded when the form opens) and `radar/adapters/web/api.py` (what `/api/report` checks and files: the product,

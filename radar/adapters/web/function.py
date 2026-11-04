@@ -12,7 +12,8 @@ from radar.adapters.wiring.root import Wiring
 
 def entry(served: Served) -> Callable[[https_fn.Request], https_fn.Response]:
     @https_fn.on_request(region="us-central1", min_instances=0, max_instances=2, concurrency=4,
-                         memory=options.MemoryOption.GB_2, timeout_sec=60)
+                         memory=options.MemoryOption.GB_2, timeout_sec=60,
+                         secrets=["MODEL_API_KEY"])
     def api(req: https_fn.Request) -> https_fn.Response:
         res = served(Request(req.method, req.path, req.get_data(), {k.lower(): v for k, v in req.headers.items()},
                              req.remote_addr or "", {k: req.args[k] for k in req.args}))

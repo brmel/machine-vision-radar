@@ -1022,11 +1022,24 @@ class SearchSettings:
     stopwords: tuple[str, ...]
 
 @dataclass(frozen=True, slots=True, kw_only=True)
+class AiProviderVertex:
+    """AiProvider tagged 'vertex'."""
+    vertex: str
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class AiProviderMeta:
+    """AiProvider tagged 'meta'."""
+    meta: str
+
+# Where a model runs, tagged by the runner that calls it.
+AiProvider = AiProviderVertex | AiProviderMeta
+
+@dataclass(frozen=True, slots=True, kw_only=True)
 class AiModel:
-    """A language model an AI use may run: Gemini on the project's Vertex AI, in its region, and its online price in US dollars per million tokens in (text and files) and out (text and thinking), as its source stated it on the day it was read."""
+    """A language model an AI use may run, where it runs, and its online price in US dollars per million tokens in (text and files) and out (text and thinking), as its source stated it on the day it was read."""
     id: str
     label: str
-    location: str
+    provider: AiProvider
     usd_in: float
     usd_out: float
     source: str

@@ -406,10 +406,12 @@ export const SearchSettingsSchema: z.ZodType<M.SearchSettings> = z.strictObject(
   stopwords: z.array(z.string()),
 });
 
+export const AiProviderSchema: z.ZodType<M.AiProvider> = z.union([z.strictObject({ vertex: z.string() }), z.strictObject({ meta: z.string() })]);
+
 export const AiModelSchema: z.ZodType<M.AiModel> = z.strictObject({
   id: z.string(),
   label: z.string(),
-  location: z.string(),
+  provider: z.lazy(() => AiProviderSchema),
   usd_in: z.number().min(0),
   usd_out: z.number().min(0),
   source: z.string(),

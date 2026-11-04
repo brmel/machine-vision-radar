@@ -43,7 +43,7 @@ def run(args: argparse.Namespace) -> int:
 def register(commands: Commands) -> None:
     p = commands.verb("catalog", "ask",
                       help="answer a question, or solve an application problem need by need, from the catalog with "
-                           "citations, or refuse (Gemini, under the AI caps; needs --project --yes)", func=run)
+                           "citations, or refuse (Ask's model, under the AI caps; needs --project --yes)", func=run)
     p.add_argument("question", help="the question or the problem, in any language the site speaks")
     p.add_argument("--locale",
                    help="the language code to answer in (default: contracts/languages.json's default language)")

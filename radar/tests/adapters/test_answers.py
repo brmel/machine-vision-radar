@@ -15,23 +15,26 @@ from radar.adapters.ai.prompted.image_judge import PromptedImageJudge
 from radar.adapters.ai.prompted.research_agent import PromptedResearchAgent
 from radar.adapters.files.prompts import FilesPromptRegistry
 from radar.adapters.ai.adk.runner import AdkRunner
+from radar.adapters.ai.meta.runner import MetaRunner
 from radar.domain.ai.answerer import Answerer
 from radar.domain.search.retriever import IndexRetriever, evidence_of
-from radar.domain.model.entities import ClaimValueQuantity, ClaimValueTerm, Quantity, Source
+from radar.domain.model.entities import AiProviderMeta, ClaimValueQuantity, ClaimValueTerm, Quantity, Source
 from radar.domain.ports.ai.answer_model import AnswerModel, AnswerText, NeedText, Sentence
 from radar.domain.ports.ai.datasheet_extractor import Datasheet, SpecValue
 from radar.domain.ports.ai.image_judge import CandidateImage
+from radar.domain.ports.ai.prompts import ModelRunner
 from radar.domain.ports.ai.research_agent import FileDraft, Reading, RecordsDraft
 from radar.domain.ports.ai.usage_log import Unparsed
 from radar.domain.ports.web.page_fetcher import Page
 from radar.domain.ports.search.retriever import Evidence
 from radar.domain.ports.search.search_engine import SearchRequest
 from radar.tests.store import stores
-from radar.tests.adapters.stub_server import EXCHANGE, serving, vertex_saying
+from radar.tests.adapters.stub_server import EXCHANGE, META_EXCHANGE, Answer, meta_saying, serving, vertex_saying
 
 FX = stores.fixture()
 READ, REGISTRY = FX.read, FX.registry
 GEMINI = REGISTRY.ai.models[0]
+MUSE = next(m for m in REGISTRY.ai.models if isinstance(m.provider, AiProviderMeta))
 RECORDED = (["prd_0000000002", "prd_0000000005"], "Which widget has a glossy finish, and what replaces it?")
 PAGE = Page("https://example.com/products/widget-two", "Widget Two", "A glossy widget, 93 g.",
             ("https://example.com/media/widget-two.pdf",), stores.NOW)
@@ -40,7 +43,7 @@ SOURCE = Source(id="src_0000000009", version=1, type="datasheet", url="https://e
 SHEET = Datasheet("prd_0000000002", b"%PDF-1.4\nfixture_mount: socket_b\n%%EOF\n", "application/pdf", SOURCE)
 CANDIDATE = CandidateImage("https://example.com/widget-two.png", b"\x89PNG\r\n\x1a\nfakeimage", "image/png")
 PROMPTS = FilesPromptRegistry(paths.PROMPTS)
-USES: dict[str, Callable[[AdkRunner], object]] = {
+USES: dict[str, Callable[[ModelRunner], object]] = {
     "ask": lambda runner: PromptedAnswerModel(PROMPTS.prompt("ask"), runner).answer(
         RECORDED[1], evidence_of(READ.products(RECORDED[0]), REGISTRY, "en"), "en"),
     "draft": lambda runner: PromptedArticleModel(PROMPTS.prompt("draft"), runner).draft(
@@ -73,7 +76,13 @@ def _vertex_saying(text: str, heard: list[str]) -> Iterator[str]:
         yield f"{url}/"
 
 def _adk(url: str) -> AdkRunner:
-    return AdkRunner(GEMINI.id, "mvradar", GEMINI.location, "recorded", url)
+    return AdkRunner(GEMINI.id, "mvradar", "us-central1", "recorded", url)
+
+def _muse(url: str) -> MetaRunner:
+    return MetaRunner(MUSE.id, f"{url}v1", "recorded")
+
+RUNNERS: dict[str, tuple[Callable[[str, list[str]], Answer], Callable[[str], ModelRunner]]] = {
+    "adk": (vertex_saying, _adk), "meta": (meta_saying, _muse)}
 
 class Scripted:
     def __init__(self, *sentences: Sentence, needs: tuple[NeedText, ...] = ()) -> None:
@@ -241,7 +250,43 @@ def test_the_adk_image_judge_ranks_candidates_and_picks_a_photo() -> None:
 
 @pytest.mark.parametrize("said", ["{}", ""])
 @pytest.mark.parametrize("use", USES)
-def test_a_reply_out_of_its_port_s_shape_is_unparsed_naming_its_prompt_with_its_tokens(use: str, said: str) -> None:
-    with _vertex_saying(said, []) as url, pytest.raises(Unparsed, match=rf"^{use}: ") as refused:
-        USES[use](_adk(url))
+@pytest.mark.parametrize("runner", RUNNERS)
+def test_a_reply_out_of_its_port_s_shape_is_unparsed_naming_its_prompt_with_its_tokens(
+        runner: str, use: str, said: str) -> None:
+    saying, opened = RUNNERS[runner]
+    with serving(saying(said, []), keep_alive=True) as url, pytest.raises(Unparsed, match=rf"^{use}: ") as refused:
+        USES[use](opened(f"{url}/"))
     assert refused.value.tokens_in > 0 and refused.value.tokens_out > 0
+
+def test_the_meta_runner_asks_for_the_prompt_s_shape_and_meets_the_contract_on_meta_s_documented_reply() -> None:
+    heard: list[str] = []
+    prompt = PROMPTS.prompt("ask")
+    with serving(meta_saying(META_EXCHANGE["response"]["choices"][0]["message"]["content"], heard),
+                 keep_alive=True) as url:
+        _contract(PromptedAnswerModel(prompt, _muse(f"{url}/")))
+    sent = json.loads(heard[0])
+    assert (sent["model"], sent["messages"][0], sent["response_format"]["json_schema"]["schema"]) == (
+        MUSE.id, {"role": "system", "content": prompt.instruction}, json.loads(prompt.output_schema))
+
+def test_the_meta_runner_sends_a_datasheet_as_a_file_and_an_image_inline() -> None:
+    heard: list[str] = []
+    for use, said in (("datasheet", '{"values": []}'), ("image_judge", '{"kind": "photo", "confidence": 0.9, '
+                                                                        '"reason": "A photo"}')):
+        with serving(meta_saying(said, heard), keep_alive=True) as url:
+            USES[use](_muse(f"{url}/"))
+    sheet, image = (json.loads(h)["messages"][1]["content"][1] for h in heard)
+    pdf, png = (base64.b64encode(f.content).decode() for f in (SHEET, CANDIDATE))
+    assert sheet == {"type": "file",
+                     "file": {"filename": "source.pdf", "file_data": f"data:application/pdf;base64,{pdf}"}}
+    assert image == {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{png}"}}
+
+def test_a_meta_call_needs_its_key_and_a_refused_one_names_its_status_never_the_key() -> None:
+    heard: list[str] = []
+    refusing: Answer = lambda path, sent: (heard.append(path), (401, b'{"error": {"message": "invalid key"}}'))[1]
+    with serving(refusing, keep_alive=True) as url:
+        with pytest.raises(RuntimeError, match="MODEL_API_KEY"):
+            MetaRunner(MUSE.id, f"{url}/v1", "").reply("catalog_answerer", PROMPTS.prompt("ask"), "w", 10)
+        assert heard == []
+        with pytest.raises(OSError, match="HTTP 401") as refused:
+            MetaRunner(MUSE.id, f"{url}/v1", "mk-secret").reply("catalog_answerer", PROMPTS.prompt("ask"), "w", 10)
+    assert "mk-secret" not in str(refused.value)

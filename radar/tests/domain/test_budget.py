@@ -62,9 +62,10 @@ def test_a_call_past_its_use_s_day_cap_is_refused_before_the_model_is_asked(use:
         _meter(docs, use).call(DAY, _unasked)
     assert _outcomes(docs) == ["answered", "capped"]
 
-@pytest.mark.parametrize("use", [u for u in USES if DEFAULTS[u].month_cad == 0])
+@pytest.mark.parametrize("use", USES)
 def test_a_use_whose_spend_is_not_approved_is_refused_at_once(use: Use) -> None:
     docs = stores.fresh()
+    _cap(docs, use, 0, DEFAULTS[use].day_calls)
     with pytest.raises(Capped, match=f"^{use.value}: CAD 0 a month, spent$"):
         _meter(docs, use).call(DAY, _unasked)
     assert _outcomes(docs) == ["capped"] and docs.get(f"{usage_collection(use)}/{DAY}") is None
@@ -73,7 +74,7 @@ def test_all_uses_together_are_held_to_their_own_cap() -> None:
     docs = stores.fresh()
     _cap(docs, Use.ASK, DEFAULTS[Use.ALL].month_cad * 2, DEFAULTS[Use.ASK].day_calls)
     docs.commit([Increment(f"{usage_collection(Use.ASK)}/{DAY[:7]}", {"cad": DEFAULTS[Use.ALL].month_cad})])
-    with pytest.raises(Capped, match="^all AI: CAD 2 a month, spent$"):
+    with pytest.raises(Capped, match=f"^all AI: CAD {DEFAULTS[Use.ALL].month_cad:g} a month, spent$"):
         _meter(docs, Use.ASK).call(DAY, _unasked)
 
 def test_a_second_cap_for_a_use_is_refused() -> None:

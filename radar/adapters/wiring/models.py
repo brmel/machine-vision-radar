@@ -11,6 +11,7 @@ from radar.adapters.ai.prompted.datasheet_extractor import PromptedDatasheetExtr
 from radar.adapters.ai.prompted.image_judge import PromptedImageJudge
 from radar.adapters.ai.prompted.research_agent import PromptedResearchAgent
 from radar.adapters.ai.adk.runner import AdkRunner
+from radar.adapters.ai.meta.runner import MetaRunner
 from radar.adapters.ai.scripted import (ScriptedAnswerModel, ScriptedArticleModel, ScriptedDatasheetExtractor,
                                         ScriptedImageJudge, ScriptedResearchAgent)
 from radar.adapters.ai.search.engine import ShardedSearch
@@ -24,7 +25,7 @@ from radar.domain.ai.answerer import Answerer
 from radar.domain.ai.budget import Use
 from radar.domain.ai.meter import Meter
 from radar.domain.ai.prompts import Prompt
-from radar.domain.model.entities import AiModel
+from radar.domain.model.entities import AiModel, AiProviderMeta, AiProviderVertex
 from radar.domain.ports.ai.article_model import ArticleModel
 from radar.domain.ports.ai.datasheet_extractor import DatasheetExtractor
 from radar.domain.ports.ai.image_judge import ImageJudge
@@ -59,7 +60,11 @@ class Models(Stores):
         return FilesPromptRegistry(paths.PROMPTS)
 
     def _runner(self, model: AiModel, project: str) -> ModelRunner:
-        return AdkRunner(model.id, project, model.location, os.environ.get("MVR_ACCESS_TOKEN"))
+        match model.provider:
+            case AiProviderVertex(vertex=location):
+                return AdkRunner(model.id, project, location, os.environ.get("MVR_ACCESS_TOKEN"))
+            case AiProviderMeta(meta=base_url):
+                return MetaRunner(model.id, base_url, os.environ.get("MODEL_API_KEY", ""))
 
     def _meter(self, use: Use, prompted: Callable[[Prompt, ModelRunner], M], scripted: M,
                prompt_id: str | None = None) -> Meter[M]:

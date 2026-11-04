@@ -23,7 +23,7 @@ from radar.adapters.firestore.ledgers.ai import (CALLS, FirestoreAskLedger, Fire
                                                  usage_collection)
 from radar.adapters.wiring.root import Wiring
 from radar.adapters.ai.prompted.answer_model import PromptedAnswerModel
-from radar.adapters.ai.adk.runner import AdkRunner
+from radar.adapters.ai.meta.runner import MetaRunner
 from radar.adapters.ai.scripted import ScriptedAnswerModel
 from radar.adapters.files.prompts import FilesPromptRegistry
 from radar.domain.ai.answerer import Answerer
@@ -32,7 +32,7 @@ from radar.domain.ai.meter import Meter
 from radar.domain.ports.ai.usage_log import ModelCall, Outcome
 from radar.domain.ai.quota import Quota
 from radar.domain.ports.ai.answer_model import AnswerModel
-from radar.tests.adapters.stub_server import serving, vertex_saying
+from radar.tests.adapters.stub_server import meta_saying, serving
 from radar.tests.store import stores
 
 FX = stores.fixture()
@@ -129,8 +129,8 @@ def test_a_reply_out_of_shape_is_unavailable_and_charged_as_billed(
         place: tuple[str, str], ledger: FirestoreDocs, monkeypatch: pytest.MonkeyPatch, said: str) -> None:
     FX.wire(place, monkeypatch)
     model = model_of(FX.registry.ai, Use.ASK, None)
-    with serving(vertex_saying(said, []), keep_alive=True) as url:
-        runner = AdkRunner(model.id, "mvradar", model.location, "recorded", f"{url}/")
+    with serving(meta_saying(said, []), keep_alive=True) as url:
+        runner = MetaRunner(model.id, f"{url}/v1", "recorded")
         model = PromptedAnswerModel(FilesPromptRegistry(paths.PROMPTS).prompt("ask"), runner)
         res = _ask(_endpoint(ledger, "api-00001", model), "glossy widget")
     [call] = [f for _, f in ledger.list(CALLS)]

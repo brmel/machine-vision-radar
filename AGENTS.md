@@ -6,7 +6,7 @@ what gets built; the gates decide whether it's done. This file binds every chang
 
 **Two repos**: this one, public, holds the code and `data/`, what the code is driven by (the registry, the
 agents' prompts, the banned words). The catalog itself lives in the store, and its snapshot, the plan and the issues in
-the maintainers' private `brmel/MVRadar`. Every path here is relative to this repo's root, and every command runs from
+the maintainers' private tracker. Every path here is relative to this repo's root, and every command runs from
 there. Code finds `data/` through `radar/paths.py` and `app/scripts/head.ts` alone (`DATA`: `MVR_DATA`, else `data`;
 `test_layout`).
 
@@ -18,7 +18,7 @@ validation), `docs/SYSTEM.md` (the store, read and write paths), `docs/SEARCH.md
 
 ## How work happens
 
-1. **The plan is the maintainers' private tracker, `brmel/MVRadar`.** A milestone is a sprint, `Sprint N · <goal>`: its
+1. **The plan is the maintainers' private tracker.** A milestone is a sprint, `Sprint N · <goal>`: its
    description is the goal, its issues the stories. The current sprint is the open one with the lowest number; nothing
    outside it starts without the founder, and one issue at a time is finished before the next starts. Open issues
    without a milestone are the backlog. Every issue has an area label (`model`, `acquisition`, `review`, `site`,
@@ -121,14 +121,17 @@ Binding for every change. A rule a tool enforces names it in parentheses; the to
 
 ### Design
 
-14. **One provider per port**, declared apart from its implementation. A new provider replaces the old one in the same
+14. **One provider per port**, declared apart from its implementation (the `ModelRunner`'s model entries choose
+    theirs: rule 15). A new provider replaces the old one in the same
     change, as one new adapter and no domain change; none runs beside it as a fallback or backup. Only `adapters/`
     imports a provider SDK (Firebase, Google Cloud, `fastembed`, ADK, Gen AI, `zod`, generated schemas) or makes a raw
     HTTP call (depcruise, `providers.test.ts`, `test_boundaries`).
 15. **Agent seam.** LLM code sits behind one SDK-agnostic port per role in `domain/ports/ai/`, our own types in and out,
     each with a scripted model for tests and emulators. A use's adapter (`adapters/ai/prompted/`) renders its prompt
-    and runs it on the `ModelRunner` port; Google ADK on Vertex AI (`adapters/ai/adk/runner.py`) is that port's one
-    provider, chosen in `adapters/wiring/models.py`, server-side only, so another provider is one new runner. Every
+    and runs it on the `ModelRunner` port, server-side only. Its runners are the Meta Model API
+    (`adapters/ai/meta/runner.py`, this build's, for Muse Spark) and Google ADK on Vertex AI
+    (`adapters/ai/adk/runner.py`); a model's `provider` in `data/registry/ai.json` picks one in
+    `adapters/wiring/models.py`, so each use runs on exactly one, never one as the other's fallback. Every
     prompt is one file a use in `data/prompts/` (`test_prompts`); every model call goes through the `Meter` (caps
     before, usage after). Outside agents' code is one package each side: `radar/domain/review/agents/`,
     `app/src/domain/ports/review/agents/`.
@@ -164,8 +167,8 @@ Binding for every change. A rule a tool enforces names it in parentheses; the to
 
 ### Commits
 
-- Conventional Commits (`type(scope): subject`), one issue per commit; the body ends with `Refs brmel/MVRadar#N` for
-  the private tracker, or `Refs #N` for this repo's issues (or `Closes …`)
+- Conventional Commits (`type(scope): subject`), one issue per commit; the body ends with `Refs #N` for this repo's
+  issues (or `Closes …`)
   and a `Lines: +A/-D` trailer (`.githooks/commit-msg`).
 - Never commit secrets, `node_modules/`, build output or local env files.
 - A PR description quotes the clean `GATES: PASS (commit=<sha>, node=<version>)` line; a `-dirty` one is rejected.
