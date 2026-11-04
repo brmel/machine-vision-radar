@@ -1,0 +1,13 @@
+{
+  "category_id": "software.cloud_platform",
+  "sections": {
+    "core": ["deployment", "vision_tasks"],
+    "detail": [],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["software_runtime"],
+  "facets": [{"field": "deployment"}, {"field": "vision_tasks"}],
+  "required_at_publish": ["deployment"],
+  "axis_dependent_keys": []
+}

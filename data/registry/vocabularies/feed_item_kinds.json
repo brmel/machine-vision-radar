@@ -1,0 +1,9 @@
+[
+  {"id": "article", "label": {"en": "Article", "fr": "Article"}},
+  {"id": "launch_digest", "label": {"en": "Launch", "fr": "Lancement"}},
+  {"id": "family_added", "label": {"en": "New product family", "fr": "Nouvelle famille de produits"}},
+  {"id": "product_added", "label": {"en": "New product", "fr": "Nouveau produit"}},
+  {"id": "vendor_added", "label": {"en": "New organization", "fr": "Nouvelle organisation"}},
+  {"id": "version_released", "label": {"en": "New version", "fr": "Nouvelle version"}},
+  {"id": "lifecycle_notice", "label": {"en": "Lifecycle notice", "fr": "Avis de cycle de vie"}}
+]

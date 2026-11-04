@@ -1,0 +1,6 @@
+[
+  {"id": "own", "label": {"en": "Our own", "fr": "Les nôtres"}, "public": true},
+  {"id": "open_licence", "label": {"en": "Open licence", "fr": "Licence ouverte"}, "public": true},
+  {"id": "vendor", "label": {"en": "Vendor copyright", "fr": "Droits du fabricant"}, "public": false, "research": true},
+  {"id": "third_party", "label": {"en": "Third-party copyright", "fr": "Droits de tiers"}, "public": false}
+]

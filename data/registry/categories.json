@@ -1,0 +1,179 @@
+[
+  {
+    "id": "imaging.cameras.area_scan",
+    "label": {"en": "Area scan cameras", "fr": "Caméras matricielles"},
+    "domain": "imaging",
+    "pipeline": ["acquire"],
+    "glyph": "matrix",
+    "description": {"en": "Matrix-sensor cameras capturing full 2D frames across machine vision interfaces.", "fr": "Caméras à capteur matriciel qui capturent des images 2D complètes, sur les interfaces de vision industrielle."}
+  },
+  {
+    "id": "imaging.cameras.line_scan",
+    "label": {"en": "Line scan cameras", "fr": "Caméras linéaires"},
+    "domain": "imaging",
+    "pipeline": ["acquire"],
+    "glyph": "matrix",
+    "description": {"en": "Linear sensor cameras building continuous 2D images line-by-line for continuous web and rotational inspection.", "fr": "Caméras à capteur linéaire qui construisent des images 2D ligne par ligne, pour l'inspection de bandes continues et de pièces en rotation."}
+  },
+  {
+    "id": "imaging.cameras.3d",
+    "label": {"en": "3D cameras & sensors", "fr": "Caméras et capteurs 3D"},
+    "domain": "imaging",
+    "pipeline": ["acquire"],
+    "glyph": "depth",
+    "description": {"en": "Structured-light, stereo vision, time-of-flight (ToF), and laser triangulation depth sensing systems.", "fr": "Systèmes de mesure de profondeur par lumière structurée, stéréovision, temps de vol (ToF) et triangulation laser."}
+  },
+  {
+    "id": "imaging.code_readers",
+    "label": {"en": "Code readers & verifiers", "fr": "Lecteurs et vérificateurs de codes"},
+    "domain": "imaging",
+    "pipeline": ["acquire", "decide"],
+    "glyph": "matrix",
+    "description": {"en": "1D/2D barcode readers, fixed-mount and handheld ID scanners, OCR/OCV readers, and ISO/IEC 15415/15416/29158 barcode verifiers and print quality grading systems.", "fr": "Lecteurs de codes-barres 1D/2D fixes et portables, lecteurs OCR/OCV, et vérificateurs de codes ISO/IEC 15415/15416/29158 avec notation de la qualité d'impression."}
+  },
+  {
+    "id": "imaging.thermal_cameras",
+    "label": {"en": "Thermal cameras", "fr": "Caméras thermiques"},
+    "domain": "imaging",
+    "pipeline": ["acquire"],
+    "glyph": "heat",
+    "description": {"en": "Calibrated uncooled and cooled LWIR/MWIR thermography and thermal imaging cameras.", "fr": "Caméras thermiques et de thermographie LWIR/MWIR, refroidies ou non, étalonnées."}
+  },
+  {
+    "id": "imaging.spectrometers",
+    "label": {"en": "Spectrometers & spectral sensors", "fr": "Spectromètres et capteurs spectraux"},
+    "domain": "imaging",
+    "pipeline": ["acquire"],
+    "glyph": "matrix",
+    "description": {"en": "Point spectrometers and spectral imaging engines for material analysis and colorimetry.", "fr": "Spectromètres ponctuels et modules d'imagerie spectrale pour l'analyse des matériaux et la colorimétrie."}
+  },
+  {
+    "id": "imaging.displacement_sensors",
+    "label": {"en": "Displacement sensors", "fr": "Capteurs de déplacement"},
+    "domain": "imaging",
+    "pipeline": ["acquire"],
+    "glyph": "depth",
+    "description": {"en": "High-precision 1D laser displacement, confocal chromatic, and interferometric measurement sensors.", "fr": "Capteurs de déplacement laser 1D de haute précision, capteurs confocaux chromatiques et capteurs interférométriques."}
+  },
+  {
+    "id": "imaging.sensors",
+    "label": {"en": "Image sensors", "fr": "Capteurs d'image"},
+    "domain": "imaging",
+    "pipeline": ["acquire"],
+    "glyph": "matrix",
+    "description": {"en": "CMOS, CCD, and emerging neuromorphic/SWIR raw image sensor components and dies.", "fr": "Capteurs d'image bruts CMOS, CCD, et capteurs émergents neuromorphiques ou SWIR, en composants ou en puces."},
+    "component_hub": {"path": "sensor", "relation": "uses_component"}
+  },
+  {
+    "id": "imaging.frame_grabbers",
+    "label": {"en": "Frame grabbers", "fr": "Cartes d'acquisition (Frame grabbers)"},
+    "domain": "imaging",
+    "pipeline": ["transport"],
+    "glyph": "connector",
+    "description": {"en": "PCIe interface cards for high-speed deterministic acquisition (CoaXPress, CameraLink, GigE Vision offload).", "fr": "Cartes d'interface PCIe pour une acquisition rapide et déterministe (CoaXPress, Camera Link, déchargement GigE Vision)."}
+  },
+  {
+    "id": "optics.lenses",
+    "label": {"en": "Lenses & optical objectives", "fr": "Objectifs et optiques"},
+    "domain": "optics",
+    "pipeline": ["acquire"],
+    "glyph": "lens",
+    "description": {"en": "C-mount, F-mount, and M-mount fixed focal length, telecentric, zoom, and liquid lenses.", "fr": "Objectifs à focale fixe, télécentriques, zoom et liquides, en monture C, F et M."}
+  },
+  {
+    "id": "optics.lighting",
+    "label": {"en": "Machine vision lighting", "fr": "Éclairages pour vision industrielle"},
+    "domain": "optics",
+    "pipeline": ["illuminate"],
+    "glyph": "lens",
+    "description": {"en": "LED ring lights, bar lights, dome lights, coaxial lights, line lights, and strobe controllers.", "fr": "Éclairages LED annulaires, barres, dômes, coaxiaux et linéaires, et contrôleurs de stroboscope."}
+  },
+  {
+    "id": "optics.optical_components",
+    "label": {"en": "Optical components", "fr": "Composants optiques"},
+    "domain": "optics",
+    "pipeline": ["acquire"],
+    "glyph": "lens",
+    "description": {"en": "Beamsplitters, mirrors, prisms, diffusers, reticles, and optical calibration targets.", "fr": "Séparateurs de faisceau, miroirs, prismes, diffuseurs, réticules et mires d'étalonnage optique."}
+  },
+  {
+    "id": "compute.edge_ai",
+    "label": {"en": "Edge AI computers & smart devices", "fr": "Calculateurs Edge AI et périphériques intelligents"},
+    "domain": "compute",
+    "pipeline": ["process"],
+    "glyph": "chip",
+    "description": {"en": "Embedded GPU/NPU computers, smart cameras, and on-premise vision inference appliances.", "fr": "Ordinateurs embarqués à GPU/NPU, caméras intelligentes et équipements d'inférence de vision sur site."}
+  },
+  {
+    "id": "compute.vision_controllers",
+    "label": {"en": "Vision controllers & industrial PCs", "fr": "Contrôleurs de vision et PC industriels"},
+    "domain": "compute",
+    "pipeline": ["process"],
+    "glyph": "chip",
+    "description": {"en": "Dedicated multi-camera industrial PCs with deterministic real-time digital I/O and camera power.", "fr": "PC industriels multicaméras dédiés, avec E/S numériques déterministes en temps réel et alimentation des caméras."}
+  },
+  {
+    "id": "software.sdk",
+    "label": {"en": "Vision SDKs & development libraries", "fr": "SDKs et bibliothèques de vision"},
+    "domain": "software",
+    "pipeline": ["process", "decide"],
+    "glyph": "code",
+    "description": {"en": "Rule-based and machine-learning computer vision software libraries, APIs, and image processing tools.", "fr": "Bibliothèques logicielles, API et outils de traitement d'image pour la vision par ordinateur, à base de règles ou d'apprentissage automatique."}
+  },
+  {
+    "id": "software.application",
+    "label": {"en": "Vision application software", "fr": "Logiciels d'application de vision"},
+    "domain": "software",
+    "pipeline": ["decide"],
+    "glyph": "code",
+    "description": {"en": "Configurable no-code/low-code vision inspection, metrology, and robot guidance application suites.", "fr": "Suites applicatives configurables sans code ou à faible code pour l'inspection, la métrologie et le guidage de robots."}
+  },
+  {
+    "id": "software.ai_platform",
+    "label": {"en": "Vision AI training & MLOps platforms", "fr": "Plateformes d'entraînement IA et MLOps"},
+    "domain": "software",
+    "pipeline": ["decide"],
+    "glyph": "code",
+    "description": {"en": "Dataset annotation, model training, active learning, and model optimization platforms for visual inspection.", "fr": "Plateformes d'annotation de jeux de données, d'entraînement de modèles, d'apprentissage actif et d'optimisation de modèles pour l'inspection visuelle."}
+  },
+  {
+    "id": "software.cloud_platform",
+    "label": {"en": "Cloud vision & fleet platforms", "fr": "Plateformes cloud et gestion de flotte"},
+    "domain": "software",
+    "pipeline": ["decide"],
+    "glyph": "code",
+    "description": {"en": "Centralized device management, remote visual monitoring, and telemetry cloud platforms.", "fr": "Plateformes cloud de gestion centralisée des appareils, de surveillance visuelle à distance et de télémétrie."}
+  },
+  {
+    "id": "software.protocol_ip",
+    "label": {"en": "Protocol stacks & IP cores", "fr": "Piles protocolaires et cœurs d'IP"},
+    "domain": "software",
+    "pipeline": ["transport"],
+    "glyph": "code",
+    "description": {"en": "FPGA IP cores and embedded driver stacks for GigE Vision, USB3 Vision, and CoaXPress protocols.", "fr": "Cœurs IP FPGA et piles de pilotes embarqués pour les protocoles GigE Vision, USB3 Vision et CoaXPress."}
+  },
+  {
+    "id": "accessories",
+    "label": {"en": "General accessories", "fr": "Accessoires généraux"},
+    "domain": "accessories",
+    "pipeline": [],
+    "glyph": "connector",
+    "description": {"en": "Mechanical mounting hardware, enclosures, protective housings, and power supplies.", "fr": "Supports mécaniques, boîtiers, carters de protection et alimentations."}
+  },
+  {
+    "id": "systems.vision_systems",
+    "label": {"en": "Complete vision systems", "fr": "Systèmes de vision complets"},
+    "domain": "systems",
+    "pipeline": ["decide", "act"],
+    "glyph": "cell",
+    "description": {"en": "Turnkey multi-camera inspection stations, sorting machines, and automated metrology cells.", "fr": "Postes d'inspection multicaméras clés en main, machines de tri et cellules de métrologie automatisées."}
+  },
+  {
+    "id": "systems.laser_marking",
+    "label": {"en": "Laser marking & verification systems", "fr": "Systèmes de marquage laser et vérification"},
+    "domain": "systems",
+    "pipeline": ["act"],
+    "glyph": "cell",
+    "description": {"en": "Integrated direct part marking (DPM) laser markers paired with inline visual verification.", "fr": "Marqueurs laser intégrés pour le marquage direct de pièces (DPM), associés à une vérification visuelle en ligne."}
+  }
+]

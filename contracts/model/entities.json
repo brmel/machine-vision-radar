@@ -1,0 +1,721 @@
+[
+  {
+    "id": "Organization",
+    "label": {"en": "Organization", "fr": "Organisation"},
+    "prefix": "org",
+    "collection": "organizations",
+    "description": "An organization of a kind in org_kinds: a maker, a brand or a community.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "kind": {"type": "TermId", "vocabulary": "org_kinds", "label": {"en": "Kind", "fr": "Nature"}},
+      "name": {"type": "string", "label": {"en": "Name", "fr": "Nom"}},
+      "slug": {
+        "type": "string",
+        "description": "URL key, permanent once published",
+        "label": {"en": "Address (slug)", "fr": "Adresse (slug)"}
+      },
+      "summary": {"type": "LocalizedText", "optional": true, "label": {"en": "Summary", "fr": "Résumé"}},
+      "website": {"type": "string", "optional": true, "label": {"en": "Website", "fr": "Site web"}},
+      "country": {
+        "type": "string",
+        "optional": true,
+        "description": "ISO 3166-1 alpha-2",
+        "label": {"en": "Country", "fr": "Pays"}
+      },
+      "founded": {"type": "PartialDate", "optional": true, "label": {"en": "Founded", "fr": "Fondée en"}}
+    }
+  },
+  {
+    "id": "OrgRelation",
+    "label": {"en": "Organization relation", "fr": "Relation entre organisations"},
+    "prefix": "orl",
+    "collection": "org_relations",
+    "description": "Valid-time edge between two organizations (acquisitions, brands, lineage).",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "from_org": {"type": "EntityId", "refs": ["Organization"], "label": {"en": "Organization", "fr": "Organisation"}},
+      "type": {
+        "type": "TermId",
+        "vocabulary": "org_relation_types",
+        "label": {"en": "Relation type", "fr": "Type de relation"}
+      },
+      "to_org": {
+        "type": "EntityId",
+        "refs": ["Organization"],
+        "label": {"en": "Related organization", "fr": "Organisation liée"}
+      },
+      "valid_from": {
+        "type": "PartialDate",
+        "optional": true,
+        "label": {"en": "Valid from", "fr": "Valable à partir du"}
+      },
+      "valid_to": {
+        "type": "PartialDate",
+        "optional": true,
+        "future_allowed": true,
+        "label": {"en": "Valid until", "fr": "Valable jusqu'au"}
+      },
+      "source_refs": {
+        "type": "array",
+        "items": "EntityId",
+        "refs": ["Source"],
+        "min_items": 1,
+        "label": {"en": "Sources", "fr": "Sources"}
+      }
+    }
+  },
+  {
+    "id": "Product",
+    "label": {"en": "Product", "fr": "Produit"},
+    "prefix": "prd",
+    "collection": "products",
+    "description": "Catalogued product node: family, model or variant.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "kind": {"type": "TermId", "vocabulary": "product_kinds", "label": {"en": "Kind", "fr": "Nature"}},
+      "parent": {
+        "type": "EntityId",
+        "refs": ["Product"],
+        "optional": true,
+        "label": {"en": "Parent product", "fr": "Produit parent"}
+      },
+      "category": {"type": "TermId", "vocabulary": "categories", "label": {"en": "Category", "fr": "Catégorie"}},
+      "spec_groups": {
+        "type": "array",
+        "items": "TermId",
+        "vocabulary": "spec_groups",
+        "optional": true,
+        "label": {"en": "Other spec groups", "fr": "Autres groupes de spécifications"},
+        "description": "Spec groups beyond its category's profile, for a product that does more than its category: a smart camera's compute"
+      },
+      "slug": {"type": "string", "label": {"en": "Address (slug)", "fr": "Adresse (slug)"}},
+      "summary": {"type": "LocalizedText", "optional": true, "label": {"en": "Summary", "fr": "Résumé"}},
+      "tags": {
+        "type": "array",
+        "items": "TermId",
+        "vocabulary": "tags",
+        "optional": true,
+        "label": {"en": "Tags", "fr": "Étiquettes"}
+      },
+      "website_url": {"type": "string", "optional": true, "label": {"en": "Website", "fr": "Site web"}},
+      "variant_axes": {
+        "type": "map",
+        "items": "TermId",
+        "key_vocabulary": "variant_axes",
+        "optional": true,
+        "label": {"en": "Variant axes", "fr": "Axes de variante"}
+      },
+      "thumbnail": {
+        "type": "EntityId",
+        "refs": ["Document"],
+        "optional": true,
+        "label": {"en": "Thumbnail", "fr": "Vignette"}
+      }
+    }
+  },
+  {
+    "id": "ProductOrgRole",
+    "label": {"en": "Organization role", "fr": "Rôle d'une organisation"},
+    "prefix": "por",
+    "collection": "product_org_roles",
+    "description": "Valid-time role of an organization for a product, from product_org_roles.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "product": {"type": "EntityId", "refs": ["Product"], "label": {"en": "Product", "fr": "Produit"}},
+      "org": {"type": "EntityId", "refs": ["Organization"], "label": {"en": "Organization", "fr": "Organisation"}},
+      "role": {"type": "TermId", "vocabulary": "product_org_roles", "label": {"en": "Role", "fr": "Rôle"}},
+      "valid_from": {
+        "type": "PartialDate",
+        "optional": true,
+        "label": {"en": "Valid from", "fr": "Valable à partir du"}
+      },
+      "valid_to": {
+        "type": "PartialDate",
+        "optional": true,
+        "future_allowed": true,
+        "label": {"en": "Valid until", "fr": "Valable jusqu'au"}
+      },
+      "source_refs": {
+        "type": "array",
+        "items": "EntityId",
+        "refs": ["Source"],
+        "min_items": 1,
+        "label": {"en": "Sources", "fr": "Sources"}
+      }
+    }
+  },
+  {
+    "id": "Name",
+    "label": {"en": "Name", "fr": "Nom"},
+    "prefix": "nam",
+    "collection": "names",
+    "description": "Display name of a product or organization, valid in time and optionally per region.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "subject": {"type": "EntityId", "refs": ["Product", "Organization"], "label": {"en": "Subject", "fr": "Sujet"}},
+      "value": {"type": "string", "label": {"en": "Value", "fr": "Valeur"}},
+      "region": {"type": "string", "optional": true, "label": {"en": "Region", "fr": "Région"}},
+      "valid_from": {
+        "type": "PartialDate",
+        "optional": true,
+        "label": {"en": "Valid from", "fr": "Valable à partir du"}
+      },
+      "valid_to": {
+        "type": "PartialDate",
+        "optional": true,
+        "future_allowed": true,
+        "label": {"en": "Valid until", "fr": "Valable jusqu'au"}
+      },
+      "is_primary": {"type": "boolean", "label": {"en": "Primary name", "fr": "Nom principal"}}
+    }
+  },
+  {
+    "id": "ProductVersion",
+    "label": {"en": "Product version", "fr": "Version de produit"},
+    "prefix": "ver",
+    "collection": "product_versions",
+    "description": "Vendor release of a product, of a kind in version_kinds.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "product": {"type": "EntityId", "refs": ["Product"], "label": {"en": "Product", "fr": "Produit"}},
+      "kind": {"type": "TermId", "vocabulary": "version_kinds", "label": {"en": "Kind", "fr": "Nature"}},
+      "label": {"type": "string", "label": {"en": "Version label", "fr": "Libellé de version"}},
+      "scheme": {
+        "type": "TermId",
+        "vocabulary": "version_schemes",
+        "label": {"en": "Numbering scheme", "fr": "Schéma de numérotation"}
+      },
+      "channel": {
+        "type": "TermId",
+        "vocabulary": "version_channels",
+        "optional": true,
+        "label": {"en": "Channel", "fr": "Canal"}
+      },
+      "released": {"type": "PartialDate", "optional": true, "label": {"en": "Released", "fr": "Sortie le"}},
+      "end_of_support": {
+        "type": "PartialDate",
+        "optional": true,
+        "future_allowed": true,
+        "label": {"en": "End of support", "fr": "Fin du support"}
+      },
+      "supersedes": {
+        "type": "EntityId",
+        "refs": ["ProductVersion"],
+        "optional": true,
+        "label": {"en": "Supersedes", "fr": "Remplace"}
+      },
+      "source_refs": {
+        "type": "array",
+        "items": "EntityId",
+        "refs": ["Source"],
+        "min_items": 1,
+        "label": {"en": "Sources", "fr": "Sources"}
+      }
+    }
+  },
+  {
+    "id": "Offering",
+    "label": {"en": "Offering", "fr": "Offre"},
+    "prefix": "off",
+    "collection": "offerings",
+    "description": "Commercial terms for a product or a range of its versions.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "product": {"type": "EntityId", "refs": ["Product"], "label": {"en": "Product", "fr": "Produit"}},
+      "version_range": {"type": "VersionRange", "optional": true, "label": {"en": "Versions", "fr": "Versions"}},
+      "seller_org": {
+        "type": "EntityId",
+        "refs": ["Organization"],
+        "optional": true,
+        "label": {"en": "Seller", "fr": "Vendeur"}
+      },
+      "regions": {"type": "array", "items": "string", "optional": true, "label": {"en": "Regions", "fr": "Régions"}},
+      "licence_type": {
+        "type": "TermId",
+        "vocabulary": "licence_types",
+        "label": {"en": "Licence type", "fr": "Type de licence"}
+      },
+      "term": {
+        "type": "TermId",
+        "vocabulary": "licence_terms",
+        "label": {"en": "Licence term", "fr": "Durée de licence"}
+      },
+      "binding": {
+        "type": "TermId",
+        "vocabulary": "licence_bindings",
+        "label": {"en": "Licence binding", "fr": "Rattachement de la licence"}
+      },
+      "metering": {"type": "Metering", "optional": true, "label": {"en": "Metering", "fr": "Mesure de l'usage"}},
+      "price": {"type": "Price", "optional": true, "label": {"en": "Price", "fr": "Prix"}},
+      "valid_from": {
+        "type": "PartialDate",
+        "optional": true,
+        "label": {"en": "Valid from", "fr": "Valable à partir du"}
+      },
+      "valid_to": {
+        "type": "PartialDate",
+        "optional": true,
+        "future_allowed": true,
+        "label": {"en": "Valid until", "fr": "Valable jusqu'au"}
+      },
+      "source_refs": {
+        "type": "array",
+        "items": "EntityId",
+        "refs": ["Source"],
+        "min_items": 1,
+        "label": {"en": "Sources", "fr": "Sources"}
+      }
+    }
+  },
+  {
+    "id": "Identifier",
+    "label": {"en": "Identifier", "fr": "Identifiant"},
+    "prefix": "idn",
+    "collection": "identifiers",
+    "description": "External key of a product or organization, in a scheme of identifier_schemes.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "subject": {"type": "EntityId", "refs": ["Product", "Organization"], "label": {"en": "Subject", "fr": "Sujet"}},
+      "scheme": {"type": "TermId", "vocabulary": "identifier_schemes", "label": {"en": "Scheme", "fr": "Schéma"}},
+      "issuer": {
+        "type": "EntityId",
+        "refs": ["Organization"],
+        "optional": true,
+        "label": {"en": "Issuer", "fr": "Émetteur"}
+      },
+      "value": {"type": "string", "label": {"en": "Value", "fr": "Valeur"}}
+    }
+  },
+  {
+    "id": "Claim",
+    "label": {"en": "Specification value", "fr": "Valeur de spécification"},
+    "prefix": "clm",
+    "collection": "claims",
+    "description": "One sourced fact about a product or organization.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "subject": {"type": "EntityId", "refs": ["Product", "Organization"], "label": {"en": "Subject", "fr": "Sujet"}},
+      "spec_key": {
+        "type": "TermId",
+        "vocabulary": "spec_definitions",
+        "label": {"en": "Specification", "fr": "Spécification"}
+      },
+      "value": {"type": "ClaimValue", "label": {"en": "Value", "fr": "Valeur"}},
+      "applies_to_versions": {
+        "type": "VersionRange",
+        "optional": true,
+        "label": {"en": "Applies to versions", "fr": "S'applique aux versions"}
+      },
+      "method": {"type": "TermId", "vocabulary": "claim_methods", "label": {"en": "Method", "fr": "Méthode"}},
+      "valid_from": {
+        "type": "PartialDate",
+        "optional": true,
+        "label": {"en": "Valid from", "fr": "Valable à partir du"}
+      },
+      "valid_to": {
+        "type": "PartialDate",
+        "optional": true,
+        "future_allowed": true,
+        "label": {"en": "Valid until", "fr": "Valable jusqu'au"}
+      },
+      "recorded_at": {"type": "Instant", "label": {"en": "Recorded", "fr": "Enregistré le"}},
+      "rank": {"type": "integer", "minimum": 1, "label": {"en": "Rank", "fr": "Rang"}},
+      "source_refs": {
+        "type": "array",
+        "items": "EntityId",
+        "refs": ["Source"],
+        "min_items": 1,
+        "label": {"en": "Sources", "fr": "Sources"}
+      }
+    }
+  },
+  {
+    "id": "Source",
+    "label": {"en": "Source", "fr": "Source"},
+    "provenance": "source",
+    "prefix": "src",
+    "collection": "sources",
+    "description": "Citable origin of facts, of a type in source_types.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "type": {"type": "TermId", "vocabulary": "source_types", "label": {"en": "Type", "fr": "Type"}},
+      "url": {"type": "string", "optional": true, "unique": true, "label": {"en": "Address", "fr": "Adresse"}},
+      "title": {"type": "string", "optional": true, "label": {"en": "Title", "fr": "Titre"}},
+      "published_at": {"type": "PartialDate", "optional": true, "label": {"en": "Published", "fr": "Publié le"}},
+      "retrieved_at": {"type": "Instant", "label": {"en": "Retrieved", "fr": "Consulté le"}},
+      "document": {
+        "type": "EntityId",
+        "refs": ["Document"],
+        "optional": true,
+        "label": {"en": "Document", "fr": "Document"}
+      }
+    }
+  },
+  {
+    "id": "Document",
+    "label": {"en": "Media file", "fr": "Fichier média"},
+    "provenance": "file",
+    "prefix": "doc",
+    "collection": "documents",
+    "description": "One media file, of a kind in document_kinds, kept once per sha256.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "kind": {"type": "TermId", "vocabulary": "document_kinds", "label": {"en": "Kind", "fr": "Nature"}},
+      "mime": {"type": "string", "label": {"en": "Media type", "fr": "Type de média"}},
+      "bytes": {"type": "integer", "minimum": 1, "label": {"en": "Size (bytes)", "fr": "Taille (octets)"}},
+      "sha256": {
+        "type": "string",
+        "description": "64 lowercase hex characters; names the file",
+        "label": {"en": "SHA-256", "fr": "SHA-256"}
+      },
+      "subjects": {
+        "type": "array",
+        "items": "EntityId",
+        "refs": ["Product", "ProductVersion", "Organization"],
+        "min_items": 1,
+        "label": {"en": "Subjects", "fr": "Sujets"}
+      },
+      "rights": {"type": "TermId", "vocabulary": "media_rights", "label": {"en": "Rights", "fr": "Droits"}},
+      "title": {"type": "LocalizedText", "optional": true, "label": {"en": "Title", "fr": "Titre"}},
+      "language": {
+        "type": "string",
+        "optional": true,
+        "description": "BCP-47 tag",
+        "label": {"en": "Language", "fr": "Langue"}
+      },
+      "width": {
+        "type": "integer",
+        "minimum": 1,
+        "optional": true,
+        "description": "Pixels; images and videos only",
+        "label": {"en": "Width (px)", "fr": "Largeur (px)"}
+      },
+      "height": {
+        "type": "integer",
+        "minimum": 1,
+        "optional": true,
+        "description": "Pixels; images and videos only",
+        "label": {"en": "Height (px)", "fr": "Hauteur (px)"}
+      },
+      "duration": {
+        "type": "number",
+        "minimum": 0,
+        "optional": true,
+        "description": "Seconds; videos only",
+        "label": {"en": "Duration (s)", "fr": "Durée (s)"}
+      },
+      "source_url": {
+        "type": "string",
+        "optional": true,
+        "label": {"en": "Source address", "fr": "Adresse de la source"}
+      },
+      "fetched_at": {"type": "Instant", "label": {"en": "Fetched", "fr": "Récupéré le"}}
+    }
+  },
+  {
+    "id": "LifecycleEvent",
+    "label": {"en": "Lifecycle event", "fr": "Événement du cycle de vie"},
+    "prefix": "evt",
+    "collection": "lifecycle_events",
+    "description": "Dated step in a product's commercial or support lifecycle.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "product": {"type": "EntityId", "refs": ["Product"], "label": {"en": "Product", "fr": "Produit"}},
+      "type": {"type": "TermId", "vocabulary": "lifecycle_event_types", "label": {"en": "Event", "fr": "Événement"}},
+      "state": {"type": "TermId", "vocabulary": "lifecycle_event_states", "label": {"en": "State", "fr": "État"}},
+      "date": {"type": "PartialDate", "label": {"en": "Date", "fr": "Date"}},
+      "caused_by": {
+        "type": "EntityId",
+        "refs": ["LifecycleEvent"],
+        "optional": true,
+        "label": {"en": "Caused by", "fr": "Causé par"}
+      },
+      "revised_by": {
+        "type": "EntityId",
+        "refs": ["LifecycleEvent"],
+        "optional": true,
+        "label": {"en": "Revised by", "fr": "Révisé par"}
+      },
+      "successor": {
+        "type": "EntityId",
+        "refs": ["Product"],
+        "optional": true,
+        "label": {"en": "Successor", "fr": "Successeur"}
+      },
+      "source_refs": {
+        "type": "array",
+        "items": "EntityId",
+        "refs": ["Source"],
+        "min_items": 1,
+        "label": {"en": "Sources", "fr": "Sources"}
+      }
+    }
+  },
+  {
+    "id": "ObservedStatus",
+    "label": {"en": "Observed status", "fr": "Statut observé"},
+    "prefix": "obs",
+    "collection": "observed_statuses",
+    "description": "A product's lifecycle status as a source states it without a dated event; dated LifecycleEvents take precedence.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "product": {"type": "EntityId", "refs": ["Product"], "label": {"en": "Product", "fr": "Produit"}},
+      "status": {"type": "TermId", "vocabulary": "lifecycle_event_types", "label": {"en": "Status", "fr": "Statut"}},
+      "recorded_at": {"type": "Instant", "label": {"en": "Recorded", "fr": "Enregistré le"}},
+      "source_refs": {
+        "type": "array",
+        "items": "EntityId",
+        "refs": ["Source"],
+        "min_items": 1,
+        "label": {"en": "Sources", "fr": "Sources"}
+      }
+    }
+  },
+  {
+    "id": "Relation",
+    "label": {"en": "Product relation", "fr": "Relation entre produits"},
+    "prefix": "rel",
+    "collection": "relations",
+    "description": "Typed, valid-time edge between products and versions.",
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "from_entity": {
+        "type": "EntityId",
+        "refs": ["Product", "ProductVersion"],
+        "label": {"en": "Product or version", "fr": "Produit ou version"}
+      },
+      "type": {
+        "type": "TermId",
+        "vocabulary": "relation_types",
+        "label": {"en": "Relation type", "fr": "Type de relation"}
+      },
+      "to_entity": {
+        "type": "EntityId",
+        "refs": ["Product", "ProductVersion"],
+        "label": {"en": "Related product or version", "fr": "Produit ou version lié"}
+      },
+      "qualifiers": {
+        "type": "map",
+        "items": "ClaimValue",
+        "optional": true,
+        "label": {"en": "Qualifiers", "fr": "Précisions"}
+      },
+      "basis": {"type": "enum", "values": ["asserted", "derived"], "label": {"en": "Basis", "fr": "Fondement"}},
+      "valid_from": {
+        "type": "PartialDate",
+        "optional": true,
+        "label": {"en": "Valid from", "fr": "Valable à partir du"}
+      },
+      "valid_to": {
+        "type": "PartialDate",
+        "optional": true,
+        "future_allowed": true,
+        "label": {"en": "Valid until", "fr": "Valable jusqu'au"}
+      },
+      "source_refs": {
+        "type": "array",
+        "items": "EntityId",
+        "refs": ["Source"],
+        "min_items": 1,
+        "label": {"en": "Sources", "fr": "Sources"}
+      }
+    }
+  },
+  {
+    "id": "AltName",
+    "label": {"en": "Alias", "fr": "Alias"},
+    "prefix": "aln",
+    "collection": "alt_names",
+    "description": "Search-only alias or misspelling.",
+    "internal": true,
+    "fields": {
+      "id": {"type": "EntityId", "label": {"en": "ID", "fr": "Identifiant"}},
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Per-entity version counter: 1 when created, +1 on every Change",
+        "label": {"en": "Version", "fr": "Version"}
+      },
+      "subject": {"type": "EntityId", "refs": ["Product", "Organization"], "label": {"en": "Subject", "fr": "Sujet"}},
+      "value": {"type": "string", "label": {"en": "Value", "fr": "Valeur"}}
+    }
+  },
+  {
+    "id": "EvalQuery",
+    "label": {"en": "Evaluation query", "fr": "Requête d'évaluation"},
+    "prefix": "evq",
+    "collection": "eval_queries",
+    "description": "A curated search query and the products a good answer lists in its first five: `radar eval run search` scores search on them, `eval run ask` the answers that cite them, and `eval run draft` the drafts about them.",
+    "internal": true,
+    "fields": {
+      "id": {"type": "EntityId"},
+      "version": {"type": "integer", "minimum": 1, "description": "Per-entity version counter: 1 when created, +1 on every Change"},
+      "query": {"type": "string"},
+      "language": {"type": "string", "description": "Language code (contracts/languages.json)"},
+      "targets": {"type": "array", "items": "EntityId", "refs": ["Product"], "min_items": 1},
+      "category": {"type": "TermId", "optional": true, "description": "A category whose products also count as a hit"},
+      "note": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "FeedItem",
+    "label": {"en": "News item", "fr": "Actualité"},
+    "prefix": "nws",
+    "collection": "feed_items",
+    "description": "A news article: a short text whose every sentence cites the catalog, under the brand's byline, in the order the founder publishes. A draft is a proposal in the review queue; the founder's approval publishes it, with `published_at` from the clock.",
+    "fields": {
+      "id": {"type": "EntityId"},
+      "version": {"type": "integer", "minimum": 1, "description": "Per-entity version counter: 1 when created, +1 on every Change"},
+      "slug": {"type": "string", "description": "URL key, permanent once published"},
+      "kind": {"type": "TermId", "vocabulary": "feed_item_kinds"},
+      "authorship": {
+        "type": "enum",
+        "values": ["human", "template", "ai_draft"],
+        "description": "Who wrote it: the founder, a template of feed.json, or a model"
+      },
+      "byline": {"type": "LocalizedText", "description": "The brand's editorial byline (feed.json), never a personal name"},
+      "title": {"type": "LocalizedText"},
+      "summary": {"type": "LocalizedText"},
+      "body": {"type": "array", "items": "FeedSentence", "min_items": 1},
+      "cites": {
+        "type": "array",
+        "items": "EntityId",
+        "refs": ["Product", "Organization", "Source"],
+        "min_items": 1,
+        "description": "Every id its sentences cite, by which a withdrawal of one finds the article"
+      },
+      "position": {"type": "integer", "minimum": 1, "description": "Its place in the publishing order"},
+      "published_at": {"type": "Instant", "optional": true, "set_on_approval": true, "description": "When the founder published it: review's clock when it approves the draft; a draft has none"},
+      "revised_at": {"type": "Instant", "optional": true, "description": "When the founder last revised it once published, from the clock"},
+      "event_date": {"type": "PartialDate", "optional": true, "description": "The vendor's date of the event, only with event_source"},
+      "event_source": {
+        "type": "EntityId",
+        "refs": ["Source"],
+        "optional": true,
+        "description": "The source of event_date"
+      }
+    }
+  },
+  {
+    "id": "AiCap",
+    "label": {"en": "AI cap", "fr": "Plafond d'IA"},
+    "prefix": "cap",
+    "collection": "ai_caps",
+    "description": "The model and spend caps of one AI use, or the caps of all of them together: its `model`, one of the registry's (data/registry/ai.json), and at most `month_cad` of model spend a month and `day_calls` calls a day, and for Ask at most `client_calls` a client a day. The registry holds the defaults; a record replaces them for its use, is read on every call, and changes by changeset with a reason. One per use: its id is keyed on the use (`keyed(\"cap\", use)`). Founder-only.",
+    "internal": true,
+    "fields": {
+      "id": {"type": "EntityId"},
+      "version": {"type": "integer", "minimum": 1, "description": "Per-entity version counter: 1 when created, +1 on every Change"},
+      "use": "Use",
+      "model": {"type": "string", "optional": true, "description": "The use's model, one of the registry's; none for all uses together, and the registry's when left out"},
+      "month_cad": {"type": "number", "minimum": 0},
+      "day_calls": {"type": "integer", "minimum": 0},
+      "client_calls": {"type": "integer", "minimum": 0, "optional": true, "description": "Ask only: the calls one client may make a day"},
+      "note": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "Change",
+    "label": {"en": "Change", "fr": "Modification"},
+    "prefix": "chg",
+    "collection": "changes",
+    "description": "One append-only modification of one entity: the version it produces and the patch that produces it.",
+    "fields": {
+      "id": {"type": "EntityId"},
+      "entity": {"type": "EntityId"},
+      "version": {"type": "integer", "minimum": 1, "description": "The entity version this change produces; version 1 creates the entity"},
+      "recorded_at": {"type": "Instant"},
+      "actor_kind": "ActorKind",
+      "actor": {"type": "string"},
+      "reason": {"type": "string"},
+      "patch": {"type": "array", "items": "PatchOp", "min_items": 1},
+      "source_refs": {"type": "array", "items": "EntityId", "refs": ["Source"]},
+      "proposal": {"type": "string", "optional": true, "description": "Id of the proposal that produced the change"},
+      "correlation_id": {"type": "string"}
+    }
+  }
+]

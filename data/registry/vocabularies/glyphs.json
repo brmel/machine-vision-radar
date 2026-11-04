@@ -1,0 +1,10 @@
+[
+  {"id": "matrix", "label": {"en": "Area sensor", "fr": "Capteur matriciel"}},
+  {"id": "depth", "label": {"en": "Depth scan", "fr": "Mesure de profondeur"}},
+  {"id": "heat", "label": {"en": "Thermal", "fr": "Thermique"}},
+  {"id": "lens", "label": {"en": "Lens", "fr": "Objectif"}},
+  {"id": "chip", "label": {"en": "Processor chip", "fr": "Puce de calcul"}},
+  {"id": "code", "label": {"en": "Code", "fr": "Code"}},
+  {"id": "cell", "label": {"en": "Vision cell", "fr": "Cellule de vision"}},
+  {"id": "connector", "label": {"en": "Connector", "fr": "Connecteur"}}
+]

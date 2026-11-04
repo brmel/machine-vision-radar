@@ -1,0 +1,4 @@
+[
+  {"id": "fpga_core", "label": {"en": "FPGA IP core", "fr": "Cœur IP FPGA"}},
+  {"id": "software_stack", "label": {"en": "Software stack", "fr": "Pile logicielle"}}
+]

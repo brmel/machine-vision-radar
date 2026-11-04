@@ -1,0 +1,11 @@
+[
+  {"id": "c_mount", "label": {"en": "C-mount", "fr": "Monture C"}},
+  {"id": "cs_mount", "label": {"en": "CS-mount", "fr": "Monture CS"}},
+  {"id": "s_mount", "label": {"en": "S-mount (M12)", "fr": "Monture S (M12)"}},
+  {"id": "f_mount", "label": {"en": "F-mount", "fr": "Monture F"}},
+  {"id": "m42", "label": {"en": "M42", "fr": "Monture M42"}},
+  {"id": "m58", "label": {"en": "M58", "fr": "Monture M58"}},
+  {"id": "m72", "label": {"en": "M72", "fr": "Monture M72"}},
+  {"id": "m95", "label": {"en": "M95", "fr": "Monture M95"}},
+  {"id": "tfl", "label": {"en": "TFL", "fr": "Monture TFL"}}
+]

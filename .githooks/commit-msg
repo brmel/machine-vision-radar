@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+# A merge commit keeps git's own message.
+[[ "$(cat "$1")" =~ ^Merge ]] && exit 0
+
+if ! grep -Eq '(Refs|Closes) ([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+' "$1"; then
+  echo "ERROR: Commit message must reference an issue via 'Refs #N' or 'Refs owner/repo#N' (or 'Closes …')." >&2
+  echo "See the Commits section of AGENTS.md: the body ends with 'Refs #N' (or 'Closes #N')." >&2
+  exit 1
+fi
+
+if ! grep -Eq 'Lines: \+[0-9]+/-[0-9]+' "$1"; then
+  echo "ERROR: Commit message must include a 'Lines: +A/-D' trailer." >&2
+  echo "See the Commits section of AGENTS.md: the body ends with 'Refs #N' (or 'Closes #N')" \
+    "and a 'Lines: +A/-D' trailer." >&2
+  exit 1
+fi

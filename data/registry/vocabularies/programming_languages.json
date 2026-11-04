@@ -1,0 +1,11 @@
+[
+  {"id": "ansi_c", "label": {"en": "C", "fr": "C"}},
+  {"id": "cpp", "label": {"en": "C++", "fr": "C++"}},
+  {"id": "csharp", "label": {"en": "C#", "fr": "C#"}},
+  {"id": "dotnet", "label": {"en": ".NET", "fr": ".NET"}},
+  {"id": "python", "label": {"en": "Python", "fr": "Python"}},
+  {"id": "delphi", "label": {"en": "Delphi", "fr": "Delphi"}},
+  {"id": "labview", "label": {"en": "LabVIEW", "fr": "LabVIEW"}},
+  {"id": "visual_basic", "label": {"en": "Visual Basic", "fr": "Visual Basic"}},
+  {"id": "structured_text", "label": {"en": "Structured Text (IEC 61131-3)", "fr": "Texte structuré (CEI 61131-3)"}}
+]

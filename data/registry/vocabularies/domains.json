@@ -1,0 +1,32 @@
+[
+  {
+    "id": "imaging",
+    "label": {"en": "Imaging", "fr": "Imagerie"},
+    "description": {"en": "Cameras, 3D and thermal cameras, code readers, spectrometers, displacement sensors, image sensors and frame grabbers.", "fr": "Caméras, caméras 3D et thermiques, lecteurs de codes, spectromètres, capteurs de déplacement, capteurs d'image et cartes d'acquisition."}
+  },
+  {
+    "id": "optics",
+    "label": {"en": "Optics", "fr": "Optique"},
+    "description": {"en": "Lenses, lighting and optical components.", "fr": "Objectifs, éclairages et composants optiques."}
+  },
+  {
+    "id": "compute",
+    "label": {"en": "Compute", "fr": "Calcul"},
+    "description": {"en": "Edge AI computers and vision controllers.", "fr": "Ordinateurs d'IA embarquée et contrôleurs de vision."}
+  },
+  {
+    "id": "software",
+    "label": {"en": "Software", "fr": "Logiciels"},
+    "description": {"en": "Vision libraries, inspection applications, AI platforms, cloud platforms and protocol IP.", "fr": "Bibliothèques de vision, applications d'inspection, plateformes d'IA, plateformes cloud et IP de protocoles."}
+  },
+  {
+    "id": "accessories",
+    "label": {"en": "Accessories", "fr": "Accessoires"},
+    "description": {"en": "Mounts, enclosures, cables, I/O cards and test equipment.", "fr": "Supports, boîtiers, câbles, cartes d'E/S et équipements de test."}
+  },
+  {
+    "id": "systems",
+    "label": {"en": "Systems", "fr": "Systèmes"},
+    "description": {"en": "Turnkey vision systems and laser marking systems.", "fr": "Systèmes de vision clés en main et systèmes de marquage laser."}
+  }
+]

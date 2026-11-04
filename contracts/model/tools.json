@@ -1,0 +1,77 @@
+[
+  {
+    "id": "search_products",
+    "title": "Search Products",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "description": "Rank the catalog's products for a query, as the site's search does: each hit with its score and why it matched. The same as `radar product search`.",
+    "input": {
+      "query": {"type": "string", "description": "The words to look for"},
+      "limit": {"type": "integer", "minimum": 1, "optional": true, "default": 10, "description": "The most hits to return"},
+      "category": {"type": "TermId", "optional": true, "description": "Search one category only, by its id"},
+      "tag": {"type": "TermId", "optional": true, "description": "Keep the products with this tag"},
+      "semantic": {"type": "boolean", "optional": true, "default": false, "description": "Blend keyword ranking with vector similarity"}
+    },
+    "output": "SearchHits"
+  },
+  {
+    "id": "get_product",
+    "title": "Get Product",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "description": "One product as its page shows it: its spec rows with the current source of each value, versions, offerings, lifecycle, successors, media and sources, with the label and unit of each spec. The same as `radar product get`.",
+    "input": {"id": {"type": "string", "description": "The product's id or slug"}},
+    "output": "ProductSheet"
+  },
+  {
+    "id": "search_sources",
+    "title": "Search Sources",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "description": "The catalog's Sources and media Documents by address, vendor, type and date, newest first, to cite a source the catalog holds rather than propose it again. Every filter given must hold. The same as `radar source search`.",
+    "input": {
+      "url": {"type": "string", "optional": true, "description": "Text the address contains, in any case"},
+      "vendor": {"type": "string", "optional": true, "description": "An organization's id or slug: the sources and files on its website"},
+      "type": {"type": "TermId", "optional": true, "description": "A source type, or a document kind"},
+      "since": {"type": "string", "format": "date", "optional": true, "description": "Retrieved on or after this day, YYYY-MM-DD"},
+      "until": {"type": "string", "format": "date", "optional": true, "description": "Retrieved on or before this day, YYYY-MM-DD"},
+      "limit": {"type": "integer", "minimum": 1, "optional": true, "default": 25, "description": "The most sources, and the most documents, to return"}
+    },
+    "output": "FoundSources"
+  },
+  {
+    "id": "submit_proposal",
+    "title": "Submit Proposal",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "description": "File a proposed change to the catalog for the founder to review: nothing changes until he approves it. Every change cites at least one source (search_sources finds the catalog's). A new product named or numbered as the one held product of its maker merges into it, as its edit; the same proposal filed again counts one more report. The same as `radar proposal submit`, by the agent and with its token.",
+    "input": {
+      "files_on": {"type": "FilesOn", "description": "What it does: adds records, changes held ones, makes two records of one thing one, or withdraws one"},
+      "reason": {"type": "string", "description": "Why, in a sentence the founder reads"},
+      "subject": {"type": "EntityId", "optional": true, "description": "The record it is about: the product a new product's records hang on, or the held record it changes"},
+      "changeset": {"type": "string", "description": "The changes, as JSON text: {\"changes\": [{\"op\": \"put\", \"entity\": {a record with its id}, \"reason\": \"...\", \"source_refs\": [\"src_...\"]}, {\"op\": \"retract\", \"id\": \"...\", \"reason\": \"...\", \"source_refs\": [...]}]}"}
+    },
+    "output": "ProposalView"
+  },
+  {
+    "id": "list_my_proposals",
+    "title": "List My Proposals",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "description": "The proposals this agent filed, newest first, a page at a time, with their status. The same as `radar proposal list --actor-kind agent --author <the agent>`.",
+    "input": {
+      "status": {"type": "ProposalStatus", "optional": true, "description": "Only the proposals in this status"},
+      "cursor": {"type": "string", "optional": true, "description": "The `next` of the previous page"}
+    },
+    "output": "ProposalPage"
+  },
+  {
+    "id": "get_proposal_status",
+    "title": "Get Proposal Status",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "description": "One of this agent's proposals: its status, the founder's note once he decided, and what it changes. Another agent's is refused. The same as `radar proposal show`.",
+    "input": {"id": {"type": "string", "description": "The proposal's id (prp_...)"}},
+    "output": "ProposalView"
+  }
+]

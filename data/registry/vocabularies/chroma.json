@@ -1,0 +1,4 @@
+[
+  {"id": "color", "label": {"en": "Color", "fr": "Couleur"}},
+  {"id": "mono", "label": {"en": "Monochrome", "fr": "Monochrome"}}
+]

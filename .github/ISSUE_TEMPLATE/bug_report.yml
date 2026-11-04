@@ -1,0 +1,23 @@
+name: Bug
+description: Something in the code does not work as documented.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The command, page or test, with its output. `npm run check` on a clean clone is the best start.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit and environment
+      description: The commit, your OS, `node -v` and `python3 --version`.

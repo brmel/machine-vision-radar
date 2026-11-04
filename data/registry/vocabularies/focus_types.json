@@ -1,0 +1,6 @@
+[
+  {"id": "fixed", "label": {"en": "Fixed", "fr": "Fixe"}},
+  {"id": "liquid_lens", "label": {"en": "Liquid lens", "fr": "Lentille liquide"}},
+  {"id": "manual", "label": {"en": "Manual", "fr": "Manuel"}},
+  {"id": "motorized", "label": {"en": "Motorized", "fr": "Motorisé"}}
+]

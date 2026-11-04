@@ -1,0 +1,22 @@
+[
+  {"id": "datasheet", "label": {"en": "Datasheet", "fr": "Fiche technique"}, "vendor_document": true, "preference": 1},
+  {
+    "id": "manual",
+    "label": {"en": "User manual", "fr": "Manuel d'utilisation"},
+    "vendor_document": true,
+    "preference": 2
+  },
+  {
+    "id": "catalog",
+    "label": {"en": "Product catalog", "fr": "Catalogue produit"},
+    "vendor_document": true,
+    "preference": 3
+  },
+  {"id": "press_release", "label": {"en": "Press release", "fr": "Communiqué de presse"}, "preference": 5},
+  {"id": "website", "label": {"en": "Vendor website", "fr": "Site du fabricant"}, "research": true, "preference": 4},
+  {
+    "id": "inherited_record_source",
+    "label": {"en": "Unclassified source", "fr": "Source non classée"},
+    "preference": 6
+  }
+]

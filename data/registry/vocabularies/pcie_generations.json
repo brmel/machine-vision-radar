@@ -1,0 +1,5 @@
+[
+  {"id": "gen2", "label": {"en": "PCIe Gen 2", "fr": "PCIe Gen 2"}},
+  {"id": "gen3", "label": {"en": "PCIe Gen 3", "fr": "PCIe Gen 3"}},
+  {"id": "gen4", "label": {"en": "PCIe Gen 4", "fr": "PCIe Gen 4"}}
+]

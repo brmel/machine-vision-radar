@@ -1,0 +1,16 @@
+name: Idea
+description: A change to what the code does.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: The need
+      description: Who needs it and why, in their words. Not the solution yet.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: A proposal
+      description: How it could work, and what it would leave out.

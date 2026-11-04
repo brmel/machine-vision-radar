@@ -1,0 +1,17 @@
+[
+  {"id": "capacitive", "label": {"en": "Capacitive", "fr": "Capacitif"}},
+  {"id": "confocal", "label": {"en": "Chromatic confocal", "fr": "Confocal chromatique"}},
+  {"id": "deflectometry", "label": {"en": "Deflectometry", "fr": "Déflectométrie"}},
+  {"id": "eddy_current", "label": {"en": "Eddy current", "fr": "Courants de Foucault"}},
+  {"id": "fiber_optic", "label": {"en": "Fiber optic", "fr": "Fibre optique"}},
+  {"id": "focus_variation", "label": {"en": "Focus variation", "fr": "Variation de focale"}},
+  {"id": "inductive", "label": {"en": "Inductive", "fr": "Inductif"}},
+  {"id": "interferometry", "label": {"en": "Interferometry", "fr": "Interférométrie"}},
+  {"id": "laser_doppler", "label": {"en": "Laser Doppler", "fr": "Vélocimétrie laser Doppler"}},
+  {"id": "laser_triangulation", "label": {"en": "Laser triangulation", "fr": "Triangulation laser"}},
+  {"id": "lidar", "label": {"en": "LiDAR", "fr": "LiDAR"}},
+  {"id": "stereo", "label": {"en": "Stereo vision", "fr": "Vision stéréoscopique"}},
+  {"id": "structured_light", "label": {"en": "Structured light", "fr": "Lumière structurée"}},
+  {"id": "tof", "label": {"en": "Time-of-flight (ToF)", "fr": "Temps de vol (ToF)"}},
+  {"id": "white_light", "label": {"en": "White light interferometry", "fr": "Interférométrie en lumière blanche"}}
+]

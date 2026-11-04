@@ -1,0 +1,29 @@
+[
+  {
+    "id": "manufacturer",
+    "label": {"en": "Original equipment manufacturer (OEM)", "fr": "Fabricant de matériel / capteurs"},
+    "description": {"en": "The organization that makes the product and puts it on the market under its own name.", "fr": "L'organisation qui fabrique le produit et le met sur le marché sous son propre nom."},
+    "vendor_for_view": 1
+  },
+  {
+    "id": "brand_owner",
+    "label": {"en": "Brand owner", "fr": "Propriétaire de la marque"},
+    "description": {"en": "The organization whose brand the product is sold under, when another makes it.", "fr": "L'organisation sous la marque de laquelle le produit est vendu, quand une autre le fabrique."},
+    "vendor_for_view": 2
+  },
+  {
+    "id": "oem_source",
+    "label": {"en": "OEM source", "fr": "Fabricant d'origine"},
+    "description": {"en": "The organization that makes a product another sells under its own brand.", "fr": "L'organisation qui fabrique un produit qu'une autre vend sous sa propre marque."}
+  },
+  {
+    "id": "distributor",
+    "label": {"en": "Distributor", "fr": "Distributeur"},
+    "description": {"en": "An organization that sells the product it neither makes nor brands.", "fr": "Une organisation qui vend le produit sans le fabriquer ni le marquer."}
+  },
+  {
+    "id": "designer",
+    "label": {"en": "Designer", "fr": "Concepteur"},
+    "description": {"en": "The organization that designed the product, when another makes it.", "fr": "L'organisation qui a conçu le produit, quand une autre le fabrique."}
+  }
+]

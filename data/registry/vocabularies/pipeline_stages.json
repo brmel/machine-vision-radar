@@ -1,0 +1,32 @@
+[
+  {
+    "id": "illuminate",
+    "label": {"en": "Illuminate", "fr": "Éclairage"},
+    "description": {"en": "LED, strobe and laser lighting", "fr": "Éclairage LED, stroboscopique et laser"}
+  },
+  {
+    "id": "acquire",
+    "label": {"en": "Acquire", "fr": "Acquisition"},
+    "description": {"en": "Cameras, 3D sensors, lenses and optics", "fr": "Caméras, capteurs 3D, objectifs et optiques"}
+  },
+  {
+    "id": "transport",
+    "label": {"en": "Transport", "fr": "Transport"},
+    "description": {"en": "Frame grabbers and protocol IP cores", "fr": "Cartes d'acquisition et cœurs IP de protocole"}
+  },
+  {
+    "id": "process",
+    "label": {"en": "Process", "fr": "Traitement"},
+    "description": {"en": "Edge AI computers, vision PCs and SDKs", "fr": "Calculateurs d'IA embarquée, PC de vision et SDK"}
+  },
+  {
+    "id": "decide",
+    "label": {"en": "Decide", "fr": "Décision"},
+    "description": {"en": "Vision software, AI training and code readers", "fr": "Logiciels de vision, entraînement d'IA et lecteurs de codes"}
+  },
+  {
+    "id": "act",
+    "label": {"en": "Act", "fr": "Action"},
+    "description": {"en": "Complete vision systems and laser marking", "fr": "Systèmes de vision complets et marquage laser"}
+  }
+]

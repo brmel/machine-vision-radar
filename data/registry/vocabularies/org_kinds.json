@@ -1,0 +1,5 @@
+[
+  {"id": "manufacturer", "label": {"en": "Hardware / sensor manufacturer", "fr": "Fabricant de matériel / capteurs"}},
+  {"id": "brand", "label": {"en": "Commercial product brand", "fr": "Marque commerciale principale"}},
+  {"id": "community", "label": {"en": "Open community project", "fr": "Communauté open source"}}
+]

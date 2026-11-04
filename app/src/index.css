@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@import "./ui/theme/tokens.css";
+
+@utility scroll-cue {
+  background:
+    linear-gradient(to right, var(--color-surface) 30%, transparent) left / 2rem 100% no-repeat local,
+    linear-gradient(to left, var(--color-surface) 30%, transparent) right / 2rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, var(--color-line-hover), transparent) left / 0.75rem 100% no-repeat,
+    radial-gradient(farthest-side at 100% 50%, var(--color-line-hover), transparent) right / 0.75rem 100% no-repeat,
+    var(--color-surface);
+}
+
+@layer base {
+  /* The size every rem scales from, type, spacing and the page's width alike: 17px at the browser's default. */
+  html {
+    font-size: 106.25%;
+  }
+
+  :root {
+    color-scheme: light;
+  }
+
+  :root.dark {
+    color-scheme: dark;
+  }
+
+  /* reCAPTCHA's badge stays hidden: the report form, its one user, carries Google's attribution. */
+  .grecaptcha-badge {
+    visibility: hidden;
+  }
+
+  /* One focus style for every control, at 3:1 against the page in both themes. */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  /* On a touch screen every control is a tap target of at least --spacing-tap; a link in running text is not. */
+  @media (pointer: coarse) {
+    :where(button, select, input:not([type="checkbox"], [type="radio"]), summary, [role="switch"]) {
+      min-height: var(--spacing-tap);
+    }
+
+    :where(nav a, footer a) {
+      display: inline-flex;
+      align-items: center;
+      min-height: var(--spacing-tap);
+    }
+  }
+}

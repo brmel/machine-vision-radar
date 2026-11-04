@@ -1,0 +1,1257 @@
+[
+  {
+    "id": "TermRef",
+    "kind": "record",
+    "description": "A registry term as pages show it: its id and label.",
+    "fields": {"id": {"type": "string"}, "label": {"type": "LocalizedText"}}
+  },
+  {
+    "id": "TermEntry",
+    "kind": "record",
+    "description": "A pipeline stage or a domain, with its words.",
+    "fields": {"id": {"type": "string"}, "label": {"type": "LocalizedText"}, "description": {"type": "LocalizedText"}}
+  },
+  {
+    "id": "ViewQuantity",
+    "kind": "record",
+    "description": "A number in the spec's one published unit (its symbol).",
+    "fields": {"value": {"type": "number"}, "unit": {"type": "string", "optional": true}}
+  },
+  {
+    "id": "ViewRange",
+    "kind": "record",
+    "description": "A range in the spec's one published unit (its symbol).",
+    "fields": {"min": {"type": "number"}, "max": {"type": "number"}, "unit": {"type": "string", "optional": true}}
+  },
+  {
+    "id": "ViewValue",
+    "kind": "union",
+    "description": "A published spec value, tagged by kind.",
+    "variants": {
+      "quantity": {"type": "ViewQuantity"},
+      "range": {"type": "ViewRange"},
+      "term": {"type": "TermRef"},
+      "terms": {"type": "array", "items": "TermRef", "min_items": 1},
+      "boolean": {"type": "boolean"},
+      "string": {"type": "string"},
+      "none": {"type": "TermRef", "description": "No value, for the reason the term says"}
+    }
+  },
+  {
+    "id": "SpecLabel",
+    "kind": "record",
+    "description": "A spec's registry label, the unit symbol its values are published in, and which way a value is better.",
+    "fields": {
+      "label": {"type": "LocalizedText"},
+      "unit": {"type": "string", "optional": true},
+      "better": {"type": "enum", "values": ["higher", "lower"], "optional": true}
+    }
+  },
+  {
+    "id": "FacetOption",
+    "kind": "record",
+    "description": "One filter option and how many products of the listing offer it.",
+    "fields": {"id": {"type": "string"}, "label": {"type": "LocalizedText"}, "count": {"type": "integer"}}
+  },
+  {
+    "id": "FacetView",
+    "kind": "record",
+    "description": "A CategoryProfile filter with its counted options, and how many of the listing's products publish its spec.",
+    "fields": {
+      "id": {"type": "string"},
+      "spec_key": {"type": "string"},
+      "label": {"type": "LocalizedText"},
+      "description": {"type": "LocalizedText", "optional": true, "description": "What its spec measures, as the heading's tooltip shows it"},
+      "kind": {"type": "enum", "values": ["enum", "multi", "number", "boolean"]},
+      "count": {"type": "integer", "description": "The listing's products that publish a value of its spec"},
+      "unit": {"type": "string", "optional": true},
+      "options": {"type": "array", "items": "FacetOption"},
+      "min": {"type": "number", "optional": true},
+      "max": {"type": "number", "optional": true}
+    }
+  },
+  {
+    "id": "SectionKeys",
+    "kind": "record",
+    "description": "A CategoryProfile's spec keys in display order: the core specs, then the detail specs.",
+    "fields": {"core": {"type": "array", "items": "string"}, "detail": {"type": "array", "items": "string"}}
+  },
+  {
+    "id": "CategoryEntry",
+    "kind": "record",
+    "description": "A category as browse shows it, with its listing size in products and pages; its facets are on its listing pages.",
+    "fields": {
+      "id": {"type": "string"},
+      "label": {"type": "LocalizedText"},
+      "description": {"type": "LocalizedText"},
+      "domain": {"type": "string"},
+      "pipeline": {"type": "array", "items": "string"},
+      "glyph": {"type": "string"},
+      "sections": {"type": "SectionKeys"},
+      "products": {"type": "integer"},
+      "pages": {"type": "integer"},
+      "component_hub": {"type": "string", "optional": true, "description": "The path segment the hubs of its products other products use live under"}
+    }
+  },
+  {
+    "id": "OrgBrief",
+    "kind": "record",
+    "description": "An organization as a link shows it.",
+    "fields": {
+      "id": {"type": "string"},
+      "slug": {"type": "string"},
+      "name": {"type": "string"},
+      "country": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "ProductCard",
+    "kind": "record",
+    "description": "A product as a card shows it; `specs` holds the published values a card or a listing filter needs.",
+    "fields": {
+      "id": {"type": "string"},
+      "slug": {"type": "string"},
+      "name": {"type": "string"},
+      "kind": {"type": "string"},
+      "vendor": {"type": "string"},
+      "vendor_name": {"type": "string"},
+      "category": {"type": "string"},
+      "summary": {"type": "LocalizedText", "optional": true},
+      "status": {"type": "TermRef", "optional": true},
+      "tags": {"type": "array", "items": "string"},
+      "specs": {"type": "map", "items": "ViewValue"},
+      "thumbnail_url": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "IndexCounts",
+    "kind": "record",
+    "description": "How many products, organizations and categories the read model publishes.",
+    "fields": {
+      "products": {"type": "integer"},
+      "organizations": {"type": "integer"},
+      "categories": {"type": "integer"}
+    }
+  },
+  {
+    "id": "IndexView",
+    "kind": "record",
+    "description": "The index: what home, browse and search read.",
+    "fields": {
+      "data_as_of": {"type": "string", "optional": true},
+      "counts": {"type": "IndexCounts"},
+      "pipeline_stages": {"type": "array", "items": "TermEntry"},
+      "domains": {"type": "array", "items": "TermEntry"},
+      "categories": {"type": "array", "items": "CategoryEntry"},
+      "spec_definitions": {"type": "map", "items": "SpecLabel"},
+      "spec_groups": {"type": "map", "items": "LocalizedText", "description": "Each spec group's label"},
+      "tags": {"type": "array", "items": "TermRef"},
+      "search": {"type": "SearchSettings"},
+      "news": {"type": "array", "items": "FeedBrief", "description": "The latest published articles, for the home teaser"},
+      "organizations": {"type": "array", "items": "OrgBrief"},
+      "products": {"type": "array", "items": "ProductCard"}
+    }
+  },
+  {
+    "id": "RegistryView",
+    "kind": "record",
+    "description": "The registry: the index without its cards and organizations, which every page needs to label things.",
+    "fields": {
+      "data_as_of": {"type": "string", "optional": true},
+      "counts": {"type": "IndexCounts"},
+      "pipeline_stages": {"type": "array", "items": "TermEntry"},
+      "domains": {"type": "array", "items": "TermEntry"},
+      "categories": {"type": "array", "items": "CategoryEntry"},
+      "spec_definitions": {"type": "map", "items": "SpecLabel"},
+      "spec_groups": {"type": "map", "items": "LocalizedText", "description": "Each spec group's label"},
+      "tags": {"type": "array", "items": "TermRef"},
+      "search": {"type": "SearchSettings"},
+      "news": {"type": "array", "items": "FeedBrief", "description": "The latest published articles, for the home teaser"}
+    }
+  },
+  {
+    "id": "CategoryPage",
+    "kind": "record",
+    "description": "One page of a category's listing, with the category's facet counts.",
+    "fields": {
+      "category": {"type": "string"},
+      "page": {"type": "integer"},
+      "pages": {"type": "integer"},
+      "next": {"type": "string", "optional": true, "description": "Opaque cursor of the next page"},
+      "facets": {"type": "array", "items": "FacetView"},
+      "products": {"type": "array", "items": "ProductCard"}
+    }
+  },
+  {
+    "id": "SourceView",
+    "kind": "record",
+    "description": "A source as a page cites it.",
+    "fields": {
+      "id": {"type": "string"},
+      "type": {"type": "TermRef"},
+      "url": {"type": "string", "optional": true},
+      "title": {"type": "string", "optional": true},
+      "retrieved_at": {"type": "string"}
+    }
+  },
+  {
+    "id": "SpecCell",
+    "kind": "record",
+    "description": "One spec row: its value and current source, or neither when no sourced claim gives it.",
+    "fields": {
+      "key": {"type": "string"},
+      "value": {"type": "ViewValue", "optional": true},
+      "source": {"type": "string", "optional": true},
+      "group": {"type": "string", "optional": true, "description": "The spec group the row comes from; none for the category's own specs"}
+    }
+  },
+  {
+    "id": "StatusView",
+    "kind": "record",
+    "description": "The derived status and its current source.",
+    "fields": {"term": {"type": "TermRef"}, "source": {"type": "string", "optional": true}}
+  },
+  {
+    "id": "ProductLink",
+    "kind": "record",
+    "description": "A product as a link shows it.",
+    "fields": {"id": {"type": "string"}, "slug": {"type": "string"}, "name": {"type": "string"}}
+  },
+  {
+    "id": "IdentifierRow",
+    "kind": "record",
+    "description": "One identifier of a product: its scheme, its value, and the schema.org property its scheme maps to.",
+    "fields": {
+      "scheme": {"type": "TermRef"},
+      "value": {"type": "string"},
+      "schema_org": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "RelationRow",
+    "kind": "record",
+    "description": "One relation as a product's page reads it: its type, its side's label, the other product, its basis, and the schema.org property its side maps to.",
+    "fields": {
+      "type": {"type": "string"},
+      "label": {"type": "LocalizedText"},
+      "product": {"type": "ProductLink"},
+      "basis": {"type": "enum", "values": ["asserted", "derived"]},
+      "schema_org": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "ComponentLink",
+    "kind": "record",
+    "description": "A product another one uses, as a link to its hub.",
+    "fields": {
+      "id": {"type": "string"},
+      "slug": {"type": "string"},
+      "name": {"type": "string"},
+      "hub": {"type": "string", "description": "Its hub's path segment"}
+    }
+  },
+  {
+    "id": "HubRef",
+    "kind": "record",
+    "description": "A product's hub: its path segment and how many products use it.",
+    "fields": {"path": {"type": "string"}, "users": {"type": "integer"}}
+  },
+  {
+    "id": "ModelRow",
+    "kind": "record",
+    "description": "One model of a family, with its core specs.",
+    "fields": {
+      "id": {"type": "string"},
+      "slug": {"type": "string"},
+      "name": {"type": "string"},
+      "specs": {"type": "array", "items": "SpecCell"}
+    }
+  },
+  {
+    "id": "VersionRow",
+    "kind": "record",
+    "description": "One product version, holding the fields its CategoryProfile shows.",
+    "fields": {
+      "id": {"type": "string"},
+      "label": {"type": "string", "optional": true},
+      "channel": {"type": "TermRef", "optional": true},
+      "released": {"type": "PartialDate", "optional": true},
+      "end_of_support": {"type": "PartialDate", "optional": true},
+      "source": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "OfferingRow",
+    "kind": "record",
+    "description": "One commercial offering, holding the fields its CategoryProfile shows.",
+    "fields": {
+      "id": {"type": "string"},
+      "licence_type": {"type": "TermRef", "optional": true},
+      "term": {"type": "TermRef", "optional": true},
+      "binding": {"type": "TermRef", "optional": true},
+      "price": {"type": "Price", "optional": true},
+      "valid_from": {"type": "PartialDate", "optional": true},
+      "valid_to": {"type": "PartialDate", "optional": true},
+      "source": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "EventRow",
+    "kind": "record",
+    "description": "One lifecycle event on the product's timeline.",
+    "fields": {
+      "id": {"type": "string"},
+      "type": {"type": "TermRef"},
+      "state": {"type": "TermRef"},
+      "occurred": {"type": "boolean"},
+      "date": {"type": "PartialDate"},
+      "source": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "MediaItem",
+    "kind": "record",
+    "description": "One Document about the product; `href` is where a page links it (the source URL unless its rights are public).",
+    "fields": {
+      "id": {"type": "string"},
+      "kind": {"type": "TermRef"},
+      "mime": {"type": "string"},
+      "bytes": {"type": "integer"},
+      "rights": {"type": "TermRef"},
+      "title": {"type": "LocalizedText", "optional": true},
+      "language": {"type": "string", "optional": true},
+      "href": {"type": "string", "optional": true},
+      "source_url": {"type": "string", "optional": true},
+      "version": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "ProductView",
+    "kind": "record",
+    "description": "Everything a product page shows, current sources only.",
+    "fields": {
+      "id": {"type": "string"},
+      "slug": {"type": "string"},
+      "name": {"type": "string"},
+      "kind": {"type": "string"},
+      "version": {"type": "integer", "description": "The record's version"},
+      "history": {"type": "boolean", "description": "It has a History view: it, or a public record about it, has more than one version"},
+      "category": {"type": "string"},
+      "summary": {"type": "LocalizedText", "optional": true},
+      "website_url": {"type": "string", "optional": true},
+      "vendor": {"type": "OrgBrief"},
+      "status": {"type": "StatusView", "optional": true},
+      "tags": {"type": "array", "items": "TermRef"},
+      "identifiers": {"type": "array", "items": "IdentifierRow", "description": "Its identifiers, in their schemes' registry order"},
+      "aliases": {"type": "array", "items": "string", "optional": true, "description": "The AltNames and other-than-primary Names of the product and its vendor: search terms only, never shown"},
+      "thumbnail_url": {"type": "string", "optional": true},
+      "family": {"type": "ProductLink", "optional": true},
+      "models": {"type": "array", "items": "ModelRow"},
+      "core": {"type": "array", "items": "SpecCell"},
+      "detail": {"type": "array", "items": "SpecCell"},
+      "versions": {"type": "array", "items": "VersionRow"},
+      "offerings": {"type": "array", "items": "OfferingRow"},
+      "lifecycle": {"type": "array", "items": "EventRow"},
+      "relations": {"type": "array", "items": "RelationRow", "description": "Its relations to other products, each read from its side, but those its component and hub links show"},
+      "components": {"type": "array", "items": "ComponentLink", "description": "The products it uses that have a hub"},
+      "hub": {"type": "HubRef", "optional": true, "description": "Its hub, when products use it"},
+      "media": {"type": "array", "items": "MediaItem"},
+      "indexable": {"type": "boolean", "description": "It publishes every spec its CategoryProfile requires at publish; a page that does not is noindex and out of the sitemap"},
+      "sources": {"type": "array", "items": "SourceView"}
+    }
+  },
+  {
+    "id": "OwnershipRow",
+    "kind": "record",
+    "description": "One dated relation between two organizations.",
+    "fields": {
+      "type": {"type": "TermRef"},
+      "from_org": {"type": "OrgBrief"},
+      "to_org": {"type": "OrgBrief"},
+      "valid_from": {"type": "PartialDate", "optional": true},
+      "valid_to": {"type": "PartialDate", "optional": true},
+      "source": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "OrganizationView",
+    "kind": "record",
+    "description": "An organization and its dated relations.",
+    "fields": {
+      "id": {"type": "string"},
+      "slug": {"type": "string"},
+      "name": {"type": "string"},
+      "kind": {"type": "TermRef"},
+      "website": {"type": "string", "optional": true},
+      "country": {"type": "string", "optional": true},
+      "summary": {"type": "LocalizedText", "optional": true},
+      "ownership": {"type": "array", "items": "OwnershipRow"},
+      "sources": {"type": "array", "items": "SourceView"}
+    }
+  },
+  {
+    "id": "FieldChangeView",
+    "kind": "record",
+    "description": "One field a version changed, each value in JSON text (absent where the field was absent).",
+    "fields": {
+      "path": {"type": "string"},
+      "before": {"type": "string", "optional": true},
+      "after": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "HistoryEntry",
+    "kind": "record",
+    "description": "One recorded version of a record, newest first in its HistoryView: the record, the spec key it carries if any, and what the version changed.",
+    "fields": {
+      "entity": {"type": "string"},
+      "spec": {"type": "string", "optional": true},
+      "version": {"type": "integer"},
+      "recorded_at": {"type": "string"},
+      "actor_kind": "ActorKind",
+      "actor": {"type": "string"},
+      "reason": {"type": "string"},
+      "changed": {"type": "array", "items": "FieldChangeView"},
+      "sources": {"type": "array", "items": "SourceView"},
+      "proposal": {"type": "string", "optional": true},
+      "correlation_id": {"type": "string"}
+    }
+  },
+  {
+    "id": "HistoryView",
+    "kind": "record",
+    "description": "A record's versions; a product's are its own and those of the public records about it, each with more than one.",
+    "fields": {"entity": {"type": "string"}, "versions": {"type": "array", "items": "HistoryEntry"}}
+  },
+  {
+    "id": "SearchField",
+    "kind": "record",
+    "description": "A field keyword search matches a query in, and its weight.",
+    "fields": {
+      "field": {"type": "enum", "values": ["name", "vendor", "category", "tags", "summary", "specs"]},
+      "weight": {"type": "number"}
+    }
+  },
+  {
+    "id": "FeedRule",
+    "kind": "record",
+    "description": "A significant change and the draft it makes: Change events creating an entity of `entity` (whose fields equal `match`), the item kind, and the EN/FR templates; `subject` names the field holding the product the item is about (the record itself when absent), `event_date` the field holding the vendor's date.",
+    "fields": {
+      "kind": {"type": "TermId", "vocabulary": "feed_item_kinds"},
+      "entity": {"type": "string"},
+      "match": {"type": "map", "items": "string", "optional": true},
+      "subject": {"type": "string", "optional": true},
+      "event_date": {"type": "string", "optional": true},
+      "title": {"type": "LocalizedText"},
+      "batch_title": {"type": "LocalizedText"},
+      "summary": {"type": "LocalizedText"},
+      "sentence": {"type": "LocalizedText"}
+    }
+  },
+  {
+    "id": "FeedDigest",
+    "kind": "record",
+    "description": "The launch digest: the first detection's one draft, its counts computed from the store.",
+    "fields": {
+      "kind": {"type": "TermId", "vocabulary": "feed_item_kinds"},
+      "title": {"type": "LocalizedText"},
+      "summary": {"type": "LocalizedText"},
+      "sentence": {"type": "LocalizedText"}
+    }
+  },
+  {
+    "id": "FeedSettings",
+    "kind": "record",
+    "description": "The news feed, as the registry's feed.json sets it: the brand's byline, how many items the home teaser carries, the launch digest, and the significant changes with their templates.",
+    "fields": {
+      "byline": {"type": "LocalizedText"},
+      "article": {"type": "TermId", "vocabulary": "feed_item_kinds", "description": "The kind of an article the founder writes"},
+      "teaser": {"type": "integer", "minimum": 1},
+      "digest": {"type": "FeedDigest"},
+      "rules": {"type": "array", "items": "FeedRule"}
+    }
+  },
+  {
+    "id": "SearchSettings",
+    "kind": "record",
+    "description": "Search and Ask's retrieval, as the registry's search.json sets them: the fields and weights, the boosts, the cut, the semantic threshold, the rank fusion's constant, the products an answer rests on, the embedding models and the words a query drops.",
+    "fields": {
+      "fields": {"type": "array", "items": "SearchField", "min_items": 1},
+      "whole_word": {"type": "number"},
+      "pair_boost": {"type": "number"},
+      "pair_window": {"type": "integer"},
+      "exact_boost": {"type": "number"},
+      "relative_cut": {"type": "number"},
+      "semantic_threshold": {"type": "number"},
+      "rrf_k": {"type": "integer", "minimum": 1, "description": "Reciprocal rank fusion's k: a hit at rank r in the keyword or the vector list adds 1/(k + r)"},
+      "evidence": {"type": "integer", "minimum": 1, "description": "The most products an answer rests on: the best by keyword, else by vector"},
+      "model": {"type": "string", "description": "The embedding model the index is built with and every query is embedded with: it runs in fastembed and has an ONNX copy the site loads"},
+      "stopwords": {"type": "array", "items": "string"}
+    }
+  },
+  {
+    "id": "AiModel",
+    "kind": "record",
+    "description": "A language model an AI use may run: Gemini on the project's Vertex AI, in its region, and its online price in US dollars per million tokens in (text and files) and out (text and thinking), as its source stated it on the day it was read.",
+    "fields": {
+      "id": {"type": "string", "description": "The model's id on Vertex AI"},
+      "label": {"type": "string"},
+      "location": {"type": "string", "description": "The Vertex AI region it is called in"},
+      "usd_in": {"type": "number", "minimum": 0},
+      "usd_out": {"type": "number", "minimum": 0},
+      "source": {"type": "string"},
+      "read": {"type": "string", "description": "The day the price was read, YYYY-MM-DD"}
+    }
+  },
+  {
+    "id": "AiUse",
+    "kind": "record",
+    "description": "One AI use's model and caps, or all uses' caps together, until an AiCap record replaces them.",
+    "fields": {
+      "use": "Use",
+      "model": {"type": "string", "optional": true, "description": "One of the models; none for all uses together"},
+      "month_cad": {"type": "number", "minimum": 0},
+      "day_calls": {"type": "integer", "minimum": 0},
+      "client_calls": {"type": "integer", "minimum": 0, "optional": true}
+    }
+  },
+  {
+    "id": "AiSettings",
+    "kind": "record",
+    "description": "The AI uses, as the registry's ai.json sets them: the models a use may run with their prices, the rate their cost is counted at in CAD, and each use's model and caps until its AiCap record replaces them.",
+    "fields": {
+      "cad_per_usd": {"type": "number", "minimum": 0, "description": "Canadian dollars to the US dollar: above the year's rate, so a cap errs low"},
+      "models": {"type": "array", "items": "AiModel", "min_items": 1},
+      "uses": {"type": "array", "items": "AiUse", "min_items": 1}
+    }
+  },
+  {
+    "id": "EmbedderModel",
+    "kind": "record",
+    "description": "The model an index's vectors come from: a query embedded with another one cannot be compared with them.",
+    "fields": {"model_id": {"type": "string"}, "dimension": {"type": "integer"}, "version": {"type": "string"}}
+  },
+  {
+    "id": "IndexShard",
+    "kind": "record",
+    "description": "One category's part of the index: the paths of its records and of its vectors (float16, in record order) in the blob store.",
+    "fields": {
+      "category": {"type": "string"},
+      "records": {"type": "string"},
+      "vectors": {"type": "string"},
+      "count": {"type": "integer"},
+      "bytes": {"type": "integer"}
+    }
+  },
+  {
+    "id": "IndexManifest",
+    "kind": "record",
+    "description": "A version of the search index: its embedder, the read model it was built from, its shards and a fingerprint per product.",
+    "fields": {
+      "version": {"type": "string"},
+      "embedder": {"type": "EmbedderModel"},
+      "read_model": {"type": "string"},
+      "shards": {"type": "array", "items": "IndexShard"},
+      "products": {"type": "map", "items": "string"}
+    }
+  },
+  {
+    "id": "Found",
+    "kind": "record",
+    "description": "What a search found: its products, best first, and how they were ranked.",
+    "fields": {"ranking": "Ranking", "products": {"type": "array", "items": "ProductCard"}}
+  },
+  {
+    "id": "Citation",
+    "kind": "record",
+    "description": "What an answer rests on: a product, and the source of the cited value when there is one.",
+    "fields": {"product": {"type": "string"}, "source": {"type": "string", "optional": true}}
+  },
+  {
+    "id": "AskNeed",
+    "kind": "record",
+    "description": "One need of an application problem: the need in a few words, the sentences naming the products that meet it, and what they cite; no sentence when no product of the catalog meets it.",
+    "fields": {
+      "need": {"type": "string"},
+      "answer": {"type": "string"},
+      "citations": {"type": "array", "items": "Citation"}
+    }
+  },
+  {
+    "id": "AskAnswer",
+    "kind": "record",
+    "description": "An answer to a question about the catalog: its sentences, each citing products and sources of the evidence; or an application problem solved need by need (`needs`, with every need's citations in `citations`); or a refusal and why.",
+    "fields": {
+      "answer": {"type": "string"},
+      "citations": {"type": "array", "items": "Citation"},
+      "needs": {"type": "array", "items": "AskNeed", "optional": true},
+      "refused": {"type": "boolean"},
+      "reason": {
+        "type": "enum",
+        "values": ["off_topic", "not_enough_evidence", "limit", "unavailable"],
+        "optional": true
+      }
+    }
+  },
+  {
+    "id": "ProposalEdit",
+    "kind": "record",
+    "description": "One edit of a proposal's change: when, by whom, why.",
+    "fields": {"at": {"type": "string"}, "actor": {"type": "string"}, "note": {"type": "string"}}
+  },
+  {
+    "id": "ProposedChange",
+    "kind": "record",
+    "description": "One record a proposal changes: its fields before and after in JSON text, absent where the record does not exist.",
+    "fields": {
+      "entity": {"type": "string"},
+      "before": {"type": "string", "optional": true},
+      "after": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "ProposalView",
+    "kind": "record",
+    "description": "A proposal in the review queue. `changes` and `changeset` come with one proposal, not a list; `problem` says why its change no longer applies; `token_id` is the id of the agent token an agent's came with; `bundle` is the research run whose bundle it belongs to.",
+    "fields": {
+      "id": {"type": "string"},
+      "files_on": "FilesOn",
+      "status": "ProposalStatus",
+      "subject": {"type": "string", "optional": true},
+      "reason": {"type": "string"},
+      "message": {"type": "string", "optional": true},
+      "source_url": {"type": "string", "optional": true},
+      "actor_kind": "ActorKind",
+      "author": {"type": "string"},
+      "created_at": {"type": "string"},
+      "reports": {"type": "integer"},
+      "reviewer": {"type": "string", "optional": true},
+      "note": {"type": "string", "optional": true},
+      "decided_at": {"type": "string", "optional": true},
+      "sources": {"type": "array", "items": "string"},
+      "edits": {"type": "array", "items": "ProposalEdit"},
+      "token_id": {"type": "string", "optional": true},
+      "bundle": {"type": "string", "optional": true},
+      "changes": {"type": "array", "optional": true, "items": "ProposedChange"},
+      "changeset": {"type": "string", "optional": true},
+      "problem": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "BundleMember",
+    "kind": "record",
+    "description": "One proposal of a bundle, what it does to the records the store holds while it waits, and the members it comes after: those that put a record it names.",
+    "fields": {
+      "proposal": {"type": "ProposalView"},
+      "risk": {"type": "Risk", "optional": true, "description": "While it waits"},
+      "after": {"type": "array", "items": "string"}
+    }
+  },
+  {
+    "id": "BundleView",
+    "kind": "record",
+    "description": "A research run's bundle: its proposals in dependency order (a product before its values), the riskiest first where order leaves a choice.",
+    "fields": {"id": {"type": "string"}, "members": {"type": "array", "items": "BundleMember"}}
+  },
+  {
+    "id": "RefusedProposal",
+    "kind": "record",
+    "description": "A proposal a decision left waiting because the validator refused its change, with the findings.",
+    "fields": {"proposal": {"type": "ProposalView"}, "findings": {"type": "array", "items": "string"}}
+  },
+  {
+    "id": "HeldProposal",
+    "kind": "record",
+    "description": "A proposal a decision left waiting because it names a record another proposal of the decision, not approved, puts.",
+    "fields": {"proposal": {"type": "ProposalView"}, "waits_on": {"type": "array", "items": "string"}}
+  },
+  {
+    "id": "DecisionOutcome",
+    "kind": "record",
+    "description": "What one decision did: the proposals it approved, rejected, retracted or edited, and those it left waiting, refused or held.",
+    "fields": {
+      "done": {"type": "array", "items": "ProposalView"},
+      "refused": {"type": "array", "items": "RefusedProposal"},
+      "held": {"type": "array", "items": "HeldProposal"}
+    }
+  },
+  {
+    "id": "ProposalPage",
+    "kind": "record",
+    "description": "A page of the review queue, newest first, and how many proposals its filter matches; or the proposals the news desk made.",
+    "fields": {
+      "proposals": {"type": "array", "items": "ProposalView"},
+      "next": {"type": "string", "optional": true, "description": "The cursor of the next page: the offset of its first row"},
+      "total": {"type": "integer", "optional": true}
+    }
+  },
+  {
+    "id": "LogEntryView",
+    "kind": "record",
+    "description": "One line of the review queue's audit log: who did what to which proposal, when, and the Change events it made.",
+    "fields": {
+      "at": {"type": "string"},
+      "action": "ProposalAction",
+      "proposal": {"type": "string"},
+      "actor": {"type": "string"},
+      "actor_kind": "ActorKind",
+      "note": {"type": "string", "optional": true},
+      "changes": {"type": "array", "items": "string"},
+      "correlation_id": {"type": "string"}
+    }
+  },
+  {
+    "id": "LogPage",
+    "kind": "record",
+    "description": "A page of the audit log, newest first, and how many entries it holds.",
+    "fields": {
+      "entries": {"type": "array", "items": "LogEntryView"},
+      "next": {"type": "string", "optional": true, "description": "The cursor of the next page: the offset of its first row"},
+      "total": {"type": "integer"}
+    }
+  },
+  {
+    "id": "FieldShape",
+    "kind": "record",
+    "description": "One field of an entity the admin edits: its label, and the input that edits it.",
+    "fields": {
+      "name": {"type": "string"},
+      "label": {"type": "LocalizedText"},
+      "type": {"type": "string"},
+      "values": {"type": "array", "items": "string"},
+      "optional": {"type": "boolean"},
+      "vocabulary": {"type": "string", "optional": true},
+      "refs": {"type": "array", "items": "string"},
+      "input": {
+        "type": "enum",
+        "values": ["text", "number", "flag", "date", "localized", "term", "terms", "choice", "json"]
+      }
+    }
+  },
+  {
+    "id": "EntityShape",
+    "kind": "record",
+    "description": "An entity the admin edits: its label, id prefix, provenance and fields.",
+    "fields": {
+      "id": {"type": "string"},
+      "label": {"type": "LocalizedText"},
+      "prefix": {"type": "string"},
+      "provenance": {"type": "enum", "values": ["source", "file"], "optional": true},
+      "fields": {"type": "array", "items": "FieldShape"}
+    }
+  },
+  {
+    "id": "SpecShape",
+    "kind": "record",
+    "description": "A spec as the admin's spec inputs type it: its datatype, the dimension of its unit, or its vocabulary.",
+    "fields": {
+      "label": {"type": "LocalizedText"},
+      "datatype": {"type": "enum", "values": ["quantity", "term", "term_set", "boolean", "string"]},
+      "dimension": {"type": "string", "optional": true},
+      "unit": {"type": "string", "optional": true},
+      "vocabulary": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "UnitShape",
+    "kind": "record",
+    "description": "A unit the admin offers for a quantity of its dimension.",
+    "fields": {"symbol": {"type": "string"}, "dimension": {"type": "string"}}
+  },
+  {
+    "id": "KindEntry",
+    "kind": "record",
+    "description": "A proposal kind and the event that files it.",
+    "fields": {
+      "id": {"type": "TermId", "vocabulary": "proposal_kinds"},
+      "label": {"type": "LocalizedText"},
+      "files_on": "FilesOn"
+    }
+  },
+  {
+    "id": "OwnedShape",
+    "kind": "record",
+    "description": "An entity another screen owns: its label, id prefix and that screen's admin address.",
+    "fields": {
+      "id": {"type": "string"},
+      "label": {"type": "LocalizedText"},
+      "prefix": {"type": "string"},
+      "screen": {"type": "string"}
+    }
+  },
+  {
+    "id": "AdminModel",
+    "kind": "record",
+    "description": "What the admin forms are typed by: the entities it edits and the ones other screens own, their vocabularies, the specs, units and category profiles, and the proposal kinds.",
+    "fields": {
+      "entities": {"type": "array", "items": "EntityShape"},
+      "owned": {"type": "array", "items": "OwnedShape"},
+      "vocabularies": {"type": "map", "items": "TermList"},
+      "specs": {"type": "map", "items": "SpecShape"},
+      "units": {"type": "map", "items": "UnitShape"},
+      "profiles": {"type": "map", "items": "SectionKeys"},
+      "kinds": {"type": "array", "items": "KindEntry"},
+      "none_vocabulary": {"type": "string", "description": "The vocabulary of the reasons a claim states no value for"},
+      "none_datatypes": {"type": "array", "items": "string", "description": "The spec datatypes whose claims may state no value"}
+    }
+  },
+  {
+    "id": "TermList",
+    "kind": "record",
+    "description": "A vocabulary's terms, in registry order.",
+    "fields": {"terms": {"type": "array", "items": "TermRef"}}
+  },
+  {
+    "id": "RecordRow",
+    "kind": "record",
+    "description": "A record in an admin list: its id, what it is called and a detail.",
+    "fields": {"id": {"type": "string"}, "label": {"type": "string"}, "detail": {"type": "string", "optional": true}}
+  },
+  {
+    "id": "RecordRows",
+    "kind": "record",
+    "description": "A page of an admin list, in label order, and how many records it holds.",
+    "fields": {
+      "records": {"type": "array", "items": "RecordRow"},
+      "next": {"type": "string", "optional": true, "description": "The cursor of the next page: the offset of its first row"},
+      "total": {"type": "integer"}
+    }
+  },
+  {
+    "id": "AdminRecord",
+    "kind": "record",
+    "description": "A record for the admin's form, with every record that refers to it and the sources they cite, each in JSON text.",
+    "fields": {"record": {"type": "string"}, "related": {"type": "array", "items": "string"}}
+  },
+  {
+    "id": "HistoryPage",
+    "kind": "record",
+    "description": "A page of any record's versions for the admin, newest first, and how many there are.",
+    "fields": {
+      "entity": {"type": "string"},
+      "versions": {"type": "array", "items": "HistoryEntry"},
+      "next": {"type": "string", "optional": true, "description": "The cursor of the next page: the offset of its first row"},
+      "total": {"type": "integer"}
+    }
+  },
+  {
+    "id": "FieldDiff",
+    "kind": "record",
+    "description": "The fields two versions of a record differ on.",
+    "fields": {"changes": {"type": "array", "items": "FieldChangeView"}}
+  },
+  {
+    "id": "FeedCite",
+    "kind": "record",
+    "description": "What a sentence of an article rests on, as the page links it: a product or an organization by its slug, or a source by its address.",
+    "fields": {
+      "id": {"type": "string"},
+      "kind": {"type": "enum", "values": ["product", "organization", "source"]},
+      "label": {"type": "string", "optional": true, "description": "A product's or an organization's name, or a source's title"},
+      "slug": {"type": "string", "optional": true},
+      "url": {"type": "string", "optional": true},
+      "type": {"type": "TermRef", "optional": true, "description": "A source's type, which names a source without a title"}
+    }
+  },
+  {
+    "id": "FeedSentenceView",
+    "kind": "record",
+    "description": "One sentence of an article and its citations.",
+    "fields": {"text": {"type": "LocalizedText"}, "cites": {"type": "array", "items": "FeedCite"}}
+  },
+  {
+    "id": "FeedBrief",
+    "kind": "record",
+    "description": "A published article in a list: newest first; `subjects` are the products and organizations it cites and `categories` theirs, for the vendor and hub pages' recent items.",
+    "fields": {
+      "slug": {"type": "string"},
+      "title": {"type": "LocalizedText"},
+      "summary": {"type": "LocalizedText"},
+      "kind": {"type": "TermRef"},
+      "published_at": {"type": "string"},
+      "subjects": {"type": "array", "items": "string"},
+      "categories": {"type": "array", "items": "string"}
+    }
+  },
+  {
+    "id": "FeedItemView",
+    "kind": "record",
+    "description": "A published article's page: its cited sentences under the brand's byline, when it was added and last revised, and the vendor's date with its source when there is one.",
+    "fields": {
+      "slug": {"type": "string"},
+      "kind": {"type": "TermRef"},
+      "authorship": {"type": "enum", "values": ["human", "template", "ai_draft"]},
+      "byline": {"type": "LocalizedText"},
+      "title": {"type": "LocalizedText"},
+      "summary": {"type": "LocalizedText"},
+      "body": {"type": "array", "items": "FeedSentenceView"},
+      "published_at": {"type": "string"},
+      "revised_at": {"type": "string", "optional": true},
+      "event_date": {"type": "PartialDate", "optional": true},
+      "event_source": {"type": "SourceView", "optional": true}
+    }
+  },
+  {
+    "id": "MarketCategory",
+    "kind": "record",
+    "description": "How many products a category lists, and from how many vendors.",
+    "fields": {"category": {"type": "string"}, "products": {"type": "integer"}, "vendors": {"type": "integer"}}
+  },
+  {
+    "id": "MarketVendor",
+    "kind": "record",
+    "description": "How many products an organization makes, in how many categories.",
+    "fields": {
+      "organization": {"type": "OrgBrief"},
+      "products": {"type": "integer"},
+      "categories": {"type": "integer"}
+    }
+  },
+  {
+    "id": "CountryCount",
+    "kind": "record",
+    "description": "How many organizations state a country as theirs, and how many products they make.",
+    "fields": {
+      "country": {"type": "string", "description": "ISO 3166-1 alpha-2"},
+      "organizations": {"type": "integer"},
+      "products": {"type": "integer"}
+    }
+  },
+  {
+    "id": "ConsolidationEvent",
+    "kind": "record",
+    "description": "An owning relation: the organization, its owner and the year it began, when stated.",
+    "fields": {
+      "type": {"type": "TermRef"},
+      "organization": {"type": "OrgBrief"},
+      "owner": {"type": "OrgBrief"},
+      "year": {"type": "integer", "optional": true}
+    }
+  },
+  {
+    "id": "MarketView",
+    "kind": "record",
+    "description": "The market as the catalog counts it, what /market and `radar metrics market` show: the categories, the vendors and the countries by products, most first, and the owning relations newest first, the undated last; each count from the index's own cards.",
+    "fields": {
+      "categories": {"type": "array", "items": "MarketCategory"},
+      "vendors": {"type": "array", "items": "MarketVendor"},
+      "countries": {"type": "array", "items": "CountryCount"},
+      "consolidation": {"type": "array", "items": "ConsolidationEvent"},
+      "organizations": {"type": "integer", "description": "Every organization, the base of the countries"}
+    }
+  },
+  {
+    "id": "FeedPageView",
+    "kind": "record",
+    "description": "Every published article, newest first: what /news lists and filters, and the feeds carry.",
+    "fields": {"items": {"type": "array", "items": "FeedBrief"}, "total": {"type": "integer"}}
+  },
+  {
+    "id": "FeedDeskRow",
+    "kind": "record",
+    "description": "A draft or a published article as the founder edits it: its record's fields, and a draft's proposal.",
+    "fields": {
+      "id": {"type": "string"},
+      "slug": {"type": "string"},
+      "kind": {"type": "TermId", "vocabulary": "feed_item_kinds"},
+      "authorship": {"type": "enum", "values": ["human", "template", "ai_draft"]},
+      "position": {"type": "integer"},
+      "title": {"type": "LocalizedText"},
+      "summary": {"type": "LocalizedText"},
+      "body": {"type": "array", "items": "FeedSentence"},
+      "published_at": {"type": "string", "optional": true},
+      "event_date": {"type": "PartialDate", "optional": true},
+      "event_source": {"type": "string", "optional": true},
+      "proposal": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "FeedDesk",
+    "kind": "record",
+    "description": "The news feed's desk, as `radar feed list` and /admin/news read it: the drafts in publishing order, and a page of the published articles, newest first, with how many there are.",
+    "fields": {
+      "drafts": {"type": "array", "items": "FeedDeskRow"},
+      "published": {"type": "array", "items": "FeedDeskRow"},
+      "next": {"type": "string", "optional": true, "description": "The cursor of the next page: the offset of its first row"},
+      "total": {"type": "integer"}
+    }
+  },
+  {
+    "id": "FeedShare",
+    "kind": "record",
+    "description": "The post the founder copies to share a published article by hand: its title, summary and address in one language.",
+    "fields": {"locale": {"type": "string"}, "url": {"type": "string"}, "text": {"type": "string"}}
+  },
+  {
+    "id": "IndexRunView",
+    "kind": "record",
+    "description": "One update or rebuild of the search index: its model, who started it and when, and the version it made or the error it stopped on.",
+    "fields": {
+      "action": {"type": "enum", "values": ["update", "rebuild"]},
+      "model_id": {"type": "string"},
+      "actor": {"type": "string"},
+      "at": {"type": "string"},
+      "correlation_id": {"type": "string"},
+      "version": {"type": "string", "optional": true},
+      "products": {"type": "integer"},
+      "embedded": {"type": "integer"},
+      "removed": {"type": "integer"},
+      "error": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "IndexStatus",
+    "kind": "record",
+    "description": "The search index against the catalog, as `radar index status` and the admin read it: the current version's embedder and products, when it was built, and the last runs; only the catalog and the runs before the first build.",
+    "fields": {
+      "version": {"type": "string", "optional": true},
+      "embedder": {"type": "EmbedderModel", "optional": true},
+      "products_indexed": {"type": "integer", "optional": true},
+      "products_in_catalog": {"type": "integer"},
+      "built_at": {"type": "string", "optional": true},
+      "runs": {"type": "array", "items": "IndexRunView"}
+    }
+  },
+  {
+    "id": "IndexSettings",
+    "kind": "record",
+    "description": "The embedding model the live index is built with, and search.json's settings: its model and the ranking and retrieval knobs.",
+    "fields": {"current": {"type": "EmbedderModel", "optional": true}, "search": {"type": "SearchSettings"}}
+  },
+  {
+    "id": "MatchView",
+    "kind": "record",
+    "description": "Why a product matched a query: the query terms found in a field, or in a published value (its spec key and label).",
+    "fields": {
+      "field": {"type": "string"},
+      "terms": {"type": "array", "items": "string"},
+      "key": {"type": "string", "optional": true},
+      "label": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "SearchHitView",
+    "kind": "record",
+    "description": "A product a query found, as `radar product search` prints it: its score, why it matched and its rank in each ranking.",
+    "fields": {
+      "id": {"type": "string"},
+      "slug": {"type": "string"},
+      "name": {"type": "string"},
+      "vendor": {"type": "string"},
+      "vendor_name": {"type": "string"},
+      "category": {"type": "string"},
+      "score": {"type": "number"},
+      "why": {"type": "array", "items": "MatchView"},
+      "rank_sources": {"type": "map", "items": "integer"}
+    }
+  },
+  {
+    "id": "SearchHits",
+    "kind": "record",
+    "description": "What a query finds, ranked: the admin's search console and the MCP server's search_products.",
+    "fields": {"hits": {"type": "array", "items": "SearchHitView"}}
+  },
+  {
+    "id": "AiCapRow",
+    "kind": "record",
+    "description": "One AI use's model, prompt and caps (the registry's defaults, or its AiCap record) against its spend of the month and its calls of the day; all uses together have caps only.",
+    "fields": {
+      "use": "Use",
+      "cap": {"type": "string"},
+      "model": {"type": "string", "optional": true},
+      "prompt": {"type": "string", "optional": true, "description": "The prompt and its version, `ask/v2`"},
+      "month_cad": {"type": "number"},
+      "day_calls": {"type": "integer"},
+      "client_calls": {"type": "integer", "optional": true},
+      "cad_month": {"type": "number"},
+      "calls_today": {"type": "integer"}
+    }
+  },
+  {
+    "id": "AiCaps",
+    "kind": "record",
+    "description": "Every AI use's settings and usage on a day, all AI together first, and the models a use may run with their prices, counted in CAD at `cad_per_usd`.",
+    "fields": {
+      "day": {"type": "string"},
+      "cad_per_usd": {"type": "number"},
+      "models": {"type": "array", "items": "AiModel"},
+      "uses": {"type": "array", "items": "AiCapRow"}
+    }
+  },
+  {
+    "id": "WeekCounts",
+    "kind": "record",
+    "description": "One week of the site's anonymous counters, Monday to the week's last counted day, with the search KPIs a week has data for.",
+    "fields": {
+      "week": {"type": "string"},
+      "to": {"type": "string"},
+      "counts": {"type": "map", "items": "integer"},
+      "kpis": {"type": "map", "items": "number"}
+    }
+  },
+  {
+    "id": "WeeklyCounts",
+    "kind": "record",
+    "description": "The site's anonymous counters week by week, newest first, read from `metrics/` and never estimated.",
+    "fields": {"weeks": {"type": "array", "items": "WeekCounts"}}
+  },
+  {
+    "id": "StoredFile",
+    "kind": "record",
+    "description": "A file the admin put into the BlobStore: its digest, type and size.",
+    "fields": {"sha256": {"type": "string"}, "mime": {"type": "string"}, "bytes": {"type": "integer"}}
+  },
+  {
+    "id": "AgentLimits",
+    "kind": "record",
+    "description": "What one outside agent may do with its token: calls a minute and proposals a day.",
+    "fields": {"requests_per_minute": {"type": "integer"}, "proposals_per_day": {"type": "integer"}}
+  },
+  {
+    "id": "AgentTokenView",
+    "kind": "record",
+    "description": "An outside agent's token as `radar agent-token list` and the admin show it: never the token, nor its digest. It works until the day it expires.",
+    "fields": {
+      "id": {"type": "string"},
+      "name": {"type": "string"},
+      "scope": "Scope",
+      "expires": {"type": "string"},
+      "created_at": {"type": "string"},
+      "limits": {"type": "AgentLimits"},
+      "status": "Standing",
+      "revoked_at": {"type": "string", "optional": true}
+    }
+  },
+  {
+    "id": "AgentTokenList",
+    "kind": "record",
+    "description": "A page of the outside agents' tokens, newest first, how many there are, and the limits a new one gets unless it is given its own.",
+    "fields": {
+      "tokens": {"type": "array", "items": "AgentTokenView"},
+      "limits": {"type": "AgentLimits"},
+      "next": {"type": "string", "optional": true, "description": "The cursor of the next page: the offset of its first row"},
+      "total": {"type": "integer"}
+    }
+  },
+  {
+    "id": "IssuedToken",
+    "kind": "record",
+    "description": "A token just issued: the token itself, shown this once, beside its view.",
+    "fields": {"agent": {"type": "AgentTokenView"}, "token": {"type": "string"}}
+  },
+  {
+    "id": "ResearchLine",
+    "kind": "record",
+    "description": "One step of a research run: a page or file read or skipped and why, a proposal filed (a page's, a staged file's or a datasheet's), why one was rejected, or why the run ended.",
+    "fields": {"at": {"type": "string"}, "step": "ResearchStep", "detail": {"type": "string"}}
+  },
+  {
+    "id": "ResearchRunView",
+    "kind": "record",
+    "description": "A research run as `radar research log` and the admin show it: its id is its correlation id, which every log line and proposal of the run carries; the pages it read, the proposals it filed (among them the files it staged and the datasheets it read) and why others were rejected, what its model calls cost, and each step.",
+    "fields": {
+      "id": {"type": "string"},
+      "scope": {"type": "string"},
+      "actor": {"type": "string"},
+      "started_at": {"type": "string"},
+      "ended_at": {"type": "string", "optional": true},
+      "status": "ResearchStatus",
+      "token": {"type": "string"},
+      "cad": {"type": "number"},
+      "pages": {"type": "array", "items": "string"},
+      "filed": {"type": "array", "items": "string"},
+      "media": {"type": "array", "items": "string"},
+      "datasheets": {"type": "array", "items": "string"},
+      "rejected": {"type": "array", "items": "string"},
+      "lines": {"type": "array", "items": "ResearchLine"}
+    }
+  },
+  {
+    "id": "ResearchRunRow",
+    "kind": "record",
+    "description": "A research run as its list shows it: how many pages it read, proposals it filed (its files and datasheets among them) and had rejected, and its cost; its page shows what they were.",
+    "fields": {
+      "id": {"type": "string"},
+      "scope": {"type": "string"},
+      "actor": {"type": "string"},
+      "started_at": {"type": "string"},
+      "ended_at": {"type": "string", "optional": true},
+      "status": "ResearchStatus",
+      "cad": {"type": "number"},
+      "pages": {"type": "integer"},
+      "filed": {"type": "integer"},
+      "rejected": {"type": "integer"}
+    }
+  },
+  {
+    "id": "ResearchRunList",
+    "kind": "record",
+    "description": "A page of the research runs, newest first, and how many there are.",
+    "fields": {
+      "runs": {"type": "array", "items": "ResearchRunRow"},
+      "next": {"type": "string", "optional": true, "description": "The cursor of the next page: the offset of its first row"},
+      "total": {"type": "integer"}
+    }
+  },
+  {
+    "id": "CategoryCells",
+    "kind": "record",
+    "description": "A category's profile cells: its products times the specs its profile shows (core and detail), and how many a claim no version range scopes fills.",
+    "fields": {
+      "cells": {"type": "integer"},
+      "before": {"type": "integer", "description": "Filled at the window's start by a claim the store still holds: one the change log first recorded by then"},
+      "now": {"type": "integer"}
+    }
+  },
+  {
+    "id": "ResearchMeasures",
+    "kind": "record",
+    "description": "The research runs started since an instant, summed, as `radar research measure` prints them: the pages they read, what they skipped and had refused by why (a log line's text after its page, file or reason), the proposals they filed, the values (Claims) those put and how many of them a listing of their product's category filters on, those values by their proposal's status now and how many their product's page shows, each category's profile cells filled at the window's start and now, and what their model calls cost.",
+    "fields": {
+      "since": {"type": "string"},
+      "runs": {"type": "integer"},
+      "pages": {"type": "integer"},
+      "skipped": {"type": "map", "items": "integer"},
+      "filed": {"type": "integer"},
+      "refused": {"type": "map", "items": "integer"},
+      "values": {"type": "integer"},
+      "filter_values": {"type": "integer"},
+      "statuses": {"type": "map", "items": "integer", "description": "The values by their proposal's status now, a ProposalStatus each"},
+      "published": {"type": "integer", "description": "The approved values their product's page shows now, citing one of their sources"},
+      "cells": {"type": "map", "items": "CategoryCells", "description": "By category id, each category with products"},
+      "cad": {"type": "number"}
+    }
+  },
+  {
+    "id": "ProductSheet",
+    "kind": "record",
+    "description": "A product as `radar product get` and the MCP server's get_product give it: its page's view, and the label and unit of each spec its rows name.",
+    "fields": {"product": {"type": "ProductView"}, "spec_definitions": {"type": "map", "items": "SpecLabel"}}
+  },
+  {
+    "id": "DocumentView",
+    "kind": "record",
+    "description": "A media Document as `radar source search` finds it: the digest and the address that dedupe its file, and the records it is about.",
+    "fields": {
+      "id": {"type": "string"},
+      "kind": {"type": "TermRef"},
+      "title": {"type": "LocalizedText", "optional": true},
+      "mime": {"type": "string"},
+      "bytes": {"type": "integer"},
+      "sha256": {"type": "string"},
+      "rights": {"type": "TermRef"},
+      "source_url": {"type": "string", "optional": true},
+      "fetched_at": {"type": "string"},
+      "subjects": {"type": "array", "items": "string"}
+    }
+  },
+  {
+    "id": "FoundSources",
+    "kind": "record",
+    "description": "The catalog's Sources and media Documents a `radar source search` finds, each list newest first.",
+    "fields": {
+      "sources": {"type": "array", "items": "SourceView"},
+      "documents": {"type": "array", "items": "DocumentView"}
+    }
+  }
+]

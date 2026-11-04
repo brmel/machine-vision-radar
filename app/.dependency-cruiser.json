@@ -1,0 +1,123 @@
+{
+  "forbidden": [
+    {
+      "comment": "The site never imports the brand studio: the studio is a separate root that renders from the site's components.",
+      "from": {
+        "path": "^src/"
+      },
+      "name": "site-never-imports-studio",
+      "severity": "error",
+      "to": {
+        "path": "^studio/"
+      }
+    },
+    {
+      "comment": "Features are isolated vertical slices: a feature may use domain/, ui/ and shell/ (i18n, seo, the logger) but never another feature.",
+      "from": {
+        "path": "^src/features/([^/]+)/"
+      },
+      "name": "no-cross-feature-imports",
+      "severity": "error",
+      "to": {
+        "path": "^src/features/",
+        "pathNot": "^src/features/$1/"
+      }
+    },
+    {
+      "comment": "domain/ holds pure domain types, ports and algorithms; it imports no other layer.",
+      "from": {
+        "path": "^src/domain/"
+      },
+      "name": "domain-is-pure",
+      "severity": "error",
+      "to": {
+        "path": "^src/(features|ui|adapters|shell)/"
+      }
+    },
+    {
+      "comment": "Features never import adapters/: views and hooks consume ports (CatalogRepository, ProductSearch).",
+      "from": {
+        "path": "^src/features/"
+      },
+      "name": "features-never-import-adapters",
+      "severity": "error",
+      "to": {
+        "path": "^src/adapters/"
+      }
+    },
+    {
+      "comment": "Only shell/ (the composition root) wires adapters.",
+      "from": {
+        "pathNot": [
+          "^src/shell/",
+          "^src/adapters/"
+        ]
+      },
+      "name": "only-shell-wires-adapters",
+      "severity": "error",
+      "to": {
+        "path": "^src/adapters/"
+      }
+    },
+    {
+      "comment": "Only adapters/ may touch a provider SDK (zod, Firebase, Google Cloud, Gen AI, ADK, Google auth), resolved or not: a provider stays behind a port.",
+      "from": {
+        "pathNot": [
+          "^src/adapters/"
+        ]
+      },
+      "name": "adapters-own-providers",
+      "severity": "error",
+      "to": {
+        "path": "^(node_modules/)?(zod|firebase|@firebase|@google-cloud|@google/genai|@google/adk|googleapis|google-auth-library)(/|$)"
+      }
+    },
+    {
+      "comment": "ui/ primitives take localized strings as props; they never import i18n.",
+      "from": {
+        "path": "^src/ui/"
+      },
+      "name": "ui-stays-i18n-free",
+      "severity": "error",
+      "to": {
+        "path": "^src/shell/i18n/"
+      }
+    },
+    {
+      "comment": "features/admin is entered only through the shell's guarded boundary (shell/admin/AdminSection.tsx, lazy + RequireAdmin).",
+      "from": {
+        "pathNot": [
+          "^src/shell/admin/",
+          "^src/features/admin/"
+        ]
+      },
+      "name": "admin-only-from-composition-root",
+      "severity": "error",
+      "to": {
+        "path": "^src/features/admin/"
+      }
+    },
+    {
+      "comment": "No circular imports anywhere.",
+      "from": {},
+      "name": "no-circular",
+      "severity": "error",
+      "to": {
+        "circular": true
+      }
+    }
+  ],
+  "options": {
+    "doNotFollow": {
+      "path": "node_modules"
+    },
+    "enhancedResolveOptions": {
+      "extensions": [
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx"
+      ]
+    }
+  }
+}

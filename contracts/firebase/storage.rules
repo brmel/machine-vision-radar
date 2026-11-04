@@ -1,0 +1,13 @@
+rules_version = '2';
+// A media file is readable by anyone only when the adapter marked it public (its rights are `own` or `open_licence`);
+// everything else, the search index among it, needs admin credentials.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{path=**} {
+      allow read, write: if false;
+    }
+    match /media/{prefix}/{file} {
+      allow read: if resource.metadata.public == 'true';
+    }
+  }
+}

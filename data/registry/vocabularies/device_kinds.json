@@ -1,0 +1,6 @@
+[
+  {"id": "bridge", "label": {"en": "Protocol bridge", "fr": "Pont de protocole"}},
+  {"id": "capture_card", "label": {"en": "Frame grabber / capture card", "fr": "Carte d'acquisition / Frame Grabber"}},
+  {"id": "extender", "label": {"en": "Range extender", "fr": "Prolongateur de portée"}},
+  {"id": "interface_board", "label": {"en": "Interface board", "fr": "Carte d'interface"}}
+]

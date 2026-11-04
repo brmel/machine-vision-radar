@@ -1,0 +1,59 @@
+[
+  {
+    "id": "accessory_for",
+    "label": {"en": "Accessory for", "fr": "Accessoire pour"},
+    "description": {"en": "The from-product is an accessory or spare part for the to-product.", "fr": "Le produit d'origine est un accessoire ou une pièce de rechange du produit cible."},
+    "from_side": {"label": {"en": "Accessory for", "fr": "Accessoire pour"}, "schema_org": "isAccessoryOrSparePartFor"},
+    "to_side": {"label": {"en": "Accessories", "fr": "Accessoires"}}
+  },
+  {
+    "id": "compatible_with",
+    "label": {"en": "Compatible with", "fr": "Compatible avec"},
+    "description": {"en": "The two products work together, as a source states.", "fr": "Les deux produits fonctionnent ensemble, selon une source."},
+    "from_side": {"label": {"en": "Compatible with", "fr": "Compatible avec"}, "schema_org": "isRelatedTo"},
+    "to_side": {"label": {"en": "Compatible with", "fr": "Compatible avec"}, "schema_org": "isRelatedTo"}
+  },
+  {
+    "id": "includes",
+    "label": {"en": "Includes", "fr": "Comprend"},
+    "description": {"en": "The from-product, a kit or a system, ships with the to-product.", "fr": "Le produit d'origine, un kit ou un système, est livré avec le produit cible."},
+    "from_side": {"label": {"en": "Includes", "fr": "Comprend"}},
+    "to_side": {"label": {"en": "Included in", "fr": "Inclus dans"}}
+  },
+  {
+    "id": "rebrand_of",
+    "label": {"en": "Rebrand of", "fr": "Version renommée de"},
+    "description": {"en": "The from-product is the to-product sold under another brand.", "fr": "Le produit d'origine est le produit cible vendu sous une autre marque."},
+    "from_side": {"label": {"en": "Rebrand of", "fr": "Version renommée de"}},
+    "to_side": {"label": {"en": "Sold as", "fr": "Vendu sous le nom de"}}
+  },
+  {
+    "id": "requires",
+    "label": {"en": "Requires", "fr": "Nécessite"},
+    "description": {"en": "The from-product does not work without the to-product.", "fr": "Le produit d'origine ne fonctionne pas sans le produit cible."},
+    "from_side": {"label": {"en": "Requires", "fr": "Nécessite"}},
+    "to_side": {"label": {"en": "Required by", "fr": "Nécessaire pour"}}
+  },
+  {
+    "id": "successor_of",
+    "label": {"en": "Successor of", "fr": "Successeur de"},
+    "description": {"en": "The from-product replaces the to-product.", "fr": "Le produit d'origine remplace le produit cible."},
+    "succeeds": true,
+    "from_side": {"label": {"en": "Replaces", "fr": "Remplace"}, "schema_org": "successorOf"},
+    "to_side": {"label": {"en": "Replaced by", "fr": "Remplacé par"}, "schema_org": "predecessorOf"}
+  },
+  {
+    "id": "supports",
+    "label": {"en": "Supports", "fr": "Prend en charge"},
+    "description": {"en": "The from-product, software or a host, runs or drives the to-product.", "fr": "Le produit d'origine, un logiciel ou un hôte, exécute ou pilote le produit cible."},
+    "from_side": {"label": {"en": "Supports", "fr": "Prend en charge"}},
+    "to_side": {"label": {"en": "Supported by", "fr": "Pris en charge par"}}
+  },
+  {
+    "id": "uses_component",
+    "label": {"en": "Uses component", "fr": "Utilise le composant"},
+    "description": {"en": "The from-product is built with the to-product inside it.", "fr": "Le produit d'origine est construit avec le produit cible à l'intérieur."},
+    "from_side": {"label": {"en": "Uses", "fr": "Utilise"}},
+    "to_side": {"label": {"en": "Used in", "fr": "Utilisé dans"}}
+  }
+]

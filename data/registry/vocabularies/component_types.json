@@ -1,0 +1,12 @@
+[
+  {"id": "beamsplitter", "label": {"en": "Beamsplitter", "fr": "Séparateur de faisceau"}},
+  {"id": "dichroic", "label": {"en": "Dichroic", "fr": "Miroir dichroïque"}},
+  {"id": "diffractive_optic", "label": {"en": "Diffractive optic", "fr": "Optique diffractive"}},
+  {"id": "diffuser", "label": {"en": "Diffuser", "fr": "Diffuseur"}},
+  {"id": "filter", "label": {"en": "Filter", "fr": "Filtre"}},
+  {"id": "mirror", "label": {"en": "Mirror", "fr": "Miroir"}},
+  {"id": "polarizer", "label": {"en": "Polarizer", "fr": "Polariseur"}},
+  {"id": "prism", "label": {"en": "Prism", "fr": "Prisme"}},
+  {"id": "waveplate", "label": {"en": "Waveplate", "fr": "Lame à retard de phase"}},
+  {"id": "window", "label": {"en": "Window", "fr": "Fenêtre optique"}}
+]

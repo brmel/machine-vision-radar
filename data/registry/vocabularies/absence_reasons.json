@@ -1,0 +1,12 @@
+[
+  {
+    "id": "none_stated",
+    "label": {"en": "None", "fr": "Aucun"},
+    "description": {"en": "The source states the product has none: no lens mount, no interface of that kind.", "fr": "La source indique que le produit n'en a pas : pas de monture, pas d'interface de ce type."}
+  },
+  {
+    "id": "not_applicable",
+    "label": {"en": "Not applicable", "fr": "Sans objet"},
+    "description": {"en": "The spec has no meaning for this product, such as a board-level camera's IP rating.", "fr": "La caractéristique n'a pas de sens pour ce produit, comme l'indice IP d'une caméra sur carte."}
+  }
+]

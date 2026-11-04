@@ -1,0 +1,809 @@
+{
+  "$comment": "Every domain operation: its CLI command, the shape of its --json output (a JSON Schema), its admin screen and its MCP tool (whose own schemas come from contracts/model/tools.json). A test fails when the CLI and this list differ.",
+  "$defs": {
+    "ProposalStatus": {"type": "string", "enum": ["suggested", "approved", "rejected", "retracted"]},
+    "ResearchStatus": {
+      "type": "string",
+      "enum": ["running", "done", "partial", "blocked", "cancelled", "capped", "failed"]
+    },
+    "Proposal": {
+      "type": "object",
+      "required": ["id", "files_on", "status", "reason", "actor_kind", "author", "created_at", "reports", "sources", "edits"],
+      "properties": {"status": {"$ref": "#/$defs/ProposalStatus"}}
+    },
+    "DecisionOutcome": {
+      "type": "object",
+      "required": ["done", "refused", "held"],
+      "properties": {
+        "done": {"type": "array", "items": {"$ref": "#/$defs/Proposal"}},
+        "refused": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["proposal", "findings"],
+            "properties": {"proposal": {"$ref": "#/$defs/Proposal"}}
+          }
+        },
+        "held": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["proposal", "waits_on"],
+            "properties": {"proposal": {"$ref": "#/$defs/Proposal"}}
+          }
+        }
+      }
+    }
+  },
+  "operations": [
+    {
+      "id": "product.search",
+      "summary": "rank products for a query from the search index",
+      "cli": "product search",
+      "admin": "/admin/search/console",
+      "mcp": "search_products",
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "slug", "name", "vendor", "vendor_name", "category", "score", "why", "rank_sources"]
+        }
+      }
+    },
+    {
+      "id": "product.compare",
+      "summary": "compare products side by side",
+      "cli": "product compare",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["products", "specs"]}
+    },
+    {
+      "id": "product.get",
+      "summary": "read a product as its page shows it, with its spec labels",
+      "cli": "product get",
+      "admin": null,
+      "mcp": "get_product",
+      "output": {
+        "type": "object",
+        "required": ["product", "spec_definitions"],
+        "properties": {"product": {"type": "object", "required": ["id", "slug", "name", "core", "detail"]}}
+      }
+    },
+    {
+      "id": "source.search",
+      "summary": "find the catalog's Sources and media Documents by address, vendor, type and date",
+      "cli": "source search",
+      "admin": null,
+      "mcp": "search_sources",
+      "output": {"type": "object", "required": ["sources", "documents"]}
+    },
+    {
+      "id": "source.dedupe",
+      "summary": "plan the merge of each address more than one Source holds into the earliest retrieved; with --file, file it as one bundle",
+      "cli": "source dedupe",
+      "admin": null,
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["groups", "proposals", "bundle", "filed", "refusals"],
+        "properties": {
+          "groups": {"type": "array", "items": {"type": "object", "required": ["url", "kept", "extras", "repoint"]}},
+          "bundle": {"type": ["string", "null"]}
+        }
+      }
+    },
+    {
+      "id": "org.get",
+      "summary": "read an organization with its owners on a date",
+      "cli": "org get",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["id", "slug", "name", "on", "named", "owners"]}
+    },
+    {
+      "id": "record.list",
+      "summary": "list a kind's records whose name or id holds a query, a page at a time, as the admin's Catalog does",
+      "cli": "record list",
+      "admin": "/admin/products",
+      "mcp": null,
+      "output": {"type": "object", "required": ["records", "total"]}
+    },
+    {
+      "id": "record.get",
+      "summary": "one record of any kind, as the admin's record page edits it",
+      "cli": "record get",
+      "admin": "/admin/records/<id>",
+      "mcp": null,
+      "output": {"type": "object", "required": ["record"]}
+    },
+    {
+      "id": "record.history",
+      "summary": "list a record's versions, a page at a time; a product's are its History page's when it has one",
+      "cli": "record history",
+      "admin": "/admin/records/<id>/history",
+      "mcp": null,
+      "output": {"type": "object", "required": ["versions"]}
+    },
+    {
+      "id": "record.diff",
+      "summary": "diff two versions of a record",
+      "cli": "record diff",
+      "admin": "/admin/records/<id>/history",
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["changes"],
+        "properties": {"changes": {"type": "array", "items": {"type": "object", "required": ["path"]}}}
+      }
+    },
+    {
+      "id": "record.rollback",
+      "summary": "propose rolling a record back to an earlier version, as a new one",
+      "cli": "record rollback",
+      "admin": "/admin/records/<id>/history",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "catalog.ask",
+      "summary": "answer a question, or solve an application problem need by need, from the catalog with citations, or refuse",
+      "cli": "catalog ask",
+      "admin": "/admin/search/console",
+      "mcp": null,
+      "output": {"type": "object", "required": ["answer", "citations", "refused"]}
+    },
+    {
+      "id": "category.list",
+      "summary": "list the category hubs",
+      "cli": "category list",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "array", "items": {"type": "object", "required": ["id", "label", "products", "path"]}}
+    },
+    {
+      "id": "category.show",
+      "summary": "show one category hub's products",
+      "cli": "category show",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["id", "label", "description", "products", "path", "cards"]}
+    },
+    {
+      "id": "hub.show",
+      "summary": "show a component hub's products",
+      "cli": "hub show",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["path", "product", "users", "cards"]}
+    },
+    {
+      "id": "change.apply",
+      "summary": "apply a changeset through the CatalogWriter",
+      "cli": "change apply",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["correlation_id", "events", "writes"]}
+    },
+    {
+      "id": "media.put",
+      "summary": "store a media file by sha256",
+      "cli": "media put",
+      "admin": "/admin/records/new/Document",
+      "mcp": null,
+      "output": {"type": "object", "required": ["sha256", "bytes", "mime", "storage_path"]}
+    },
+    {
+      "id": "media.get",
+      "summary": "read a media file, verifying its sha256",
+      "cli": "media get",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["sha256", "bytes", "out"]}
+    },
+    {
+      "id": "media.url",
+      "summary": "the public URL of a media file",
+      "cli": "media url",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["sha256", "url"]}
+    },
+    {
+      "id": "index.rebuild",
+      "summary": "rebuild the search index",
+      "cli": "index rebuild",
+      "admin": "/admin/search",
+      "mcp": null,
+      "output": {"type": "object", "required": ["correlation_id", "version", "products", "embedded", "removed"]}
+    },
+    {
+      "id": "index.update",
+      "summary": "update the search index with the changed products",
+      "cli": "index update",
+      "admin": "/admin/search",
+      "mcp": null,
+      "output": {"type": "object", "required": ["correlation_id", "version", "products", "embedded", "removed"]}
+    },
+    {
+      "id": "feed.new",
+      "summary": "file a news article as a draft",
+      "cli": "feed new",
+      "admin": "/admin/news",
+      "mcp": null,
+      "output": {"type": "object", "required": ["proposals"]}
+    },
+    {
+      "id": "feed.edit",
+      "summary": "revise a draft or a published article",
+      "cli": "feed edit",
+      "admin": "/admin/news",
+      "mcp": null,
+      "output": {"type": "object", "required": ["proposals"]}
+    },
+    {
+      "id": "feed.reorder",
+      "summary": "move a draft in the publishing order",
+      "cli": "feed reorder",
+      "admin": "/admin/news",
+      "mcp": null,
+      "output": {"type": "object", "required": ["proposals"]}
+    },
+    {
+      "id": "feed.detect",
+      "summary": "draft the significant changes since the last run",
+      "cli": "feed detect",
+      "admin": "/admin/news",
+      "mcp": null,
+      "output": {"type": "object", "required": ["proposals"]}
+    },
+    {
+      "id": "feed.draft",
+      "summary": "draft an article about a product or an organization with the article model",
+      "cli": "feed draft",
+      "admin": "/admin/news",
+      "mcp": null,
+      "output": {"type": "object", "required": ["proposals"]}
+    },
+    {
+      "id": "feed.list",
+      "summary": "the drafts and the published articles",
+      "cli": "feed list",
+      "admin": "/admin/news",
+      "mcp": null,
+      "output": {"type": "object", "required": ["drafts", "published", "total"]}
+    },
+    {
+      "id": "feed.show",
+      "summary": "one draft or published article",
+      "cli": "feed show",
+      "admin": "/admin/news",
+      "mcp": null,
+      "output": {"type": "object", "required": ["id", "slug"]}
+    },
+    {
+      "id": "feed.publish",
+      "summary": "publish the next draft",
+      "cli": "feed publish",
+      "admin": "/admin/news",
+      "mcp": null,
+      "output": {"type": "object", "required": ["proposals"]}
+    },
+    {
+      "id": "feed.approve",
+      "summary": "publish every templated draft under one note",
+      "cli": "feed approve",
+      "admin": "/admin/news",
+      "mcp": null,
+      "output": {"type": "object", "required": ["proposals"]}
+    },
+    {
+      "id": "feed.retract",
+      "summary": "withdraw a published article",
+      "cli": "feed retract",
+      "admin": "/admin/news",
+      "mcp": null,
+      "output": {"type": "object", "required": ["proposals"]}
+    },
+    {
+      "id": "feed.share-text",
+      "summary": "the post to share an article by hand",
+      "cli": "feed share-text",
+      "admin": "/admin/news",
+      "mcp": null,
+      "output": {"type": "object", "required": ["locale", "url", "text"]}
+    },
+    {
+      "id": "ai-caps.get",
+      "summary": "each AI use's model, prompt and caps against its spend and calls, and the models a use may run",
+      "cli": "ai-caps get",
+      "admin": "/admin/search/settings",
+      "mcp": null,
+      "output": {"type": "object", "required": ["day", "cad_per_usd", "models", "uses"]}
+    },
+    {
+      "id": "ai-caps.set",
+      "summary": "change a use's model or caps with a reason, approved at once",
+      "cli": "ai-caps set",
+      "admin": "/admin/search/settings",
+      "mcp": null,
+      "output": {"type": "object", "required": ["id", "status", "reason"]}
+    },
+    {
+      "id": "ai-caps.history",
+      "summary": "a use's model and cap versions",
+      "cli": "ai-caps history",
+      "admin": "/admin/search/settings",
+      "mcp": null,
+      "output": {"type": "object", "required": ["versions"]}
+    },
+    {
+      "id": "index.status",
+      "summary": "the search index against the catalog, and its last runs",
+      "cli": "index status",
+      "admin": "/admin/search",
+      "mcp": null,
+      "output": {"type": "object", "required": ["products_in_catalog", "runs"]}
+    },
+    {
+      "id": "index.settings",
+      "summary": "the registry's search settings beside the model the index was built with",
+      "cli": "index settings",
+      "admin": "/admin/search",
+      "mcp": null,
+      "output": {"type": "object", "required": ["search"]}
+    },
+    {
+      "id": "eval.run",
+      "summary": "evaluate search or an AI use on its eval set",
+      "cli": "eval run",
+      "admin": null,
+      "mcp": null,
+      "output": {
+        "oneOf": [
+          {"type": "object", "required": ["use", "mode", "k", "queries", "hits", "hit_rate", "mrr", "misses"]},
+          {"type": "object", "required": ["use", "cases", "passed", "rate", "failures"]}
+        ]
+      }
+    },
+    {
+      "id": "metrics.weekly",
+      "summary": "the site's counters week by week",
+      "cli": "metrics weekly",
+      "admin": "/admin/search",
+      "mcp": null,
+      "output": {"type": "object", "required": ["weeks"]}
+    },
+    {
+      "id": "metrics.market",
+      "summary": "the market as the catalog counts it",
+      "cli": "metrics market",
+      "admin": null,
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["categories", "vendors", "countries", "consolidation", "organizations"]
+      }
+    },
+    {
+      "id": "metrics.show",
+      "summary": "the site's counters and search KPIs",
+      "cli": "metrics show",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["from", "to", "counts", "kpis"]}
+    },
+    {
+      "id": "quality.coverage",
+      "summary": "per category, each profile spec's share of products publishing a value of it, the most published first",
+      "cli": "quality coverage",
+      "admin": null,
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["categories"],
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["category", "products", "specs"],
+              "properties": {
+                "specs": {"type": "array", "items": {"type": "object", "required": ["key", "products", "share"]}}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "quality.report",
+      "summary": "each product's provenance from its sources and dates, and the catalog's coverage; with --file, weak products' quarantines proposed",
+      "cli": "quality report",
+      "admin": null,
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["products", "weak", "records", "coverage", "filed"],
+        "properties": {
+          "records": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "category", "claims", "sources_per_claim", "source_types", "vendor_backed", "undated_sources", "valid_time_gaps", "overdue_events", "missing_required", "core_specs", "weak"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "store.load",
+      "summary": "load a catalog folder and its files into an empty store",
+      "cli": "store load",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["correlation_id", "docs", "blobs"]}
+    },
+    {
+      "id": "store.validate",
+      "summary": "validate every entity in the store",
+      "cli": "store validate",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["correlation_id", "ok", "counts", "errors", "warnings"]}
+    },
+    {
+      "id": "store.replay",
+      "summary": "rebuild the store from its Change events and compare",
+      "cli": "store replay",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["correlation_id", "into", "written", "differences"]}
+    },
+    {
+      "id": "store.reproject",
+      "summary": "write the public read model again",
+      "cli": "store reproject",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["correlation_id", "written"]}
+    },
+    {
+      "id": "store.export",
+      "summary": "write the store's entities as a catalog folder",
+      "cli": "store export",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["correlation_id", "counts"]}
+    },
+    {
+      "id": "store.backup",
+      "summary": "back the store up to Storage",
+      "cli": "store backup",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["correlation_id", "instant", "collections"]}
+    },
+    {
+      "id": "store.restore",
+      "summary": "restore a backup into an empty database",
+      "cli": "store restore",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["correlation_id", "into", "instant", "collections"]}
+    },
+    {
+      "id": "store.purge",
+      "summary": "list, or with --apply delete, what nothing live reads",
+      "cli": "store purge",
+      "admin": null,
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["correlation_id", "applied", "collections", "orphans", "objects", "bytes", "deleted"]
+      }
+    },
+    {
+      "id": "model.generate",
+      "summary": "generate the model's types, or check them",
+      "cli": "model generate",
+      "admin": null,
+      "mcp": null,
+      "output": {
+        "oneOf": [{"type": "object", "required": ["written"]}, {"type": "object", "required": ["ok", "fresh"]}]
+      }
+    },
+    {
+      "id": "model.validate",
+      "summary": "validate the model and registry, or a catalog",
+      "cli": "model validate",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["ok", "errors", "warnings"]}
+    },
+    {
+      "id": "model.show",
+      "summary": "every kind's fields, references and labels, as the admin's forms read them",
+      "cli": "model show",
+      "admin": "/admin/records/<id>",
+      "mcp": null,
+      "output": {"type": "object", "required": ["entities"]}
+    },
+    {
+      "id": "site.export",
+      "summary": "write the site's agent files",
+      "cli": "site export",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["products"]}
+    },
+    {
+      "id": "proposal.submit",
+      "summary": "file a proposal from a draft: it waits for the founder's decision",
+      "cli": "proposal submit",
+      "admin": "/admin/records/<id>",
+      "mcp": "submit_proposal",
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "proposal.list",
+      "summary": "the review queue, newest first, filtered by status, the event it was filed on, actor and bundle",
+      "cli": "proposal list",
+      "admin": "/admin/queue",
+      "mcp": "list_my_proposals",
+      "output": {
+        "type": "object",
+        "required": ["proposals"],
+        "properties": {"proposals": {"type": "array", "items": {"$ref": "#/$defs/Proposal"}}}
+      }
+    },
+    {
+      "id": "proposal.show",
+      "summary": "one proposal with the diff of what it changes",
+      "cli": "proposal show",
+      "admin": "/admin/queue/<proposal>",
+      "mcp": "get_proposal_status",
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "proposal.bundle",
+      "summary": "a research run's proposals in dependency order, the riskiest first where the order leaves a choice",
+      "cli": "proposal bundle",
+      "admin": "/admin/queue/bundles/<run>",
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["id", "members"],
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["proposal", "after"],
+              "properties": {"proposal": {"$ref": "#/$defs/Proposal"}}
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "proposal.edit",
+      "summary": "replace a suggested proposal's change, validated again",
+      "cli": "proposal edit",
+      "admin": "/admin/queue/<proposal>",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/DecisionOutcome"}
+    },
+    {
+      "id": "proposal.approve",
+      "summary": "approve proposals or a bundle under one note: each applies on its own in dependency order; refused or waiting ones are listed",
+      "cli": "proposal approve",
+      "admin": "/admin/queue",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/DecisionOutcome"}
+    },
+    {
+      "id": "proposal.reject",
+      "summary": "reject suggested proposals or a bundle's",
+      "cli": "proposal reject",
+      "admin": "/admin/queue/<proposal>",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/DecisionOutcome"}
+    },
+    {
+      "id": "proposal.retract",
+      "summary": "retract approved proposals or a bundle's: what each changed goes back, as new versions",
+      "cli": "proposal retract",
+      "admin": "/admin/queue/<proposal>",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/DecisionOutcome"}
+    },
+    {
+      "id": "proposal.log",
+      "summary": "the audit log of every submit, edit and decision, newest first",
+      "cli": "proposal log",
+      "admin": "/admin/queue/log",
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["entries"],
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["at", "action", "proposal", "actor", "actor_kind", "changes", "correlation_id"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "product.add",
+      "summary": "propose a new product with its records",
+      "cli": "product add",
+      "admin": "/admin/records/new/Product",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "product.edit",
+      "summary": "propose changes to a product and its records",
+      "cli": "product edit",
+      "admin": "/admin/records/<id>",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "product.retract",
+      "summary": "propose withdrawing a product",
+      "cli": "product retract",
+      "admin": "/admin/records/<id>",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "org.add",
+      "summary": "propose a new organization",
+      "cli": "org add",
+      "admin": "/admin/records/new/Organization",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "org.edit",
+      "summary": "propose changes to an organization",
+      "cli": "org edit",
+      "admin": "/admin/records/<id>",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "org.retract",
+      "summary": "propose withdrawing an organization",
+      "cli": "org retract",
+      "admin": "/admin/records/<id>",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "media.add",
+      "summary": "store a file and propose its Document",
+      "cli": "media add",
+      "admin": "/admin/records/new/Document",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "media.edit",
+      "summary": "propose changes to a Document",
+      "cli": "media edit",
+      "admin": "/admin/records/<id>",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "media.retract",
+      "summary": "propose withdrawing a Document; its file goes when approved",
+      "cli": "media retract",
+      "admin": "/admin/records/<id>",
+      "mcp": null,
+      "output": {"$ref": "#/$defs/Proposal"}
+    },
+    {
+      "id": "admin.grant",
+      "summary": "set the admin claim on the founder's account",
+      "cli": "admin grant",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["email", "uid"]}
+    },
+    {
+      "id": "agent-token.create",
+      "summary": "issue a named token to an outside agent, shown once",
+      "cli": "agent-token create",
+      "admin": "/admin/agents",
+      "mcp": null,
+      "output": {"type": "object", "required": ["agent", "token"]}
+    },
+    {
+      "id": "agent-token.list",
+      "summary": "every agent token with its scope, expiry, limits and status",
+      "cli": "agent-token list",
+      "admin": "/admin/agents",
+      "mcp": null,
+      "output": {"type": "object", "required": ["tokens", "limits", "total"]}
+    },
+    {
+      "id": "agent-token.revoke",
+      "summary": "revoke an agent token",
+      "cli": "agent-token revoke",
+      "admin": "/admin/agents",
+      "mcp": null,
+      "output": {"type": "object", "required": ["id", "name", "scope", "expires", "status", "revoked_at"]}
+    },
+    {
+      "id": "research.run",
+      "summary": "run the research agent on a product, a maker or a category until it stops, filing each finding into the run's bundle",
+      "cli": "research run",
+      "admin": "/admin/research",
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["id", "scope", "actor", "started_at", "status", "token", "cad", "pages", "filed", "media", "datasheets", "rejected", "lines"],
+        "properties": {"status": {"$ref": "#/$defs/ResearchStatus"}}
+      }
+    },
+    {
+      "id": "research.cancel",
+      "summary": "cancel a running research run at its next step",
+      "cli": "research cancel",
+      "admin": "/admin/research/runs/<id>",
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["id", "scope", "actor", "started_at", "status", "token", "cad", "pages", "filed", "media", "datasheets", "rejected", "lines"],
+        "properties": {"status": {"$ref": "#/$defs/ResearchStatus"}}
+      }
+    },
+    {
+      "id": "research.list",
+      "summary": "every research run, newest first",
+      "cli": "research list",
+      "admin": "/admin/research",
+      "mcp": null,
+      "output": {"type": "object", "required": ["runs", "total"]}
+    },
+    {
+      "id": "research.measure",
+      "summary": "the research runs started since an instant, summed",
+      "cli": "research measure",
+      "admin": null,
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["since", "runs", "pages", "skipped", "filed", "refused", "values", "filter_values", "statuses", "published", "cells", "cad"]
+      }
+    },
+    {
+      "id": "research.log",
+      "summary": "a research run's log and the proposals it filed",
+      "cli": "research log",
+      "admin": "/admin/research/runs/<id>",
+      "mcp": null,
+      "output": {
+        "type": "object",
+        "required": ["id", "scope", "actor", "started_at", "status", "token", "cad", "pages", "filed", "media", "datasheets", "rejected", "lines"],
+        "properties": {"status": {"$ref": "#/$defs/ResearchStatus"}}
+      }
+    },
+    {
+      "id": "mcp.serve",
+      "summary": "serve the MCP tools over stdio: each line on stdout one JSON-RPC answer",
+      "cli": "mcp serve",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["jsonrpc", "id"]}
+    }
+  ]
+}

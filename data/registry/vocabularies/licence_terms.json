@@ -1,0 +1,5 @@
+[
+  {"id": "annual", "label": {"en": "Annual term", "fr": "Abonnement annuel"}},
+  {"id": "one_time", "label": {"en": "One-time upfront", "fr": "Achat unique au comptant"}},
+  {"id": "perpetual", "label": {"en": "Perpetual rights", "fr": "Licence perpétuelle"}}
+]

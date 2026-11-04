@@ -1,0 +1,8 @@
+[
+  {"id": "anti_reflective", "label": {"en": "Anti-reflective", "fr": "Antireflet"}},
+  {"id": "hard_coat", "label": {"en": "Hard coating", "fr": "Revêtement dur"}},
+  {"id": "dielectric", "label": {"en": "Dielectric", "fr": "Diélectrique"}},
+  {"id": "metallic", "label": {"en": "Metallic", "fr": "Métallique"}},
+  {"id": "hydrophobic", "label": {"en": "Hydrophobic", "fr": "Hydrophobe"}},
+  {"id": "ito", "label": {"en": "ITO (conductive)", "fr": "ITO (conducteur)"}}
+]

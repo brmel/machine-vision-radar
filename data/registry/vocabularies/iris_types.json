@@ -1,0 +1,5 @@
+[
+  {"id": "auto", "label": {"en": "Auto", "fr": "Automatique"}},
+  {"id": "fixed", "label": {"en": "Fixed", "fr": "Fixe"}},
+  {"id": "manual", "label": {"en": "Manual", "fr": "Manuel"}}
+]

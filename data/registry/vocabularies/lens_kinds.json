@@ -1,0 +1,5 @@
+[
+  {"id": "fixed_focal", "label": {"en": "Fixed focal", "fr": "Focale fixe"}},
+  {"id": "macro", "label": {"en": "Macro", "fr": "Optique macro"}},
+  {"id": "zoom", "label": {"en": "Zoom", "fr": "Zoom optique"}}
+]

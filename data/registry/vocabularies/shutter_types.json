@@ -1,0 +1,4 @@
+[
+  {"id": "global", "label": {"en": "Global", "fr": "Obturateur global (Global shutter)"}},
+  {"id": "rolling", "label": {"en": "Rolling", "fr": "Obturateur roulant (Rolling shutter)"}}
+]

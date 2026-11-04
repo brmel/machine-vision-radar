@@ -1,0 +1,4 @@
+[
+  {"id": "firmware", "label": {"en": "Firmware", "fr": "Micrologiciel (Firmware)"}},
+  {"id": "software", "label": {"en": "Software", "fr": "Logiciel"}}
+]

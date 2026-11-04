@@ -1,0 +1,21 @@
+{
+  "category_id": "imaging.displacement_sensors",
+  "sections": {
+    "core": ["principle", "measuring_range", "resolution", "sampling_rate"],
+    "detail": ["linearity"],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["connectivity", "environment", "laser"],
+  "facets": [
+    {"field": "principle"},
+    {"field": "measuring_range"},
+    {"field": "resolution"},
+    {"field": "sampling_rate"},
+    {"field": "interfaces"},
+    {"field": "ip_rating"},
+    {"field": "laser_class"}
+  ],
+  "required_at_publish": ["principle", "measuring_range"],
+  "axis_dependent_keys": ["measuring_range"]
+}

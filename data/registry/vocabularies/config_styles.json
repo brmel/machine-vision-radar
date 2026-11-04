@@ -1,0 +1,6 @@
+[
+  {"id": "code", "label": {"en": "Code", "fr": "Code / API"}},
+  {"id": "guided", "label": {"en": "Guided", "fr": "Interface guidée / Assistant"}},
+  {"id": "low_code", "label": {"en": "Low code", "fr": "Peu de code (Low-code)"}},
+  {"id": "no_code", "label": {"en": "No code", "fr": "Sans code (No-code)"}}
+]

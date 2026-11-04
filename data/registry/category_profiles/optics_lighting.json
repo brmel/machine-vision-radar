@@ -1,0 +1,19 @@
+{
+  "category_id": "optics.lighting",
+  "sections": {
+    "core": ["light_type", "color", "power", "controller_integrated"],
+    "detail": [],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["environment"],
+  "facets": [
+    {"field": "light_type"},
+    {"field": "color"},
+    {"field": "controller_integrated"},
+    {"field": "power"},
+    {"field": "ip_rating"}
+  ],
+  "required_at_publish": ["light_type"],
+  "axis_dependent_keys": ["color"]
+}

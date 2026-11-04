@@ -1,0 +1,18 @@
+{
+  "category_id": "imaging.spectrometers",
+  "sections": {
+    "core": ["spectral_acquisition", "spectral_range", "bands", "measurement_rate"],
+    "detail": [],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["connectivity", "environment"],
+  "facets": [
+    {"field": "spectral_acquisition"},
+    {"field": "spectral_range"},
+    {"field": "interfaces"},
+    {"field": "measurement_rate"}
+  ],
+  "required_at_publish": ["spectral_range"],
+  "axis_dependent_keys": ["bands"]
+}

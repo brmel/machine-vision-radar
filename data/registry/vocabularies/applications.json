@@ -1,0 +1,18 @@
+[
+  {"id": "aoi", "label": {"en": "Automated optical inspection", "fr": "Inspection optique automatisée"}},
+  {"id": "spi", "label": {"en": "Solder paste inspection", "fr": "Inspection de pâte à braser"}},
+  {"id": "axi", "label": {"en": "X-ray inspection", "fr": "Inspection par rayons X"}},
+  {"id": "bin_picking", "label": {"en": "Bin picking", "fr": "Prélèvement en vrac"}},
+  {"id": "metrology", "label": {"en": "Dimensional metrology", "fr": "Métrologie dimensionnelle"}},
+  {"id": "wafer_inspection", "label": {"en": "Wafer inspection", "fr": "Inspection de wafers"}},
+  {"id": "web_inspection", "label": {"en": "Web and surface inspection", "fr": "Inspection de bandes et de surfaces"}},
+  {"id": "assembly_verification", "label": {"en": "Assembly verification", "fr": "Vérification d'assemblage"}},
+  {"id": "traffic_enforcement", "label": {"en": "Traffic enforcement", "fr": "Contrôle routier"}},
+  {"id": "vehicle_inspection", "label": {"en": "Vehicle inspection", "fr": "Inspection de véhicules"}},
+  {
+    "id": "identification",
+    "label": {"en": "Code and text identification", "fr": "Identification de codes et de textes"}
+  },
+  {"id": "ndt", "label": {"en": "Non-destructive testing", "fr": "Contrôle non destructif"}},
+  {"id": "general_inspection", "label": {"en": "General visual inspection", "fr": "Inspection visuelle générale"}}
+]

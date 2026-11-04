@@ -1,0 +1,4 @@
+[
+  {"code": "en", "label": "EN", "name": "English", "dir": "ltr", "intl": "en-GB", "default": true, "decimal": ".", "yes": "Yes", "no": "No", "sentence": "{name} is in {category}, by {vendor}."},
+  {"code": "fr", "label": "FR", "name": "Français", "dir": "ltr", "intl": "fr-FR", "default": false, "decimal": ",", "yes": "Oui", "no": "Non", "sentence": "{name} fait partie de « {category} », par {vendor}."}
+]

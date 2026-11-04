@@ -1,0 +1,5 @@
+[
+  {"id": "iso_15415", "label": {"en": "ISO/IEC 15415", "fr": "ISO/CEI 15415"}},
+  {"id": "iso_15416", "label": {"en": "ISO/IEC 15416", "fr": "ISO/CEI 15416"}},
+  {"id": "iso_29158", "label": {"en": "ISO/IEC 29158", "fr": "ISO/CEI 29158"}}
+]

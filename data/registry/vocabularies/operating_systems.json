@@ -1,0 +1,8 @@
+[
+  {"id": "windows", "label": {"en": "Windows", "fr": "Windows"}},
+  {"id": "linux", "label": {"en": "Linux", "fr": "Linux"}},
+  {"id": "macos", "label": {"en": "macOS", "fr": "macOS"}},
+  {"id": "android", "label": {"en": "Android", "fr": "Android"}},
+  {"id": "rtos", "label": {"en": "Real-time OS", "fr": "Système temps réel"}},
+  {"id": "bare_metal", "label": {"en": "Bare metal", "fr": "Sans système"}}
+]

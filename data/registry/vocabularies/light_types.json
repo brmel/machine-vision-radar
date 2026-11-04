@@ -1,0 +1,11 @@
+[
+  {"id": "ring", "label": {"en": "Ring light", "fr": "Éclairage annulaire"}},
+  {"id": "line", "label": {"en": "Line light", "fr": "Éclairage linéaire"}},
+  {"id": "bar", "label": {"en": "Bar light", "fr": "Barre d'éclairage"}},
+  {"id": "spot", "label": {"en": "Spot light", "fr": "Spot"}},
+  {"id": "coaxial", "label": {"en": "Coaxial light", "fr": "Éclairage coaxial"}},
+  {"id": "backlight", "label": {"en": "Backlight", "fr": "Rétroéclairage"}},
+  {"id": "structured", "label": {"en": "Structured light", "fr": "Lumière structurée"}},
+  {"id": "dark_field", "label": {"en": "Dark field", "fr": "Fond noir"}},
+  {"id": "dome", "label": {"en": "Dome light", "fr": "Dôme"}}
+]

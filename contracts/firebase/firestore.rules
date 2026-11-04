@@ -1,0 +1,31 @@
+rules_version = '2';
+// Anyone reads the public read docs; everything else is the server's and the CLI's (admin credentials bypass these
+// rules). No client writes anything: a reader's report goes through the function's /api/report.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    match /public_index/{doc} {
+      allow read: if true;
+    }
+    match /public_products/{product} {
+      allow read: if true;
+    }
+    match /public_facets/{category} {
+      allow read: if true;
+    }
+    match /public_facets/{category}/pages/{page} {
+      allow read: if true;
+    }
+    match /public_organizations/{organization} {
+      allow read: if true;
+    }
+    match /public_history/{product} {
+      allow read: if true;
+    }
+    match /public_news/{article} {
+      allow read: if true;
+    }
+  }
+}

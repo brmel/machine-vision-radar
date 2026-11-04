@@ -1,0 +1,18 @@
+[
+  {
+    "id": "datasheet",
+    "label": {"en": "Datasheet", "fr": "Fiche technique"},
+    "mime_types": ["application/pdf"],
+    "research": true
+  },
+  {"id": "manual", "label": {"en": "Manual", "fr": "Manuel"}, "mime_types": ["application/pdf"]},
+  {
+    "id": "release_notes",
+    "label": {"en": "Release notes", "fr": "Notes de version"},
+    "mime_types": ["application/pdf", "text/plain", "text/markdown"],
+    "version": true
+  },
+  {"id": "brochure", "label": {"en": "Brochure", "fr": "Brochure"}, "mime_types": ["application/pdf"]},
+  {"id": "image", "label": {"en": "Image", "fr": "Image"}, "mime_types": ["image/"]},
+  {"id": "other", "label": {"en": "Other document", "fr": "Autre document"}}
+]

@@ -1,0 +1,6 @@
+[
+  {"id": "labeling", "label": {"en": "Labeling", "fr": "Annotation"}},
+  {"id": "dataset_management", "label": {"en": "Dataset management", "fr": "Gestion des jeux de données"}},
+  {"id": "active_learning", "label": {"en": "Active learning", "fr": "Apprentissage actif"}},
+  {"id": "synthetic_data", "label": {"en": "Synthetic data", "fr": "Données synthétiques"}}
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "new_record",
+    "label": {"en": "New record", "fr": "Nouvelle fiche"},
+    "description": {"en": "A product, organization or media file added, with its sources.", "fr": "Un produit, une organisation ou un média ajouté, avec ses sources."},
+    "files_on": "create"
+  },
+  {
+    "id": "record_edit",
+    "label": {"en": "Edit", "fr": "Modification"},
+    "description": {"en": "Changed values of existing records, with their sources.", "fr": "Des valeurs modifiées de fiches existantes, avec leurs sources."},
+    "files_on": "update"
+  },
+  {
+    "id": "record_merge",
+    "label": {"en": "Merge", "fr": "Fusion"},
+    "description": {"en": "Two records of one thing made one: the kept record takes the other's facts, the other is withdrawn.", "fr": "Deux fiches d'une même chose réunies : la fiche gardée reprend les faits de l'autre, l'autre est retirée."},
+    "files_on": "merge"
+  },
+  {
+    "id": "record_retraction",
+    "label": {"en": "Retraction", "fr": "Retrait"},
+    "description": {"en": "A record withdrawn from the catalog; its history stays.", "fr": "Une fiche retirée du catalogue ; son historique reste."},
+    "files_on": "retract"
+  },
+  {
+    "id": "correction",
+    "label": {"en": "Error report", "fr": "Signalement d'erreur"},
+    "description": {"en": "A reader's report of an error on a product page, to be checked against a source.", "fr": "Le signalement d'une erreur sur une fiche produit par un lecteur, à vérifier sur une source."},
+    "files_on": "report"
+  },
+  {
+    "id": "quarantine",
+    "label": {"en": "Quarantine", "fr": "Quarantaine"},
+    "description": {"en": "A product whose provenance is too weak to publish: approving withdraws it.", "fr": "Un produit dont la provenance est trop faible pour être publié : l'approuver le retire."},
+    "files_on": "quality"
+  },
+  {
+    "id": "feed_item",
+    "label": {"en": "News item", "fr": "Actualité"},
+    "description": {"en": "An item of the news feed.", "fr": "Une entrée du fil d'actualité."},
+    "files_on": "feed"
+  },
+  {
+    "id": "version_rollback",
+    "label": {"en": "Rollback", "fr": "Retour arrière"},
+    "description": {"en": "A record returned to an earlier version, as a new version.", "fr": "Une fiche ramenée à une version antérieure, comme nouvelle version."},
+    "files_on": "rollback"
+  }
+]

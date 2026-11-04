@@ -1,0 +1,199 @@
+[
+  {"id": "EntityId", "kind": "scalar", "base": "string", "pattern": "^[a-z]{3}_[0123456789abcdefghjkmnpqrstvwxyz]{10}$", "description": "Opaque id: the entity's three-letter prefix (entities.json) plus 10 lowercase Crockford base32 characters."},
+  {"id": "TermId", "kind": "scalar", "base": "string", "pattern": "^[a-z0-9_]+(\\.[a-z0-9_]+)*$", "description": "Id of a registry item (a Term, Unit, Dimension, SpecDefinition or Category)."},
+  {"id": "Instant", "kind": "scalar", "base": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$", "description": "UTC timestamp taken from the clock (ISO 8601, Z suffix)."},
+  {
+    "id": "ActorKind",
+    "kind": "enum",
+    "values": ["human", "agent", "import"],
+    "description": "Who made a change or filed a proposal: a person (the founder or a reader), an agent, or an import."
+  },
+  {
+    "id": "Ranking",
+    "kind": "enum",
+    "values": ["words", "meaning"],
+    "description": "How a search ranked its products: by the words they hold, or, when no word matched, by closeness in meaning."
+  },
+  {
+    "id": "ProposalStatus",
+    "kind": "enum",
+    "values": ["suggested", "approved", "rejected", "retracted"],
+    "description": "Where a proposal stands in the review queue: waiting, applied, refused, or undone after it was applied."
+  },
+  {
+    "id": "ProposalAction",
+    "kind": "enum",
+    "values": ["submit", "edit", "approve", "reject", "retract"],
+    "description": "What the review queue's audit log records done to a proposal."
+  },
+  {
+    "id": "Risk",
+    "kind": "enum",
+    "values": ["withdraws", "changes", "adds"],
+    "description": "What a proposal of a bundle does to the records the store holds, riskiest first: withdraws one, changes one, or only adds."
+  },
+  {
+    "id": "FilesOn",
+    "kind": "enum",
+    "values": ["create", "update", "merge", "retract", "report", "quality", "feed", "rollback"],
+    "description": "The event that files a proposal: a record added, changed, merged or withdrawn, a reader's report, a quality check, a news draft, a rollback."
+  },
+  {
+    "id": "Use",
+    "kind": "enum",
+    "values": ["all", "ask", "research", "datasheet", "draft"],
+    "description": "An AI use in the system: ask, research, datasheet extraction, news drafting, or all uses together."
+  },
+  {
+    "id": "Scope",
+    "kind": "enum",
+    "values": ["read", "propose"],
+    "description": "What an outside agent token permits: reading catalog data, or reading and proposing changes."
+  },
+  {
+    "id": "Standing",
+    "kind": "enum",
+    "values": ["active", "expired", "revoked"],
+    "description": "Where an agent token stands: active, expired past its date, or revoked by the founder."
+  },
+  {
+    "id": "ResearchStatus",
+    "kind": "enum",
+    "values": ["running", "done", "partial", "blocked", "cancelled", "capped", "failed"],
+    "description": "Where a research run stands: running; done, every page in reach read; partial, its page or time budget spent with pages left; blocked, no page in reach read; stopped by the founder, stopped by an AI cap, or failed."
+  },
+  {
+    "id": "ResearchStep",
+    "kind": "enum",
+    "values": ["read", "skipped", "filed", "media", "datasheet", "rejected", "ended"],
+    "description": "One step of a research run: a page or file read or skipped, a proposal filed, rejected, or run ended."
+  },
+  {
+    "id": "LocalizedText",
+    "kind": "map",
+    "items": "string",
+    "min_length": 1,
+    "key_pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+    "required_keys": ["en"],
+    "description": "BCP-47 language tag to text; en is required and is the fallback."
+  },
+  {
+    "id": "PartialDate",
+    "kind": "record",
+    "description": "Calendar date with an explicit precision, so no date claims more exactness than its source.",
+    "fields": {
+      "value": {"type": "string", "description": "YYYY, YYYY-H1|H2, YYYY-Q1..Q4, YYYY-MM or YYYY-MM-DD, matching precision"},
+      "precision": {"type": "enum", "values": ["year", "half", "quarter", "month", "day"]},
+      "approximate": {"type": "boolean", "optional": true}
+    }
+  },
+  {
+    "id": "Term",
+    "kind": "record",
+    "description": "One item of a closed vocabulary in data/registry/.",
+    "fields": {
+      "id": {"type": "TermId"},
+      "label": {"type": "LocalizedText"},
+      "description": {"type": "LocalizedText", "optional": true},
+      "public": {"type": "boolean", "optional": true, "description": "media_rights: files under this right may be served publicly"},
+      "mime_types": {"type": "array", "items": "string", "optional": true, "description": "document_kinds: the mime types (or prefixes such as image/) a file of this kind may have"},
+      "version": {"type": "boolean", "optional": true, "description": "document_kinds: a file of this kind is about a ProductVersion and must name it in its subjects"},
+      "sets_status": {"type": "boolean", "optional": true, "description": "lifecycle_event_types: an occurred event of this type becomes the product's displayed status"},
+      "names_successor": {"type": "boolean", "optional": true, "description": "lifecycle_event_types: an event of this type, and only such an event, names a successor, which a sourced relation of a type marked succeeds ties to the product"},
+      "occurred": {"type": "boolean", "optional": true, "description": "lifecycle_event_states: an event in this state has happened, so it can set the displayed status and needs no state badge"},
+      "expected": {"type": "boolean", "optional": true, "description": "lifecycle_event_states: an event in this state is still to come: it may be dated in the future when a cited source was published, and is overdue once its date has passed"},
+      "superseded": {"type": "boolean", "optional": true, "description": "lifecycle_event_states: an event in this state names, in revised_by, the event of the same product and type that revises it"},
+      "vendor_document": {"type": "boolean", "optional": true, "description": "source_types: a document the maker publishes about its product; a value it backs is datasheet-grade"},
+      "preference": {"type": "integer", "optional": true, "minimum": 1, "description": "source_types: how a source of this type ranks for the one source a page shows beside a value, 1 first; then the newest, then the smallest id"},
+      "files_on": {"type": "FilesOn", "optional": true, "description": "proposal_kinds: the event that files a proposal of this kind"},
+      "research": {"type": "boolean", "optional": true, "description": "source_types: a page a research run reads is a Source of this type; media_rights: a file it finds is proposed under this right; document_kinds: a file of this kind it finds is read for the values it states, as a Source of the source type and by the claim method of the kind's id"},
+      "succeeds": {"type": "boolean", "optional": true, "description": "relation_types: a relation of this type says its from_entity replaces its to_entity, its successor"},
+      "owns": {"type": "boolean", "optional": true, "description": "org_relation_types: a relation of this type makes its to_org the owner of its from_org, from its valid_from until its valid_to"},
+      "renames": {"type": "boolean", "optional": true, "description": "org_relation_types: a relation of this type says its from_org is its to_org under a new name, from its valid_from: one organization, named as it was called that day"},
+      "aliases": {"type": "array", "items": "string", "optional": true},
+      "pattern": {"type": "string", "optional": true, "description": "identifier_schemes: a value is the whole of this regex"},
+      "subjects": {"type": "array", "items": "string", "optional": true, "description": "identifier_schemes: the entity kinds a value of this scheme identifies"},
+      "gs1_check": {"type": "boolean", "optional": true, "description": "identifier_schemes: a value's last digit is its GS1 check digit"},
+      "names_product": {"type": "boolean", "optional": true, "description": "identifier_schemes: a value names one product of its maker, so two of its products sharing one are one product"},
+      "schema_org": {"type": "string", "optional": true, "description": "identifier_schemes: the schema.org Product property a value of this scheme is"},
+      "vendor_for_view": {"type": "integer", "optional": true, "minimum": 1, "description": "product_org_roles: the order in which an organization of this role is a product's vendor on its page, 1 first; a role without it never is"},
+      "from_side": {"type": "RelationSide", "optional": true, "description": "relation_types: how a relation of this type reads on its from_entity's page"},
+      "to_side": {"type": "RelationSide", "optional": true, "description": "relation_types: how it reads on its to_entity's page"}
+    }
+  },
+  {
+    "id": "RelationSide",
+    "kind": "record",
+    "description": "One side of a relation type: the label a product's page lists the related products under, and the schema.org Product property it maps to.",
+    "fields": {"label": {"type": "LocalizedText"}, "schema_org": {"type": "string", "optional": true}}
+  },
+  {
+    "id": "Price",
+    "kind": "record",
+    "description": "Price with ISO 4217 currency and the date it was observed.",
+    "fields": {"amount": {"type": "number"}, "currency": {"type": "string"}, "as_of": {"type": "PartialDate"}}
+  },
+  {
+    "id": "Metering",
+    "kind": "record",
+    "description": "Usage metering of an Offering: included quantity of a unit per period.",
+    "fields": {"unit": {"type": "string"}, "included_qty": {"type": "number"}, "period": {"type": "string"}}
+  },
+  {
+    "id": "FeedSentence",
+    "kind": "record",
+    "description": "One sentence of a news article and what it rests on: at least one product, organization or source.",
+    "fields": {
+      "text": {"type": "LocalizedText"},
+      "cites": {"type": "array", "items": "EntityId", "refs": ["Product", "Organization", "Source"], "min_items": 1}
+    }
+  },
+  {
+    "id": "Quantity",
+    "kind": "record",
+    "description": "A measured value in a registry unit.",
+    "fields": {"value": {"type": "number"}, "unit": {"type": "TermId", "vocabulary": "units"}}
+  },
+  {
+    "id": "Range",
+    "kind": "record",
+    "description": "A measured range, from min to max, in a registry unit.",
+    "fields": {"min": {"type": "number"}, "max": {"type": "number"}, "unit": {"type": "TermId", "vocabulary": "units"}}
+  },
+  {
+    "id": "VersionRange",
+    "kind": "record",
+    "description": "Set of ProductVersions of one product, ordered by the version's scheme.",
+    "fields": {
+      "product": {"type": "EntityId", "refs": ["Product"]},
+      "min": {"type": "string", "optional": true},
+      "max": {"type": "string", "optional": true},
+      "include": {"type": "array", "items": "string", "optional": true},
+      "exclude": {"type": "array", "items": "string", "optional": true}
+    }
+  },
+  {
+    "id": "ClaimValue",
+    "kind": "union",
+    "description": "Value of a Claim, tagged by kind: a quantity or a range for a quantity spec, a term, terms, a boolean or a string; or none, with the reason (absence_reasons) a source gives for having no value.",
+    "variants": {
+      "quantity": "Quantity",
+      "range": "Range",
+      "term": "TermId",
+      "terms": {"type": "array", "items": "TermId", "min_items": 1},
+      "boolean": "boolean",
+      "string": "string",
+      "none": {"type": "TermId", "vocabulary": "absence_reasons"}
+    }
+  },
+  {
+    "id": "PatchOp",
+    "kind": "record",
+    "description": "One step of a Change: add, replace or remove the value at a field path (e.g. specs.frame_rate or name).",
+    "fields": {
+      "op": {"type": "enum", "values": ["add", "replace", "remove"]},
+      "path": {"type": "string"},
+      "value": {"type": "string", "optional": true, "description": "The new value as JSON text; absent for remove"}
+    }
+  }
+]

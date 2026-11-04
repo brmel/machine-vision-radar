@@ -1,0 +1,141 @@
+{
+  "cases": [
+    {
+      "id": "glossy widget",
+      "product": "prd_0000000002",
+      "text": "fixture_reach: 120 mm\nfixture_finish: gloss\nfixture_mass: 85 g\n",
+      "expected": {
+        "sources": [
+          {
+            "id": "src_0000000101",
+            "version": 1,
+            "type": "datasheet",
+            "url": "https://example.com/widget-two.pdf",
+            "title": "Widget Two datasheet",
+            "retrieved_at": "2026-10-11T00:00:00Z"
+          }
+        ],
+        "claims": [
+          {
+            "id": "clm_d5321x77s3",
+            "version": 1,
+            "subject": "prd_0000000002",
+            "spec_key": "fixture_reach",
+            "value": {
+              "quantity": {
+                "value": 120.0,
+                "unit": "mm"
+              }
+            },
+            "method": "datasheet",
+            "recorded_at": "2026-10-11T00:00:00Z",
+            "rank": 1,
+            "source_refs": [
+              "src_0000000101"
+            ]
+          },
+          {
+            "id": "clm_gtbvd8jsee",
+            "version": 1,
+            "subject": "prd_0000000002",
+            "spec_key": "fixture_finish",
+            "value": {
+              "term": "gloss"
+            },
+            "method": "datasheet",
+            "recorded_at": "2026-10-11T00:00:00Z",
+            "rank": 1,
+            "source_refs": [
+              "src_0000000101"
+            ]
+          },
+          {
+            "id": "clm_pmsgtj9sm1",
+            "version": 1,
+            "subject": "prd_0000000002",
+            "spec_key": "fixture_mass",
+            "value": {
+              "quantity": {
+                "value": 85.0,
+                "unit": "g"
+              }
+            },
+            "method": "datasheet",
+            "recorded_at": "2026-10-11T00:00:00Z",
+            "rank": 1,
+            "source_refs": [
+              "src_0000000101"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "socket widget",
+      "product": "prd_0000000004",
+      "text": "fixture_reach: 250 mm\nfixture_mount: socket_a\nfixture_finish: none not_applicable\n",
+      "expected": {
+        "sources": [
+          {
+            "id": "src_0000000102",
+            "version": 1,
+            "type": "datasheet",
+            "url": "https://example.com/widget-one-l.pdf",
+            "title": "Widget One L datasheet",
+            "retrieved_at": "2026-10-11T00:00:00Z"
+          }
+        ],
+        "claims": [
+          {
+            "id": "clm_pd2rv2vgxm",
+            "version": 1,
+            "subject": "prd_0000000004",
+            "spec_key": "fixture_reach",
+            "value": {
+              "quantity": {
+                "value": 250.0,
+                "unit": "mm"
+              }
+            },
+            "method": "datasheet",
+            "recorded_at": "2026-10-11T00:00:00Z",
+            "rank": 1,
+            "source_refs": [
+              "src_0000000102"
+            ]
+          },
+          {
+            "id": "clm_j0ya78pcaq",
+            "version": 1,
+            "subject": "prd_0000000004",
+            "spec_key": "fixture_mount",
+            "value": {
+              "term": "socket_a"
+            },
+            "method": "datasheet",
+            "recorded_at": "2026-10-11T00:00:00Z",
+            "rank": 1,
+            "source_refs": [
+              "src_0000000102"
+            ]
+          },
+          {
+            "id": "clm_ynvb3jedr3",
+            "version": 1,
+            "subject": "prd_0000000004",
+            "spec_key": "fixture_finish",
+            "value": {
+              "none": "not_applicable"
+            },
+            "method": "datasheet",
+            "recorded_at": "2026-10-11T00:00:00Z",
+            "rank": 1,
+            "source_refs": [
+              "src_0000000102"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

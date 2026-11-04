@@ -1,0 +1,13 @@
+[
+  {"id": "planned", "label": {"en": "Planned future event", "fr": "Événement futur planifié"}, "expected": true},
+  {
+    "id": "actual",
+    "label": {"en": "Observed / occurred event", "fr": "Événement constaté / survenu"},
+    "occurred": true
+  },
+  {
+    "id": "revised",
+    "label": {"en": "Superseded / revised schedule", "fr": "Calendrier révisé / reporté"},
+    "superseded": true
+  }
+]

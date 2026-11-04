@@ -1,0 +1,13 @@
+{
+  "category_id": "accessories",
+  "sections": {
+    "core": ["accessory_type"],
+    "detail": [],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": [],
+  "facets": [{"field": "accessory_type"}],
+  "required_at_publish": ["accessory_type"],
+  "axis_dependent_keys": []
+}

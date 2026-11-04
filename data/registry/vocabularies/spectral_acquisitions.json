@@ -1,0 +1,5 @@
+[
+  {"id": "point", "label": {"en": "Point", "fr": "Ponctuelle"}},
+  {"id": "pushbroom", "label": {"en": "Pushbroom (line)", "fr": "Pushbroom (ligne)"}},
+  {"id": "snapshot", "label": {"en": "Snapshot", "fr": "Instantanée"}}
+]

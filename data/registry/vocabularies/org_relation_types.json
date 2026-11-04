@@ -1,0 +1,7 @@
+[
+  {"id": "acquired_by", "label": {"en": "Acquired by", "fr": "Acquis par"}, "owns": true},
+  {"id": "merged_into", "label": {"en": "Merged into", "fr": "Fusionné avec"}, "owns": true},
+  {"id": "brand_of", "label": {"en": "Commercial brand of", "fr": "Marque commerciale de"}, "owns": true},
+  {"id": "renamed_from", "label": {"en": "Renamed from", "fr": "Renommé à partir de"}, "renames": true},
+  {"id": "spun_off_from", "label": {"en": "Spun off from", "fr": "Issu d'une scission de"}}
+]

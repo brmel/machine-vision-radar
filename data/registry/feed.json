@@ -1,0 +1,58 @@
+{
+  "byline": {"en": "Machine Vision Radar", "fr": "Machine Vision Radar"},
+  "article": "article",
+  "teaser": 5,
+  "digest": {
+    "kind": "launch_digest",
+    "title": {"en": "Machine Vision Radar opens with {products} products from {organizations} organizations", "fr": "Machine Vision Radar ouvre avec {products} produits de {organizations} organisations"},
+    "summary": {"en": "A structured, sourced catalog of machine vision.", "fr": "Un catalogue structuré et sourcé de la vision industrielle."},
+    "sentence": {"en": "The catalog lists {products} products from {organizations} organizations, each value with one of {sources} sources.", "fr": "Le catalogue recense {products} produits de {organizations} organisations, chaque valeur avec l'une de {sources} sources."}
+  },
+  "rules": [
+    {
+      "kind": "family_added",
+      "entity": "Product",
+      "match": {"kind": "family"},
+      "title": {"en": "{name} joins the catalog", "fr": "{name} rejoint le catalogue"},
+      "batch_title": {"en": "{count} product families join the catalog", "fr": "{count} familles de produits rejoignent le catalogue"},
+      "summary": {"en": "A product family added to the catalog, with its sources.", "fr": "Une famille de produits ajoutée au catalogue, avec ses sources."},
+      "sentence": {"en": "{name} joins the catalog.", "fr": "{name} rejoint le catalogue."}
+    },
+    {
+      "kind": "product_added",
+      "entity": "Product",
+      "title": {"en": "{name} joins the catalog", "fr": "{name} rejoint le catalogue"},
+      "batch_title": {"en": "{count} products join the catalog", "fr": "{count} produits rejoignent le catalogue"},
+      "summary": {"en": "A product added to the catalog, with its sources.", "fr": "Un produit ajouté au catalogue, avec ses sources."},
+      "sentence": {"en": "{name} joins the catalog.", "fr": "{name} rejoint le catalogue."}
+    },
+    {
+      "kind": "vendor_added",
+      "entity": "Organization",
+      "title": {"en": "{name} joins the catalog", "fr": "{name} rejoint le catalogue"},
+      "batch_title": {"en": "{count} organizations join the catalog", "fr": "{count} organisations rejoignent le catalogue"},
+      "summary": {"en": "An organization added to the catalog.", "fr": "Une organisation ajoutée au catalogue."},
+      "sentence": {"en": "{name} joins the catalog.", "fr": "{name} rejoint le catalogue."}
+    },
+    {
+      "kind": "version_released",
+      "entity": "ProductVersion",
+      "subject": "product",
+      "event_date": "released",
+      "title": {"en": "{name} {label} is out", "fr": "{name} {label} est sorti"},
+      "batch_title": {"en": "{count} new versions", "fr": "{count} nouvelles versions"},
+      "summary": {"en": "A new version, as its source states it.", "fr": "Une nouvelle version, telle que sa source l'annonce."},
+      "sentence": {"en": "{name} {label} is out.", "fr": "{name} {label} est sorti."}
+    },
+    {
+      "kind": "lifecycle_notice",
+      "entity": "LifecycleEvent",
+      "subject": "product",
+      "event_date": "date",
+      "title": {"en": "A lifecycle notice for {name}", "fr": "Un avis de cycle de vie pour {name}"},
+      "batch_title": {"en": "{count} lifecycle notices", "fr": "{count} avis de cycle de vie"},
+      "summary": {"en": "A lifecycle notice, as its source states it.", "fr": "Un avis de cycle de vie, tel que sa source l'annonce."},
+      "sentence": {"en": "{name} has a lifecycle notice.", "fr": "{name} fait l'objet d'un avis de cycle de vie."}
+    }
+  ]
+}

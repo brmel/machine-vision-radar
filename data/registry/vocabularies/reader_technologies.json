@@ -1,0 +1,4 @@
+[
+  {"id": "imager", "label": {"en": "Imager", "fr": "Imageur 2D"}},
+  {"id": "laser", "label": {"en": "Laser", "fr": "Scanner laser"}}
+]

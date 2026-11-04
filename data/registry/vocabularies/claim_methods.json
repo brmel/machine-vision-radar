@@ -1,0 +1,13 @@
+[
+  {"id": "datasheet", "label": {"en": "Published technical datasheet", "fr": "Fiche technique officielle"}},
+  {
+    "id": "press",
+    "label": {"en": "Press release / trade announcement", "fr": "Communiqué de presse / Annonce commerciale"}
+  },
+  {
+    "id": "inherited_record_source",
+    "label": {"en": "Inherited record source", "fr": "Source héritée de l'enregistrement"}
+  },
+  {"id": "website", "label": {"en": "Official product website", "fr": "Site web officiel du fabricant"}},
+  {"id": "catalog", "label": {"en": "Product catalog / brochure", "fr": "Catalogue général du fabricant"}}
+]

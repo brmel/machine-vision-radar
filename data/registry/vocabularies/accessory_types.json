@@ -1,0 +1,7 @@
+[
+  {"id": "cable", "label": {"en": "Cable", "fr": "Câble"}},
+  {"id": "enclosure", "label": {"en": "Enclosure", "fr": "Boîtier de protection"}},
+  {"id": "io_card", "label": {"en": "Io card", "fr": "Carte d'E/S"}},
+  {"id": "mount", "label": {"en": "Mount", "fr": "Support mécanique"}},
+  {"id": "test_equipment", "label": {"en": "Test equipment", "fr": "Équipement de test"}}
+]

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: A wrong value in the catalog
+    url: https://mvradar.web.app
+    about: Use "Report an error" on the product's page; the catalog lives in the store, not in this repo.
+  - name: A security problem
+    url: https://github.com/brmel/machine-vision-radar/security/advisories/new
+    about: Report it privately, never in a public issue.

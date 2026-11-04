@@ -1,0 +1,12 @@
+[
+  {"id": "area_scan", "label": {"en": "Area-scan cameras", "fr": "Caméras matricielles"}},
+  {"id": "line_scan", "label": {"en": "Line-scan cameras", "fr": "Caméras linéaires"}},
+  {"id": "3d", "label": {"en": "3D cameras", "fr": "Caméras 3D"}},
+  {"id": "thermal", "label": {"en": "Thermal cameras", "fr": "Caméras thermiques"}},
+  {"id": "hyperspectral", "label": {"en": "Hyperspectral cameras", "fr": "Caméras hyperspectrales"}},
+  {"id": "smart", "label": {"en": "Smart cameras", "fr": "Caméras intelligentes"}},
+  {
+    "id": "hardware_independent",
+    "label": {"en": "Any (hardware-independent)", "fr": "Toutes (indépendant du matériel)"}
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {"id": "semver", "label": {"en": "Semantic versioning (SemVer 2.0.0)", "fr": "Versionnage sémantique (SemVer)"}},
+  {"id": "calver", "label": {"en": "Calendar versioning (CalVer)", "fr": "Versionnage par calendrier (CalVer)"}},
+  {
+    "id": "vendor",
+    "label": {"en": "Vendor discrete version sequence", "fr": "Séquence de versions spécifique au fabricant"}
+  },
+  {
+    "id": "continuous",
+    "label": {"en": "Continuous deployment / date windows", "fr": "Déploiement continu / intervalles de dates"}
+  }
+]

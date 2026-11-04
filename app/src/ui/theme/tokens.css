@@ -1,0 +1,148 @@
+/* The design tokens, each named by its role: the one place a color, a type size, a spacing, a radius or a shadow is
+   set. Components name roles only (`bg-surface`, `text-caption`); the dark theme redefines the colors. */
+@theme {
+  /* Surfaces: the page, the cards on it, the header and footer, sunken areas (table heads, tiles), raised ones (chips,
+     hovered controls), the inverse of the page (a selected chip) and the logo's mark. */
+  --color-page: #f8fafc;
+  --color-surface: var(--color-white);
+  --color-chrome: var(--color-white);
+  --color-sunken: var(--color-neutral-50);
+  --color-raised: var(--color-neutral-100);
+  --color-raised-hover: var(--color-neutral-200);
+  --color-inverse: var(--color-neutral-900);
+  --color-inverse-hover: var(--color-neutral-700);
+  --color-on-inverse: var(--color-white);
+  --color-mark: var(--color-neutral-900);
+  --color-on-mark: var(--color-neutral-100);
+
+  /* Text, strongest to faintest; faint is for separators, never for words. */
+  --color-fg: var(--color-neutral-900);
+  --color-fg-secondary: var(--color-neutral-700);
+  --color-muted: var(--color-neutral-600);
+  --color-faint: var(--color-neutral-300);
+
+  /* Lines: borders and dividers, and the focus ring. */
+  --color-line: var(--color-neutral-200);
+  --color-line-subtle: var(--color-neutral-100);
+  --color-line-strong: var(--color-neutral-300);
+  --color-line-hover: var(--color-neutral-400);
+  --color-focus: var(--color-neutral-900);
+
+  /* The brand accent, with its hover and pressed states and the text on it. */
+  --color-accent: #ffd21e;
+  --color-accent-hover: #ebd028;
+  --color-accent-active: #e0b90c;
+  --color-on-accent: var(--color-zinc-950);
+
+  /* States: the text, the background and the border of each. */
+  --color-success: var(--color-emerald-800);
+  --color-success-bg: var(--color-emerald-50);
+  --color-success-line: var(--color-emerald-200);
+  --color-info: var(--color-blue-800);
+  --color-info-bg: var(--color-blue-50);
+  --color-info-line: var(--color-blue-200);
+  --color-warning: var(--color-amber-800);
+  --color-warning-bg: var(--color-amber-50);
+  --color-warning-line: var(--color-amber-300);
+  --color-danger: var(--color-red-700);
+  --color-danger-bg: var(--color-red-100);
+  --color-danger-line: var(--color-red-200);
+
+  /* Type: the text and code fonts, then the scale, smallest (badges) to largest (the home page's display heading). */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1rem;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.25rem;
+  --text-lead: 1rem;
+  --text-lead--line-height: 1.5rem;
+  --text-section: 1.125rem;
+  --text-section--line-height: 1.75rem;
+  --text-title: 1.5rem;
+  --text-title--line-height: 2rem;
+  --text-display: 1.875rem;
+  --text-display--line-height: 2.25rem;
+  --text-display-md: 2.25rem;
+  --text-display-md--line-height: 2.5rem;
+  --text-display-lg: 3rem;
+  --text-display-lg--line-height: 1;
+  /* A heading's weight: semibold, never bold (a bold heading is a template tell). */
+  --font-weight-heading: 600;
+
+  /* Spacing: the unit of every gap and padding (`p-4` is four), the page's width, a touch target's least height. */
+  --spacing: 0.25rem;
+  --container-page: 80rem;
+  --spacing-tap: 2.75rem;
+
+  /* Radius: a chip, a control, a card, a search field. */
+  --radius-chip: 0.25rem;
+  --radius-control: 0.375rem;
+  --radius-card: 0.5rem;
+  --radius-field: 0.75rem;
+
+  /* Shadow: a pressed-in control, a search field, an overlay. */
+  --shadow-control: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-field: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-overlay: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Motion, started under `motion-safe:` only: a card rising into place once, a chevron nudging along the flow three
+     times, then at rest. */
+  --animate-rise: rise 220ms ease-out both;
+  --animate-nudge: nudge 1s ease-in-out 3;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(calc(var(--spacing) * 1.5));
+    }
+  }
+
+  @keyframes nudge {
+    50% {
+      transform: translateX(var(--spacing));
+    }
+  }
+}
+
+/* The dark theme: the same roles, redefined. */
+@layer base {
+  .dark {
+    --color-page: #090d14;
+    --color-surface: #0f1622;
+    --color-chrome: var(--color-page);
+    --color-sunken: color-mix(in oklab, var(--color-neutral-900) 60%, transparent);
+    --color-raised: var(--color-neutral-800);
+    --color-raised-hover: var(--color-neutral-700);
+    --color-inverse: var(--color-neutral-100);
+    --color-inverse-hover: var(--color-neutral-300);
+    --color-on-inverse: var(--color-neutral-950);
+    --color-mark: var(--color-neutral-800);
+
+    --color-fg: var(--color-neutral-100);
+    --color-fg-secondary: var(--color-neutral-300);
+    --color-muted: var(--color-neutral-400);
+    --color-faint: var(--color-neutral-700);
+
+    --color-line: var(--color-neutral-800);
+    --color-line-subtle: color-mix(in oklab, var(--color-neutral-800) 80%, transparent);
+    --color-line-strong: var(--color-neutral-700);
+    --color-line-hover: var(--color-neutral-500);
+    --color-focus: var(--color-accent);
+
+    --color-success: var(--color-emerald-400);
+    --color-success-bg: color-mix(in oklab, var(--color-emerald-950) 30%, transparent);
+    --color-success-line: color-mix(in oklab, var(--color-emerald-800) 50%, transparent);
+    --color-info: var(--color-blue-400);
+    --color-info-bg: color-mix(in oklab, var(--color-blue-950) 30%, transparent);
+    --color-info-line: color-mix(in oklab, var(--color-blue-800) 50%, transparent);
+    --color-warning: var(--color-amber-300);
+    --color-warning-bg: color-mix(in oklab, var(--color-amber-950) 30%, transparent);
+    --color-warning-line: var(--color-amber-700);
+    --color-danger: var(--color-red-400);
+    --color-danger-bg: color-mix(in oklab, var(--color-red-900) 40%, transparent);
+    --color-danger-line: color-mix(in oklab, var(--color-red-900) 50%, transparent);
+  }
+}

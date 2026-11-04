@@ -1,0 +1,83 @@
+{
+  "organizations": [
+    {"id": "org_0000000001", "version": 1, "kind": "manufacturer", "name": "Vexa Optics", "slug": "vexa-optics", "summary": {"en": "Fictional camera maker used by the model test corpus.", "fr": "Fabricant fictif de caméras utilisé par le corpus de test du modèle."}, "website": "https://vexa.example.com", "country": "DE", "founded": {"value": "2009", "precision": "year"}},
+    {"id": "org_0000000002", "version": 1, "kind": "brand", "name": "Nordlicht Vision", "slug": "nordlicht-vision", "website": "https://nordlicht.example.com"}
+  ],
+  "org_relations": [
+    {"id": "orl_0000000001", "version": 1, "from_org": "org_0000000002", "type": "brand_of", "to_org": "org_0000000001", "valid_from": {"value": "2015-Q2", "precision": "quarter"}, "source_refs": ["src_0000000001"]}
+  ],
+  "products": [
+    {"id": "prd_0000000001", "version": 1, "kind": "family", "category": "imaging.cameras.area_scan", "slug": "vexa-optics__vx", "summary": {"en": "Fictional GigE area-scan camera family."}, "tags": ["area_scan", "poe"], "website_url": "https://vexa.example.com/vx"},
+    {"id": "prd_0000000002", "version": 1, "kind": "model", "parent": "prd_0000000001", "category": "imaging.cameras.area_scan", "slug": "vexa-optics__vx-500"},
+    {"id": "prd_0000000003", "version": 1, "kind": "variant", "parent": "prd_0000000002", "category": "imaging.cameras.area_scan", "slug": "vexa-optics__vx-500c", "variant_axes": {"chroma": "color"}},
+    {"id": "prd_0000000004", "version": 3, "kind": "model", "parent": "prd_0000000001", "category": "imaging.cameras.area_scan", "slug": "vexa-optics__vx-600", "summary": {"en": "Fictional successor of the VX-500.", "fr": "Successeur fictif de la VX-500."}, "tags": ["area_scan"]}
+  ],
+  "product_org_roles": [
+    {"id": "por_0000000001", "version": 1, "product": "prd_0000000001", "org": "org_0000000001", "role": "manufacturer", "source_refs": ["src_0000000001"]},
+    {"id": "por_0000000002", "version": 1, "product": "prd_0000000002", "org": "org_0000000001", "role": "manufacturer", "source_refs": ["src_0000000001"]},
+    {"id": "por_0000000003", "version": 1, "product": "prd_0000000003", "org": "org_0000000001", "role": "manufacturer", "source_refs": ["src_0000000001"]},
+    {"id": "por_0000000004", "version": 1, "product": "prd_0000000004", "org": "org_0000000001", "role": "manufacturer", "source_refs": ["src_0000000001"]}
+  ],
+  "names": [
+    {"id": "nam_0000000001", "version": 1, "subject": "prd_0000000002", "value": "VX-500", "is_primary": true},
+    {"id": "nam_0000000002", "version": 1, "subject": "prd_0000000002", "value": "Nordlicht N5", "region": "EU", "valid_from": {"value": "2024-03", "precision": "month"}, "is_primary": false}
+  ],
+  "product_versions": [
+    {"id": "ver_0000000001", "version": 1, "product": "prd_0000000002", "kind": "firmware", "label": "1.2.0", "scheme": "semver", "channel": "stable", "released": {"value": "2024-H1", "precision": "half"}, "source_refs": ["src_0000000001"]},
+    {"id": "ver_0000000002", "version": 1, "product": "prd_0000000002", "kind": "firmware", "label": "1.10.0", "scheme": "semver", "channel": "stable", "released": {"value": "2025-02-11", "precision": "day"}, "end_of_support": {"value": "2030", "precision": "year"}, "supersedes": "ver_0000000001", "source_refs": ["src_0000000001"]}
+  ],
+  "offerings": [
+    {"id": "off_0000000001", "version": 1, "product": "prd_0000000002", "version_range": {"product": "prd_0000000002", "min": "1.2.0"}, "seller_org": "org_0000000001", "regions": ["EU"], "licence_type": "perpetual", "term": "one_time", "binding": "hardware_embedded", "price": {"amount": 1890, "currency": "EUR", "as_of": {"value": "2026-05", "precision": "month"}}, "source_refs": ["src_0000000002"]}
+  ],
+  "identifiers": [
+    {"id": "idn_0000000001", "version": 1, "subject": "prd_0000000002", "scheme": "part_number", "issuer": "org_0000000001", "value": "VX-500-GM"}
+  ],
+  "claims": [
+    {"id": "clm_0000000001", "version": 1, "subject": "prd_0000000002", "spec_key": "resolution_megapixels", "value": {"quantity": {"value": 5.0, "unit": "mp"}}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]},
+    {"id": "clm_0000000002", "version": 1, "subject": "prd_0000000002", "spec_key": "width_px", "value": {"quantity": {"value": 2448, "unit": "px"}}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]},
+    {"id": "clm_0000000003", "version": 1, "subject": "prd_0000000002", "spec_key": "pixel_size", "value": {"quantity": {"value": 3.45, "unit": "um"}}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]},
+    {"id": "clm_0000000004", "version": 1, "subject": "prd_0000000002", "spec_key": "frame_rate", "value": {"range": {"min": 10, "max": 75, "unit": "hz"}}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]},
+    {"id": "clm_0000000005", "version": 1, "subject": "prd_0000000002", "spec_key": "shutter_type", "value": {"terms": ["global"]}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]},
+    {"id": "clm_0000000006", "version": 1, "subject": "prd_0000000002", "spec_key": "capabilities", "value": {"terms": ["roi", "triggering"]}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]},
+    {"id": "clm_0000000007", "version": 1, "subject": "prd_0000000002", "spec_key": "compliance", "value": {"terms": ["genicam"]}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]},
+    {"id": "clm_0000000008", "version": 1, "subject": "prd_0000000002", "spec_key": "sensor_model", "value": {"string": "Fictional FS-500"}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]},
+    {"id": "clm_0000000009", "version": 1, "subject": "prd_0000000002", "spec_key": "operating_temperature", "value": {"range": {"min": 0, "max": 50, "unit": "deg_c"}}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]},
+    {"id": "clm_0000000010", "version": 1, "subject": "prd_0000000002", "spec_key": "frame_rate", "value": {"quantity": {"value": 60, "unit": "hz"}}, "method": "inherited_record_source", "recorded_at": "2026-09-01T10:00:00Z", "rank": 2, "source_refs": ["src_0000000003"]},
+    {"id": "clm_0000000011", "version": 1, "subject": "prd_0000000002", "spec_key": "dynamic_range", "value": {"quantity": {"value": 71, "unit": "db"}}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"], "applies_to_versions": {"product": "prd_0000000002", "min": "1.10.0"}},
+    {"id": "clm_0000000012", "version": 1, "subject": "prd_0000000001", "spec_key": "frame_rate", "value": {"range": {"min": 10, "max": 75, "unit": "hz"}}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]},
+    {"id": "clm_0000000013", "version": 1, "subject": "prd_0000000003", "spec_key": "chroma", "value": {"terms": ["color"]}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]},
+    {"id": "clm_0000000014", "version": 1, "subject": "prd_0000000002", "spec_key": "spectral_range", "value": {"range": {"min": 0.9, "max": 1.7, "unit": "um"}}, "method": "datasheet", "recorded_at": "2026-09-01T10:00:00Z", "rank": 1, "source_refs": ["src_0000000001"]}
+  ],
+  "sources": [
+    {"id": "src_0000000001", "version": 1, "type": "datasheet", "url": "https://vexa.example.com/vx-500.pdf", "title": "VX-500 datasheet", "published_at": {"value": "2025-01", "precision": "month"}, "retrieved_at": "2026-09-01T09:00:00Z", "document": "doc_0000000001"},
+    {"id": "src_0000000002", "version": 1, "type": "website", "url": "https://vexa.example.com/shop/vx-500", "retrieved_at": "2026-09-01T09:05:00Z"},
+    {"id": "src_0000000003", "version": 1, "type": "inherited_record_source", "url": "https://vexa.example.com/archive/vx-500", "retrieved_at": "2026-09-01T09:10:00Z"}
+  ],
+  "documents": [
+    {"id": "doc_0000000001", "version": 1, "kind": "datasheet", "mime": "application/pdf", "bytes": 482113, "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "subjects": ["prd_0000000002"], "rights": "vendor", "title": {"en": "VX-500 datasheet"}, "language": "en", "source_url": "https://vexa.example.com/vx-500.pdf", "fetched_at": "2026-09-01T09:00:00Z"}
+  ],
+  "lifecycle_events": [
+    {"id": "evt_0000000001", "version": 1, "product": "prd_0000000002", "type": "released", "state": "actual", "date": {"value": "2024-02", "precision": "month"}, "source_refs": ["src_0000000001"]},
+    {"id": "evt_0000000002", "version": 1, "product": "prd_0000000002", "type": "eol_notice", "state": "planned", "date": {"value": "2028", "precision": "year", "approximate": true}, "source_refs": ["src_0000000001"]},
+    {"id": "evt_0000000003", "version": 1, "product": "prd_0000000002", "type": "successor_named", "state": "actual", "date": {"value": "2026-03", "precision": "month"}, "successor": "prd_0000000004", "source_refs": ["src_0000000002"]},
+    {"id": "evt_0000000004", "version": 1, "product": "prd_0000000002", "type": "released", "state": "revised", "date": {"value": "2023-11", "precision": "month"}, "revised_by": "evt_0000000001", "source_refs": ["src_0000000003"]}
+  ],
+  "relations": [
+    {"id": "rel_0000000003", "version": 1, "from_entity": "prd_0000000004", "type": "successor_of", "to_entity": "prd_0000000002", "basis": "asserted", "source_refs": ["src_0000000002"]}
+  ],
+  "alt_names": [
+    {"id": "aln_0000000001", "version": 1, "subject": "prd_0000000002", "value": "VX500"}
+  ],
+  "observed_statuses": [
+    {"id": "obs_0000000001", "version": 1, "product": "prd_0000000003", "status": "released", "recorded_at": "2026-09-01T10:00:00Z", "source_refs": ["src_0000000002"]}
+  ],
+  "changes": [
+    {"id": "chg_0000000001", "entity": "aln_0000000001", "version": 1, "recorded_at": "2026-09-02T08:00:00Z", "actor_kind": "human", "actor": "curator", "reason": "an alias from the vendor's price list", "patch": [{"op": "add", "path": "id", "value": "\"aln_0000000001\""}, {"op": "add", "path": "subject", "value": "\"prd_0000000002\""}, {"op": "add", "path": "value", "value": "\"VX500\""}], "source_refs": [], "correlation_id": "cor-0001"},
+    {"id": "chg_0000000002", "entity": "prd_0000000004", "version": 1, "recorded_at": "2026-09-03T08:00:00Z", "actor_kind": "import", "actor": "importer", "reason": "first import", "patch": [{"op": "add", "path": "id", "value": "\"prd_0000000004\""}, {"op": "add", "path": "kind", "value": "\"model\""}, {"op": "add", "path": "parent", "value": "\"prd_0000000001\""}, {"op": "add", "path": "category", "value": "\"imaging.cameras.area_scan\""}, {"op": "add", "path": "slug", "value": "\"vexa-optics__vx-600\""}], "source_refs": ["src_0000000002"], "correlation_id": "cor-0002"},
+    {"id": "chg_0000000003", "entity": "prd_0000000004", "version": 2, "recorded_at": "2026-09-10T08:00:00Z", "actor_kind": "human", "actor": "curator", "reason": "summary from the launch page", "patch": [{"op": "add", "path": "summary", "value": "{\"en\": \"Fictional successor of the VX-500.\", \"fr\": \"Successeur fictif de la VX-500.\"}"}], "source_refs": ["src_0000000002"], "correlation_id": "cor-0003"},
+    {"id": "chg_0000000004", "entity": "prd_0000000004", "version": 3, "recorded_at": "2026-09-12T08:00:00Z", "actor_kind": "agent", "actor": "tagger", "reason": "tagged from the datasheet", "patch": [{"op": "add", "path": "tags", "value": "[\"area_scan\"]"}], "source_refs": ["src_0000000001"], "correlation_id": "cor-0004"}
+  ],
+  "feed_items": [
+    {"id": "nws_0000000001", "version": 1, "slug": "vx-500-joins-the-catalog", "kind": "article", "authorship": "human", "byline": {"en": "Machine Vision Radar", "fr": "Machine Vision Radar"}, "title": {"en": "The VX-500 joins the catalog", "fr": "La VX-500 rejoint le catalogue"}, "summary": {"en": "A camera with its datasheet.", "fr": "Une caméra avec sa fiche technique."}, "body": [{"text": {"en": "The VX-500 is a camera.", "fr": "La VX-500 est une caméra."}, "cites": ["prd_0000000001", "src_0000000001"]}], "cites": ["prd_0000000001", "src_0000000001"], "position": 1, "published_at": "2026-10-12T00:00:00Z", "event_date": {"value": "2026-09", "precision": "month"}, "event_source": "src_0000000001"}
+  ]
+}

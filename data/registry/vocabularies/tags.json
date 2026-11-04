@@ -1,0 +1,123 @@
+[
+  {
+    "id": "smart",
+    "label": {"en": "Smart / onboard processing", "fr": "Traitement intelligent embarqué"},
+    "description": {"en": "Runs the vision processing on the device itself, with no external PC.", "fr": "Exécute le traitement de vision sur l'appareil, sans PC externe."}
+  },
+  {
+    "id": "open_platform",
+    "label": {"en": "Open platform (user programmable)", "fr": "Plateforme ouverte programmable"},
+    "aliases": ["User Programmable", "Programmable par l'utilisateur"],
+    "description": {"en": "Runs the user's own code or applications on the device, beyond the vendor's configuration.", "fr": "Exécute le code ou les applications de l'utilisateur sur l'appareil, au-delà de la configuration du fabricant."}
+  },
+  {
+    "id": "event_based",
+    "label": {"en": "Neuromorphic / event-based", "fr": "Capteur neuromorphique / basé sur les événements"},
+    "description": {"en": "The sensor reports per-pixel brightness changes as they happen instead of full frames.", "fr": "Le capteur signale les changements de luminosité de chaque pixel au moment où ils se produisent, au lieu d'images complètes."}
+  },
+  {
+    "id": "edge_ai",
+    "label": {"en": "Dedicated edge AI acceleration", "fr": "Accélération IA dédiée en périphérie"},
+    "description": {"en": "Has a dedicated neural-network accelerator (NPU, GPU or similar) for inference on the device.", "fr": "Dispose d'un accélérateur dédié aux réseaux de neurones (NPU, GPU ou équivalent) pour l'inférence sur l'appareil."}
+  },
+  {
+    "id": "genai_capable",
+    "label": {"en": "Generative AI / foundation model support", "fr": "Prise en charge de modèles fondation et IA générative"},
+    "description": {"en": "Runs or serves generative or foundation models, such as large vision or language models.", "fr": "Exécute ou sert des modèles génératifs ou de fondation, comme de grands modèles de vision ou de langage."}
+  },
+  {
+    "id": "zero_shot",
+    "label": {"en": "Zero-shot detection / classification", "fr": "Détection et classification zero-shot"},
+    "description": {"en": "Detects or classifies objects it was not trained on, from a text prompt or an example.", "fr": "Détecte ou classe des objets sans entraînement préalable, à partir d'une invite textuelle ou d'un exemple."}
+  },
+  {
+    "id": "hyperspectral",
+    "label": {"en": "Hyperspectral imaging", "fr": "Imagerie hyperspectrale"},
+    "description": {"en": "Captures tens to hundreds of contiguous spectral bands per pixel.", "fr": "Capture des dizaines à des centaines de bandes spectrales contiguës par pixel."}
+  },
+  {
+    "id": "multispectral",
+    "label": {"en": "Multispectral imaging", "fr": "Imagerie multispectrale"},
+    "description": {"en": "Captures a few separate spectral bands per pixel, beyond RGB.", "fr": "Capture quelques bandes spectrales distinctes par pixel, au-delà du RVB."}
+  },
+  {
+    "id": "polarized",
+    "label": {"en": "Polarization imaging", "fr": "Imagerie polarimétrique"},
+    "description": {"en": "Measures the angle or degree of polarization of the light at each pixel.", "fr": "Mesure l'angle ou le degré de polarisation de la lumière en chaque pixel."}
+  },
+  {
+    "id": "swir",
+    "label": {"en": "Short-wave infrared (SWIR)", "fr": "Infrarouge à ondes courtes (SWIR)"},
+    "description": {"en": "Senses short-wave infrared light, from about 0.9 to 2.5 µm.", "fr": "Détecte l'infrarouge à ondes courtes, d'environ 0,9 à 2,5 µm."}
+  },
+  {
+    "id": "uv",
+    "label": {"en": "Ultraviolet (UV)", "fr": "Ultraviolet (UV)"},
+    "description": {"en": "Senses or emits ultraviolet light, below about 400 nm.", "fr": "Détecte ou émet de la lumière ultraviolette, en dessous d'environ 400 nm."}
+  },
+  {
+    "id": "thermal",
+    "label": {"en": "Thermal capability (cross-category)", "fr": "Capacité thermique transversale"},
+    "description": {"en": "Cross-cutting thermal imaging capability on multi-band/hybrid systems; dedicated thermal cameras belong to imaging.thermal_cameras.", "fr": "Capacité d'imagerie thermique transversale sur des systèmes multibandes ou hybrides ; les caméras thermiques dédiées relèvent de imaging.thermal_cameras."}
+  },
+  {
+    "id": "xray",
+    "label": {"en": "X-ray detection", "fr": "Détection par rayons X"},
+    "description": {"en": "Images with X-rays, to inspect the inside of parts or packages.", "fr": "Image par rayons X, pour inspecter l'intérieur des pièces ou des emballages."}
+  },
+  {
+    "id": "board_level",
+    "label": {"en": "Board-level / bare PCB form factor", "fr": "Format carte nue / PCB intégrable"},
+    "description": {"en": "Sold as a bare board or module without a housing, to build into other equipment.", "fr": "Vendu en carte nue ou en module sans boîtier, à intégrer dans d'autres équipements."}
+  },
+  {
+    "id": "rugged",
+    "label": {"en": "Rugged / high ingress protection", "fr": "Protection renforcée contre les environnements sévères"},
+    "description": {"en": "Built for harsh sites: sealed against dust and water (high IP rating), or rated for shock and vibration.", "fr": "Conçu pour les sites difficiles : étanche à la poussière et à l'eau (indice IP élevé), ou résistant aux chocs et aux vibrations."}
+  },
+  {
+    "id": "compact",
+    "label": {"en": "Ultra-compact footprint", "fr": "Encombrement ultra-compact"},
+    "description": {"en": "An unusually small housing for its class.", "fr": "Un boîtier particulièrement petit pour sa catégorie."}
+  },
+  {
+    "id": "poe",
+    "label": {"en": "Power over Ethernet (PoE)", "fr": "Alimentation par Ethernet (PoE)"},
+    "description": {"en": "Takes power and data over one Ethernet cable.", "fr": "Reçoit l'alimentation et les données par un seul câble Ethernet."}
+  },
+  {
+    "id": "robot_ready",
+    "label": {"en": "Robot ready / flange mountable", "fr": "Adapté à la robotique / fixation sur bride"},
+    "description": {"en": "Mounts on a robot flange or arm and comes with a robot integration.", "fr": "Se fixe sur une bride ou un bras de robot et est fourni avec une intégration robot."}
+  },
+  {
+    "id": "turnkey",
+    "label": {"en": "Complete turnkey system", "fr": "Système complet clé en main"},
+    "description": {"en": "A complete system, hardware and software, ready to deploy without integration work.", "fr": "Un système complet, matériel et logiciel, prêt à déployer sans travail d'intégration."}
+  },
+  {
+    "id": "area_scan",
+    "label": {"en": "Area scan architecture", "fr": "Architecture matricielle (Area Scan)"},
+    "description": {"en": "Captures a full 2D frame at once from a matrix sensor.", "fr": "Capture une image 2D complète en une fois à partir d'un capteur matriciel."}
+  },
+  {
+    "id": "cloud_connected",
+    "label": {"en": "Cloud connected", "fr": "Connecté au cloud"},
+    "description": {"en": "Sends data to a cloud service, or is managed from one.", "fr": "Envoie des données vers un service cloud, ou est géré depuis celui-ci."}
+  },
+  {
+    "id": "fanless",
+    "label": {"en": "Fanless architecture", "fr": "Sans ventilateur"},
+    "description": {"en": "Cooled without a fan: no moving part to wear out or draw in dust.", "fr": "Refroidi sans ventilateur : aucune pièce mobile qui s'use ou aspire la poussière."}
+  },
+  {
+    "id": "bin_picking",
+    "label": {"en": "Bin-picking ready", "fr": "Prêt pour le dévracage"},
+    "description": {"en": "Locates parts piled at random in a bin so that a robot can pick them.", "fr": "Localise des pièces en vrac dans un bac pour qu'un robot puisse les saisir."}
+  },
+  {
+    "id": "analytics",
+    "label": {"en": "Production analytics", "fr": "Analytique de production"},
+    "description": {"en": "Collects and reports production data such as yield, defects and trends.", "fr": "Collecte et présente des données de production : rendement, défauts, tendances."}
+  }
+]

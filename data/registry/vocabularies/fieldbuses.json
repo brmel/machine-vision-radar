@@ -1,0 +1,10 @@
+[
+  {"id": "profinet", "label": {"en": "PROFINET", "fr": "PROFINET"}},
+  {"id": "ethernet_ip", "label": {"en": "EtherNet/IP", "fr": "EtherNet/IP"}},
+  {"id": "ethercat", "label": {"en": "EtherCAT", "fr": "EtherCAT"}},
+  {"id": "io_link", "label": {"en": "IO-Link", "fr": "IO-Link"}},
+  {"id": "modbus_tcp", "label": {"en": "Modbus/TCP", "fr": "Modbus/TCP"}},
+  {"id": "modbus", "label": {"en": "Modbus (serial)", "fr": "Modbus (série)"}},
+  {"id": "cc_link", "label": {"en": "CC-Link", "fr": "CC-Link"}},
+  {"id": "opc_ua", "label": {"en": "OPC UA", "fr": "OPC UA"}}
+]

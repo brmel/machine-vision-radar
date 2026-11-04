@@ -1,0 +1,19 @@
+{
+  "category_id": "compute.vision_controllers",
+  "sections": {
+    "core": ["processor", "channels", "config_style"],
+    "detail": [],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["compute", "connectivity", "environment"],
+  "facets": [
+    {"field": "channels"},
+    {"field": "config_style"},
+    {"field": "interfaces"},
+    {"field": "fieldbus"},
+    {"field": "operating_temperature"}
+  ],
+  "required_at_publish": ["processor"],
+  "axis_dependent_keys": ["processor", "channels"]
+}

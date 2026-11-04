@@ -1,0 +1,4 @@
+[
+  {"id": "stable", "label": {"en": "General availability stable", "fr": "Version stable disponible publiquement"}},
+  {"id": "beta", "label": {"en": "Beta / public preview", "fr": "Version bêta"}}
+]

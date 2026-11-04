@@ -1,0 +1,10 @@
+[
+  {"id": "roi", "label": {"en": "Region of interest (ROI / windowing)", "fr": "Région d'intérêt (ROI / fenêtrage)"}},
+  {"id": "triggering", "label": {"en": "Hardware / software triggering", "fr": "Déclenchement matériel / logiciel"}},
+  {"id": "binning", "label": {"en": "Pixel binning", "fr": "Binning de pixels"}},
+  {"id": "hdr", "label": {"en": "High dynamic range (HDR)", "fr": "Plage dynamique étendue (HDR)"}},
+  {"id": "chunk_data", "label": {"en": "GenICam chunk data", "fr": "Données Chunk GenICam"}},
+  {"id": "ptp", "label": {"en": "IEEE 1588 PTP synchronization", "fr": "Synchronisation PTP IEEE 1588"}},
+  {"id": "sequencer", "label": {"en": "Parameter sequencer", "fr": "Séquenceur de paramètres"}},
+  {"id": "auto_exposure", "label": {"en": "Auto exposure & gain", "fr": "Exposition et gain automatiques"}}
+]

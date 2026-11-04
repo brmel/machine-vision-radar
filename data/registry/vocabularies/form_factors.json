@@ -1,0 +1,17 @@
+[
+  {"id": "box_pc", "label": {"en": "Box PC", "fr": "PC boîtier"}},
+  {"id": "handheld", "label": {"en": "Handheld", "fr": "Portable"}},
+  {"id": "fixed_mount", "label": {"en": "Fixed mount", "fr": "Montage fixe"}},
+  {"id": "board_level", "label": {"en": "Board level", "fr": "Carte nue"}},
+  {"id": "som", "label": {"en": "System on module", "fr": "Système sur module"}},
+  {"id": "sbc", "label": {"en": "Single-board computer", "fr": "Ordinateur monocarte"}},
+  {"id": "dev_kit", "label": {"en": "Developer kit", "fr": "Kit de développement"}},
+  {"id": "chip", "label": {"en": "Chip", "fr": "Puce"}},
+  {"id": "m2", "label": {"en": "M.2 module", "fr": "Module M.2"}},
+  {"id": "mini_pcie", "label": {"en": "Mini PCIe card", "fr": "Carte Mini PCIe"}},
+  {"id": "pcie_card", "label": {"en": "PCIe card", "fr": "Carte PCIe"}},
+  {"id": "pci_card", "label": {"en": "PCI card", "fr": "Carte PCI"}},
+  {"id": "expresscard", "label": {"en": "ExpressCard", "fr": "Carte ExpressCard"}},
+  {"id": "com_express", "label": {"en": "COM Express", "fr": "Module COM Express"}},
+  {"id": "smarc", "label": {"en": "SMARC", "fr": "Module SMARC"}}
+]

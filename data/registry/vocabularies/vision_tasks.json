@@ -1,0 +1,9 @@
+[
+  {"id": "classification", "label": {"en": "Classification", "fr": "Classification"}},
+  {"id": "detection", "label": {"en": "Object detection", "fr": "Détection d'objets"}},
+  {"id": "segmentation", "label": {"en": "Segmentation", "fr": "Segmentation"}},
+  {"id": "anomaly", "label": {"en": "Anomaly detection", "fr": "Détection d'anomalies"}},
+  {"id": "ocr", "label": {"en": "OCR", "fr": "OCR"}},
+  {"id": "pose", "label": {"en": "Pose estimation", "fr": "Estimation de pose"}},
+  {"id": "defect_generation", "label": {"en": "Defect generation", "fr": "Génération de défauts"}}
+]

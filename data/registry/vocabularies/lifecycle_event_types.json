@@ -1,0 +1,27 @@
+[
+  {"id": "active", "label": {"en": "Active", "fr": "Actif"}, "sets_status": true},
+  {"id": "announced", "label": {"en": "Announced", "fr": "Annoncé"}, "sets_status": true},
+  {
+    "id": "released",
+    "label": {"en": "Commercial release / general availability", "fr": "Commercialisation générale"},
+    "sets_status": true
+  },
+  {
+    "id": "eol_notice",
+    "label": {"en": "End of life (EOL) notice issued", "fr": "Avis de fin de vie (EOL)"},
+    "sets_status": true
+  },
+  {"id": "last_time_buy", "label": {"en": "Last time buy (LTB) date", "fr": "Date de dernier achat (LTB)"}},
+  {"id": "last_delivery", "label": {"en": "Last delivery / ship date", "fr": "Dernière date de livraison"}},
+  {"id": "discontinued", "label": {"en": "Discontinued", "fr": "Fin de commercialisation"}, "sets_status": true},
+  {
+    "id": "end_of_support",
+    "label": {"en": "End of technical support (EOS)", "fr": "Fin de support technique (EOS)"},
+    "sets_status": true
+  },
+  {
+    "id": "successor_named",
+    "label": {"en": "Successor product officially named", "fr": "Successeur officiellement désigné"},
+    "names_successor": true
+  }
+]

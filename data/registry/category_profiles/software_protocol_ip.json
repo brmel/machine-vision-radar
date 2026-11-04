@@ -1,0 +1,13 @@
+{
+  "category_id": "software.protocol_ip",
+  "sections": {
+    "core": ["interfaces", "form"],
+    "detail": [],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["software_runtime"],
+  "facets": [{"field": "interfaces"}, {"field": "form"}],
+  "required_at_publish": ["interfaces"],
+  "axis_dependent_keys": []
+}

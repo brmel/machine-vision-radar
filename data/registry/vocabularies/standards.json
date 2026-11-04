@@ -1,0 +1,62 @@
+[
+  {
+    "id": "camera_link_hs_1_2",
+    "label": {"en": "Camera Link HS 1.2", "fr": "Camera Link HS 1.2"},
+    "description": {"en": "The AIA Camera Link HS interface standard, version 1.2.", "fr": "La norme d'interface Camera Link HS de l'AIA, version 1.2."}
+  },
+  {
+    "id": "ce",
+    "label": {"en": "CE marking", "fr": "Marquage CE"},
+    "description": {"en": "Conformity with the European Union's product directives, as the CE mark declares.", "fr": "Conformité aux directives produits de l'Union européenne, déclarée par le marquage CE."}
+  },
+  {
+    "id": "coaxpress_2_1",
+    "label": {"en": "CoaXPress 2.1", "fr": "CoaXPress 2.1"},
+    "description": {"en": "The JIIA CoaXPress interface standard, version 2.1.", "fr": "La norme d'interface CoaXPress de la JIIA, version 2.1."}
+  },
+  {
+    "id": "emva_1288_4_0",
+    "label": {"en": "EMVA 1288 4.0", "fr": "EMVA 1288 4.0"},
+    "description": {"en": "Camera and sensor performance measured and reported under the EMVA 1288 standard, release 4.0.", "fr": "Performances de caméra et de capteur mesurées et publiées selon la norme EMVA 1288, version 4.0."}
+  },
+  {
+    "id": "fcc",
+    "label": {"en": "FCC Part 15", "fr": "FCC Part 15"},
+    "description": {"en": "Conformity with the US FCC rules on radio-frequency emissions.", "fr": "Conformité aux règles de la FCC américaine sur les émissions radioélectriques."}
+  },
+  {
+    "id": "genicam",
+    "label": {"en": "GenICam", "fr": "GenICam"},
+    "description": {"en": "The EMVA GenICam generic programming interface: a camera described by its XML file and SFNC feature names.", "fr": "L'interface de programmation générique GenICam de l'EMVA : une caméra décrite par son fichier XML et les noms de fonctions SFNC."}
+  },
+  {
+    "id": "gige_vision_2_2",
+    "label": {"en": "GigE Vision 2.2", "fr": "GigE Vision 2.2"},
+    "description": {"en": "The AIA GigE Vision interface standard, version 2.2.", "fr": "La norme d'interface GigE Vision de l'AIA, version 2.2."}
+  },
+  {
+    "id": "opc_ua_mv_1_0",
+    "label": {"en": "OPC UA Machine Vision 1.0", "fr": "OPC UA Machine Vision 1.0"},
+    "description": {"en": "The OPC UA companion specification for machine vision systems, part 1, version 1.0.", "fr": "La spécification compagnon OPC UA pour les systèmes de vision industrielle, partie 1, version 1.0."}
+  },
+  {
+    "id": "reach",
+    "label": {"en": "REACH", "fr": "REACH"},
+    "description": {"en": "Conformity with the European Union's REACH regulation on chemical substances.", "fr": "Conformité au règlement européen REACH sur les substances chimiques."}
+  },
+  {
+    "id": "rohs",
+    "label": {"en": "RoHS", "fr": "RoHS"},
+    "description": {"en": "Conformity with the European Union's RoHS directive restricting hazardous substances.", "fr": "Conformité à la directive européenne RoHS limitant les substances dangereuses."}
+  },
+  {
+    "id": "ul",
+    "label": {"en": "UL listing", "fr": "Homologation UL"},
+    "description": {"en": "A UL safety certification of the product.", "fr": "Une certification de sécurité UL du produit."}
+  },
+  {
+    "id": "usb3_vision_1_2",
+    "label": {"en": "USB3 Vision 1.2", "fr": "USB3 Vision 1.2"},
+    "description": {"en": "The AIA USB3 Vision interface standard, version 1.2.", "fr": "La norme d'interface USB3 Vision de l'AIA, version 1.2."}
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "category_id": "imaging.code_readers",
+  "sections": {
+    "core": ["reads", "max_read_rate", "reader_technology", "form_factor"],
+    "detail": ["illumination", "grading_standards", "lens_mount"],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["connectivity", "environment", "laser", "image_sensor"],
+  "facets": [
+    {"field": "reads"},
+    {"field": "reader_technology"},
+    {"field": "form_factor"},
+    {"field": "interfaces"},
+    {"field": "fieldbus"},
+    {"field": "illumination"},
+    {"field": "ip_rating"},
+    {"field": "max_read_rate"}
+  ],
+  "required_at_publish": ["reads"],
+  "axis_dependent_keys": ["illumination", "width_px"]
+}

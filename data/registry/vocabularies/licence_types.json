@@ -1,0 +1,6 @@
+[
+  {"id": "perpetual", "label": {"en": "Perpetual licence", "fr": "Licence perpétuelle"}},
+  {"id": "subscription", "label": {"en": "Subscription licence", "fr": "Abonnement périodique"}},
+  {"id": "free", "label": {"en": "Free / open source", "fr": "Libre / Open Source"}},
+  {"id": "runtime_only", "label": {"en": "Runtime deployment only", "fr": "Déploiement exécution seule"}}
+]

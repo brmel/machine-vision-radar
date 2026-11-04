@@ -1,0 +1,20 @@
+{
+  "fields": [
+    {"field": "name", "weight": 10},
+    {"field": "vendor", "weight": 6},
+    {"field": "category", "weight": 5},
+    {"field": "tags", "weight": 5},
+    {"field": "summary", "weight": 4},
+    {"field": "specs", "weight": 2}
+  ],
+  "whole_word": 2,
+  "pair_boost": 4,
+  "pair_window": 3,
+  "exact_boost": 100,
+  "relative_cut": 0.3,
+  "semantic_threshold": 0.25,
+  "rrf_k": 60,
+  "evidence": 6,
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "stopwords": ["a", "about", "all", "an", "and", "any", "are", "as", "at", "be", "best", "between", "by", "can", "could", "do", "does", "find", "for", "from", "get", "give", "good", "has", "have", "how", "i", "in", "into", "is", "it", "its", "list", "looking", "me", "my", "need", "needs", "of", "on", "or", "our", "please", "recommend", "show", "some", "suitable", "than", "that", "the", "their", "them", "there", "these", "this", "those", "to", "under", "up", "use", "used", "using", "want", "we", "what", "when", "where", "which", "who", "why", "will", "with", "would", "you", "your", "au", "aux", "avec", "ce", "ces", "cet", "cette", "chercher", "cherche", "comme", "comment", "d", "dans", "de", "des", "du", "elle", "en", "est", "et", "faut", "il", "je", "l", "la", "le", "les", "leur", "leurs", "ma", "mes", "mon", "ne", "nous", "ou", "par", "pas", "plus", "pour", "qu", "quel", "quelle", "quelles", "quels", "qui", "quoi", "sa", "se", "ses", "son", "sont", "sur", "trouver", "un", "une", "veux", "vos", "votre", "vous"]
+}

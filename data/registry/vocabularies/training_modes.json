@@ -1,0 +1,4 @@
+[
+  {"id": "built_in", "label": {"en": "Built-in training", "fr": "Entraînement intégré"}},
+  {"id": "external", "label": {"en": "External training", "fr": "Entraînement externe"}}
+]

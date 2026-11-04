@@ -1,0 +1,5 @@
+[
+  {"id": "family", "label": {"en": "Product family", "fr": "Gamme de produits"}},
+  {"id": "model", "label": {"en": "Specific model", "fr": "Modèle spécifique"}},
+  {"id": "variant", "label": {"en": "Model variant / ordering option", "fr": "Variante / Option de commande"}}
+]

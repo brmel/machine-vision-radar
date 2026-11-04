@@ -1,0 +1,16 @@
+[
+  {"id": "manufacturing", "label": {"en": "General manufacturing", "fr": "Industrie manufacturière"}},
+  {"id": "automotive", "label": {"en": "Automotive", "fr": "Automobile"}},
+  {"id": "electronics", "label": {"en": "Electronics", "fr": "Électronique"}},
+  {"id": "semiconductor", "label": {"en": "Semiconductor", "fr": "Semi-conducteurs"}},
+  {"id": "logistics", "label": {"en": "Logistics", "fr": "Logistique"}},
+  {"id": "pharmaceutical", "label": {"en": "Pharmaceutical", "fr": "Pharmaceutique"}},
+  {"id": "food", "label": {"en": "Food and beverage", "fr": "Agroalimentaire"}},
+  {"id": "packaging", "label": {"en": "Packaging", "fr": "Emballage"}},
+  {"id": "printing", "label": {"en": "Printing", "fr": "Imprimerie"}},
+  {"id": "medical", "label": {"en": "Medical devices", "fr": "Dispositifs médicaux"}},
+  {"id": "photovoltaics", "label": {"en": "Photovoltaics", "fr": "Photovoltaïque"}},
+  {"id": "paper", "label": {"en": "Paper and board", "fr": "Papier et carton"}},
+  {"id": "transport", "label": {"en": "Road transport", "fr": "Transport routier"}},
+  {"id": "e_commerce", "label": {"en": "E-commerce", "fr": "Commerce en ligne"}}
+]

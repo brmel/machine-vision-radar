@@ -1,0 +1,25 @@
+# Build output: dist/ holds the agent files (python -m radar site export), app/dist/ the site
+/dist/
+app/dist/
+# The server render the prerender imports (npm run build:server)
+app/dist-server/
+# The brand studio's renders (npm run studio:still)
+app/studio/out/
+node_modules/
+
+# Python
+.venv/
+.pytest_cache/
+__pycache__/
+
+# OS / editor noise, logs, local env
+.DS_Store
+*.log
+.env*
+
+# Firebase cache, and the gates' hosting config (app/scripts/gates/test-hosting.ts)
+.firebase/
+firebase.gate.json
+
+# Playwright output
+app/test-results/

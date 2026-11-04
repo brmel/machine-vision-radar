@@ -1,0 +1,20 @@
+{
+  "category_id": "compute.edge_ai",
+  "sections": {
+    "core": ["tops", "processor", "form_factor", "power"],
+    "detail": [],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["compute", "software_runtime", "connectivity", "environment"],
+  "facets": [
+    {"field": "tops"},
+    {"field": "form_factor"},
+    {"field": "power"},
+    {"field": "os"},
+    {"field": "deployment"},
+    {"field": "interfaces"}
+  ],
+  "required_at_publish": ["tops"],
+  "axis_dependent_keys": ["form_factor"]
+}

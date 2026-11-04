@@ -1,0 +1,24 @@
+{
+  "category_id": "imaging.cameras.area_scan",
+  "sections": {
+    "core": ["resolution_megapixels", "frame_rate", "interfaces", "shutter_type"],
+    "detail": ["lens_mount", "form_factor", "dynamic_range", "latency", "temporal_resolution", "contrast_threshold", "max_event_rate", "spectral_range"],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["image_sensor", "connectivity", "environment"],
+  "facets": [
+    {"field": "interfaces"},
+    {"field": "resolution_megapixels"},
+    {"field": "frame_rate"},
+    {"field": "pixel_size"},
+    {"field": "shutter_type"},
+    {"field": "chroma"},
+    {"field": "lens_mount"},
+    {"field": "sensor_technology"},
+    {"field": "ip_rating"},
+    {"field": "fieldbus"}
+  ],
+  "required_at_publish": ["interfaces"],
+  "axis_dependent_keys": ["lens_mount", "chroma", "shutter_type", "width_px"]
+}

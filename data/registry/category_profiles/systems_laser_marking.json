@@ -1,0 +1,20 @@
+{
+  "category_id": "systems.laser_marking",
+  "sections": {
+    "core": ["system_function", "laser_type", "power", "marking_field"],
+    "detail": ["marking_speed", "integrated_vision"],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["laser"],
+  "facets": [
+    {"field": "system_function"},
+    {"field": "laser_type"},
+    {"field": "power"},
+    {"field": "integrated_vision"},
+    {"field": "wavelength"},
+    {"field": "marking_field"}
+  ],
+  "required_at_publish": ["laser_type"],
+  "axis_dependent_keys": []
+}

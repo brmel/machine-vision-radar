@@ -1,0 +1,4 @@
+[
+  {"id": "cloud", "label": {"en": "Cloud", "fr": "Cloud"}},
+  {"id": "edge", "label": {"en": "Edge", "fr": "Périphérie (Edge)"}}
+]

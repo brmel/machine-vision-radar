@@ -1,0 +1,14 @@
+{
+  "cad_per_usd": 1.45,
+  "models": [
+    {"id": "gemini-2.5-flash-lite", "label": "Gemini 2.5 Flash-Lite", "location": "us-central1", "usd_in": 0.1, "usd_out": 0.4, "source": "https://cloud.google.com/vertex-ai/generative-ai/pricing", "read": "2026-10-22"},
+    {"id": "gemini-3.1-flash-lite", "label": "Gemini 3.1 Flash-Lite", "location": "global", "usd_in": 0.25, "usd_out": 1.5, "source": "https://cloud.google.com/vertex-ai/generative-ai/pricing", "read": "2026-10-28"}
+  ],
+  "uses": [
+    {"use": "all", "month_cad": 2, "day_calls": 200},
+    {"use": "ask", "model": "gemini-2.5-flash-lite", "month_cad": 2, "day_calls": 200, "client_calls": 20},
+    {"use": "research", "model": "gemini-2.5-flash-lite", "month_cad": 0, "day_calls": 0},
+    {"use": "datasheet", "model": "gemini-2.5-flash-lite", "month_cad": 0, "day_calls": 0},
+    {"use": "draft", "model": "gemini-2.5-flash-lite", "month_cad": 0, "day_calls": 0}
+  ]
+}

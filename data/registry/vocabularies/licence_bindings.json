@@ -1,0 +1,9 @@
+[
+  {"id": "node_locked", "label": {"en": "Node-locked machine licence", "fr": "Verrouillé par machine (Node-Locked)"}},
+  {"id": "floating_network", "label": {"en": "Floating network licence server", "fr": "Licence réseau flottante"}},
+  {
+    "id": "hardware_embedded",
+    "label": {"en": "Firmware / silicon embedded", "fr": "Intégré au microprogramme / silicium"}
+  },
+  {"id": "unrestricted", "label": {"en": "Unrestricted royalty-free", "fr": "Sans restriction matérielle"}}
+]

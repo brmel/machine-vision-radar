@@ -1,0 +1,20 @@
+{
+  "category_id": "imaging.frame_grabbers",
+  "sections": {
+    "core": ["interfaces", "channels", "pcie_generation", "pcie_lanes", "device_kind"],
+    "detail": ["form_factor", "onboard_processing"],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": [],
+  "facets": [
+    {"field": "interfaces"},
+    {"field": "device_kind"},
+    {"field": "channels"},
+    {"field": "pcie_generation"},
+    {"field": "form_factor"},
+    {"field": "onboard_processing"}
+  ],
+  "required_at_publish": ["interfaces"],
+  "axis_dependent_keys": ["form_factor"]
+}

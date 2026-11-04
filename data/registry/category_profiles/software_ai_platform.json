@@ -1,0 +1,20 @@
+{
+  "category_id": "software.ai_platform",
+  "sections": {
+    "core": ["ai_methods", "vision_tasks", "training", "deployment"],
+    "detail": ["few_shot", "data_tools", "integration_api"],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["software_runtime"],
+  "facets": [
+    {"field": "ai_methods"},
+    {"field": "vision_tasks"},
+    {"field": "training"},
+    {"field": "deployment"},
+    {"field": "data_tools"},
+    {"field": "few_shot"}
+  ],
+  "required_at_publish": ["ai_methods"],
+  "axis_dependent_keys": []
+}

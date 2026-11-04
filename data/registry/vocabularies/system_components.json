@@ -1,0 +1,17 @@
+[
+  {"id": "camera", "label": {"en": "Cameras", "fr": "Caméras"}},
+  {"id": "sensor_3d", "label": {"en": "3D sensor", "fr": "Capteur 3D"}},
+  {"id": "illumination", "label": {"en": "Illumination", "fr": "Éclairage"}},
+  {"id": "optics", "label": {"en": "Optics", "fr": "Optique"}},
+  {"id": "compute", "label": {"en": "Computer", "fr": "Ordinateur"}},
+  {"id": "software", "label": {"en": "Software", "fr": "Logiciel"}},
+  {"id": "handling", "label": {"en": "Part handling", "fr": "Manutention des pièces"}},
+  {"id": "robot", "label": {"en": "Robot arm", "fr": "Bras robotisé"}},
+  {"id": "gripper", "label": {"en": "Gripper", "fr": "Préhenseur"}},
+  {"id": "conveyor", "label": {"en": "Conveyor", "fr": "Convoyeur"}},
+  {"id": "xray_source", "label": {"en": "X-ray source", "fr": "Source de rayons X"}},
+  {"id": "laser_source", "label": {"en": "Laser source", "fr": "Source laser"}},
+  {"id": "enclosure", "label": {"en": "Enclosure", "fr": "Boîtier"}},
+  {"id": "radar_sensor", "label": {"en": "Radar", "fr": "Radar"}},
+  {"id": "rotary_table", "label": {"en": "Rotary table", "fr": "Table rotative"}}
+]

@@ -1,0 +1,131 @@
+[
+  {
+    "id": "Dimension",
+    "kind": "record",
+    "description": "Physical dimension a unit measures, and its canonical unit: the one whose factor is 1.",
+    "registry_file": "dimensions.json",
+    "fields": {
+      "id": {"type": "TermId"},
+      "label": {"type": "LocalizedText"},
+      "canonical_unit": {"type": "TermId", "vocabulary": "units"}
+    }
+  },
+  {
+    "id": "Unit",
+    "kind": "record",
+    "description": "Unit of one dimension, with the symbol pages show, its UCUM code and its factor: a value in its dimension's canonical unit is the value in this unit times the factor.",
+    "registry_file": "units.json",
+    "fields": {
+      "id": {"type": "TermId"},
+      "symbol": {"type": "string"},
+      "dimension": {"type": "TermId", "vocabulary": "dimensions"},
+      "ucum": {"type": "string", "description": "the unit's code in the Unified Code for Units of Measure, case-sensitive"},
+      "factor": {"type": "number"}
+    }
+  },
+  {
+    "id": "SpecDefinition",
+    "kind": "record",
+    "description": "One typed attribute a Claim can carry.",
+    "registry_file": "spec_definitions.json",
+    "fields": {
+      "id": {"type": "TermId"},
+      "label": {"type": "LocalizedText"},
+      "datatype": {"type": "enum", "values": ["quantity", "term", "term_set", "boolean", "string"]},
+      "dimension": {"type": "TermId", "optional": true, "vocabulary": "dimensions"},
+      "unit": {"type": "TermId", "optional": true, "vocabulary": "units", "description": "quantity: the unit pages state and filter it in; a claim may state another unit of its dimension, converted with the factors"},
+      "vocabulary": {"type": "string", "optional": true},
+      "better": {
+        "type": "enum",
+        "values": ["higher", "lower"],
+        "optional": true,
+        "description": "quantity: which way a value is better, so a comparison can say which product leads; absent when neither"
+      },
+      "description": {"type": "LocalizedText", "optional": true, "description": "what is measured or named, and under what convention"},
+      "aliases": {"type": "array", "items": "string", "optional": true, "description": "the words datasheets use for it, in any language; search and the extraction prompts read them"},
+      "bounds": {"type": "Bounds", "optional": true, "description": "quantity: the values a product can plausibly state, in the spec's unit; a claim outside them is refused"},
+      "precision": {"type": "integer", "optional": true, "minimum": 0, "description": "quantity: the decimals a page shows; the read model rounds to them"},
+      "external": {"type": "ExternalIds", "optional": true}
+    }
+  },
+  {
+    "id": "Bounds",
+    "kind": "record",
+    "description": "The least and the greatest value of a quantity spec, in its unit.",
+    "fields": {"min": {"type": "number"}, "max": {"type": "number"}}
+  },
+  {
+    "id": "ExternalIds",
+    "kind": "record",
+    "description": "The ids a spec has in another standard's dictionary: identifiers only, never a copied definition.",
+    "fields": {
+      "eclass": {"type": "string", "optional": true, "description": "ECLASS property IRDI"},
+      "etim": {"type": "string", "optional": true, "description": "ETIM feature code"},
+      "sfnc": {"type": "string", "optional": true, "description": "GenICam Standard Features Naming Convention feature name"},
+      "emva1288": {"type": "string", "optional": true, "description": "EMVA 1288 quantity"}
+    }
+  },
+  {
+    "id": "Category",
+    "kind": "record",
+    "description": "Function taxonomy node.",
+    "registry_file": "categories.json",
+    "fields": {
+      "id": {"type": "TermId"},
+      "label": {"type": "LocalizedText"},
+      "domain": {"type": "TermId", "vocabulary": "domains"},
+      "pipeline": {"type": "array", "items": "TermId", "vocabulary": "pipeline_stages"},
+      "glyph": {"type": "TermId", "vocabulary": "glyphs"},
+      "description": {"type": "LocalizedText"},
+      "component_hub": {"type": "ComponentHub", "optional": true}
+    }
+  },
+  {
+    "id": "ComponentHub",
+    "kind": "record",
+    "description": "A category whose products others use as components: each one so used gets a hub page at /<path>/<slug> listing the products that use it through `relation`.",
+    "fields": {"path": {"type": "string"}, "relation": {"type": "TermId", "vocabulary": "relation_types"}}
+  },
+  {
+    "id": "Facet",
+    "kind": "record",
+    "description": "A filter shown on a category page: a spec, labelled by its SpecDefinition, in its unit, its kind read off its datatype.",
+    "fields": {"field": {"type": "TermId", "vocabulary": "spec_definitions"}}
+  },
+  {
+    "id": "ProfileSections",
+    "kind": "record",
+    "description": "Keys shown per page section: the category's own core and detail specs (its groups' specs follow the detail ones); versions and offerings list entity fields.",
+    "fields": {
+      "core": {"type": "array", "items": "string"},
+      "detail": {"type": "array", "items": "string"},
+      "versions": {"type": "array", "items": "string"},
+      "offerings": {"type": "array", "items": "string"}
+    }
+  },
+  {
+    "id": "SpecGroup",
+    "kind": "record",
+    "description": "Specs several categories share, such as an image sensor's: a profile or a product takes the group whole.",
+    "registry_file": "spec_groups.json",
+    "fields": {
+      "id": {"type": "TermId"},
+      "label": {"type": "LocalizedText"},
+      "specs": {"type": "array", "items": "TermId", "vocabulary": "spec_definitions", "min_items": 1}
+    }
+  },
+  {
+    "id": "CategoryProfile",
+    "kind": "record",
+    "description": "Presentation contract of one category: its own specs, the spec groups it takes, its filters and what a page must publish.",
+    "registry_file": "category_profiles/",
+    "fields": {
+      "category_id": {"type": "TermId", "vocabulary": "categories"},
+      "sections": {"type": "ProfileSections"},
+      "groups": {"type": "array", "items": "TermId", "vocabulary": "spec_groups"},
+      "facets": {"type": "array", "items": "Facet"},
+      "required_at_publish": {"type": "array", "items": "string"},
+      "axis_dependent_keys": {"type": "array", "items": "string"}
+    }
+  }
+]

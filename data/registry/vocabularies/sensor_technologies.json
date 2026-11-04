@@ -1,0 +1,12 @@
+[
+  {"id": "cmos", "label": {"en": "CMOS", "fr": "CMOS"}},
+  {"id": "bsi_cmos", "label": {"en": "Back-side illuminated CMOS", "fr": "CMOS rétro-éclairé"}},
+  {"id": "scmos", "label": {"en": "sCMOS", "fr": "sCMOS"}},
+  {"id": "ccd", "label": {"en": "CCD", "fr": "CCD"}},
+  {"id": "emccd", "label": {"en": "EMCCD", "fr": "EMCCD"}},
+  {"id": "ingaas", "label": {"en": "InGaAs", "fr": "InGaAs"}},
+  {"id": "microbolometer", "label": {"en": "Microbolometer", "fr": "Microbolomètre"}},
+  {"id": "insb", "label": {"en": "InSb", "fr": "InSb"}},
+  {"id": "mct", "label": {"en": "MCT (HgCdTe)", "fr": "MCT (HgCdTe)"}},
+  {"id": "event_based", "label": {"en": "Event-based", "fr": "Événementiel"}}
+]

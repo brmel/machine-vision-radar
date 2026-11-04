@@ -1,0 +1,10 @@
+[
+  {"id": "white", "label": {"en": "White", "fr": "Blanc"}},
+  {"id": "red", "label": {"en": "Red", "fr": "Rouge"}},
+  {"id": "green", "label": {"en": "Green", "fr": "Vert"}},
+  {"id": "blue", "label": {"en": "Blue", "fr": "Bleu"}},
+  {"id": "rgb", "label": {"en": "RGB multi-color", "fr": "Multicolore RVB"}},
+  {"id": "uv", "label": {"en": "Ultraviolet (UV)", "fr": "Ultraviolet (UV)"}},
+  {"id": "ir", "label": {"en": "Infrared", "fr": "Infrarouge"}},
+  {"id": "swir", "label": {"en": "Short-wave infrared", "fr": "Infrarouge à ondes courtes"}}
+]

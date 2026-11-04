@@ -1,0 +1,948 @@
+[
+  {
+    "id": "accessory_type",
+    "datatype": "term",
+    "vocabulary": "accessory_types",
+    "label": {"en": "Accessory classification", "fr": "Classification de l'accessoire"},
+    "description": {"en": "Kind of accessory: cable, enclosure, I/O card, mount or test equipment.", "fr": "Type d'accessoire : câble, boîtier de protection, carte d'E/S, support ou équipement de test."}
+  },
+  {
+    "id": "accuracy",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "better": "lower",
+    "label": {"en": "Measurement accuracy", "fr": "Précision de mesure"},
+    "description": {"en": "Maximum deviation of measured 3D points from the true geometry, as point or volumetric accuracy per the source.", "fr": "Écart maximal des points 3D mesurés par rapport à la géométrie réelle, en précision ponctuelle ou volumétrique selon la source."},
+    "aliases": ["accuracy", "point accuracy", "volumetric accuracy", "3D accuracy", "précision", "exactitude", "précision volumétrique", "Genauigkeit", "Messgenauigkeit", "Punktgenauigkeit"],
+    "bounds": {"min": 0.0001, "max": 1000},
+    "precision": 3
+  },
+  {
+    "id": "ai_methods",
+    "datatype": "term_set",
+    "vocabulary": "ai_methods",
+    "label": {"en": "Supported vision tasks", "fr": "Tâches de vision supportées"},
+    "description": {"en": "AI method families the product uses or offers, such as deep learning, classical machine learning, generative AI or vision-language models.", "fr": "Familles de méthodes d'IA que le produit utilise ou propose, par exemple apprentissage profond, apprentissage automatique classique, IA générative ou modèles vision-langage."}
+  },
+  {
+    "id": "application",
+    "datatype": "term_set",
+    "vocabulary": "applications",
+    "label": {"en": "Applications", "fr": "Applications"},
+    "description": {"en": "Inspection tasks the system is built for, such as AOI, solder paste inspection, X-ray inspection, bin picking or metrology.", "fr": "Tâches d'inspection pour lesquelles le système est conçu, par exemple AOI, inspection de pâte à braser, inspection par rayons X, dévracage ou métrologie."}
+  },
+  {
+    "id": "bands",
+    "datatype": "quantity",
+    "dimension": "count",
+    "unit": "count",
+    "better": "higher",
+    "label": {"en": "Spectral bands", "fr": "Bandes spectrales"},
+    "description": {"en": "Number of distinct spectral bands the device records for each spatial point.", "fr": "Nombre de bandes spectrales distinctes que l'appareil enregistre pour chaque point de l'image."},
+    "aliases": ["bands", "spectral channels", "number of bands", "wavelength bands", "bandes", "nombre de bandes", "canaux spectraux", "Spektralbänder", "Spektralkanäle", "Anzahl der Bänder"],
+    "bounds": {"min": 1, "max": 10000},
+    "precision": 0
+  },
+  {
+    "id": "baseline",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "label": {"en": "Stereo baseline", "fr": "Ligne de base stéréo"},
+    "description": {"en": "Distance between the optical centers of a stereo device's two cameras, or between its projector and camera.", "fr": "Distance entre les centres optiques des deux caméras d'un appareil stéréo, ou entre son projecteur et sa caméra."},
+    "aliases": ["baseline", "stereo base", "base distance", "camera baseline", "base stéréo", "entraxe des caméras", "ligne de base", "Basisabstand", "Stereobasis", "Basislänge"],
+    "bounds": {"min": 1, "max": 5000},
+    "precision": 1
+  },
+  {
+    "id": "camera_support",
+    "datatype": "term_set",
+    "vocabulary": "camera_types",
+    "label": {"en": "Supported camera standards", "fr": "Standards de caméras supportés"},
+    "description": {"en": "Camera kinds the software works with, such as area-scan, line-scan, 3D, thermal or hyperspectral, or any hardware.", "fr": "Types de caméras avec lesquels le logiciel fonctionne, par exemple matricielles, linéaires, 3D, thermiques ou hyperspectrales, ou tout matériel."}
+  },
+  {
+    "id": "capabilities",
+    "datatype": "term_set",
+    "vocabulary": "capabilities",
+    "label": {"en": "Functional capabilities", "fr": "Capacités fonctionnelles"},
+    "description": {"en": "Camera functions the device supports, such as region of interest, triggering, binning, HDR, chunk data, PTP sync or a sequencer.", "fr": "Fonctions de caméra prises en charge, par exemple région d'intérêt, déclenchement, binning, HDR, données chunk, synchronisation PTP ou séquenceur."},
+    "aliases": ["camera features", "camera functions", "functions", "features", "fonctions", "fonctionnalités", "fonctions de la caméra", "Funktionen", "Kamerafunktionen", "Funktionsumfang", "Leistungsmerkmale"]
+  },
+  {
+    "id": "channels",
+    "datatype": "quantity",
+    "dimension": "count",
+    "unit": "count",
+    "better": "higher",
+    "label": {"en": "Channels count", "fr": "Nombre de canaux"},
+    "description": {"en": "Number of independent camera inputs of a frame grabber or vision controller.", "fr": "Nombre d'entrées caméra indépendantes d'une carte d'acquisition ou d'un contrôleur de vision."},
+    "aliases": ["camera inputs", "camera ports", "inputs", "number of channels", "entrées caméra", "nombre de caméras", "voies", "Kanäle", "Kameraeingänge", "Kanalanzahl"],
+    "bounds": {"min": 1, "max": 256},
+    "precision": 0
+  },
+  {
+    "id": "chroma",
+    "datatype": "term_set",
+    "vocabulary": "chroma",
+    "label": {"en": "Chroma capability", "fr": "Sensibilité chromatique"},
+    "description": {"en": "Whether the sensor captures color images, through a color filter array, or monochrome images.", "fr": "Indique si le capteur produit des images couleur, par une matrice de filtres colorés, ou monochromes."},
+    "aliases": ["color/mono", "mono/color", "color type", "monochrome or color", "couleur/monochrome", "monochrome/couleur", "type couleur", "Farbe/Monochrom", "Farbe/Mono", "Farbtyp"]
+  },
+  {
+    "id": "coating",
+    "datatype": "term_set",
+    "vocabulary": "coatings",
+    "label": {"en": "Optical coating", "fr": "Traitement de surface optique"},
+    "description": {"en": "Surface coating on the optical component, such as anti-reflective, hard, dielectric, metallic or hydrophobic.", "fr": "Traitement de surface du composant optique, par exemple antireflet, durci, diélectrique, métallique ou hydrophobe."}
+  },
+  {
+    "id": "color",
+    "datatype": "term_set",
+    "vocabulary": "light_colors",
+    "label": {"en": "Emitted light color", "fr": "Couleur d'éclairage émise"},
+    "description": {"en": "Color or spectral band of the emitted light, such as white, red, RGB, UV, IR or SWIR.", "fr": "Couleur ou bande spectrale de la lumière émise, par exemple blanc, rouge, RVB, UV, IR ou SWIR."},
+    "aliases": ["light color", "light colour", "LED color", "emission color", "couleur de la lumière", "couleur des LED", "Lichtfarbe", "LED-Farbe", "Leuchtfarbe"]
+  },
+  {
+    "id": "compliance",
+    "datatype": "term_set",
+    "vocabulary": "standards",
+    "label": {"en": "Standards and compliance", "fr": "Normes et conformité"},
+    "description": {"en": "The interface standards, by version, and the compliance marks the product's maker states it meets.", "fr": "Les normes d'interface, par version, et les marquages de conformité que le fabricant déclare respectés par le produit."},
+    "aliases": ["GenICam compliant", "GenICam support", "standards compliance", "certifications", "approvals", "conformité", "Normen", "Zulassungen", "GenICam-konform"]
+  },
+  {
+    "id": "component_type",
+    "datatype": "term_set",
+    "vocabulary": "component_types",
+    "label": {"en": "Hardware component classification", "fr": "Classification du composant matériel"},
+    "description": {"en": "Kind of optical component, such as filter, mirror, prism, polarizer, waveplate, beamsplitter or window.", "fr": "Type de composant optique, par exemple filtre, miroir, prisme, polariseur, lame d'onde, séparatrice ou hublot."}
+  },
+  {
+    "id": "config_style",
+    "datatype": "term",
+    "vocabulary": "config_styles",
+    "label": {"en": "Configuration style", "fr": "Mode de configuration"},
+    "description": {"en": "How users set up applications: by writing code, with low-code or no-code tools, or through a guided step-by-step setup.", "fr": "Manière dont l'utilisateur configure ses applications : en code, avec des outils low-code ou no-code, ou par une configuration guidée pas à pas."}
+  },
+  {
+    "id": "contrast_threshold",
+    "datatype": "quantity",
+    "dimension": "ratio_dimensionless",
+    "unit": "percent",
+    "better": "lower",
+    "label": {"en": "Event contrast sensitivity", "fr": "Sensibilité au contraste"},
+    "description": {"en": "Smallest relative change in a pixel's brightness that triggers an event in an event-based sensor, as a percentage.", "fr": "Plus petite variation relative de luminosité d'un pixel qui déclenche un événement dans un capteur à événements, en pourcentage."},
+    "aliases": ["contrast threshold", "contrast sensitivity", "event threshold", "seuil de contraste", "seuil d'événement", "Kontrastschwelle", "Kontrastempfindlichkeit"],
+    "bounds": {"min": 0.1, "max": 100},
+    "precision": 1
+  },
+  {
+    "id": "controller_integrated",
+    "datatype": "boolean",
+    "label": {"en": "Integrated controller", "fr": "Contrôleur intégré"},
+    "description": {"en": "Whether the light includes its own driver or strobe controller, so it runs from power and trigger without an external controller.", "fr": "Indique si l'éclairage intègre son propre driver ou contrôleur de flash, et fonctionne avec alimentation et déclenchement sans contrôleur externe."},
+    "aliases": ["built-in controller", "integrated driver", "built-in driver", "onboard driver", "integrated strobe controller", "driver intégré", "contrôleur embarqué", "électronique de commande intégrée", "integrierter Controller", "integrierte Ansteuerung", "integrierter Treiber"]
+  },
+  {
+    "id": "data_tools",
+    "datatype": "term_set",
+    "vocabulary": "data_tools",
+    "label": {"en": "Dataset annotation tools", "fr": "Outils d'annotation de données"},
+    "description": {"en": "Dataset tools the platform includes, such as labeling, dataset management, active learning or synthetic data generation.", "fr": "Outils de données inclus dans la plateforme, par exemple annotation, gestion de jeux de données, apprentissage actif ou génération de données synthétiques."}
+  },
+  {
+    "id": "deep_learning",
+    "datatype": "boolean",
+    "label": {"en": "Deep learning support", "fr": "Support du Deep Learning"},
+    "description": {"en": "Whether the SDK includes deep-learning tools to train or run neural networks.", "fr": "Indique si le SDK inclut des outils d'apprentissage profond pour entraîner ou exécuter des réseaux de neurones."}
+  },
+  {
+    "id": "deployment",
+    "datatype": "term_set",
+    "vocabulary": "deployments",
+    "label": {"en": "Deployment architecture", "fr": "Architecture de déploiement"},
+    "description": {"en": "Where the product runs: in the cloud, at the edge near the cameras, or both.", "fr": "Lieu d'exécution du produit : dans le cloud, en périphérie près des caméras, ou les deux."}
+  },
+  {
+    "id": "depth_range",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "label": {"en": "Depth working range", "fr": "Plage de profondeur"},
+    "description": {"en": "Distances along the optical axis (Z) over which the device returns depth, nearest to farthest, or its Z measuring span.", "fr": "Distances le long de l'axe optique (Z) où l'appareil fournit la profondeur, de la plus proche à la plus lointaine, ou son étendue de mesure en Z."},
+    "aliases": ["Z range", "depth range", "measuring range Z", "Z measuring range", "plage Z", "plage de mesure Z", "étendue de mesure en Z", "Messbereich Z", "Z-Messbereich", "Tiefenbereich"],
+    "bounds": {"min": 0, "max": 1000000},
+    "precision": 1
+  },
+  {
+    "id": "device_kind",
+    "datatype": "term_set",
+    "vocabulary": "device_kinds",
+    "label": {"en": "Device kind", "fr": "Type de périphérique"},
+    "description": {"en": "Kind of acquisition hardware: capture card, interface board, bridge or extender.", "fr": "Type de matériel d'acquisition : carte de capture, carte d'interface, pont ou prolongateur."},
+    "aliases": ["device type", "board type", "card type", "type de carte", "type d'appareil", "Gerätetyp", "Kartentyp"]
+  },
+  {
+    "id": "dimensions_size",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "label": {"en": "Physical enclosure dimensions", "fr": "Dimensions physiques du boîtier"},
+    "description": {"en": "Largest outer dimension of the component, such as the diameter of a round optic or the longer side of a rectangular one.", "fr": "Plus grande dimension extérieure du composant, par exemple le diamètre d'une optique ronde ou le plus grand côté d'une optique rectangulaire."},
+    "bounds": {"min": 0.1, "max": 5000},
+    "precision": 1
+  },
+  {
+    "id": "dynamic_range",
+    "datatype": "quantity",
+    "dimension": "ratio_db",
+    "unit": "db",
+    "better": "higher",
+    "label": {"en": "Dynamic range", "fr": "Plage dynamique"},
+    "description": {"en": "Ratio of the sensor's saturation signal to its temporal dark noise, in decibels, for a single exposure unless the source names an HDR mode.", "fr": "Rapport entre le signal de saturation du capteur et son bruit temporel d'obscurité, en décibels, en pose unique sauf mode HDR indiqué."},
+    "aliases": ["DR", "intra-scene dynamic range", "dynamique", "gamme dynamique", "Dynamikbereich", "Dynamikumfang", "Dynamik"],
+    "bounds": {"min": 20, "max": 200},
+    "precision": 1
+  },
+  {
+    "id": "f_number",
+    "datatype": "quantity",
+    "dimension": "ratio_dimensionless",
+    "unit": "one",
+    "label": {"en": "Aperture (f-number)", "fr": "Ouverture (nombre d'ouverture f/#)"},
+    "description": {"en": "Ratio of focal length to entrance pupil diameter; with an adjustable iris, from the widest to the smallest aperture.", "fr": "Rapport entre distance focale et diamètre de la pupille d'entrée ; avec un diaphragme réglable, de l'ouverture maximale à la minimale."},
+    "aliases": ["aperture", "f-stop", "f/#", "F#", "focal ratio", "aperture range", "iris range", "ouverture", "nombre f", "plage d'ouverture", "Blende", "Blendenzahl", "Blendenbereich", "Lichtstärke"],
+    "bounds": {"min": 0.5, "max": 128},
+    "precision": 2
+  },
+  {
+    "id": "few_shot",
+    "datatype": "boolean",
+    "label": {"en": "Few-shot learning capable", "fr": "Apprentissage par peu d'exemples"},
+    "description": {"en": "Whether the platform trains a usable model from a few labeled images, typically tens or fewer per class.", "fr": "Indique si la plateforme entraîne un modèle exploitable à partir de quelques images annotées, en général quelques dizaines par classe au plus."}
+  },
+  {
+    "id": "field_of_view",
+    "datatype": "quantity",
+    "dimension": "angle",
+    "unit": "deg",
+    "label": {"en": "Field of view", "fr": "Champ de vision (FOV)"},
+    "description": {"en": "Angular field the device sees or scans, horizontal unless the source states otherwise; 360 for a full rotation.", "fr": "Champ angulaire que l'appareil voit ou balaie, horizontal sauf mention contraire de la source ; 360 pour un tour complet."},
+    "aliases": ["FOV", "angle of view", "AOV", "viewing angle", "horizontal FOV", "angle de champ", "angle de vue", "champ angulaire", "Sichtfeld", "Bildwinkel", "Öffnungswinkel", "Blickfeld"],
+    "bounds": {"min": 0.1, "max": 360},
+    "precision": 1
+  },
+  {
+    "id": "fieldbus",
+    "datatype": "term_set",
+    "vocabulary": "fieldbuses",
+    "label": {"en": "Fieldbus", "fr": "Bus de terrain"},
+    "description": {"en": "Industrial network protocols the device uses to talk to PLCs, such as PROFINET, EtherNet/IP, EtherCAT, Modbus or OPC UA.", "fr": "Protocoles de réseau industriel que l'appareil utilise avec les automates, par exemple PROFINET, EtherNet/IP, EtherCAT, Modbus ou OPC UA."},
+    "aliases": ["industrial Ethernet", "industrial protocols", "PLC protocols", "industrial communication", "protocoles industriels", "Ethernet industriel", "réseau de terrain", "Feldbus", "Industrieprotokolle"]
+  },
+  {
+    "id": "focal_length",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "label": {"en": "Focal length", "fr": "Distance focale"},
+    "description": {"en": "Effective focal length of the lens; for a zoom lens, from its shortest to its longest focal length.", "fr": "Distance focale effective de l'objectif ; pour un zoom, de la plus courte à la plus longue."},
+    "aliases": ["EFL", "effective focal length", "focal", "focale", "longueur focale", "focale effective", "Brennweite"],
+    "bounds": {"min": 0.3, "max": 5000},
+    "precision": 2
+  },
+  {
+    "id": "focus_type",
+    "datatype": "term",
+    "vocabulary": "focus_types",
+    "label": {"en": "Focus adjustment type", "fr": "Type de réglage de mise au point"},
+    "description": {"en": "How the lens focus is set: fixed, manual, motorized or through a liquid lens.", "fr": "Mode de réglage de la mise au point : fixe, manuel, motorisé ou par lentille liquide."},
+    "aliases": ["focus", "focus control", "focusing", "focus mechanism", "mise au point", "type de mise au point", "commande de mise au point", "Fokus", "Fokussierung", "Fokusart", "Scharfeinstellung"]
+  },
+  {
+    "id": "form",
+    "datatype": "term",
+    "vocabulary": "ip_forms",
+    "label": {"en": "Physical form", "fr": "Forme physique"},
+    "description": {"en": "How a protocol IP product is delivered: as an FPGA IP core or as a software stack.", "fr": "Forme sous laquelle un produit IP de protocole est livré : cœur IP FPGA ou pile logicielle."}
+  },
+  {
+    "id": "form_factor",
+    "datatype": "term_set",
+    "vocabulary": "form_factors",
+    "label": {"en": "Form factor", "fr": "Facteur de forme"},
+    "description": {"en": "Physical package of the product, such as a box enclosure, a board-level module, a handheld unit or a PCIe card.", "fr": "Format physique du produit, par exemple boîtier, module carte nue, appareil portatif ou carte PCIe."},
+    "aliases": ["housing type", "package type", "mechanical format", "format", "type de boîtier", "Bauform", "Formfaktor", "Gehäuseform"]
+  },
+  {
+    "id": "frame_rate",
+    "datatype": "quantity",
+    "dimension": "frequency",
+    "unit": "hz",
+    "better": "higher",
+    "label": {"en": "Frame rate", "fr": "Fréquence d'images"},
+    "description": {"en": "Maximum number of full frames per second the device delivers at full resolution over its main interface.", "fr": "Nombre maximal d'images complètes par seconde que l'appareil délivre en pleine résolution sur son interface principale."},
+    "aliases": ["fps", "frames per second", "frame frequency", "max frame rate", "image rate", "images par seconde", "i/s", "ips", "cadence d'images", "Bildrate", "Bildfrequenz", "Bilder pro Sekunde", "Bildwiederholrate"],
+    "bounds": {"min": 0.01, "max": 10000000},
+    "precision": 1,
+    "external": {"sfnc": "AcquisitionFrameRate"}
+  },
+  {
+    "id": "grading_standards",
+    "datatype": "term_set",
+    "vocabulary": "grading_standards",
+    "label": {"en": "Quality grading standards", "fr": "Normes de gradation qualité"},
+    "description": {"en": "Code print-quality standards the device grades against, such as ISO/IEC 15415, 15416 and 29158.", "fr": "Normes de qualité d'impression des codes selon lesquelles l'appareil évalue, par exemple ISO/IEC 15415, 15416 et 29158."},
+    "aliases": ["verification standards", "print quality standards", "code grading", "code verification", "normes de vérification", "vérification de code", "évaluation de la qualité d'impression", "Verifikationsnormen", "Codeverifikation", "Druckqualitätsbewertung"]
+  },
+  {
+    "id": "height_px",
+    "datatype": "quantity",
+    "dimension": "pixel_count",
+    "unit": "px",
+    "better": "higher",
+    "label": {"en": "Height", "fr": "Hauteur"},
+    "description": {"en": "Active pixel rows at full resolution; for a line-scan sensor, its number of lines, often 1.", "fr": "Lignes de pixels actives en pleine résolution ; pour un capteur linéaire, son nombre de lignes, souvent 1."},
+    "aliases": ["vertical pixels", "image height", "pixels vertical", "number of lines", "pixels verticaux", "hauteur d'image", "nombre de lignes", "Bildhöhe", "Pixel vertikal", "Zeilenanzahl"],
+    "bounds": {"min": 1, "max": 100000},
+    "precision": 0,
+    "external": {"sfnc": "SensorHeight"}
+  },
+  {
+    "id": "illumination",
+    "datatype": "term_set",
+    "vocabulary": "illuminations",
+    "label": {"en": "Integrated illumination", "fr": "Éclairage intégré"},
+    "description": {"en": "Light source built into the reader to light the codes it reads, such as LEDs.", "fr": "Source de lumière intégrée au lecteur pour éclairer les codes qu'il lit, par exemple des LED."},
+    "aliases": ["illumination", "lighting", "built-in illumination", "integrated light", "internal lighting", "éclairage", "éclairage interne", "Beleuchtung", "integrierte Beleuchtung", "interne Beleuchtung"]
+  },
+  {
+    "id": "industries",
+    "datatype": "term_set",
+    "vocabulary": "industries",
+    "label": {"en": "Industries", "fr": "Secteurs"},
+    "description": {"en": "Industries the product is built or sold for, such as automotive, electronics, semiconductor, food or logistics.", "fr": "Secteurs pour lesquels le produit est conçu ou vendu, par exemple automobile, électronique, semi-conducteurs, agroalimentaire ou logistique."}
+  },
+  {
+    "id": "integrated_vision",
+    "datatype": "boolean",
+    "label": {"en": "Integrated vision sensor", "fr": "Capteur de vision intégré"},
+    "description": {"en": "Whether the laser system includes a camera to locate parts or verify marks.", "fr": "Indique si le système laser intègre une caméra pour localiser les pièces ou vérifier les marquages."}
+  },
+  {
+    "id": "integration_api",
+    "datatype": "boolean",
+    "label": {"en": "Integration API", "fr": "API d'intégration"},
+    "description": {"en": "Whether the platform exposes a documented API that other software can call, such as REST or an SDK.", "fr": "Indique si la plateforme expose une API documentée que d'autres logiciels peuvent appeler, comme REST ou un SDK."}
+  },
+  {
+    "id": "interfaces",
+    "datatype": "term_set",
+    "vocabulary": "interfaces",
+    "label": {"en": "Interfaces", "fr": "Interfaces"},
+    "description": {"en": "Data and control interfaces of the device, such as GigE Vision, USB3 Vision, CoaXPress, Camera Link, MIPI or serial lines.", "fr": "Interfaces de données et de commande de l'appareil, par exemple GigE Vision, USB3 Vision, CoaXPress, Camera Link, MIPI ou liaisons série."},
+    "aliases": ["data interface", "camera interface", "connectivity", "I/O interface", "interface de données", "connectique", "connectivité", "Schnittstelle", "Schnittstellen", "Datenschnittstelle", "Kameraschnittstelle"]
+  },
+  {
+    "id": "ip_rating",
+    "datatype": "term",
+    "vocabulary": "ip_rating",
+    "label": {"en": "IP rating", "fr": "Indice de protection (IP)"},
+    "description": {"en": "Ingress protection code per IEC 60529, or ISO 20653 for IP69K: the first digit rates solids, the second water.", "fr": "Code de protection selon la CEI 60529, ou l'ISO 20653 pour IP69K : le premier chiffre note les solides, le second l'eau."},
+    "aliases": ["ingress protection", "protection class", "IP code", "enclosure rating", "protection rating", "indice IP", "degré de protection", "classe de protection", "code IP", "Schutzart", "IP-Schutzart", "Schutzgrad"]
+  },
+  {
+    "id": "iris_type",
+    "datatype": "term",
+    "vocabulary": "iris_types",
+    "label": {"en": "Iris control type", "fr": "Type de commande de diaphragme"},
+    "description": {"en": "How the lens aperture is set: fixed, manual or automatic.", "fr": "Mode de réglage de l'ouverture de l'objectif : fixe, manuel ou automatique."},
+    "aliases": ["iris", "iris control", "aperture control", "diaphragm", "diaphragme", "commande d'iris", "Blendensteuerung", "Blendenart"]
+  },
+  {
+    "id": "languages",
+    "datatype": "term_set",
+    "vocabulary": "programming_languages",
+    "label": {"en": "Supported programming languages", "fr": "Langages de programmation supportés"},
+    "description": {"en": "Programming languages the product offers an API or development environment for.", "fr": "Langages de programmation pour lesquels le produit fournit une API ou un environnement de développement."}
+  },
+  {
+    "id": "laser_class",
+    "datatype": "term",
+    "vocabulary": "laser_class",
+    "label": {"en": "Laser safety class", "fr": "Classe de sécurité laser"},
+    "description": {"en": "Safety class of the laser product under IEC 60825-1, set by the accessible emission of its laser.", "fr": "Classe de sécurité du produit laser selon la CEI 60825-1, fixée par l'émission accessible de son laser."},
+    "aliases": ["laser class", "laser classification", "laser product class", "classe laser", "classe du laser", "Laserklasse", "Laserschutzklasse"]
+  },
+  {
+    "id": "laser_type",
+    "datatype": "term_set",
+    "vocabulary": "laser_sources",
+    "label": {"en": "Laser source technology", "fr": "Technologie de source laser"},
+    "description": {"en": "Laser source of the system, such as fiber, CO2, UV, green or diode.", "fr": "Source laser du système, par exemple fibre, CO2, UV, verte ou diode."}
+  },
+  {
+    "id": "latency",
+    "datatype": "quantity",
+    "dimension": "time",
+    "unit": "us",
+    "better": "lower",
+    "label": {"en": "Processing latency", "fr": "Latence de traitement"},
+    "description": {"en": "Time from light reaching the sensor to the matching data or result leaving the device.", "fr": "Temps entre l'arrivée de la lumière sur le capteur et la sortie des données ou du résultat correspondants."},
+    "aliases": ["latency", "pixel latency", "processing delay", "latence", "délai de traitement", "Latenz", "Verarbeitungslatenz", "Verzögerungszeit"],
+    "bounds": {"min": 0.01, "max": 10000000},
+    "precision": 1
+  },
+  {
+    "id": "lateral_resolution",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "um",
+    "better": "lower",
+    "label": {"en": "Lateral resolution (X/Y)", "fr": "Résolution latérale (X/Y)"},
+    "description": {"en": "Smallest spacing the 3D device resolves across the scene in X and Y, usually the point spacing on the object.", "fr": "Plus petit espacement que l'appareil 3D distingue dans le plan de la scène, en X et Y, en général le pas des points sur l'objet."},
+    "aliases": ["X resolution", "XY resolution", "point spacing", "résolution X", "résolution XY", "pas latéral", "laterale Auflösung", "X-Auflösung", "Punktabstand"],
+    "bounds": {"min": 0.01, "max": 50000},
+    "precision": 2
+  },
+  {
+    "id": "lens_kind",
+    "datatype": "term_set",
+    "vocabulary": "lens_kinds",
+    "label": {"en": "Lens architecture", "fr": "Architecture d'objectif"},
+    "description": {"en": "Optical design of the lens: fixed focal length, zoom or macro.", "fr": "Conception optique de l'objectif : focale fixe, zoom ou macro."},
+    "aliases": ["lens type", "lens category", "lens design", "type d'objectif", "famille d'objectif", "Objektivtyp", "Objektivart"]
+  },
+  {
+    "id": "lens_mount",
+    "datatype": "term_set",
+    "vocabulary": "lens_mounts",
+    "label": {"en": "Lens mount", "fr": "Monture d'objectif"},
+    "description": {"en": "Mechanical interface between lens and camera body, such as C-mount, CS-mount, S-mount or F-mount, which also sets the flange distance.", "fr": "Interface mécanique entre objectif et boîtier, par exemple monture C, CS, S ou F, qui fixe aussi le tirage mécanique."},
+    "aliases": ["mount", "mount type", "optical interface", "lens interface", "monture", "type de monture", "fixation d'objectif", "Objektivanschluss", "Objektivgewinde", "Bajonett"]
+  },
+  {
+    "id": "light_type",
+    "datatype": "term",
+    "vocabulary": "light_types",
+    "label": {"en": "Illumination geometry", "fr": "Géométrie d'éclairage"},
+    "description": {"en": "Geometry of the light, such as ring, bar, spot, dome, coaxial, backlight or dark field.", "fr": "Géométrie de l'éclairage, par exemple annulaire, barre, spot, dôme, coaxial, rétroéclairage ou fond noir."},
+    "aliases": ["light type", "illumination type", "lighting type", "light shape", "type d'éclairage", "forme d'éclairage", "Beleuchtungsart", "Beleuchtungstyp", "Leuchtentyp"]
+  },
+  {
+    "id": "line_rate",
+    "datatype": "quantity",
+    "dimension": "frequency",
+    "unit": "khz",
+    "better": "higher",
+    "label": {"en": "Line rate", "fr": "Fréquence de ligne"},
+    "description": {"en": "Maximum number of lines per second a line-scan sensor reads out at full line width; for a 3D laser profiler, its profile rate.", "fr": "Nombre maximal de lignes par seconde lues par un capteur linéaire sur toute sa largeur ; pour un profilomètre laser 3D, sa cadence de profils."},
+    "aliases": ["line frequency", "lines per second", "max line rate", "line scan rate", "fréquence ligne", "lignes par seconde", "cadence ligne", "Zeilenrate", "Zeilenfrequenz", "Zeilen pro Sekunde"],
+    "bounds": {"min": 0.01, "max": 2000},
+    "precision": 2,
+    "external": {"sfnc": "AcquisitionLineRate"}
+  },
+  {
+    "id": "linearity",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "um",
+    "better": "lower",
+    "label": {"en": "Measurement linearity", "fr": "Linéarité de mesure"},
+    "description": {"en": "Maximum deviation of the sensor's output from a straight-line fit over its measuring range, as a length.", "fr": "Écart maximal de la sortie du capteur par rapport à une droite d'ajustement sur toute son étendue de mesure, exprimé en longueur."},
+    "bounds": {"min": 0.0001, "max": 10000},
+    "precision": 3
+  },
+  {
+    "id": "magnification",
+    "datatype": "quantity",
+    "dimension": "ratio_dimensionless",
+    "unit": "one",
+    "label": {"en": "Optical magnification ratio", "fr": "Rapport de grandissement optique"},
+    "description": {"en": "Ratio of image size on the sensor to object size, as stated for a macro or telecentric lens; for a zoom, its range.", "fr": "Rapport entre la taille de l'image sur le capteur et celle de l'objet, comme pour un objectif macro ou télécentrique ; pour un zoom, sa plage."},
+    "aliases": ["magnification", "optical magnification", "PMAG", "primary magnification", "grandissement", "grossissement", "Vergrößerung", "Abbildungsmaßstab"],
+    "bounds": {"min": 0.001, "max": 1000},
+    "precision": 3
+  },
+  {
+    "id": "marking_field",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "label": {"en": "Marking field", "fr": "Champ de marquage"},
+    "description": {"en": "Side length of the laser marker's marking field; for a rectangular field, the longer side.", "fr": "Longueur du côté du champ de marquage du marqueur laser ; pour un champ rectangulaire, le plus grand côté."},
+    "bounds": {"min": 1, "max": 10000},
+    "precision": 0
+  },
+  {
+    "id": "marking_speed",
+    "datatype": "quantity",
+    "dimension": "velocity",
+    "unit": "mm_per_s",
+    "better": "higher",
+    "label": {"en": "Marking linear speed", "fr": "Vitesse linéaire de marquage"},
+    "description": {"en": "Maximum linear speed of the laser spot across the workpiece while marking, as the source states it.", "fr": "Vitesse linéaire maximale du spot laser sur la pièce pendant le marquage, telle que la source l'indique."},
+    "bounds": {"min": 1, "max": 100000},
+    "precision": 0
+  },
+  {
+    "id": "max_event_rate",
+    "datatype": "quantity",
+    "dimension": "frequency",
+    "unit": "hz",
+    "better": "higher",
+    "label": {"en": "Max event throughput", "fr": "Débit d'événements maximal"},
+    "description": {"en": "Maximum number of pixel events per second an event-based sensor or camera reads out.", "fr": "Nombre maximal d'événements pixel par seconde qu'un capteur ou une caméra à événements transmet."},
+    "aliases": ["event rate", "max event rate", "events per second", "event throughput", "débit d'événements", "taux d'événements", "événements par seconde", "Ereignisrate", "Ereignisse pro Sekunde", "maximale Ereignisrate"],
+    "bounds": {"min": 100000, "max": 100000000000},
+    "precision": 0
+  },
+  {
+    "id": "max_read_rate",
+    "datatype": "quantity",
+    "dimension": "frequency",
+    "unit": "hz",
+    "better": "higher",
+    "label": {"en": "Maximum read rate", "fr": "Cadence de lecture maximale"},
+    "description": {"en": "Maximum number of reads or decodes per second the code reader performs.", "fr": "Nombre maximal de lectures ou de décodages par seconde que le lecteur de codes effectue."},
+    "aliases": ["read rate", "decode rate", "reads per second", "decodes per second", "vitesse de lecture", "cadence de décodage", "lectures par seconde", "Leserate", "Lesegeschwindigkeit", "Decodierrate"],
+    "bounds": {"min": 0.1, "max": 100000},
+    "precision": 0
+  },
+  {
+    "id": "max_sensor_format",
+    "datatype": "term",
+    "vocabulary": "sensor_formats",
+    "label": {"en": "Maximum sensor format", "fr": "Format de capteur maximal"},
+    "description": {"en": "Largest sensor format the lens image circle covers without vignetting, such as 2/3-inch, 1.1-inch or full frame.", "fr": "Plus grand format de capteur couvert par le cercle image de l'objectif sans vignetage, par exemple 2/3 de pouce, 1,1 pouce ou plein format."},
+    "aliases": ["sensor format", "max sensor size", "image format", "optical format", "max image format", "format de capteur", "format d'image", "format optique", "Sensorformat", "Bildformat", "maximale Sensorgröße"]
+  },
+  {
+    "id": "measurement_rate",
+    "datatype": "quantity",
+    "dimension": "frequency",
+    "unit": "hz",
+    "better": "higher",
+    "label": {"en": "Measurement frequency", "fr": "Cadence de mesure"},
+    "description": {"en": "Maximum number of spectra, spectral lines or spectral frames the device records per second.", "fr": "Nombre maximal de spectres, de lignes ou d'images spectrales que l'appareil enregistre par seconde."},
+    "aliases": ["measurement rate", "acquisition rate", "spectra per second", "spectral rate", "fréquence de mesure", "spectres par seconde", "cadence d'acquisition", "Messrate", "Messfrequenz", "Spektren pro Sekunde"],
+    "bounds": {"min": 0.001, "max": 10000000},
+    "precision": 1
+  },
+  {
+    "id": "measuring_range",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "label": {"en": "Measurement range", "fr": "Plage de mesure"},
+    "description": {"en": "Distances a displacement sensor measures, from start to end of its range, or its span when the source gives only that.", "fr": "Plage de distances mesurée par un capteur de déplacement, du début à la fin, ou sa seule étendue quand la source ne donne qu'elle."},
+    "bounds": {"min": 0, "max": 1000000},
+    "precision": 2
+  },
+  {
+    "id": "memory",
+    "datatype": "quantity",
+    "dimension": "digital_information",
+    "unit": "byte",
+    "better": "higher",
+    "label": {"en": "System RAM", "fr": "Mémoire vive système (RAM)"},
+    "description": {"en": "Main memory (RAM) available to the device's processor.", "fr": "Capacité de mémoire principale accessible au processeur de l'appareil."},
+    "bounds": {"min": 10000, "max": 10000000000000},
+    "precision": 0
+  },
+  {
+    "id": "onboard_processing",
+    "datatype": "boolean",
+    "label": {"en": "Onboard processing", "fr": "Traitement embarqué"},
+    "description": {"en": "Whether the frame grabber processes images on the board, for example in an FPGA, before passing them to the host.", "fr": "Indique si la carte d'acquisition traite les images sur la carte, par exemple dans un FPGA, avant de les transmettre à l'hôte."},
+    "aliases": ["FPGA processing", "image preprocessing", "onboard image processing", "hardware acceleration", "traitement FPGA", "prétraitement d'image", "traitement d'image embarqué", "FPGA-Verarbeitung", "Bildvorverarbeitung", "On-Board-Verarbeitung"]
+  },
+  {
+    "id": "operating_temperature",
+    "datatype": "quantity",
+    "dimension": "temperature",
+    "unit": "deg_c",
+    "label": {"en": "Operating temperature", "fr": "Température de fonctionnement"},
+    "description": {"en": "Ambient temperature range in which the device is specified to operate; not the temperature it measures, nor its storage range.", "fr": "Plage de température ambiante dans laquelle l'appareil est spécifié pour fonctionner ; ni la température qu'il mesure, ni sa plage de stockage."},
+    "aliases": ["operating temp", "ambient temperature", "working temperature", "ambient operating temperature", "température d'utilisation", "température ambiante", "plage de température de fonctionnement", "Betriebstemperatur", "Umgebungstemperatur", "Arbeitstemperatur"],
+    "bounds": {"min": -100, "max": 200},
+    "precision": 0
+  },
+  {
+    "id": "os",
+    "datatype": "term_set",
+    "vocabulary": "operating_systems",
+    "label": {"en": "Operating system", "fr": "Système d'exploitation"},
+    "description": {"en": "Operating systems the product runs on or supports.", "fr": "Systèmes d'exploitation sur lesquels le produit fonctionne ou qu'il prend en charge."}
+  },
+  {
+    "id": "pcie_generation",
+    "datatype": "term",
+    "vocabulary": "pcie_generations",
+    "label": {"en": "PCIe generation", "fr": "Génération PCIe"},
+    "description": {"en": "PCI Express generation of the host interface, which sets the transfer rate per lane.", "fr": "Génération PCI Express de l'interface hôte, qui fixe le débit par ligne."},
+    "aliases": ["PCIe Gen", "PCI Express generation", "PCIe version", "bus generation", "génération PCI Express", "version PCIe", "PCIe-Version", "PCIe-Generation", "PCI-Express-Generation"]
+  },
+  {
+    "id": "pcie_lanes",
+    "datatype": "quantity",
+    "dimension": "count",
+    "unit": "count",
+    "better": "higher",
+    "label": {"en": "PCIe lanes", "fr": "Lignes PCIe"},
+    "description": {"en": "Number of PCI Express lanes of the host interface, as in x4 or x8.", "fr": "Nombre de lignes PCI Express de l'interface hôte, par exemple x4 ou x8."},
+    "aliases": ["lanes", "lane count", "link width", "PCIe link width", "voies PCIe", "nombre de lignes PCIe", "largeur de lien", "PCIe-Lanes", "Lane-Anzahl", "Linkbreite"],
+    "bounds": {"min": 1, "max": 32},
+    "precision": 0
+  },
+  {
+    "id": "pixel_size",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "um",
+    "label": {"en": "Pixel size", "fr": "Taille de pixel"},
+    "description": {"en": "Center-to-center pitch of the sensor's pixels; for non-square pixels, the horizontal pitch.", "fr": "Pas des pixels du capteur, de centre à centre ; pour des pixels non carrés, le pas horizontal."},
+    "aliases": ["pixel pitch", "pitch", "cell size", "unit cell size", "pixel dimensions", "pas de pixel", "pas des pixels", "dimension des pixels", "Pixelgröße", "Pixelabstand", "Pixel-Pitch", "Zellgröße"],
+    "bounds": {"min": 0.3, "max": 2000},
+    "precision": 2
+  },
+  {
+    "id": "points_per_sec",
+    "datatype": "quantity",
+    "dimension": "frequency",
+    "unit": "hz",
+    "better": "higher",
+    "label": {"en": "Point acquisition rate", "fr": "Taux d'acquisition de points"},
+    "description": {"en": "Maximum number of 3D points the device measures per second, across all its lines, beams or pixels.", "fr": "Nombre maximal de points 3D mesurés par seconde, toutes lignes, faisceaux ou pixels confondus."},
+    "aliases": ["points per second", "point rate", "pts/s", "measurement points per second", "points par seconde", "cadence de points", "Punkte pro Sekunde", "Punktrate", "Messpunkte pro Sekunde"],
+    "bounds": {"min": 1000, "max": 100000000000},
+    "precision": 0
+  },
+  {
+    "id": "power",
+    "datatype": "quantity",
+    "dimension": "power",
+    "unit": "w",
+    "better": "lower",
+    "label": {"en": "Power consumption", "fr": "Consommation électrique"},
+    "description": {"en": "Electrical power the device draws in operation, typical or maximum as the source states it.", "fr": "Puissance électrique absorbée par l'appareil en fonctionnement, typique ou maximale selon la source."},
+    "aliases": ["power", "power draw", "power dissipation", "rated power", "wattage", "puissance consommée", "puissance absorbée", "consommation", "Leistungsaufnahme", "Stromverbrauch", "Leistungsbedarf"],
+    "bounds": {"min": 0.0001, "max": 20000},
+    "precision": 3
+  },
+  {
+    "id": "principle",
+    "datatype": "term_set",
+    "vocabulary": "principles",
+    "label": {"en": "Measurement principle", "fr": "Principe de mesure"},
+    "description": {"en": "Physical principle the device uses to measure distance or shape, such as laser triangulation, structured light, stereo, time of flight or confocal.", "fr": "Principe physique utilisé pour mesurer une distance ou une forme, par exemple triangulation laser, lumière structurée, stéréo, temps de vol ou confocal."},
+    "aliases": ["measuring principle", "measurement method", "measuring method", "sensing principle", "3D technology", "principe", "méthode de mesure", "technologie de mesure", "Messprinzip", "Messverfahren", "Messmethode"]
+  },
+  {
+    "id": "processor",
+    "datatype": "string",
+    "label": {"en": "Processor / SoC", "fr": "Processeur / SoC"},
+    "description": {"en": "CPU, SoC or accelerator chip the device computes on, as its maker names it.", "fr": "Processeur, SoC ou puce d'accélération sur lequel l'appareil calcule, tel que son fabricant le nomme."}
+  },
+  {
+    "id": "reader_technology",
+    "datatype": "term_set",
+    "vocabulary": "reader_technologies",
+    "label": {"en": "Reading technology", "fr": "Technologie de lecture"},
+    "description": {"en": "How a code reader captures codes: with an image sensor (imager) or by sweeping a laser beam.", "fr": "Manière dont un lecteur capte les codes : par capteur d'image (imageur) ou par balayage d'un faisceau laser."},
+    "aliases": ["scan engine", "reader type", "scanner type", "reading method", "type de lecteur", "moteur de lecture", "Lesetechnologie", "Lesertyp", "Scan-Engine"]
+  },
+  {
+    "id": "reads",
+    "datatype": "term_set",
+    "vocabulary": "symbologies",
+    "label": {"en": "Supported symbologies", "fr": "Symbologies supportées"},
+    "description": {"en": "Code families the reader decodes, such as 1D barcodes, 2D codes, direct part marks and printed text (OCR).", "fr": "Familles de codes que le lecteur décode, par exemple codes-barres 1D, codes 2D, marquages directs sur pièce et texte imprimé (OCR)."},
+    "aliases": ["symbologies", "readable codes", "code types", "barcode types", "codes lisibles", "types de codes", "Symbologien", "lesbare Codes", "Codetypen"]
+  },
+  {
+    "id": "resolution",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "um",
+    "better": "lower",
+    "label": {"en": "Optical resolution", "fr": "Résolution optique"},
+    "description": {"en": "Smallest length the device resolves: the smallest distance change for a displacement sensor, the pixel size on the object for an inspection system.", "fr": "Plus petite longueur distinguée : variation minimale de distance pour un capteur de déplacement, taille du pixel sur l'objet pour un système d'inspection."},
+    "bounds": {"min": 1e-06, "max": 100000},
+    "precision": 3
+  },
+  {
+    "id": "resolution_megapixels",
+    "datatype": "quantity",
+    "dimension": "pixel_count",
+    "unit": "mp",
+    "better": "higher",
+    "label": {"en": "Resolution", "fr": "Résolution"},
+    "description": {"en": "Number of active pixels of the sensor at full resolution, in millions.", "fr": "Nombre de pixels actifs du capteur en pleine résolution, en millions."},
+    "aliases": ["megapixels", "MP", "pixel count", "effective pixels", "sensor resolution", "mégapixels", "Mpx", "nombre de pixels", "définition", "Auflösung", "Megapixel", "Pixelanzahl"],
+    "bounds": {"min": 0.0001, "max": 5000},
+    "precision": 2
+  },
+  {
+    "id": "sampling_rate",
+    "datatype": "quantity",
+    "dimension": "frequency",
+    "unit": "hz",
+    "better": "higher",
+    "label": {"en": "Sampling rate", "fr": "Taux d'échantillonnage"},
+    "description": {"en": "Maximum number of measurements per second a displacement sensor outputs.", "fr": "Nombre maximal de mesures par seconde que fournit un capteur de déplacement."},
+    "bounds": {"min": 0.1, "max": 100000000},
+    "precision": 1
+  },
+  {
+    "id": "scan_rate",
+    "datatype": "quantity",
+    "dimension": "frequency",
+    "unit": "hz",
+    "better": "higher",
+    "label": {"en": "Scan frequency", "fr": "Fréquence de balayage"},
+    "description": {"en": "Maximum number of scans per second a 3D device completes: profiles for a profiler, sweeps for a scanner, revolutions for a rotating lidar.", "fr": "Nombre maximal de balayages par seconde d'un appareil 3D : profils pour un profilomètre, passes pour un scanner, tours pour un lidar rotatif."},
+    "aliases": ["scan rate", "profile rate", "profiles per second", "profile frequency", "scan speed", "cadence de balayage", "fréquence de profil", "profils par seconde", "Profilfrequenz", "Profilrate", "Profile pro Sekunde", "Scanrate"],
+    "bounds": {"min": 0.01, "max": 1000000},
+    "precision": 1
+  },
+  {
+    "id": "scan_width",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "label": {"en": "Scan width (FOV)", "fr": "Largeur de champ balayé"},
+    "description": {"en": "Width of the field the 3D device covers along its profile (X), at the distance the source states.", "fr": "Largeur du champ couvert par l'appareil 3D le long du profil (X), à la distance indiquée par la source."},
+    "aliases": ["X range", "measuring range X", "FOV width", "field of view X", "plage X", "champ de mesure en X", "largeur de champ", "Messbereich X", "X-Messbereich", "Sichtfeldbreite"],
+    "bounds": {"min": 0.1, "max": 100000},
+    "precision": 1
+  },
+  {
+    "id": "sensor_length",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "label": {"en": "Sensor active length", "fr": "Longueur active du capteur"},
+    "description": {"en": "Length of the active pixel line of a line-scan sensor: pixel count times pixel pitch.", "fr": "Longueur de la ligne de pixels actifs d'un capteur linéaire : nombre de pixels multiplié par le pas."},
+    "aliases": ["sensor length", "active length", "line length", "longueur du capteur", "longueur de ligne", "Sensorlänge", "aktive Länge", "Zeilenlänge"],
+    "bounds": {"min": 1, "max": 5000},
+    "precision": 2
+  },
+  {
+    "id": "sensor_manufacturer",
+    "datatype": "string",
+    "label": {"en": "Sensor manufacturer", "fr": "Fabricant du capteur"},
+    "description": {"en": "Company that makes the image sensor inside the product, which may differ from the product's maker.", "fr": "Fabricant du capteur d'image intégré au produit, qui peut différer du fabricant du produit."},
+    "aliases": ["sensor vendor", "sensor maker", "sensor brand", "marque du capteur", "fournisseur du capteur", "Sensorhersteller"]
+  },
+  {
+    "id": "sensor_model",
+    "datatype": "string",
+    "label": {"en": "Sensor model", "fr": "Modèle de capteur"},
+    "description": {"en": "Part number of the image sensor the product uses, as the sensor's maker names it.", "fr": "Référence du capteur d'image utilisé par le produit, telle que le fabricant du capteur la nomme."},
+    "aliases": ["sensor", "image sensor", "sensor name", "imager", "sensor part number", "capteur", "capteur d'image", "référence du capteur", "Bildsensor", "Sensorbezeichnung"],
+    "external": {"sfnc": "SensorName"}
+  },
+  {
+    "id": "sensor_technology",
+    "datatype": "term",
+    "vocabulary": "sensor_technologies",
+    "label": {"en": "Sensor technology", "fr": "Technologie de capteur"},
+    "description": {"en": "Detector technology of the image sensor, such as CMOS, CCD, InGaAs, microbolometer or event-based.", "fr": "Technologie de détection du capteur d'image, par exemple CMOS, CCD, InGaAs, microbolomètre ou à événements."},
+    "aliases": ["sensor type", "detector type", "detector technology", "imager type", "type de capteur", "type de détecteur", "Sensortyp", "Sensortechnologie", "Detektortyp"]
+  },
+  {
+    "id": "shutter_type",
+    "datatype": "term_set",
+    "vocabulary": "shutter_types",
+    "label": {"en": "Shutter type", "fr": "Type d'obturateur"},
+    "description": {"en": "How the sensor exposes its pixels: global, all rows at once, or rolling, row by row.", "fr": "Mode d'exposition des pixels du capteur : global, toutes les lignes à la fois, ou roulant, ligne par ligne."},
+    "aliases": ["shutter", "shutter mode", "shutter technology", "obturateur", "mode d'obturation", "type d'obturation", "Verschluss", "Verschlussart", "Shutter-Typ"],
+    "external": {"sfnc": "SensorShutterMode"}
+  },
+  {
+    "id": "spectral_acquisition",
+    "datatype": "term",
+    "vocabulary": "spectral_acquisitions",
+    "label": {"en": "Spectral acquisition", "fr": "Acquisition spectrale"},
+    "description": {"en": "How a spectral device acquires its data: point by point, line by line (pushbroom) or a whole image at once (snapshot).", "fr": "Mode d'acquisition des données spectrales : point par point, ligne par ligne (pushbroom) ou image entière en une prise (snapshot)."},
+    "aliases": ["acquisition mode", "imaging method", "scanning mode", "hyperspectral imaging type", "mode d'acquisition", "méthode d'imagerie spectrale", "Aufnahmeverfahren", "Aufnahmeprinzip", "Scanverfahren"]
+  },
+  {
+    "id": "spectral_range",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "um",
+    "label": {"en": "Spectral range", "fr": "Plage spectrale"},
+    "description": {"en": "Wavelength band over which the detector or optic responds, from shortest to longest wavelength.", "fr": "Bande de longueurs d'onde sur laquelle le détecteur ou l'optique répond, de la plus courte à la plus longue."},
+    "aliases": ["wavelength range", "spectral response", "spectral band", "waveband", "spectral sensitivity", "gamme spectrale", "domaine spectral", "bande spectrale", "plage de longueurs d'onde", "Spektralbereich", "Wellenlängenbereich", "spektrale Empfindlichkeit"],
+    "bounds": {"min": 0.001, "max": 100},
+    "precision": 2
+  },
+  {
+    "id": "storage",
+    "datatype": "quantity",
+    "dimension": "digital_information",
+    "unit": "byte",
+    "better": "higher",
+    "label": {"en": "Internal storage", "fr": "Stockage interne"},
+    "description": {"en": "Built-in non-volatile storage capacity, such as eMMC, SSD or flash, not counting removable media.", "fr": "Capacité de stockage non volatil intégrée, comme eMMC, SSD ou flash, hors supports amovibles."},
+    "bounds": {"min": 1000000, "max": 1000000000000000},
+    "precision": 0
+  },
+  {
+    "id": "system_components",
+    "datatype": "term_set",
+    "vocabulary": "system_components",
+    "label": {"en": "System components", "fr": "Composants du système"},
+    "description": {"en": "Main parts a turnkey vision system includes, such as cameras, 3D sensors, lighting, optics, compute, software and handling.", "fr": "Principaux éléments d'un système de vision clé en main, par exemple caméras, capteurs 3D, éclairage, optique, calcul, logiciel et manutention."}
+  },
+  {
+    "id": "system_function",
+    "datatype": "term_set",
+    "vocabulary": "laser_functions",
+    "label": {"en": "Turnkey system function", "fr": "Fonction du système clé en main"},
+    "description": {"en": "What the laser system does: marking parts, or projecting outlines onto a work surface to guide assembly.", "fr": "Fonction du système laser : marquer des pièces, ou projeter des contours sur un plan de travail pour guider l'assemblage."}
+  },
+  {
+    "id": "telecentric",
+    "datatype": "boolean",
+    "label": {"en": "Telecentric design", "fr": "Conception télécentrique"},
+    "description": {"en": "Whether the lens is telecentric, keeping magnification constant as object distance changes within its depth of field.", "fr": "Indique si l'objectif est télécentrique, à grandissement constant quand la distance de l'objet varie dans sa profondeur de champ."},
+    "aliases": ["telecentric", "telecentric lens", "bi-telecentric", "telecentricity", "télécentrique", "objectif télécentrique", "bi-télécentrique", "télécentricité", "telezentrisch", "Telezentrie", "bi-telezentrisch"]
+  },
+  {
+    "id": "temperature_accuracy",
+    "datatype": "quantity",
+    "dimension": "temperature",
+    "unit": "deg_c",
+    "better": "lower",
+    "label": {"en": "Temperature accuracy", "fr": "Précision de température"},
+    "description": {"en": "Maximum error of a radiometric camera's temperature reading against the true object temperature, as a plus-or-minus value.", "fr": "Erreur maximale de la température mesurée par une caméra radiométrique par rapport à la température réelle de l'objet, en plus ou moins."},
+    "aliases": ["temperature measurement accuracy", "radiometric accuracy", "object temperature accuracy", "précision de mesure de température", "précision radiométrique", "Temperaturgenauigkeit", "Temperaturmessgenauigkeit"],
+    "bounds": {"min": 0.01, "max": 20},
+    "precision": 1
+  },
+  {
+    "id": "temporal_resolution",
+    "datatype": "quantity",
+    "dimension": "time",
+    "unit": "us",
+    "better": "lower",
+    "label": {"en": "Temporal resolution", "fr": "Résolution temporelle"},
+    "description": {"en": "Smallest time step the device tells apart between two events or measurements, such as the timestamp resolution of an event sensor.", "fr": "Plus petit intervalle de temps que l'appareil distingue entre deux événements ou mesures, comme la résolution d'horodatage d'un capteur à événements."},
+    "aliases": ["timestamp resolution", "time resolution", "timing resolution", "résolution d'horodatage", "précision temporelle", "zeitliche Auflösung", "Zeitauflösung", "Zeitstempelauflösung"],
+    "bounds": {"min": 1e-05, "max": 1000000},
+    "precision": 3
+  },
+  {
+    "id": "thermal_sensitivity_netd",
+    "datatype": "quantity",
+    "dimension": "temperature",
+    "unit": "deg_c",
+    "better": "lower",
+    "label": {"en": "Thermal sensitivity (NETD)", "fr": "Sensibilité thermique (NETD)"},
+    "description": {"en": "Noise-equivalent temperature difference: the smallest object temperature difference the detector resolves above its noise, usually stated at 30 °C.", "fr": "Différence de température équivalente au bruit : le plus petit écart de température d'objet que le détecteur distingue de son bruit, souvent à 30 °C."},
+    "aliases": ["NETD", "thermal sensitivity", "noise equivalent temperature difference", "thermal resolution", "sensibilité thermique", "résolution thermique", "thermische Empfindlichkeit", "thermische Auflösung", "rauschäquivalente Temperaturdifferenz"],
+    "bounds": {"min": 0.001, "max": 2},
+    "precision": 3
+  },
+  {
+    "id": "tops",
+    "datatype": "quantity",
+    "dimension": "compute_rate",
+    "unit": "tops",
+    "better": "higher",
+    "label": {"en": "AI compute performance", "fr": "Puissance de calcul IA"},
+    "description": {"en": "Peak AI inference throughput in tera operations per second, at the numeric precision the source states, usually INT8.", "fr": "Débit d'inférence IA crête en téra-opérations par seconde, à la précision numérique indiquée par la source, souvent INT8."},
+    "bounds": {"min": 0.001, "max": 10000},
+    "precision": 2
+  },
+  {
+    "id": "training",
+    "datatype": "term_set",
+    "vocabulary": "training_modes",
+    "label": {"en": "Model training modality", "fr": "Modalité d'entraînement"},
+    "description": {"en": "Where models are trained: within the product itself, or outside it, with the product importing the trained models.", "fr": "Lieu d'entraînement des modèles : dans le produit lui-même, ou à l'extérieur, le produit important les modèles entraînés."}
+  },
+  {
+    "id": "vertical_resolution",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "nm",
+    "better": "lower",
+    "label": {"en": "Vertical resolution (Z)", "fr": "Résolution axiale / verticale (Z)"},
+    "description": {"en": "Smallest height change along Z that the 3D device resolves, often stated as the noise of repeated measurements.", "fr": "Plus petite variation de hauteur selon Z que l'appareil 3D distingue, souvent donnée comme le bruit de mesures répétées."},
+    "aliases": ["Z resolution", "height resolution", "axial resolution", "depth resolution", "résolution Z", "résolution en hauteur", "résolution en profondeur", "Z-Auflösung", "Höhenauflösung", "vertikale Auflösung"],
+    "bounds": {"min": 0.001, "max": 100000000},
+    "precision": 2
+  },
+  {
+    "id": "vision_tasks",
+    "datatype": "term_set",
+    "vocabulary": "vision_tasks",
+    "label": {"en": "Vision tasks", "fr": "Tâches de vision"},
+    "description": {"en": "Image analysis tasks the product performs, such as classification, detection, segmentation, anomaly detection, OCR or pose estimation.", "fr": "Tâches d'analyse d'image réalisées par le produit, par exemple classification, détection, segmentation, détection d'anomalies, OCR ou estimation de pose."}
+  },
+  {
+    "id": "wavelength",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "nm",
+    "label": {"en": "Wavelength", "fr": "Longueur d'onde"},
+    "description": {"en": "Peak or center emission wavelength of the device's light source, such as its laser or LED.", "fr": "Longueur d'onde d'émission, crête ou centrale, de la source de lumière de l'appareil, comme son laser ou sa LED."},
+    "aliases": ["peak wavelength", "laser wavelength", "emission wavelength", "center wavelength", "longueur d'onde du laser", "longueur d'onde d'émission", "longueur d'onde centrale", "Wellenlänge", "Laserwellenlänge", "Emissionswellenlänge"],
+    "bounds": {"min": 100, "max": 20000},
+    "precision": 0
+  },
+  {
+    "id": "weight",
+    "datatype": "quantity",
+    "dimension": "mass",
+    "unit": "g",
+    "better": "lower",
+    "label": {"en": "Weight", "fr": "Poids"},
+    "description": {"en": "Mass of the device without lens, cables or accessories, unless the source states otherwise.", "fr": "Masse de l'appareil sans objectif, câbles ni accessoires, sauf mention contraire de la source."},
+    "aliases": ["mass", "net weight", "masse", "poids net", "Gewicht", "Nettogewicht"],
+    "bounds": {"min": 0.1, "max": 10000000},
+    "precision": 1
+  },
+  {
+    "id": "width_px",
+    "datatype": "quantity",
+    "dimension": "pixel_count",
+    "unit": "px",
+    "better": "higher",
+    "label": {"en": "Width", "fr": "Largeur"},
+    "description": {"en": "Active pixels per row at full resolution; for a line-scan sensor, the pixels along its line.", "fr": "Pixels actifs par ligne en pleine résolution ; pour un capteur linéaire, le nombre de pixels de sa ligne."},
+    "aliases": ["horizontal resolution", "horizontal pixels", "image width", "pixels horizontal", "résolution horizontale", "pixels horizontaux", "largeur d'image", "horizontale Auflösung", "Bildbreite", "Pixel horizontal"],
+    "bounds": {"min": 4, "max": 100000},
+    "precision": 0,
+    "external": {"sfnc": "SensorWidth"}
+  },
+  {
+    "id": "working_distance",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "label": {"en": "Working distance", "fr": "Distance de travail"},
+    "description": {"en": "Distance from the front of the lens to the object in focus; for a focusable lens, the range from its minimum object distance.", "fr": "Distance entre l'avant de l'objectif et l'objet net ; pour un objectif à mise au point réglable, la plage depuis sa distance minimale."},
+    "aliases": ["WD", "object distance", "MOD", "minimum object distance", "distance objet", "distance minimale de mise au point", "Arbeitsabstand", "Objektabstand", "Mindestobjektabstand"],
+    "bounds": {"min": 0.01, "max": 100000},
+    "precision": 1
+  },
+  {
+    "id": "working_range",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "m",
+    "label": {"en": "Working range", "fr": "Portée opérationnelle"},
+    "description": {"en": "Distances from the device at which a time-of-flight camera or lidar returns valid measurements, nearest to farthest, or its maximum range.", "fr": "Distances auxquelles une caméra temps de vol ou un lidar fournit des mesures valides, de la plus proche à la plus lointaine, ou sa portée maximale."},
+    "aliases": ["detection range", "max range", "maximum range", "distance range", "measuring distance", "portée", "portée de détection", "portée maximale", "plage de distance", "Reichweite", "Arbeitsbereich", "Erfassungsbereich", "Messreichweite"],
+    "bounds": {"min": 0, "max": 2000},
+    "precision": 2
+  }
+]

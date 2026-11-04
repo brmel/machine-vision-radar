@@ -1,0 +1,67 @@
+[
+  {
+    "id": "part_number",
+    "label": {"en": "Manufacturer part number (MPN)", "fr": "Référence fabricant (MPN)"},
+    "description": {"en": "The number the manufacturer gives the product, as its datasheet and price list print it.", "fr": "Le numéro que le fabricant donne au produit, tel que sa fiche technique et son tarif l'impriment."},
+    "subjects": ["Product"],
+    "schema_org": "mpn",
+    "names_product": true
+  },
+  {
+    "id": "order_code",
+    "label": {"en": "Order code", "fr": "Code de commande"},
+    "description": {"en": "The code a seller's catalog orders the product by, when it differs from the part number.", "fr": "Le code sous lequel le catalogue d'un vendeur commande le produit, s'il diffère de la référence fabricant."},
+    "subjects": ["Product"]
+  },
+  {
+    "id": "gtin",
+    "label": {"en": "GTIN (EAN, UPC)", "fr": "Code GTIN (EAN, UPC)"},
+    "description": {"en": "The GS1 Global Trade Item Number on the product's barcode: 8, 12, 13 or 14 digits, the last a check digit.", "fr": "Le numéro GS1 GTIN du code-barres du produit : 8, 12, 13 ou 14 chiffres, le dernier de contrôle."},
+    "pattern": "[0-9]{8}|[0-9]{12,14}",
+    "gs1_check": true,
+    "subjects": ["Product"],
+    "schema_org": "gtin"
+  },
+  {
+    "id": "eclass_class",
+    "label": {"en": "ECLASS class", "fr": "Classe ECLASS"},
+    "description": {"en": "The ECLASS classification class the product falls in, as an eight-digit code.", "fr": "La classe de classification ECLASS du produit, en code à huit chiffres."},
+    "pattern": "[0-9]{2}-?[0-9]{2}-?[0-9]{2}-?[0-9]{2}",
+    "subjects": ["Product"]
+  },
+  {
+    "id": "etim_class",
+    "label": {"en": "ETIM class", "fr": "Classe ETIM"},
+    "description": {"en": "The ETIM class the product falls in: EC and six digits.", "fr": "La classe ETIM du produit : EC et six chiffres."},
+    "pattern": "EC[0-9]{6}",
+    "subjects": ["Product"]
+  },
+  {
+    "id": "unspsc",
+    "label": {"en": "UNSPSC code", "fr": "Code UNSPSC"},
+    "description": {"en": "The UN Standard Products and Services Code commodity of the product: eight digits.", "fr": "Le code de produit UNSPSC des Nations unies : huit chiffres."},
+    "pattern": "[0-9]{8}",
+    "subjects": ["Product"]
+  },
+  {
+    "id": "wikidata",
+    "label": {"en": "Wikidata item", "fr": "Élément Wikidata"},
+    "description": {"en": "The Wikidata item about the product or organization: Q and a number.", "fr": "L'élément Wikidata sur le produit ou l'organisation : Q et un nombre."},
+    "pattern": "Q[1-9][0-9]*",
+    "subjects": ["Product", "Organization"]
+  },
+  {
+    "id": "lei",
+    "label": {"en": "Legal entity identifier (LEI)", "fr": "Identifiant d'entité juridique (LEI)"},
+    "description": {"en": "The ISO 17442 identifier of a legal entity: twenty letters and digits, the last two check digits.", "fr": "L'identifiant ISO 17442 d'une entité juridique : vingt lettres et chiffres, les deux derniers de contrôle."},
+    "pattern": "[0-9A-Z]{18}[0-9]{2}",
+    "subjects": ["Organization"]
+  },
+  {
+    "id": "duns",
+    "label": {"en": "D-U-N-S number", "fr": "Numéro D-U-N-S"},
+    "description": {"en": "The nine-digit Dun & Bradstreet number of an organization's site.", "fr": "Le numéro Dun & Bradstreet à neuf chiffres d'un site d'une organisation."},
+    "pattern": "[0-9]{9}",
+    "subjects": ["Organization"]
+  }
+]

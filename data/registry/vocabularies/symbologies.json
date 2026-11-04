@@ -1,0 +1,9 @@
+[
+  {"id": "1d", "label": {"en": "1D barcodes", "fr": "Codes-barres 1D"}},
+  {"id": "2d", "label": {"en": "2D codes", "fr": "Codes 2D"}},
+  {"id": "dpm", "label": {"en": "Direct part marking", "fr": "Marquage direct"}},
+  {"id": "ocr", "label": {"en": "OCR", "fr": "OCR"}},
+  {"id": "pdf417", "label": {"en": "PDF417", "fr": "PDF417"}},
+  {"id": "postal", "label": {"en": "Postal codes", "fr": "Codes postaux"}},
+  {"id": "stacked", "label": {"en": "Stacked codes", "fr": "Codes empilés"}}
+]

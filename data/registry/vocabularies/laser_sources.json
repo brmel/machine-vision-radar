@@ -1,0 +1,7 @@
+[
+  {"id": "fiber", "label": {"en": "Fiber laser", "fr": "Laser à fibre"}},
+  {"id": "co2", "label": {"en": "CO2 laser", "fr": "Laser CO2"}},
+  {"id": "uv", "label": {"en": "UV laser", "fr": "Laser UV"}},
+  {"id": "green", "label": {"en": "Green laser", "fr": "Laser vert"}},
+  {"id": "diode", "label": {"en": "Diode laser", "fr": "Laser à diode"}}
+]

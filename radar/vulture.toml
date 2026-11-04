@@ -1,0 +1,15 @@
+# The gate's unused-code scan of radar/ (app/scripts/gates/check.sh). What it leaves out is reached by name from
+# outside the scan.
+[tool.vulture]
+min_confidence = 60
+# Generated from contracts/model/entities.json: every field is the contract's, read by the app and written whole.
+exclude = ["*/radar/domain/model/entities.py"]
+ignore_names = [
+  # Callbacks and attributes the standard library reaches by name: HTMLParser, HTTPConnection,
+  # BaseHTTPRequestHandler, RobotFileParser.
+  "allow_all", "connect", "disallow_all", "do_GET", "do_POST", "handle_data", "handle_endtag", "handle_starttag",
+  "log_message", "protocol_version", "sock",
+  # Dataclass fields parsed whole from a file the app reads (a language's direction and Intl locale) or written whole
+  # to JSON (a model call's latency, provenance's counts).
+  "dir", "intl", "latency_ms", "source_types", "sources_per_claim",
+]

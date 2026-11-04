@@ -1,0 +1,6 @@
+[
+  {"id": "class_1", "label": {"en": "Class 1", "fr": "Classe 1"}, "aliases": ["1"]},
+  {"id": "class_2", "label": {"en": "Class 2", "fr": "Classe 2"}, "aliases": ["2"]},
+  {"id": "class_2m", "label": {"en": "Class 2M", "fr": "Classe 2M"}, "aliases": ["2M"]},
+  {"id": "class_3r", "label": {"en": "Class 3R", "fr": "Classe 3R"}, "aliases": ["3R"]}
+]

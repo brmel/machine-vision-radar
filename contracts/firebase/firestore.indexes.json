@@ -1,0 +1,49 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "public_products",
+      "queryScope": "COLLECTION",
+      "fields": [{"fieldPath": "category", "order": "ASCENDING"}, {"fieldPath": "name_key", "order": "ASCENDING"}]
+    },
+    {
+      "collectionGroup": "public_products",
+      "queryScope": "COLLECTION",
+      "fields": [{"fieldPath": "category", "order": "ASCENDING"}, {"fieldPath": "name_key", "order": "DESCENDING"}]
+    },
+    {
+      "collectionGroup": "public_products",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "category", "order": "ASCENDING"},
+        {"fieldPath": "vendor_key", "order": "ASCENDING"},
+        {"fieldPath": "name_key", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "public_products",
+      "queryScope": "COLLECTION",
+      "fields": [{"fieldPath": "vendor", "order": "ASCENDING"}, {"fieldPath": "name_key", "order": "ASCENDING"}]
+    },
+    {
+      "collectionGroup": "public_products",
+      "queryScope": "COLLECTION",
+      "fields": [{"fieldPath": "vendor_key", "order": "ASCENDING"}, {"fieldPath": "name_key", "order": "ASCENDING"}]
+    },
+    {
+      "collectionGroup": "public_products",
+      "queryScope": "COLLECTION",
+      "fields": [{"fieldPath": "uses", "arrayConfig": "CONTAINS"}, {"fieldPath": "name_key", "order": "ASCENDING"}]
+    }
+  ],
+  "fieldOverrides": [
+    {"collectionGroup": "public_index", "fieldPath": "json", "indexes": []},
+    {"collectionGroup": "public_products", "fieldPath": "json", "indexes": []},
+    {"collectionGroup": "public_products", "fieldPath": "card", "indexes": []},
+    {"collectionGroup": "public_facets", "fieldPath": "json", "indexes": []},
+    {"collectionGroup": "pages", "fieldPath": "json", "indexes": []},
+    {"collectionGroup": "public_organizations", "fieldPath": "json", "indexes": []},
+    {"collectionGroup": "public_history", "fieldPath": "json", "indexes": []},
+    {"collectionGroup": "public_news", "fieldPath": "json", "indexes": []},
+    {"collectionGroup": "v", "fieldPath": "json", "indexes": []}
+  ]
+}
