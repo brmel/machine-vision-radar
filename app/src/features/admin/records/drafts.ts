@@ -9,6 +9,9 @@ const CROCKFORD = "0123456789abcdefghjkmnpqrstvwxyz";
 export const isRecord = (value: Json | null | undefined): value is JsonRecord => value !== null
   && typeof value === "object" && !Array.isArray(value);
 
+export const text = (value: Json | undefined): string =>
+  (typeof value === "string" || typeof value === "number" ? String(value) : "");
+
 function newId(prefix: string): string {
   return `${prefix}_${Array.from(crypto.getRandomValues(new Uint8Array(10)), (b) => CROCKFORD[b % 32]).join("")}`;
 }

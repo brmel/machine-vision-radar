@@ -35,7 +35,7 @@ export function syncNotFoundHead(title: string): void {
   document.head.querySelector('script[type="application/ld+json"]')?.remove();
 }
 
-export function useRecordHead(head: PageHeadMeta | null, loaded: boolean, missing: string): void {
+export function useRecordHead(head: PageHeadMeta | null, loaded = false, missing = ""): void {
   useEffect(() => {
     if (head) syncDocumentHead(head);
     else if (loaded) syncNotFoundHead(missing);

@@ -1,12 +1,12 @@
 import { type FC, type ReactNode, useMemo } from "react";
 import { PAGE_SIZE, type CatalogRepository } from "../../domain/ports/CatalogRepository.ts";
-import { Breadcrumbs, DetailState, localized, useRead } from "../../ui/index.ts";
+import { Breadcrumbs, localized, useRead } from "../../ui/index.ts";
 import { browsePath } from "../../domain/paths.ts";
 import { buildVendorHeadMeta } from "../../shell/seo/seo.ts";
 import { useRecordHead } from "../../shell/seo/documentHead.ts";
 import { SITE_ORIGIN } from "../../shell/seo/siteOrigin.ts";
 import { useI18n } from "../../shell/i18n/index.tsx";
-import { useDetailStateLabels } from "../../shell/i18n/labels.ts";
+import { DetailState } from "../../shell/layout/DetailState.tsx";
 import { logger } from "../../shell/logger.ts";
 import { OwnershipList } from "./OwnershipList.tsx";
 import { VendorHeader } from "./VendorHeader.tsx";
@@ -37,13 +37,12 @@ export const VendorDetailView: FC<VendorDetailViewProps> = ({ repository, vendor
   const [vendor, listing] = value ?? [null, null];
   const headMeta = useMemo(() => (vendor ? buildVendorHeadMeta({ ...vendor,
     summary: vendor.summary ? localized(vendor.summary, locale) : "" }, SITE_ORIGIN) : null), [vendor, locale]);
-  const stateLabels = useDetailStateLabels(t("vendorNotFound"));
   useRecordHead(headMeta, !isLoading && !error, t("vendorNotFound"));
 
   const trail = <Breadcrumbs label={t("breadcrumbLabel")}
     trail={[{ label: t("catalogTitle"), href: browsePath(""), onOpen: onBrowse }]} />;
   if (isLoading || error || !vendor || !listing) {
-    return <DetailState loading={isLoading} failed={error} trail={trail} labels={stateLabels}
+    return <DetailState loading={isLoading} failed={error} trail={trail} missing={t("vendorNotFound")}
       skeleton={{ count: 3 }} />;
   }
 

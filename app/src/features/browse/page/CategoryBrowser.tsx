@@ -1,17 +1,16 @@
-import { type FC, type ReactNode, useEffect, useState } from "react";
+import { type FC, type ReactNode, useMemo, useState } from "react";
 import type { CatalogRepository } from "../../../domain/ports/CatalogRepository.ts";
 import type { SearchEvent } from "../../../domain/ports/AskApi.ts";
 import type { ProductSearch } from "../../../domain/ports/ProductSearch.ts";
 import { withoutFilters, withQuery } from "../../../domain/filtering/filterTransitions.ts";
-import { ReadState } from "../../../ui/index.ts";
 import { useI18n } from "../../../shell/i18n/index.tsx";
-import { useReadStateLabels } from "../../../shell/i18n/labels.ts";
+import { ReadState } from "../../../shell/layout/ReadState.tsx";
 import { useBrowse } from "../hooks/useBrowse.ts";
 import { useProductSearch } from "../hooks/useProductSearch.ts";
 import { CatalogSearch } from "../components/CatalogSearch.tsx";
 import { AppliedFilters } from "./AppliedFilters.tsx";
 import { buildHubHeadMeta, categoryHub } from "../../../shell/seo/hubs.ts";
-import { syncDocumentHead } from "../../../shell/seo/documentHead.ts";
+import { useRecordHead } from "../../../shell/seo/documentHead.ts";
 import { SITE_ORIGIN } from "../../../shell/seo/siteOrigin.ts";
 import { appliedFilters } from "../hooks/browseFilters.ts";
 import { encodeFilters } from "../../../domain/filtering/filterUrl.ts";
@@ -36,21 +35,19 @@ interface CategoryBrowserProps {
 export const CategoryBrowser: FC<CategoryBrowserProps> = ({ repository, productSearch, onCounted, query,
   onNavigate, onSelectProduct, onSelectVendor, onToggleCompare, comparedIds, news }) => {
   const { t, locale } = useI18n();
-  const states = useReadStateLabels();
   const rank = useProductSearch(productSearch, onCounted);
   const { index, view, searched, error, change } = useBrowse(repository, rank, query, onNavigate);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const hub = index?.categories.find((c) => c.id === view?.filters.category);
-  useEffect(() => {
-    if (hub && view) syncDocumentHead(buildHubHeadMeta(categoryHub(hub, view.products), SITE_ORIGIN));
-  }, [hub, view]);
+  useRecordHead(useMemo(() => (hub && view ? buildHubHeadMeta(categoryHub(hub, view.products), SITE_ORIGIN) : null),
+    [hub, view]));
 
   if (error || !index || !view) {
     return (
       <div className="space-y-3">
         <BrowseHeader hub={hub} />
         <ReadState failed={Boolean(error)} skeleton={{ count: 6 }} level={2}
-          labels={{ ...states, errorTitle: t(error === "search" ? "searchErrorTitle" : "errorTitle") }} />
+          title={error === "search" ? "searchErrorTitle" : "errorTitle"} />
       </div>
     );
   }

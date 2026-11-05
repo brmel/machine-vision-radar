@@ -29,7 +29,7 @@ export const StatusView: FC = () => {
     <section className="space-y-6">
       <PageHeader title={t("adminSearchTitle")} />
       <Facts layout="grid" className="text-body" facts={[
-        { key: "version", label: t("adminSearchVersion"),
+        { key: "version", label: t("versionField_label"),
           value: <span className="font-mono">{shown.version ?? "—"}</span> },
         { key: "products", label: t("adminSearchProducts"),
           value: t("adminSearchIndexed", { indexed: formatNumber(shown.products_indexed ?? 0, locale),

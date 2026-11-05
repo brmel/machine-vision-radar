@@ -17,7 +17,7 @@ export const FiltersToggle: FC<{ open: boolean; active: number;
     >
       <span className="inline-flex items-center gap-2">
         <SlidersHorizontal className="w-4 h-4 text-muted" aria-hidden="true" />
-        <span>{t("filtersToggleLabel")}</span>
+        <span>{t("filtersTitle")}</span>
         {active > 0 && <Badge tone="accent">{active}</Badge>}
       </span>
       <Chevron className="w-4 h-4 text-muted" aria-hidden="true" />

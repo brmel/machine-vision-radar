@@ -1,13 +1,14 @@
-import { useEffect, useMemo, type FC } from "react";
+import { useMemo, type FC } from "react";
 import type { CatalogRepository } from "../../../domain/ports/CatalogRepository.ts";
 import { PAGE_SIZE } from "../../../domain/ports/CatalogRepository.ts";
 import type { FeedBrief } from "../../../domain/views.ts";
 import { NEWS_PATH, pageCount, pageOf } from "../../../domain/paths.ts";
-import { Chip, PageHeader, Pagination, ReadState, StatePanel, localized, useRead } from "../../../ui/index.ts";
+import { Chip, PageHeader, Pagination, StatePanel, localized, useRead } from "../../../ui/index.ts";
 import { useI18n } from "../../../shell/i18n/index.tsx";
-import { usePagerLabels, useReadStateLabels } from "../../../shell/i18n/labels.ts";
+import { usePagerLabels } from "../../../shell/i18n/labels.ts";
+import { ReadState } from "../../../shell/layout/ReadState.tsx";
 import { buildNewsHeadMeta } from "../../../shell/seo/news.ts";
-import { syncDocumentHead } from "../../../shell/seo/documentHead.ts";
+import { useRecordHead } from "../../../shell/seo/documentHead.ts";
 import { SITE_ORIGIN } from "../../../shell/seo/siteOrigin.ts";
 import { logger } from "../../../shell/logger.ts";
 import { NewsList } from "./NewsList.tsx";
@@ -32,14 +33,11 @@ function kindsOf(items: readonly FeedBrief[]): { kind: FeedBrief["kind"]; count:
 export const NewsView: FC<NewsViewProps> = ({ repository, query, onQuery, onOpen }) => {
   const { t, plural, locale } = useI18n();
   const pager = usePagerLabels();
-  const states = useReadStateLabels();
   const news = useRead(() => repository.news(), "news",
     (err) => logger.error("news: the articles failed to load", { page: "news" }, err));
   const head = useMemo(() => (news.value
     ? buildNewsHeadMeta(news.value.items.slice(0, PAGE_SIZE), news.value.total, SITE_ORIGIN) : null), [news.value]);
-  useEffect(() => {
-    if (head) syncDocumentHead(head);
-  }, [head]);
+  useRecordHead(head);
 
   const feeds = (
     <>
@@ -57,7 +55,7 @@ export const NewsView: FC<NewsViewProps> = ({ repository, query, onQuery, onOpen
     return (
       <div className="space-y-3">
         {heading()}
-        <ReadState failed={news.error} labels={states} skeleton={{ count: 4, type: "row" }} />
+        <ReadState failed={news.error} skeleton={{ count: 4, type: "row" }} />
       </div>
     );
   }

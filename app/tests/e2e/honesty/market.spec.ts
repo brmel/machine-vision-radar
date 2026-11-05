@@ -25,11 +25,11 @@ inEachLocale("The market page", (locale) => {
 
       const products = market.categories.reduce((sum, c) => sum + c.products, 0);
       await expect(main).toContainText(fill(t.marketCategoriesBase, { products }));
-      await expect(rows(t.marketCategoriesTitle))
+      await expect(rows(t.marketCategories))
         .toHaveText(market.categories.map((c) => `${label(c.category)}${c.products}${c.vendors}`));
       await expect(main).toContainText(
         fill(t.marketVendorsBase, { vendors: market.vendors.length, organizations: market.organizations }));
-      await expect(rows(t.marketVendorsTitle)).toHaveText(market.vendors.map((v) =>
+      await expect(rows(t.marketVendors)).toHaveText(market.vendors.map((v) =>
         `${v.organization.name}${country(v.organization.country)}${v.products}${v.categories}`));
       const located = market.countries.reduce((sum, c) => sum + c.organizations, 0);
       await expect(main).toContainText(fill(t.marketCountriesBase, { located, organizations: market.organizations }));
@@ -40,7 +40,7 @@ inEachLocale("The market page", (locale) => {
         `${e.year ?? "—"}${e.organization.name}${localized(e.type.label, locale)}${e.owner.name}`));
 
       const [vendor] = market.vendors;
-      await rows(t.marketVendorsTitle).getByRole("link", { name: vendor.organization.name, exact: true }).click();
+      await rows(t.marketVendors).getByRole("link", { name: vendor.organization.name, exact: true }).click();
       await expect(page).toHaveURL(vendorPath(vendor.organization.slug));
       await page.goBack();
       const [category] = market.categories;

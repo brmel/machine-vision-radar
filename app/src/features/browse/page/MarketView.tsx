@@ -2,10 +2,10 @@ import { type FC } from "react";
 import type { CatalogRepository } from "../../../domain/ports/CatalogRepository.ts";
 import type { OrgBrief } from "../../../domain/views.ts";
 import { categoryPath, vendorPath } from "../../../domain/paths.ts";
-import { AppLink, PageHeader, ReadState, Section, formatCountry, localized, useRead,
+import { AppLink, PageHeader, Section, formatCountry, localized, useRead,
   useRegistry } from "../../../ui/index.ts";
 import { useI18n } from "../../../shell/i18n/index.tsx";
-import { useReadStateLabels } from "../../../shell/i18n/labels.ts";
+import { ReadState } from "../../../shell/layout/ReadState.tsx";
 import { logger } from "../../../shell/logger.ts";
 import { Counts } from "./Counts.tsx";
 
@@ -18,7 +18,6 @@ interface MarketViewProps {
 export const MarketView: FC<MarketViewProps> = ({ repository, onCategory, onVendor }) => {
   const { t, locale } = useI18n();
   const { categories } = useRegistry();
-  const states = useReadStateLabels();
   const market = useRead(() => repository.market(), "market",
     (err) => logger.error("market: the counts failed to load", { page: "market" }, err));
   const heading = <PageHeader title={t("marketTitle")} lead={t("marketDescription")} />;
@@ -26,7 +25,7 @@ export const MarketView: FC<MarketViewProps> = ({ repository, onCategory, onVend
     return (
       <div className="space-y-3">
         {heading}
-        <ReadState failed={market.error} labels={states} skeleton={{ count: 4, type: "row" }} />
+        <ReadState failed={market.error} skeleton={{ count: 4, type: "row" }} />
       </div>
     );
   }
@@ -40,11 +39,11 @@ export const MarketView: FC<MarketViewProps> = ({ repository, onCategory, onVend
   const vendor = (org: OrgBrief) =>
     <AppLink href={vendorPath(org.slug)} onOpen={() => onVendor(org.slug)} className="underline">{org.name}</AppLink>;
   const tables = [
-    { title: t("marketCategoriesTitle"),
+    { title: t("marketCategories"),
       note: t("marketCategoriesBase", { products: counts.categories.reduce((sum, c) => sum + c.products, 0) }),
       heads: [t("marketCategory"), t("marketProducts"), t("marketVendors")], numbers: [1, 2],
       rows: counts.categories.map((c) => ({ key: c.category, cells: [category(c.category), c.products, c.vendors] })) },
-    { title: t("marketVendorsTitle"),
+    { title: t("marketVendors"),
       note: t("marketVendorsBase", { vendors: counts.vendors.length, organizations: counts.organizations }),
       heads: [t("marketVendor"), t("marketCountry"), t("marketProducts"), t("marketCategories")], numbers: [2, 3],
       rows: counts.vendors.map((v) => ({ key: v.organization.slug,

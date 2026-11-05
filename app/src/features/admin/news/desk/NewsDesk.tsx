@@ -24,7 +24,7 @@ export const NewsDesk: FC<{ search: string }> = ({ search }) => {
   return (
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <PageHeader title={t("adminNewsTitle")} />
+        <PageHeader title={t("adminNavNews")} />
         <Button variant="primary" onClick={() => onNavigate("/news/new")}>{t("adminNewsWrite")}</Button>
       </div>
       <Section id="news-drafts" title={t("adminNewsDrafts")}>

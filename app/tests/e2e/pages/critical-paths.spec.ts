@@ -141,7 +141,7 @@ inEachLocale("Navigation", (locale) => {
     await page.goto("/");
     const m = MESSAGES[locale];
     const menu = page.getByRole("banner").getByRole("navigation").first();
-    await expect(menu.getByRole("link")).toHaveText([m.navHome, m.navBrowse, m.navAsk, m.navNews, m.navAbout]);
+    await expect(menu.getByRole("link")).toHaveText([m.navHome, m.navBrowse, m.navAsk, m.newsTitle, m.navAbout]);
     await expect(page.getByRole("banner").getByRole("link", { name: m.navBrowse })).toHaveCount(1);
 
     await page.getByRole("main").getByRole("textbox").first().fill(word);
