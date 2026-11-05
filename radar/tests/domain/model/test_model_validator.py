@@ -12,8 +12,7 @@ from radar.domain.validation.context import ValidationContext
 from radar.domain.validation.rules.catalog import (category_and_roles, countries, entity_ids, references, variant_axes,
                                                    versions)
 from radar.domain.validation.rules.claims import claim_profile, claim_values, dates, lifecycle
-from radar.domain.validation.rules.feed import dates as feed_dates, review, slugs, sources
-from radar.domain.validation.rules import changes, unique
+from radar.domain.validation.rules import changes, feed, unique
 from radar.domain.validation.rules.registry import no_filler_text, vocabularies
 from radar.domain.validation.rules.sources import source_integrity, source_preference
 from radar.domain.model.registry import composed
@@ -118,11 +117,11 @@ BREAKS: dict[str, tuple[Any, Callable[[dict], None]]] = {
     "proposal_shape": (changes, _set(lambda r: r["changes"][1], "proposal", "my-proposal")),
     "no_source_url": (source_integrity, lambda r: (r["sources"][0].update(url=""), r["sources"][0].pop("document"))),
     "source_url_twice": (unique, lambda r: r["sources"].append({**r["sources"][1], "id": "src_0000000009"})),
-    "feed_uncited": (sources, lambda r: r["feed_items"][0]["body"][0].update(cites=["prd_0000000001"])),
-    "feed_undated_source": (feed_dates, lambda r: r["feed_items"][0].pop("event_source")),
-    "feed_personal_byline": (review,
+    "feed_uncited": (feed, lambda r: r["feed_items"][0]["body"][0].update(cites=["prd_0000000001"])),
+    "feed_undated_source": (feed, lambda r: r["feed_items"][0].pop("event_source")),
+    "feed_personal_byline": (feed,
                              _set(lambda r: r["feed_items"][0], "byline", {"en": "A. Person", "fr": "A. Person"})),
-    "feed_spaced_slug": (slugs, _set(lambda r: r["feed_items"][0], "slug", "VX 500 joins")),
+    "feed_spaced_slug": (feed, _set(lambda r: r["feed_items"][0], "slug", "VX 500 joins")),
     "thumbnail_missing": (references, _thumbnail("doc_9999999999")),
     "thumbnail_not_an_image": (references, _thumbnail("doc_0000000001")),
     "thumbnail_not_public": (references, _thumbnail(IMAGE["id"], IMAGE)),

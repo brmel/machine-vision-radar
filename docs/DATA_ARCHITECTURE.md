@@ -223,11 +223,10 @@ runs: an unknown or missing field, a wrong type, a bad id, an enum value outside
 - **changes:** an entity's change versions run 1..n without gaps, n its stored `version`; the patches replay to the
   stored entity (or to nothing after a retraction); a change that sets a sourced fact cites a source; a `proposal` has
   the proposal id shape.
-- **feed_sources:** an article's `cites` is exactly what its sentences cite (so withdrawing one finds the article, and
-  **references** refuses it while cited), and its `event_source` is among them.
-- **feed_dates:** `event_date` and `event_source` come together; `revised_at` only once published.
-- **feed_review:** the byline is feed.json's, the brand's, never a personal name.
-- **feed_slugs:** a slug is lowercase words joined by hyphens, an address under /news/.
+- **feed:** an article's `cites` is exactly what its sentences cite (so withdrawing one finds the article, and
+  **references** refuses it while cited), and its `event_source` is among them; `event_date` and `event_source` come
+  together; `revised_at` only once published; the byline is feed.json's, the brand's, never a personal name; a slug is
+  lowercase words joined by hyphens, an address under /news/.
 
 ## 7. Evolving the model
 
