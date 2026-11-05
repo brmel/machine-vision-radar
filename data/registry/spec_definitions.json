@@ -76,6 +76,42 @@
     "precision": 0
   },
   {
+    "id": "body_height",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "better": "lower",
+    "label": {"en": "Body height", "fr": "Hauteur du boîtier"},
+    "description": {"en": "Outer height of the device's body across its optical axis, without lens, connectors or mounts.", "fr": "Hauteur extérieure du boîtier perpendiculairement à l'axe optique, sans objectif, connecteurs ni fixations."},
+    "aliases": ["housing height", "camera height", "hauteur du boîtier"],
+    "bounds": {"min": 1, "max": 5000},
+    "precision": 1
+  },
+  {
+    "id": "body_length",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "better": "lower",
+    "label": {"en": "Body length", "fr": "Longueur du boîtier"},
+    "description": {"en": "Outer length of the device's body along its optical axis, without lens, connectors or mounts.", "fr": "Longueur extérieure du boîtier le long de l'axe optique, sans objectif, connecteurs ni fixations."},
+    "aliases": ["housing length", "housing depth", "camera length", "longueur du boîtier"],
+    "bounds": {"min": 1, "max": 5000},
+    "precision": 1
+  },
+  {
+    "id": "body_width",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "better": "lower",
+    "label": {"en": "Body width", "fr": "Largeur du boîtier"},
+    "description": {"en": "Outer width of the device's body across its optical axis, without lens, connectors or mounts.", "fr": "Largeur extérieure du boîtier perpendiculairement à l'axe optique, sans objectif, connecteurs ni fixations."},
+    "aliases": ["housing width", "camera width", "largeur du boîtier"],
+    "bounds": {"min": 1, "max": 5000},
+    "precision": 1
+  },
+  {
     "id": "camera_support",
     "datatype": "term_set",
     "vocabulary": "camera_types",

@@ -6,5 +6,9 @@
   {"id": "chunk_data", "label": {"en": "GenICam chunk data", "fr": "Données Chunk GenICam"}},
   {"id": "ptp", "label": {"en": "IEEE 1588 PTP synchronization", "fr": "Synchronisation PTP IEEE 1588"}},
   {"id": "sequencer", "label": {"en": "Parameter sequencer", "fr": "Séquenceur de paramètres"}},
-  {"id": "auto_exposure", "label": {"en": "Auto exposure & gain", "fr": "Exposition et gain automatiques"}}
+  {"id": "auto_exposure", "label": {"en": "Auto exposure & gain", "fr": "Exposition et gain automatiques"}},
+  {
+    "id": "polarization",
+    "label": {"en": "Polarization imaging (on-sensor polarizers)", "fr": "Imagerie polarimétrique (polariseurs sur le capteur)"}
+  }
 ]

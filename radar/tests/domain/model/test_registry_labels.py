@@ -14,6 +14,8 @@ IDENTICAL_ALLOWLIST = frozenset({
     "PCIe Gen 2", "PCIe Gen 3", "PCIe Gen 4",
     "Windows", "Linux", "macOS", "Android", "C", "C++", "C#", ".NET", "Python", "Delphi", "LabVIEW", "Visual Basic",
     "CMOS", "sCMOS", "CCD", "EMCCD", "InGaAs", "InSb", "MCT (HgCdTe)", '1/4"', '1/3"', '1/2"', '2/3"', '1"', '4/3"',
+    '1.1"', '1.2"', '1.3"', '1.4"', '1.8"', '2"', '2.3"', '2.5"', '2.7"', '3.4"', '3.6"', '4.1"', '4.2"', "APS-H",
+    "FPD-Link III", "Micro Four Thirds",
     "APS-C", "Super 35", "OCR", "PDF417",
     "GigE Vision", "USB3 Vision", "GenICam", "GigE Vision 2.2", "USB3 Vision 1.2", "CoaXPress 2.1",
     "Camera Link HS 1.2", "EMVA 1288 4.0", "OPC UA Machine Vision 1.0", "FCC Part 15", "REACH", "RoHS",
