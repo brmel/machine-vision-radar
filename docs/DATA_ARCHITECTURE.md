@@ -197,8 +197,9 @@ runs: an unknown or missing field, a wrong type, a bad id, an enum value outside
 - **references:** every reference resolves to an entity of a kind its `refs` allow (a Change may still name a record
   withdrawn since, if recorded while it existed); a product's thumbnail is an image Document about it under public
   rights; a Document of a kind marked `version` names a ProductVersion.
-- **category_and_roles:** every product has a ProductOrgRole and a slug of §8's shape; in a whole catalog (`store
-  validate`, or `model validate` on a folder), an empty category is a warning, a coverage gap.
+- **category_and_roles:** every product has a ProductOrgRole, names an organization in a role once, and has a slug of
+  §8's shape; in a whole catalog (`store validate`, or `model validate` on a folder), an empty category is a warning,
+  a coverage gap.
 - **variant_axes:** a variant has a parent and differs from it only on its axes and the profile's
   `axis_dependent_keys`.
 - **versions:** a product's versions order by their scheme; a version-scoped claim targets its own subject and matches

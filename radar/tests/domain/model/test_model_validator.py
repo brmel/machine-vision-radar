@@ -62,6 +62,8 @@ BREAKS: dict[str, tuple[Any, Callable[[dict], None]]] = {
     "wrong_kind": (references, _set(lambda r: _claim(r, 1), "source_refs", ["doc_0000000001"])),
     "unknown_term": (vocabularies, _set(lambda r: r["products"][0], "tags", ["not_a_tag"])),
     "slug_without_maker": (category_and_roles, _set(lambda r: r["products"][0], "slug", "no-maker-prefix")),
+    "role_twice": (category_and_roles,
+                   lambda r: r["product_org_roles"].append({**r["product_org_roles"][0], "id": "por_0000000099"})),
     "unknown_category": (vocabularies,
                          _set(lambda r: next(p for p in r["products"] if p["id"] == _claim(r, 1)["subject"]),
                               "category", "not_a_category")),

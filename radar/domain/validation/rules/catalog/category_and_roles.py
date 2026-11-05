@@ -12,8 +12,16 @@ def _makers(ctx: ValidationContext) -> dict[str, set[str]]:
         makers.setdefault(role.product, set()).add(slugs.get(role.org, role.org))
     return makers
 
+def _twice(ctx: ValidationContext, res: ValidationResult) -> None:
+    seen: dict[tuple[str, str, str], str] = {}
+    for role in ctx.catalog.all(ProductOrgRole):
+        if (first := seen.setdefault((role.product, role.org, role.role), role.id)) != role.id:
+            res.error(NAME, role.id,
+                      f"'{role.product}' names '{role.org}' as '{role.role}' twice: {first} and {role.id}")
+
 def check(ctx: ValidationContext, res: ValidationResult) -> None:
     products, makers = ctx.catalog.all(Product), _makers(ctx)
+    _twice(ctx, res)
     for prod in products:
         maker, _, own = prod.slug.partition("__")
         if prod.id not in makers:
