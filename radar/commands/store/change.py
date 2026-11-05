@@ -5,8 +5,8 @@ import json
 from pathlib import Path
 
 from radar.adapters.console import log, output
-from radar.domain.validation.context import InvalidChangeset
-from radar.domain.model.changeset import Changeset, parse_changeset
+from radar.domain.validation.verdict import InvalidChangeset
+from radar.domain.model.history.changeset import Changeset, parse_changeset
 from radar.domain.review.requests import Founder, Rollback
 from radar.domain.model.history.projection import plain
 from radar.domain.review.views import shown_view
@@ -17,7 +17,7 @@ def _apply(args: argparse.Namespace, changeset: Changeset, cid: str) -> int:
         applied = args.wiring.writer().apply(changeset, cid)
     except InvalidChangeset as exc:
         for f in exc.findings:
-            log.error(f if isinstance(f, str) else f"[{f.rule}] {f.entity_id}: {f.message}")
+            log.error(str(f))
         return log.error("the changeset is refused: nothing written")
     log.info(f"change: {len(applied.events)} event(s), {applied.writes} doc(s) written")
     lines = [f"{e['entity']} v{e['version']}: {op['op']} {op['path']}" + (f" = {op['value']}" if "value" in op else "")

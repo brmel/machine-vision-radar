@@ -17,12 +17,12 @@ from radar import paths
 from radar.adapters.console import log
 from radar.adapters.files import json_store
 from radar.adapters.files.json_parser import Checker
-from radar.adapters.files.model_json import load_registry, load_schema
+from radar.adapters.files.model_json import load_model
 from radar.adapters.storage.blobs import media_url
 from radar.adapters.storage.memory_change_log import MemoryChangeLog
 from radar.domain.model.entities import (CategoryPage, Change, HistoryView, IndexView, MarketView, ProductCard,
                                          ProductView)
-from radar.domain.model.schema import ModelSchema
+from radar.domain.model.model import Model
 from radar.domain.read_model import read_model
 from radar.domain.model.history.projection import plain
 from radar.domain.review.views import admin_model
@@ -104,7 +104,7 @@ def build(out: Path, extra: int = 0) -> Path:
         (catalog_dir / name).write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
                                         encoding="utf-8")
     export_bundle(catalog_dir, out / "dist", registry)
-    _write(out / "admin-model.json", plain(admin_model(load_schema(), load_registry(registry))))
+    _write(out / "admin-model.json", plain(admin_model(load_model(registry))))
     return out / "dist"
 
 def _write_view(path: Path, view: Any) -> None:
@@ -114,10 +114,9 @@ def _write_view(path: Path, view: Any) -> None:
 def export_bundle(catalog_dir: Path, dist: Path, registry_dir: Path) -> None:
     public = dist / "public"
     shutil.rmtree(public, ignore_errors=True)
-    schema = load_schema()
-    registry = load_registry(registry_dir, schema)
-    catalog = json_store.load_catalog(catalog_dir, schema)
-    rm = read_model.build(catalog, registry, schema, MemoryChangeLog(catalog.all(Change)), Checker(schema), media_url)
+    model = load_model(registry_dir)
+    catalog = json_store.load_catalog(catalog_dir, model)
+    rm = read_model.build(catalog, model, MemoryChangeLog(catalog.all(Change)), Checker(model), media_url)
     for folder, views in (("products", rm.products), ("organizations", rm.organizations), ("history", rm.histories),
                           ("news", rm.news)):
         for key, view in views.items():
@@ -135,8 +134,8 @@ def export_bundle(catalog_dir: Path, dist: Path, registry_dir: Path) -> None:
 T = TypeVar("T")
 
 class FilesCatalogRepository:
-    def __init__(self, public: Path, schema: ModelSchema) -> None:
-        self._public, self._views = public, Checker(schema)
+    def __init__(self, public: Path, model: Model) -> None:
+        self._public, self._views = public, Checker(model)
 
     def _read(self, view_type: type[T], *parts: str) -> T | None:
         path = self._public.joinpath(*parts)

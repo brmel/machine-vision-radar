@@ -12,7 +12,7 @@ from radar.adapters.console.parser import Commands
 from radar.domain.model.entities import ActorKind, FilesOn, ProposalStatus, Source
 from radar.domain.ports.catalog.held_records import HeldRecords
 from radar.domain.model.history.projection import ROWS, plain
-from radar.domain.model.changeset import Change, Changeset, PutEntity, parse_changeset
+from radar.domain.model.history.changeset import Change, Changeset, PutEntity, parse_changeset
 from radar.domain.ports.review.proposal_queue import Query
 from radar.domain.review.proposal import Outcome, Shown
 from radar.domain.review.requests import (Approval, Bundled, Changes, Founder, Picked, Rejection, Retraction, Revision,
@@ -121,7 +121,7 @@ def run_put(args: argparse.Namespace) -> int:
     changeset = Changeset(tuple(c if c.source_refs else replace(c, source_refs=tuple(args.source or ()))
                                 for c in read.changes))
     return _file(args, FilesOn.CREATE if args.verb == "add" else FilesOn.UPDATE, changeset,
-                 changeset.subject(args.wiring.model()[0].types[NOUNS[args.cmd]]))
+                 changeset.subject(args.wiring.model().schema.types[NOUNS[args.cmd]]))
 
 def run_retract(args: argparse.Namespace) -> int:
     return show(args, args.wiring.review().submit(Withdrawal(args.id, args.reason), _founder(args)))

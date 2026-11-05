@@ -22,7 +22,7 @@ def _text(answer: AskAnswer) -> str:
 def run(args: argparse.Namespace) -> int:
     args.wiring.correlate("ask")
     meter, locale = (args.wiring.ask_meter(args.wiring.search_engine()), args.locale
-                     or args.wiring.model()[1].default_language.code)
+                     or args.wiring.model().registry.default_language.code)
     asked, cad = meter.call(args.wiring.now()[:10], lambda answerer: answerer.ask(args.question, locale))
     answer = asked.answer
     if asked.text:

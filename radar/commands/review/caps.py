@@ -22,7 +22,8 @@ def _text(view: dict[str, Any]) -> str:
                      for r in view["uses"])
 
 def run_get(args: argparse.Namespace) -> int:
-    view = caps_today(args.wiring.budget(), args.wiring.model()[1].ai, args.wiring.prompts(), args.wiring.now()[:10])
+    view = caps_today(args.wiring.budget(), args.wiring.model().registry.ai, args.wiring.prompts(),
+                      args.wiring.now()[:10])
     return output.format_output(plain(view), json_mode=args.json, text_formatter=_text)
 
 def run_set(args: argparse.Namespace) -> int:

@@ -21,11 +21,10 @@ def _lines(found: dict[str, Any]) -> str:
     return "\n".join(rows) or "no source or document"
 
 def run(args: argparse.Namespace) -> int:
-    schema, registry = args.wiring.model()
     query = SourceQuery(limit=args.limit, url=args.url, vendor=args.vendor, type=args.type, since=args.since,
                         until=args.until)
-    return output.format_output(query.found(args.wiring.catalog(schema, KINDS), registry), json_mode=args.json,
-                                text_formatter=_lines)
+    return output.format_output(query.found(args.wiring.catalog(KINDS), args.wiring.model().registry),
+                                json_mode=args.json, text_formatter=_lines)
 
 def _plan(groups: Sequence[SourceGroup], merged: dict[str, Any]) -> str:
     rows = [f"{g.url}\n  keep {g.kept}; merge {', '.join(g.extras)}; repoint {len(g.repoint)} record(s)"
@@ -35,8 +34,8 @@ def _plan(groups: Sequence[SourceGroup], merged: dict[str, Any]) -> str:
                              f"{merged['proposals']} proposal(s){filed}", *merged["refusals"]])
 
 def run_dedupe(args: argparse.Namespace) -> int:
-    schema, _ = args.wiring.model()
-    merge = SourceMerge.of(args.wiring.catalog(schema, SourceMerge.kinds(schema)), schema)
+    schema = args.wiring.model().schema
+    merge = SourceMerge.of(args.wiring.catalog(SourceMerge.kinds(schema)), schema)
     bundle = args.wiring.correlate("dedupe") if args.file and merge.drafts else None
     receipts = args.wiring.review().file(Bundle(bundle, merge.drafts), Job(ACTOR, bundle)) if bundle else ()
     merged = {"groups": [asdict(g) for g in merge.groups], "proposals": len(merge.drafts), "bundle": bundle,

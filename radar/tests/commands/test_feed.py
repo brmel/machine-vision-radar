@@ -74,7 +74,7 @@ def test_a_product_an_article_cites_is_not_withdrawn_from_under_it() -> None:
 
 def test_the_change_log_lists_every_change_after_a_cursor_in_order() -> None:
     docs, files = FX.seeded()
-    store = StoreChangeLog(docs, FX.schema)
+    store = StoreChangeLog(docs, FX.model)
     for log in (store, MemoryChangeLog(store.after().changes)):
         every = log.after()
         keys = [(c.recorded_at, c.id) for c in every.changes]
@@ -161,7 +161,7 @@ def test_a_draft_resting_on_more_than_the_record_never_reaches_the_queue(monkeyp
     FX.wire(place, monkeypatch)
     wiring, queued = Wiring(), FX.json(place, "proposal", "list")
     model = Stating((*GROUNDED[:2], "{name} reaches 9,999 mm."))
-    meter = Meter(wiring.budget(), FirestoreUsageLog(wiring.store()), FX.registry.ai, Use.DRAFT, "draft",
+    meter = Meter(wiring.budget(), FirestoreUsageLog(wiring.store()), FX.model.registry.ai, Use.DRAFT, "draft",
                   lambda chosen: model)
     drafter = Drafter(wiring.retriever(wiring.search_engine()), wiring.repository(), wiring.feed(), meter,
                       lambda: wiring.now()[:10])
@@ -170,6 +170,6 @@ def test_a_draft_resting_on_more_than_the_record_never_reaches_the_queue(monkeyp
     assert FX.json(place, "proposal", "list") == queued
 
 def test_a_draft_with_a_number_the_record_lacks_in_its_title_or_summary_is_refused() -> None:
-    subject = evidence_of(FX.read.products([PRODUCT]), FX.registry, "en")
+    subject = evidence_of(FX.read.products([PRODUCT]), FX.model.registry, "en")
     assert "sentence 4 states 9999" in (
         drafted(Stating(GROUNDED, summary="A 9,999 mm widget."), subject, "", "en").rejected or "")

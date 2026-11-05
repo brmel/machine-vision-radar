@@ -10,7 +10,7 @@ import pytest
 from radar.adapters.firestore import layout, store
 from radar.adapters.firestore.repository import StoreChangeLog
 from radar.domain.model.history.ids import keyed
-from radar.domain.validation.context import InvalidChangeset
+from radar.domain.validation.verdict import InvalidChangeset
 from radar.tests.store import stores
 
 FX = stores.fixture()
@@ -78,9 +78,9 @@ def test_a_replay_rebuilds_the_live_store_byte_for_byte() -> None:
              stores.put({**org, "name": f"{org['name']} Group", "country": "FR"}, "Moved", []))
     assert _json(docs, f"{layout.INDEX}/registry")["data_as_of"] == "2026-10-17"
     target = stores.fresh()
-    assert store.replay(docs, target, FX.schema, FX.registry) > 0
+    assert store.replay(docs, target, FX.model) > 0
     assert set(layout.PUBLIC) <= set(docs.collections())
-    assert store.differences(docs, target, layout.rebuilt(FX.schema)) == []
+    assert store.differences(docs, target, layout.rebuilt(FX.model.schema)) == []
 
 def test_a_products_history_keeps_a_withdrawn_claim_across_later_writes() -> None:
     docs, files = FX.seeded()
@@ -90,7 +90,7 @@ def test_a_products_history_keeps_a_withdrawn_claim_across_later_writes() -> Non
     FX.apply(docs, files, "w-2", stores.put(changed, "Datasheet revision B", claim["source_refs"]))
     assert {v["entity"] for v in _json(docs, f"{layout.HISTORY}/{claim['subject']}")["versions"]} == {
         gone["id"], claim["id"]}
-    assert store.reproject(docs, FX.schema, FX.registry) == 0
+    assert store.reproject(docs, FX.model) == 0
 
 class _Counted:
     def __init__(self, docs: Any) -> None:
@@ -131,7 +131,7 @@ def test_a_models_approval_reads_as_many_records_in_a_family_of_200_as_in_a_fami
     second = reads(2)
     FX.apply(docs, files, "siblings", *(c for n in range(3, 200) for c in sibling(n)))
     assert reads(200) == second
-    assert store.reproject(docs, FX.schema, FX.registry) == 0
+    assert store.reproject(docs, FX.model) == 0
 
 def test_a_change_that_adds_an_error_or_a_new_slug_writes_nothing() -> None:
     docs, files = FX.seeded()
@@ -185,6 +185,6 @@ def test_two_writers_racing_to_one_version_leave_one() -> None:
 
     with pytest.raises((ValueError, OSError)):
         FX.apply(stores.Hooked(docs, race), files, "second", change(302.0))
-    log = StoreChangeLog(docs, FX.schema)
+    log = StoreChangeLog(docs, FX.model)
     assert [(c.version, c.correlation_id) for c in log.for_entity(claim["id"]).changes][1:] == [(2, "first")]
     assert FX.stored(docs, claim["id"])["value"]["range"]["max"] == 301.0

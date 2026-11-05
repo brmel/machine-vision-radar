@@ -12,7 +12,7 @@ from radar.adapters.firestore.ledgers import COLLECTIONS
 from radar.adapters.storage.blobs import MEDIA, StorageBlobStore
 from radar.domain.model.history.projection import states
 from radar.domain.model.entities import Change
-from radar.domain.model.registry import Registry
+from radar.domain.model.model import Model
 from radar.domain.model.schema import ModelSchema
 from radar.domain.ports.store.blob_store import BlobStore
 from . import layout
@@ -30,25 +30,24 @@ class Media:
     mime: str
     public: bool
 
-def projected(schema: ModelSchema, registry: Registry, records: Sequence[Record],
-              events: Sequence[Record]) -> dict[str, Fields]:
-    out: dict[str, Fields] = {canonical(schema, r["id"]): canonical_doc(r) for r in (*records, *events)}
-    parsed = catalog_of(schema, events)
+def projected(model: Model, records: Sequence[Record], events: Sequence[Record]) -> dict[str, Fields]:
+    out: dict[str, Fields] = {canonical(model.schema, r["id"]): canonical_doc(r) for r in (*records, *events)}
+    parsed = catalog_of(model, events)
     for entity, evs in groupby(events, key=itemgetter("entity")):
         for n, state in enumerate(states(parsed.get(e["id"]) for e in evs)[1:], 1):
             out.update(snapshots(entity, n, state))
-    out.update(full(catalog_of(schema, records), registry, schema, parsed.all(Change)))
+    out.update(full(catalog_of(model, records), model, parsed.all(Change)))
     return out
 
-def load(docs: Docs, blobs: BlobStore, schema: ModelSchema, registry: Registry, records: Sequence[Record],
-         media: dict[str, Media], correlation_id: str, now: str) -> dict[str, int]:
+def load(docs: Docs, blobs: BlobStore, model: Model, records: Sequence[Record], media: dict[str, Media],
+         correlation_id: str, now: str) -> dict[str, int]:
     if docs.collections():
         raise ValueError("load writes into an empty store")
-    prefix = changes_prefix(schema)
+    prefix = changes_prefix(model.schema)
     entities = [r for r in records if not r["id"].startswith(f"{prefix}_")]
     recorded = [r for r in records if r["id"].startswith(f"{prefix}_")]
     events = [*recorded, *_imports(prefix, entities, {e["entity"] for e in recorded}, correlation_id, now)]
-    wanted = projected(schema, registry, entities, sorted(events, key=lambda e: (e["entity"], e["version"])))
+    wanted = projected(model, entities, sorted(events, key=lambda e: (e["entity"], e["version"])))
     for m in media.values():
         blobs.put(m.path.read_bytes(), m.mime, m.public)
     commit(docs, wanted)
@@ -66,23 +65,23 @@ def walk(docs: Docs, collection: str) -> Iterator[tuple[str, Fields]]:
     if collection in SUBCOLLECTIONS:
         yield from ((p, f) for p, f in docs.group(SUBCOLLECTIONS[collection]) if p.startswith(f"{collection}/"))
 
-def replay(source: Docs, target: Docs, schema: ModelSchema, registry: Registry) -> int:
+def replay(source: Docs, target: Docs, model: Model) -> int:
     if target.collections():
         raise ValueError("replay writes into an empty store")
     events = sorted((f for _, f in source.list(CHANGES)), key=lambda e: (e["entity"], e["version"]))
-    parsed = catalog_of(schema, events)
+    parsed = catalog_of(model, events)
     histories = [[parsed.get(e["id"]) for e in evs] for _, evs in groupby(events, key=itemgetter("entity"))]
-    versioned = counted(schema)
-    records = [{**state, **({"version": evs[-1].version} if schema.kind_of(evs[-1].entity) in versioned else {})}
+    versioned = counted(model.schema)
+    records = [{**state, **({"version": evs[-1].version} if model.schema.kind_of(evs[-1].entity) in versioned else {})}
                for evs in histories if (state := states(evs)[-1])]
-    return commit(target, projected(schema, registry, records, events))
+    return commit(target, projected(model, records, events))
 
-def reproject(docs: Docs, schema: ModelSchema, registry: Registry) -> int:
-    records = list(scan(docs, schema))
-    prefix = changes_prefix(schema)
+def reproject(docs: Docs, model: Model) -> int:
+    records = list(scan(docs, model.schema))
+    prefix = changes_prefix(model.schema)
     events = [r for r in records if r["id"].startswith(f"{prefix}_")]
-    catalog = catalog_of(schema, [r for r in records if not r["id"].startswith(f"{prefix}_")])
-    wanted: dict[str, Fields | None] = dict(full(catalog, registry, schema, catalog_of(schema, events).all(Change)))
+    catalog = catalog_of(model, [r for r in records if not r["id"].startswith(f"{prefix}_")])
+    wanted: dict[str, Fields | None] = dict(full(catalog, model, catalog_of(model, events).all(Change)))
     wanted.update({path: None for c in layout.PUBLIC for path, _ in walk(docs, c) if path not in wanted})
     return commit(docs, wanted)
 

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from radar.adapters.files.model_json import LANGUAGES, load_registry, load_schema
+from radar.adapters.files.model_json import LANGUAGES, load_model
 from radar.domain.ports.store.records import LISTED
 from radar.domain.review.views import OWNED, admin_model
 
 def test_the_admin_edits_every_entity_another_screen_does_not_own_labelled_and_reached_from_a_catalog_list() -> None:
     codes = [l.code for l in LANGUAGES]
-    schema = load_schema()
-    model = admin_model(schema, load_registry())
+    loaded = load_model()
+    schema, model = loaded.schema, admin_model(loaded)
     edited = model.entities
     assert set(OWNED) <= {t.name for t in schema.entities}
     labels = [(e.id, e.label) for e in (*edited, *model.owned)] + [

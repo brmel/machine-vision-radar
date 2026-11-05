@@ -6,7 +6,8 @@ from typing import Iterator
 from radar.domain.ai.budget import Use
 from radar.domain.model import versions
 from radar.domain.model.entities import CategoryProfile, FilesOn, LocalizedText, SpecDefinition
-from radar.domain.validation.context import ValidationContext, ValidationResult
+from radar.domain.validation.context import ValidationContext
+from radar.domain.validation.verdict import Finding, Findings
 
 NAME = "registry_integrity"
 RESERVED = frozenset({"product", "vendor", "category", "browse", "search", "compare", "about", "admin", "api", "assets",
@@ -187,8 +188,8 @@ def _ai(ctx: ValidationContext) -> Iterator[tuple[str, str]]:
         if (u.use == Use.ALL.value) != (u.model is None) or (u.model and u.model not in models):
             yield "ai.json", f"'{u.use}' runs {u.model!r}: all uses together run none, and each use one of the models"
 
-def check(ctx: ValidationContext, res: ValidationResult) -> None:
+def check(ctx: ValidationContext) -> Findings:
     for part in (_specs, _measures, _units, _dimensions, _profiles, _coverage, _bindings, _references, _hubs, _uniform,
                  _sides, _synonyms, _filings, _ai):
         for item_id, message in part(ctx):
-            res.error(NAME, item_id, message)
+            yield Finding(NAME, item_id, message)

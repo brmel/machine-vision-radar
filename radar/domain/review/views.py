@@ -7,9 +7,10 @@ from radar.domain.model.entities import (AdminModel, AiCap, BundleMember, Bundle
                                          HeldProposal, KindEntry, OwnedShape, ProposalEdit, ProposalPage, ProposalView,
                                          ProposedChange, RefusedProposal, SectionKeys, SpecGroup, SpecShape, Term,
                                          TermList, TermRef, UnitShape)
+from radar.domain.model.model import Model
 from radar.domain.model.registry import Registry
 from radar.domain.model.schema import FieldSpec, ModelSchema, SchemaError, TypeSpec
-from radar.domain.model.changeset import EntityChange, changeset_json
+from radar.domain.model.history.changeset import EntityChange, changeset_json
 from radar.domain.model.history.projection import json_text
 from radar.domain.ports.review.proposal_queue import QueuePage
 from radar.domain.review.proposal import Member, Outcome, Proposal, Shown
@@ -42,7 +43,8 @@ def bundle_view(bundle: str, members: Sequence[Member]) -> BundleView:
 
 def outcome_view(outcome: Outcome) -> DecisionOutcome:
     return DecisionOutcome(done=tuple(proposal_view(p) for p in outcome.done),
-                           refused=tuple(RefusedProposal(proposal=proposal_view(r.proposal), findings=r.findings)
+                           refused=tuple(RefusedProposal(proposal=proposal_view(r.proposal),
+                                                         findings=tuple(map(str, r.findings)))
                                          for r in outcome.refused),
                            held=tuple(HeldProposal(proposal=proposal_view(h.proposal), waits_on=h.waits_on)
                                       for h in outcome.held))
@@ -96,7 +98,8 @@ def _specs(registry: Registry) -> dict[str, SpecShape]:
     return {k: SpecShape(label=dict(s.label), datatype=s.datatype, dimension=s.dimension, unit=s.unit,
                          vocabulary=s.vocabulary) for k, s in registry.spec_definitions.items()}
 
-def admin_model(schema: ModelSchema, registry: Registry) -> AdminModel:
+def admin_model(model: Model) -> AdminModel:
+    schema, registry = model.schema, model.registry
     types = [t for t in schema.entities if t.name not in OWNED]
     [absence] = [v.vocabulary for v in schema.types["ClaimValue"].variants if v.vocabulary]
     vocabularies = _vocabularies(types, registry, absence)

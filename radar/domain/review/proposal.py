@@ -6,8 +6,8 @@ from dataclasses import dataclass, replace
 from typing import Literal
 
 from radar.domain.model.entities import ActorKind, FilesOn, ProposalAction, ProposalStatus, Risk
-from radar.domain.model.changeset import Changeset, EntityChange, changeset_json
-from radar.domain.validation.context import InvalidChangeset
+from radar.domain.model.history.changeset import Changeset, EntityChange, changeset_json
+from radar.domain.validation.verdict import Finding, InvalidChangeset
 
 Verdict = Literal[ProposalAction.APPROVE, ProposalAction.REJECT, ProposalAction.RETRACT]
 MOVES: dict[ProposalAction, tuple[ProposalStatus, ProposalStatus]] = {
@@ -87,9 +87,6 @@ class Proposal:
                        applied=changes if decision == ProposalAction.APPROVE else self.applied,
                        undone=changes if decision == ProposalAction.RETRACT else self.undone)
 
-def findings(exc: InvalidChangeset) -> tuple[str, ...]:
-    return tuple(f if isinstance(f, str) else f"[{f.rule}] {f.entity_id}: {f.message}" for f in exc.findings)
-
 @dataclass(frozen=True, slots=True)
 class Shown:
     proposal: Proposal
@@ -120,7 +117,7 @@ class Member:
 @dataclass(frozen=True, slots=True)
 class Refusal:
     proposal: Proposal
-    findings: tuple[str, ...]
+    findings: tuple[Finding, ...]
 
 @dataclass(frozen=True, slots=True)
 class Held:

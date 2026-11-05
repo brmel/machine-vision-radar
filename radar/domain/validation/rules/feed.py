@@ -3,12 +3,13 @@ from __future__ import annotations
 import re
 
 from radar.domain.model.entities import FeedItem
-from radar.domain.validation.context import ValidationContext, ValidationResult
+from radar.domain.validation.context import ValidationContext
+from radar.domain.validation.verdict import Finding, Findings
 
 NAME = "feed"
 SLUG = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 
-def check(ctx: ValidationContext, res: ValidationResult) -> None:
+def check(ctx: ValidationContext) -> Findings:
     byline = dict(ctx.registry.feed.byline)
     for item in ctx.catalog.all(FeedItem):
         cited = {c for s in item.body for c in s.cites}
@@ -24,4 +25,4 @@ def check(ctx: ValidationContext, res: ValidationResult) -> None:
                 (dict(item.byline) != byline, f"the byline is the brand's, {byline}, not {dict(item.byline)}"),
                 (not SLUG.fullmatch(item.slug), f"slug '{item.slug}' is lowercase words joined by hyphens")):
             if broken:
-                res.error(NAME, item.id, message)
+                yield Finding(NAME, item.id, message)

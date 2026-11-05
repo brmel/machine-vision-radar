@@ -4,15 +4,16 @@ import json
 from dataclasses import asdict, fields, replace
 from typing import Any, Iterable, Mapping, Sequence
 
-from radar.adapters.files.json_parser import Checker, ModelParser
+from radar.adapters.files.json_parser import Checker
 from radar.adapters.files.model_json import DEFAULT_LANGUAGE
 from radar.domain.model.entities import (ActorKind, AdminRecord, CategoryPage, Change, Claim, Document, FilesOn,
                                          HistoryView, IndexView, LogEntryView, LogPage, MarketView, Name, Organization,
                                          Product, ProductCard, ProductView, ProposalStatus, RecordRow, RecordRows,
                                          Source, StoredFile)
 from radar.domain.model.history.projection import Projection, json_text, later, page_of, paged, plain
+from radar.domain.model.model import Model
 from radar.domain.model.schema import ModelSchema
-from radar.domain.model.changeset import changeset_json, parse_changeset
+from radar.domain.model.history.changeset import changeset_json, parse_changeset
 from radar.domain.ports.history.change_log import ChangePage
 from radar.domain.ports.review.proposal_queue import Query, QueuePage
 from radar.domain.model.history.ids import ENTITY_ID, keyed
@@ -30,8 +31,8 @@ from .projection.neighborhood import ReferenceGraph
 from .store import scan
 
 class StoreCatalogRepository:
-    def __init__(self, docs: Docs, schema: ModelSchema) -> None:
-        self._docs, self._views = docs, Checker(schema)
+    def __init__(self, docs: Docs, model: Model) -> None:
+        self._docs, self._views = docs, Checker(model)
 
     def index(self) -> IndexView:
         reg = self._docs.get(f"{INDEX}/registry")
@@ -80,11 +81,11 @@ class StoreCatalogRepository:
         return self._views.parse(raw, MarketView, "market")
 
 class StoreChangeLog:
-    def __init__(self, docs: Docs, schema: ModelSchema) -> None:
-        self._docs, self._parser, self._type = docs, ModelParser(schema), schema.types[Change.__name__]
+    def __init__(self, docs: Docs, model: Model) -> None:
+        self._docs, self._model = docs, model
 
     def _parsed(self, rows: Iterable[tuple[str, Fields]]) -> list[Change]:
-        return [self._parser.record(f, self._type, p) for p, f in rows]
+        return [self._model.parse(f, Change, p) for p, f in rows]
 
     def for_entity(self, entity: str, cursor: str | None = None) -> ChangePage:
         return paged(self._parsed(self._docs.where(CHANGES, "entity", [entity])), cursor)
@@ -197,25 +198,25 @@ class StoreFeedReads:
         self._docs.commit([Put(f"{FEED_STATE}/detector", {"cursor": cursor})])
 
 class StoreHeldRecords:
-    def __init__(self, docs: Docs, schema: ModelSchema) -> None:
-        self._docs, self._schema = docs, schema
+    def __init__(self, docs: Docs, model: Model) -> None:
+        self._docs, self._model, self._schema = docs, model, model.schema
 
     def organizations(self) -> tuple[Organization, ...]:
         return tuple(
-            layout.catalog_of(self._schema, scan(self._docs, self._schema, (Organization.__name__,))).all(Organization))
+            layout.catalog_of(self._model, scan(self._docs, self._schema, (Organization.__name__,))).all(Organization))
 
     def held(self, record_id: str) -> Mapping[str, Any] | None:
         return layout.held(self._docs, self._schema, record_id)
 
     def matching(self, kind: type[T], field: str, value: str) -> tuple[T, ...]:
         found = (record_of(f) for _, f in self._docs.where(self._schema.collection(kind.__name__), field, [value]))
-        return tuple(layout.catalog_of(self._schema, found).all(kind))
+        return tuple(layout.catalog_of(self._model, found).all(kind))
 
     def ranked_first(self, claim: Mapping[str, Any]) -> str | None:
         return layout.ranked_first(self._docs, self._schema, dict(claim))
 
     def claims(self) -> tuple[Claim, ...]:
-        return tuple(layout.catalog_of(self._schema, scan(self._docs, self._schema, (Claim.__name__,))).all(Claim))
+        return tuple(layout.catalog_of(self._model, scan(self._docs, self._schema, (Claim.__name__,))).all(Claim))
 
     def created_since(self, instant: str) -> frozenset[str]:
         return frozenset(f["entity"] for _, f in self._docs.after(CHANGES, "recorded_at", (instant, ""))
@@ -228,9 +229,9 @@ def _row(r: Row) -> RecordRow:
                      detail=" · ".join(str(v) for v in (r.get("kind"), r.get("rights"), *r.get("subjects", [])) if v))
 
 class StoreRecords:
-    def __init__(self, docs: Docs, schema: ModelSchema, blobs: BlobStore) -> None:
-        self._docs, self._schema, self._blobs = docs, schema, blobs
-        self._graph, self._read = ReferenceGraph(docs, schema), StoreCatalogRepository(docs, schema)
+    def __init__(self, docs: Docs, model: Model, blobs: BlobStore) -> None:
+        self._docs, self._schema, self._blobs = docs, model.schema, blobs
+        self._graph, self._read = ReferenceGraph(docs, model.schema), StoreCatalogRepository(docs, model)
 
     def _all(self, kind: str, category: str | None) -> list[RecordRow]:
         if kind == Product.__name__:

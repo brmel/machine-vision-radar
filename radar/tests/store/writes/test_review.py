@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from radar.adapters.firestore import layout, store
-from radar.domain.model.changeset import Retract, parse_changeset
+from radar.domain.model.history.changeset import Retract, parse_changeset
 from radar.domain.model.entities import FilesOn, ProposalStatus, Risk
 from radar.domain.ports.review.proposal_queue import Query
 from radar.domain.ports.store.docs import Put
@@ -14,8 +14,8 @@ from radar.domain.review.agents.tokens import Limits, Refused, Scope, issue
 from radar.domain.review.proposal import AlreadyProposed, Filed, ProposalError
 from radar.domain.review.requests import (Agent, Approval, Bundle, Bundled, Changes, Enactment, Founder, Job, Picked,
                                           Reader, Rejection, Report, Retraction, Revision, Rollback, Withdrawal)
-from radar.domain.validation.context import InvalidChangeset, ValidationContext
-from radar.domain.validation.runner import validate
+from radar.domain.validation.context import Part
+from radar.domain.validation.verdict import InvalidChangeset
 from radar.tests.store import stores
 
 FX = stores.fixture()
@@ -95,22 +95,20 @@ def test_retracting_a_proposal_that_added_a_source_returns_the_catalog_to_before
     review.decide(Retraction(Picked((approved.id,)), "Never sold"), FOUNDER)
     versions = FX.versions(docs)
     for r in added:
-        assert docs.get(layout.canonical(FX.schema, r["id"])) is None
+        assert docs.get(layout.canonical(FX.model.schema, r["id"])) is None
         assert [v.version for v in versions.history(r["id"]).versions] == [2, 1]
-    today, records = date.fromisoformat(stores.NOW[:10]), list(store.scan(docs, FX.schema))
-    assert validate(ValidationContext(layout.catalog_of(FX.schema, records), FX.registry, FX.schema,
-                                      today)).errors == []
+    today, records = date.fromisoformat(stores.NOW[:10]), list(store.scan(docs, FX.model.schema))
+    assert FX.model.check(layout.catalog_of(FX.model, records), Part(), today).errors == ()
     review.decide(Enactment(_changes(FilesOn.CREATE, "A page", "src_00000000zz",
                                      ({**added[0], "id": "src_00000000zz"}, ["src_00000000zz"]))), FOUNDER)
     review.decide(Enactment(Withdrawal("src_00000000zz", "Gone")), FOUNDER)
-    assert docs.get(layout.canonical(FX.schema, "src_00000000zz")) is None, (
+    assert docs.get(layout.canonical(FX.model.schema, "src_00000000zz")) is None, (
         "a source its Change events cite is withdrawn; they keep it")
-    records = list(store.scan(docs, FX.schema))
+    records = list(store.scan(docs, FX.model.schema))
     for moved in ("2026-10-18T23:00:00Z",
                   "2026-01-01T00:00:00Z"):
         events = [{**r, "recorded_at": moved} if r["id"] == approved.applied[-1].change else r for r in records]
-        [finding] = validate(ValidationContext(layout.catalog_of(FX.schema, events), FX.registry, FX.schema,
-                                               today)).errors
+        [finding] = FX.model.check(layout.catalog_of(FX.model, events), Part(), today).errors
         assert finding.message == f"Change.source_refs: '{cited[0]}' does not exist", (
             "history cites a source that existed when it was recorded")
 
@@ -136,7 +134,7 @@ def test_review_refuses_what_it_cannot_apply() -> None:
             and review.decide(Approval(Picked((edited.id,)), "Fixed"), FOUNDER).changed)
     review.decide(Approval(Picked((good.id,)), "Revision B"), FOUNDER)
     [refused] = review.decide(Retraction(Picked((report.id,)), "Wrong after all"), FOUNDER).refused
-    assert "changed after" in refused.findings[0]
+    assert "changed after" in refused.findings[0].message
     rollback = review.submit(Rollback(claim["id"], 1, "Back to the first datasheet"), FOUNDER).proposal
     review.decide(Approval(Picked((rollback.id,)), "Back to v1"), FOUNDER)
     assert FX.stored(docs, claim["id"])["value"] == claim["value"]
@@ -148,7 +146,7 @@ def test_a_withdrawal_lets_go_of_the_record_everywhere_and_never_leaves_a_refere
     shared = next(d for d in FX.rows("documents.jsonl") if d["subjects"])
     product, last = shared["subjects"][0], FX.rows("products.jsonl")[-1]["id"]
     if len(shared["subjects"]) == 1:
-        docs.commit([Put(layout.canonical(FX.schema, shared["id"]),
+        docs.commit([Put(layout.canonical(FX.model.schema, shared["id"]),
                          {**FX.stored(docs, shared["id"]), "subjects": [product, last]})])
     filed = review.submit(Withdrawal(product, "Never sold"), FOUNDER).proposal
     retracted = ({c.entity for c in filed.changeset.changes if isinstance(c.action, Retract)} if filed.changeset
@@ -156,15 +154,15 @@ def test_a_withdrawal_lets_go_of_the_record_everywhere_and_never_leaves_a_refere
     needing = {r["id"] for f in ("names.jsonl", "claims.jsonl") for r in FX.rows(f) if r["subject"] == product}
     assert {product} | needing <= retracted and shared["id"] not in retracted
     review.decide(Approval(Picked((filed.id,)), "Checked"), FOUNDER)
-    assert (docs.get(layout.canonical(FX.schema, product)) is None
+    assert (docs.get(layout.canonical(FX.model.schema, product)) is None
             and product not in FX.stored(docs, shared["id"])["subjects"])
     assert FX.versions(docs).history(product).versions
     claim = next(c for c in FX.rows("claims.jsonl") if c["subject"] not in (product, last))
-    docs.commit([Put(layout.canonical(FX.schema, claim["id"]),
+    docs.commit([Put(layout.canonical(FX.model.schema, claim["id"]),
                      {**FX.stored(docs, claim["id"]), "applies_to_versions": {"product": last}})])
     with pytest.raises(InvalidChangeset, match=f"applies_to_versions.product: '{last}' does not exist"):
         review.decide(Enactment(Withdrawal(last, "Never sold")), FOUNDER)
-    assert docs.get(layout.canonical(FX.schema, last)) is not None
+    assert docs.get(layout.canonical(FX.model.schema, last)) is not None
 
 def _run_drafts() -> dict[str, Changes]:
     source, product, name, role = (FX.rows(f)[0]

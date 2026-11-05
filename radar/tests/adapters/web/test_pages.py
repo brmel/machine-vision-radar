@@ -11,7 +11,7 @@ from radar.tests.adapters.stub_server import serving
 from radar.tests.fixtures.fixture_category import recorded_page
 from radar.tests.store import stores
 
-DOCUMENTS = stores.fixture().registry.vocabularies["document_kinds"]
+DOCUMENTS = stores.fixture().model.registry.vocabularies["document_kinds"]
 NOW, SITE = stores.NOW, "https://example.com"
 SPECS = ('<!doctype html><html><head><title>Widget Ten</title><meta property="og:image" '
          'content="/media/widget-ten.jpg"></head><body>'

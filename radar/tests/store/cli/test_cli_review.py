@@ -55,16 +55,14 @@ def test_the_ai_caps_from_the_cli() -> None:
     stores.cli(FX, place, "proposal", "retract", paused["id"], "--note", "Ask back on")
     assert ask() == before
 
-    other = next(m for m in FX.registry.ai.models if m.id != before["model"])
+    other = next(m for m in FX.model.registry.ai.models if m.id != before["model"])
     FX.json(place, "ai-caps", "set", Use.ASK.value, "--model", other.id, "--reason", "Ask on another model")
     assert (ask()["model"], ask()["day_calls"]) == (other.id, before["day_calls"])
     stores.cli(FX, place, "catalog", "ask", "glossy widget")
     [call] = [f for _, f in stores.fresh_at(place[0]).list(CALLS) if f["outcome"] == "answered"]
-    assert (call["model"], call["cad"]) == (other.id,
-                                            round(cost(FX.registry.ai, other, call["tokens_in"], call["tokens_out"]),
-                                                  8))
-    assert (call["tokens_in"]
-            and ask()["cad_month"] == round(cost(FX.registry.ai, other, call["tokens_in"], call["tokens_out"]), 6))
+    spent = cost(FX.model.registry.ai, other, call["tokens_in"], call["tokens_out"])
+    assert (call["model"], call["cad"]) == (other.id, round(spent, 8))
+    assert call["tokens_in"] and ask()["cad_month"] == round(spent, 6)
 
 def test_the_review_queue_from_the_cli(tmp_path: Path) -> None:
     place = FX.loaded()

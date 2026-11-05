@@ -13,9 +13,8 @@ STUDIO = DEV / "app" / "studio"
 ANY, REFLECTION, JSON_TEXT, AS_CAST = "Any", "getattr or hasattr", "JSON text", "as cast"
 UNTYPED: dict[str, dict[str, int]] = {
     ANY: {
-        "radar/domain/model/changeset.py": 12,
+        "radar/domain/model/history/changeset.py": 12,
         "radar/domain/model/history/projection.py": 12,
-        "radar/domain/model/schema.py": 4,
         "radar/domain/ports/ai/research_agent.py": 1,
         "radar/domain/ports/catalog/held_records.py": 2,
         "radar/domain/ports/catalog/views.py": 2,
@@ -38,15 +37,12 @@ UNTYPED: dict[str, dict[str, int]] = {
         "radar/domain/review/feed/news.py": 1,
         "radar/domain/search/hits.py": 1,
         "radar/domain/search/sources.py": 2,
-        "radar/domain/validation/rules/registry/vocabularies.py": 1,
-        "radar/domain/validation/walk.py": 11,
     },
     REFLECTION: {
         "radar/domain/model/history/projection.py": 1,
         "radar/domain/read_model/products/views.py": 1,
-        "radar/domain/validation/rules/changes.py": 1,
         "radar/domain/validation/rules/registry/registry_integrity.py": 2,
-        "radar/domain/validation/walk.py": 3,
+        "radar/domain/validation/walk.py": 2,
     },
     JSON_TEXT: {
         "radar/adapters/firestore/repository.py": 2,
@@ -113,7 +109,7 @@ def test_past_the_wiring_the_search_engine_is_reached_by_its_port_only() -> None
                  for m in engine_imports(p.read_text(encoding="utf-8"))]
     assert not offenders, f"the search engine's modules imported past the wiring: {offenders}"
 
-DOMAIN_SERVICES = {"Drafter", "IndexRetriever", "Projection", "Review"}
+DOMAIN_SERVICES = {"Drafter", "IndexRetriever", "Model", "Projection", "Review"}
 COMMANDS_ON_ADAPTERS = {"radar/commands/store/store.py", "radar/build/codegen/__init__.py"}
 
 def _classes(path: Path) -> Iterator[ast.ClassDef]:

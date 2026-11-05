@@ -63,7 +63,14 @@ def _emit(t: TypeSpec) -> list[str]:
         return _union(t)
     return _record(t.name, t.description, t.fields)
 
+def _classes(types: tuple[TypeSpec, ...]) -> list[str]:
+    names = [n for t in types for n in ([variant_class(t.name, v.name) for v in t.variants] if t.kind == "union"
+                                        else [t.name] if t.kind in ("record", "entity") else [])]
+    return ["", "# Each generated class by its name.", "CLASSES: Mapping[str, type] = {",
+            *(f'    "{n}": {n},' for n in names), "}"]
+
 def emit_python(schema: ModelSchema) -> str:
-    return "\n".join([HEADER.rstrip("\n"),
-                      *(line for t in (*schema.value_types, *schema.registry_types, *schema.entities, *schema.views)
-                        for line in _emit(t))]) + "\n"
+    types = (*schema.value_types, *schema.registry_types, *schema.entities, *schema.views)
+    return "\n".join([HEADER.rstrip("\n"), *(line for t in types for line in _emit(t)),
+                      "", "# Every entity of the catalog.", f"Entity = {' | '.join(t.name for t in schema.entities)}",
+                      *_classes(types)]) + "\n"

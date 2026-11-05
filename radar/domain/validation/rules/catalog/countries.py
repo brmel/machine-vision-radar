@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from radar.domain.model.entities import Organization
-from radar.domain.validation.context import ValidationContext, ValidationResult
+from radar.domain.validation.context import ValidationContext
+from radar.domain.validation.verdict import Finding, Findings
 
 NAME = "countries"
 
@@ -21,7 +22,8 @@ ISO_3166_ALPHA_2 = frozenset((
     "UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW "
 ).split())
 
-def check(ctx: ValidationContext, res: ValidationResult) -> None:
+def check(ctx: ValidationContext) -> Findings:
     for org in ctx.catalog.all(Organization):
         if org.country is not None and org.country not in ISO_3166_ALPHA_2:
-            res.error(NAME, org.id, f"country '{org.country}' is not an assigned ISO 3166-1 alpha-2 code (e.g. 'DE')")
+            yield Finding(NAME, org.id,
+                          f"country '{org.country}' is not an assigned ISO 3166-1 alpha-2 code (e.g. 'DE')")

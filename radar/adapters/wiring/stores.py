@@ -16,15 +16,14 @@ from radar.adapters.firestore.repository import (StoreCatalogRepository, StoreCh
                                                  StoreProposalQueue, StoreRecords, StoreVersionStore)
 from radar.adapters.firestore.writer import StoreWriter
 from radar.adapters.files import json_parser, json_store
-from radar.adapters.files.model_json import load_registry, load_schema
+from radar.adapters.files.model_json import load_model
 from radar.adapters.storage.blobs import StorageBlobStore, bucket, media_url
 from radar.adapters.storage.memory_catalog import MemoryCatalog
 from radar.adapters.firestore.ledgers.agents import FirestoreAgentTokens, FirestoreResearchRuns
 from radar.adapters.web.admin.identity import FirebaseIdentity
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.entities import EvalQuery
-from radar.domain.model.registry import Registry
-from radar.domain.model.schema import ModelSchema
+from radar.domain.model.model import Model, ParseError
 from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.ports.catalog.held_records import HeldRecords
 from radar.domain.ports.catalog.views import Check, MediaUrl
@@ -39,6 +38,7 @@ from radar.domain.read_model.products.values import Terms
 from radar.domain.read_model.derived.identity import ProductIdentity
 from radar.domain.review.agents.duplicates import HELD
 from radar.domain.review.review import Review
+from radar.domain.validation.context import Part, Scope, Whole
 
 DEMO = "demo-"
 METADATA_TOKEN = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
@@ -61,6 +61,7 @@ class NoStore(Exception):
 class Stores:
     def __init__(self, project: str | None = None, yes: bool = False) -> None:
         self._real, self._yes = project, yes
+        self._model: Model | None = None
 
     def now(self) -> str:
         return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -114,20 +115,20 @@ class Stores:
         return StorageBlobStore(f"http://{self._host('FIREBASE_STORAGE_EMULATOR_HOST')}", bucket())
 
     def repository(self) -> CatalogRepository:
-        return StoreCatalogRepository(self.store(), self.model()[0])
+        return StoreCatalogRepository(self.store(), self.model())
 
-    def model(self) -> tuple[ModelSchema, Registry]:
-        schema = load_schema()
-        return schema, load_registry(paths.REGISTRY, schema)
+    def model(self) -> Model:
+        self._model = self._model or load_model()
+        return self._model
 
     def writer(self) -> StoreWriter:
-        schema, registry = self.model()
-        return StoreWriter(self.store(), schema, registry, self.now, self.blobs())
+        return StoreWriter(self.store(), self.model(), self.now, self.blobs())
 
     def review(self) -> Review:
-        schema, registry = self.model()
-        return Review(StoreProposalQueue(self.store(), registry.proposal_kinds()), self.writer(), self.versions(schema),
-                      lambda: self.catalog(schema, tuple(HELD)), ProductIdentity.of(registry), schema, self.instant)
+        model = self.model()
+        return Review(StoreProposalQueue(self.store(), model.registry.proposal_kinds()), self.writer(), self.versions(),
+                      lambda: self.catalog(tuple(HELD)), ProductIdentity.of(model.registry), model.schema,
+                      self.instant)
 
     def identity(self) -> FirebaseIdentity:
         if self._real:
@@ -141,40 +142,39 @@ class Stores:
         return FirestoreResearchRuns(self.store())
 
     def held(self) -> HeldRecords:
-        return StoreHeldRecords(self.store(), self.model()[0])
+        return StoreHeldRecords(self.store(), self.model())
 
     def records(self) -> Records:
-        return StoreRecords(self.store(), self.model()[0], self.blobs())
+        return StoreRecords(self.store(), self.model(), self.blobs())
 
     def histories(self) -> Histories:
-        schema, registry = self.model()
-        docs = self.store()
-        return Histories(self.versions(schema), self.repository(),
-                         lambda ids: catalog_of(schema, read_records(docs, schema, ids).values()),
-                         Terms(registry).source_view)
+        model, docs = self.model(), self.store()
+        return Histories(self.versions(), self.repository(),
+                         lambda ids: catalog_of(model, read_records(docs, model.schema, ids).values()),
+                         Terms(model.registry).source_view)
 
-    def catalog(self, schema: ModelSchema, kinds: tuple[str, ...] = ()) -> Catalog:
-        return catalog_of(schema, scan(self.store(), schema, kinds))
+    def catalog(self, kinds: tuple[str, ...] = ()) -> Catalog:
+        return catalog_of(self.model(), scan(self.store(), self.model().schema, kinds))
 
-    def catalog_at(self, path: str | None) -> tuple[Catalog, bool]:
+    def catalog_at(self, path: str | None) -> tuple[Catalog, Scope]:
         if not path:
-            return MemoryCatalog(), False
-        p, schema = Path(path), self.model()[0]
+            return MemoryCatalog(), Part()
+        p, model = Path(path), self.model()
         if not p.exists():
-            raise json_parser.ParseError(f"model file not found: {p}")
+            raise ParseError(f"model file not found: {p}")
         if p.is_dir() or p.name.endswith(".jsonl"):
-            return json_store.load_catalog(p if p.is_dir() else p.parent, schema), True
-        return json_parser.load_catalog_file(p, schema), False
+            return json_store.load_catalog(p if p.is_dir() else p.parent, model), Whole()
+        return json_parser.load_catalog_file(p, model), Part()
 
     def datasheet_cases(self, path: Path) -> tuple[DatasheetCase, ...]:
-        return json_parser.parse_datasheet_set(json_parser.read_json(path), self.model()[0])
+        return json_parser.parse_datasheet_set(json_parser.read_json(path), self.model())
 
     def problems(self, path: Path) -> tuple[EvalQuery, ...]:
-        return tuple(json_parser.load_catalog_file(path, self.model()[0]).all(EvalQuery))
+        return tuple(json_parser.load_catalog_file(path, self.model()).all(EvalQuery))
 
     def views(self) -> tuple[Check, MediaUrl]:
-        return json_parser.Checker(self.model()[0]), media_url
+        return json_parser.Checker(self.model()), media_url
 
-    def versions(self, schema: ModelSchema) -> VersionStore:
+    def versions(self) -> VersionStore:
         docs = self.store()
-        return StoreVersionStore(docs, StoreChangeLog(docs, schema))
+        return StoreVersionStore(docs, StoreChangeLog(docs, self.model()))

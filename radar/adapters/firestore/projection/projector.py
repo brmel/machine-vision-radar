@@ -20,8 +20,7 @@ from radar.domain.model.history.projection import Projection, plain
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.entities import (Change, FeedBrief, FeedItem, ModelRow, OrgBrief, Organization, OrgRelation,
                                          Product, ProductView, Source)
-from radar.domain.model.registry import Registry
-from radar.domain.model.schema import ModelSchema
+from radar.domain.model.model import Model
 from radar.domain.ports.store.docs import Docs, Fields
 from ..layout import (FACETS, HISTORY, INDEX, NEWS, ORGANIZATIONS, PAGES, PRODUCTS, Record, catalog_of, chunks, doc,
                       doc_value, index_docs, listing_docs, news_docs, product_doc, public_docs, read_records)
@@ -42,27 +41,27 @@ def _teaser(stored: Record, briefs: Sequence[FeedBrief] | None, checked: Checker
 def _kept(old: Mapping[str, ProductView], rebuilt: Collection[str]) -> dict[str, list[ModelRow]]:
     return {p: [m for m in v.models if m.id not in rebuilt] for p, v in old.items()}
 
-def full(catalog: Catalog, registry: Registry, schema: ModelSchema, changes: Sequence[Change]) -> dict[str, Fields]:
-    return public_docs(
-        read_model.build(catalog, registry, schema, MemoryChangeLog(changes), Checker(schema), media_url))
+def full(catalog: Catalog, model: Model, changes: Sequence[Change]) -> dict[str, Fields]:
+    return public_docs(read_model.build(catalog, model, MemoryChangeLog(changes), Checker(model), media_url))
 
 class Projector:
-    def __init__(self, docs: Docs, schema: ModelSchema, registry: Registry) -> None:
-        self.docs, self.schema, self.registry = docs, schema, registry
+    def __init__(self, docs: Docs, model: Model) -> None:
+        self.docs, self.model, self.schema, self.registry = docs, model, model.schema, model.registry
+        schema = model.schema
         self.product, self.organization, self.feed, self.source, self.relation = (
             schema.types[t.__name__].prefix for t in (Product, Organization, FeedItem, Source, OrgRelation))
         self.feed_items, self.relations = schema.collection(FeedItem.__name__), schema.collection(OrgRelation.__name__)
 
     def writes(self, hood: Neighborhood, changed: Changed) -> Writes:
         records = hood.after(changed)
-        catalog = catalog_of(self.schema, records.values())
-        checked = Checker(self.schema)
+        catalog = catalog_of(self.model, records.values())
+        checked = Checker(self.model)
         present = sorted(p for p in hood.products if p in records)
         changes = sorted(catalog.all(Change), key=lambda c: (c.entity, c.version))
         revised = listed(self.schema, changes)
         old = {p: checked.parse(doc_value(f), ProductView, p)
                for p, f in ((p, self.docs.get(f"{PRODUCTS}/{p}")) for p in sorted(hood.products)) if f}
-        builder, views = read_model.product_views(catalog, self.registry, self.schema, checked, media_url, revised,
+        builder, views = read_model.product_views(catalog, self.model, checked, media_url, revised,
                                                   present, _kept(old, hood.products))
         out: Writes = {f"{PRODUCTS}/{p}": product_doc(views[p]) if p in views else None for p in hood.products}
         pages = self._listings(views, old, checked)
@@ -85,10 +84,10 @@ class Projector:
         stored = self.docs.get_many([f"{PRODUCTS}/{r}" for r in of_kind(self.product, refs) if r not in views])
         products = {path.split("/", 1)[1]: doc_value(f) for path, f in stored.items()}
         briefs = {b["id"]: b for b in doc_value(self.docs.get(f"{INDEX}/organizations")) or []}
-        orgs = catalog_of(self.schema,
+        orgs = catalog_of(self.model,
                           self._after(self.organization, of_kind(self.organization, changed.keys()),
                                       changed)).all(Organization)
-        sources = catalog_of(self.schema, self._after(self.source, of_kind(self.source, refs), changed)).all(Source)
+        sources = catalog_of(self.model, self._after(self.source, of_kind(self.source, refs), changed)).all(Source)
         return Cited({**products, **plain(views)},
                      {**briefs, **{o.id: plain(brief(o)) for o in orgs}},
                      {s.id: builder.terms.source_view(s) for s in sources})
@@ -96,7 +95,7 @@ class Projector:
     def _news(self, hood: Neighborhood, changed: Changed, views: Mapping[str, ProductView], builder: ProductViews,
               checked: Check) -> tuple[Writes, Sequence[FeedBrief] | None]:
         ids = {f["id"] for _, f in self.docs.list(self.feed_items)} | of_kind(self.feed, changed.keys())
-        items = catalog_of(self.schema, self._after(self.feed, ids, changed)).all(FeedItem)
+        items = catalog_of(self.model, self._after(self.feed, ids, changed)).all(FeedItem)
         reached = _reached(items, changed.keys() | hood.products | hood.organizations)
         if not reached and not of_kind(self.feed, changed.keys()):
             return {}, None
@@ -145,13 +144,13 @@ class Projector:
 
     def _briefs(self, orgs: Changed) -> list[Record]:
         briefs = {b["id"]: b for b in doc_value(self.docs.get(f"{INDEX}/organizations")) or [] if b["id"] not in orgs}
-        briefs.update({oid: plain(brief(catalog_of(self.schema, [after]).get(oid))) for oid, (_, after) in orgs.items()
+        briefs.update({oid: plain(brief(catalog_of(self.model, [after]).get(oid))) for oid, (_, after) in orgs.items()
                        if after is not None})
         return sorted(briefs.values(), key=lambda b: b["slug"])
 
     def _market(self, cards: list[Record], orgs: list[Record], changed: Changed, checked: Check) -> Writes:
         ids = {f["id"] for _, f in self.docs.list(self.relations)} | of_kind(self.relation, changed.keys())
-        relations = catalog_of(self.schema, self._after(self.relation, ids, changed)).all(OrgRelation)
+        relations = catalog_of(self.model, self._after(self.relation, ids, changed)).all(OrgRelation)
         return {f"{INDEX}/market": doc(checked(market(cards, orgs, list(relations), self.registry), "MarketView",
                                                "market"))}
 

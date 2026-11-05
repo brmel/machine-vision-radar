@@ -44,23 +44,22 @@ class Wiring(Models):
         return Unchecked()
 
     def mcp(self) -> McpServer:
-        schema, registry = self.model()
-        tools = {**read_tools(self.search_engine, self.repository(), lambda: self.catalog(schema, KINDS), registry),
+        tools = {**read_tools(self.search_engine, self.repository(), lambda: self.catalog(KINDS),
+                              self.model().registry),
                  **proposal_tools(self.review())}
         return McpServer(tools, self.agent_tokens(), self.now, self.correlate)
 
     def researcher(self) -> Researcher:
-        schema, registry = self.model()
-        fetcher = PoliteFetcher(f"{paths.site_origin()}/about", self.now, registry.vocabularies["document_kinds"],
+        model = self.model()
+        fetcher = PoliteFetcher(f"{paths.site_origin()}/about", self.now, model.registry.vocabularies["document_kinds"],
                                 os.environ.get("MVR_WEB_BASE"))
-        files = Files(self.blobs(), self.datasheet_meter(), registry.vocabularies)
+        files = Files(self.blobs(), self.datasheet_meter(), model.registry.vocabularies)
         return Researcher(self.research_meter(), self.image_judge_meter(), fetcher, files, self.review(),
-                          self.research_runs(), self.agent_tokens(), self.repository(),
-                          self.held(), schema, registry, self.now)
+                          self.research_runs(), self.agent_tokens(), self.repository(), self.held(), model, self.now)
 
     def search_admin(self, review: Review, histories: Histories) -> SearchAdmin:
         return SearchAdmin(self.indexer, self.search_engine, lambda: self.ask_meter(self.search_engine()),
-                           self.budget(), self.prompts(), self.ask_ledger(), review, histories, self.model()[1],
+                           self.budget(), self.prompts(), self.ask_ledger(), review, histories, self.model().registry,
                            lambda: self.now()[:10])
 
     def news_admin(self, review: Review) -> NewsAdmin:
@@ -68,24 +67,23 @@ class Wiring(Models):
 
     def admin_endpoint(self) -> AdminEndpoint:
         review, histories = self.review(), self.histories()
-        return AdminEndpoint(review, self.identity(), self.records(), histories, admin_model(*self.model()),
+        return AdminEndpoint(review, self.identity(), self.records(), histories, admin_model(self.model()),
                              self.correlate, self.reindex,
                              {"search": self.search_admin(review, histories).route,
 "news": self.news_admin(review).route, "agents": AgentsAdmin(self.agent_tokens(), self.now).route,
 "research": ResearchAdmin(self.researcher, self.correlate).route})
 
     def detector(self) -> Detector:
-        schema, registry = self.model()
-        docs = self.store()
-        return Detector(StoreChangeLog(docs, schema), self.feed(), registry.feed,
-                        StoreFeedReads(docs, schema, self.repository()), schema)
+        model, docs = self.model(), self.store()
+        return Detector(StoreChangeLog(docs, model), self.feed(), model.registry.feed,
+                        StoreFeedReads(docs, model.schema, self.repository()), model.schema)
 
     def feed(self, review: Review | None = None) -> Feed:
-        schema, registry = self.model()
+        model = self.model()
         return Feed(review or self.review(), Job("news", self.correlate("feed")),
-                    lambda: self.catalog(schema, (FeedItem.__name__,)).all(FeedItem),
-                    lambda record: catalog_of(schema, [{"version": 1, **record_of(dict(record))}]).all(FeedItem)[0],
-                    registry, self.instant)
+                    lambda: self.catalog((FeedItem.__name__,)).all(FeedItem),
+                    lambda record: catalog_of(model, [{"version": 1, **record_of(dict(record))}]).all(FeedItem)[0],
+                    model.registry, self.instant)
 
     def drafter(self) -> Drafter:
         return Drafter(self.retriever(self.search_engine()), self.repository(), self.feed(), self.draft_meter(),

@@ -41,9 +41,9 @@ def place() -> Place:
     tokens = FirestoreAgentTokens(docs)
     token, secret = issue("scout", Scope.READ, date(2027, 1, 1), Limits(), NOW)
     tokens.issue(token)
-    sources = catalog_of(FX.schema, store.scan(docs, FX.schema, KINDS))
-    return Place(read_tools(lambda: FX.search_engine, StoreCatalogRepository(docs, FX.schema), lambda: sources,
-                            FX.registry), tokens, secret)
+    sources = catalog_of(FX.model, store.scan(docs, FX.model.schema, KINDS))
+    return Place(read_tools(lambda: FX.search_engine, StoreCatalogRepository(docs, FX.model), lambda: sources,
+                            FX.model.registry), tokens, secret)
 
 def test_the_protocol_subset(place: Place) -> None:
     agent = place.agent()

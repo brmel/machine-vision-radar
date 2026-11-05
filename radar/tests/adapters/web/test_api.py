@@ -39,8 +39,8 @@ FX = stores.fixture()
 NOW = datetime(2026, 10, 19, 12, tzinfo=timezone.utc)
 DAY, MONTH = "2026-10-19", "2026-10"
 HOSTING = "35.191.0.9"
-USAGE, CAP, ASKS_ON = (usage_collection(Use.ASK), caps_of(FX.registry.ai, [])[Use.ASK],
-                       model_of(FX.registry.ai, Use.ASK, None).id)
+USAGE, CAP, ASKS_ON = (usage_collection(Use.ASK), caps_of(FX.model.registry.ai, [])[Use.ASK],
+                       model_of(FX.model.registry.ai, Use.ASK, None).id)
 
 @pytest.fixture(scope="module")
 def place() -> tuple[str, str]:
@@ -54,8 +54,8 @@ def _endpoint(ledger: FirestoreDocs, release: str, model: AnswerModel = Scripted
     wiring = Wiring()
     engine, asks = wiring.search_engine(), FirestoreAskLedger(ledger)
     answerer = Answerer(wiring.retriever(engine), model)
-    meter = Meter(FirestoreBudget(ledger, FX.schema, FX.registry.ai), FirestoreUsageLog(ledger, now=lambda: NOW),
-                  FX.registry.ai, Use.ASK, "scripted", lambda model: answerer)
+    meter = Meter(FirestoreBudget(ledger, FX.model), FirestoreUsageLog(ledger, now=lambda: NOW),
+                  FX.model.registry.ai, Use.ASK, "scripted", lambda model: answerer)
     quota = Quota(asks, meter, engine, release)
     return AskEndpoint(quota, asks, now=lambda: NOW, correlate=wiring.correlate)
 
@@ -128,7 +128,7 @@ def test_every_model_call_and_every_capped_one_is_recorded_without_the_question(
 def test_a_reply_out_of_shape_is_unavailable_and_charged_as_billed(
         place: tuple[str, str], ledger: FirestoreDocs, monkeypatch: pytest.MonkeyPatch, said: str) -> None:
     FX.wire(place, monkeypatch)
-    model = model_of(FX.registry.ai, Use.ASK, None)
+    model = model_of(FX.model.registry.ai, Use.ASK, None)
     with serving(meta_saying(said, []), keep_alive=True) as url:
         runner = MetaRunner(model.id, f"{url}/v1", "recorded")
         model = PromptedAnswerModel(FilesPromptRegistry(paths.PROMPTS).prompt("ask"), runner)

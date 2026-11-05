@@ -42,7 +42,7 @@ M = TypeVar("M")
 
 class Models(Stores):
     def search_engine(self) -> ShardedSearch:
-        registry = self.model()[1]
+        registry = self.model().registry
         return ShardedSearch(BlobStoreIndexFiles(self.blobs()), FastembedEmbedder(registry.search.model), registry,
                              self.repository())
 
@@ -51,7 +51,7 @@ class Models(Stores):
 
     def indexer(self) -> Indexer:
         return Indexer(self.search_engine(), self.repository(), FirestoreIndexRuns(self.store()),
-                       self.model()[1].search, self.instant)
+                       self.model().registry.search, self.instant)
 
     def prompts(self) -> PromptRegistry:
         return FilesPromptRegistry(paths.PROMPTS)
@@ -76,7 +76,7 @@ class Models(Stores):
             if project and not self._yes:
                 raise NoStore("a model call is charged to the project's AI budget and recorded there: pass --yes")
             return prompted(prompt, self._runner(model, project)) if project else scripted
-        return Meter(self.budget(), FirestoreUsageLog(self.store()), self.model()[1].ai, use, prompt.id, opened)
+        return Meter(self.budget(), FirestoreUsageLog(self.store()), self.model().registry.ai, use, prompt.id, opened)
 
     def ask_meter(self, engine: SearchEngine) -> Meter[Answerer]:
         retriever = self.retriever(engine)
@@ -84,7 +84,7 @@ class Models(Stores):
                            Answerer(retriever, ScriptedAnswerModel()))
 
     def research_meter(self) -> Meter[ResearchAgent]:
-        registry = self.model()[1]
+        registry = self.model().registry
         return self._meter(Use.RESEARCH, lambda prompt, runner: PromptedResearchAgent(prompt, runner, registry),
                            ScriptedResearchAgent())
 
@@ -92,7 +92,7 @@ class Models(Stores):
         return self._meter(Use.RESEARCH, PromptedImageJudge, ScriptedImageJudge(), prompt_id="image_judge")
 
     def datasheet_meter(self) -> Meter[DatasheetExtractor]:
-        registry = self.model()[1]
+        registry = self.model().registry
         return self._meter(Use.DATASHEET, lambda prompt, runner: PromptedDatasheetExtractor(prompt, runner, registry),
                            ScriptedDatasheetExtractor())
 
@@ -100,14 +100,13 @@ class Models(Stores):
         return self._meter(Use.DRAFT, PromptedArticleModel, ScriptedArticleModel())
 
     def retriever(self, engine: SearchEngine) -> Retriever:
-        return IndexRetriever(engine, self.repository(), self.model()[1])
+        return IndexRetriever(engine, self.repository(), self.model().registry)
 
     def ask_ledger(self) -> AskLedger:
         return FirestoreAskLedger(self.store())
 
     def budget(self) -> Budget:
-        schema, registry = self.model()
-        return FirestoreBudget(self.store(), schema, registry.ai)
+        return FirestoreBudget(self.store(), self.model())
 
     def reindex(self, actor: str, correlation_id: str) -> bool:
         try:

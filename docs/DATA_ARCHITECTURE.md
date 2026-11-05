@@ -7,6 +7,17 @@ write (the `CatalogWriter`), on the store (`radar store validate`) and on a cata
 The store, the read model and the read and write paths: [SYSTEM.md](SYSTEM.md); search and every AI use:
 [SEARCH.md](SEARCH.md).
 
+**The interface** is one object, `Model` (`radar/domain/model/model.py`), holding the schema and the registry; the
+wiring loads it once and every caller takes it.
+
+- `Model.parse(raw, kind, where)`: the one edge parser of records, JSON in and the generated `kind` out, or a
+  `ParseError` naming the path.
+- `Model.check(catalog, scope, today)`: every `Rule` (`radar/domain/validation/rule.py`) on the catalog, returning an
+  immutable `Verdict` of `Finding`s (rule, entity, message, `Severity` error or warning). The `scope` is `Whole()`
+  for the store (`store validate`) and a folder `model validate` reads, else `Part()`: a write's neighborhood, a
+  catalog `store load` seeds, a catalog file or the registry alone.
+- A refused write raises `InvalidChangeset`, which holds findings only.
+
 ## 1. Principles
 
 1. **Technology-neutral:** machine-vision concepts, independent of databases, wire formats or UI state.
@@ -173,7 +184,7 @@ broadcast capture unless marketed for machine vision. **Boundaries:**
 
 ## 6. Validation
 
-Parsing (`radar/adapters/files/json_parser.py`, driven by the model schema) rejects a wrong shape before any rule
+Parsing (`Model.parse`, driven by the model schema) rejects a wrong shape before any rule
 runs: an unknown or missing field, a wrong type, a bad id, an enum value outside its list, a LocalizedText without
 `en` or with empty text, NaN or Infinity, a number below its minimum (a Claim `rank` below 1), too few items (empty
 `source_refs` where one is required). The rules (`radar/domain/validation/rules/`) then check:

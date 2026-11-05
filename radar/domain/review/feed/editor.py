@@ -9,7 +9,7 @@ from radar.domain.model.entities import (FeedDesk, FeedDeskRow, FeedItem, FeedSe
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.history.projection import every_page, page_of, plain
 from radar.domain.model.registry import Registry
-from radar.domain.model.changeset import Change, Changeset, PutEntity
+from radar.domain.model.history.changeset import Change, Changeset, PutEntity
 from radar.domain.ports.review.proposal_queue import Query
 from radar.domain.review.feed.news import published
 from radar.domain.review.proposal import Proposal

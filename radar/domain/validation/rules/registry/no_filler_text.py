@@ -4,7 +4,8 @@ import re
 from collections.abc import Mapping
 
 from radar.domain.model.registry import Filler
-from radar.domain.validation.context import ValidationContext, ValidationResult
+from radar.domain.validation.context import ValidationContext
+from radar.domain.validation.verdict import Finding, Findings
 from radar.domain.validation.walk import visits
 
 NAME = "no_filler_text"
@@ -15,7 +16,7 @@ def _findings(filler: Filler, text: str) -> list[str]:
                  for m in re.finditer(b.pattern, text, re.IGNORECASE)]
     return ([f"placeholder text '{text}'"] if placeholder else []) + marketing
 
-def check(ctx: ValidationContext, res: ValidationResult) -> None:
+def check(ctx: ValidationContext) -> Findings:
     for v in visits(ctx):
         if v.spec.leaf_type not in ("string", "LocalizedText"):
             continue
@@ -24,4 +25,4 @@ def check(ctx: ValidationContext, res: ValidationResult) -> None:
         for item in v.items:
             for text in (item.values() if isinstance(item, Mapping) else (item,)):
                 for found in _findings(ctx.registry.filler, text):
-                    res.error(NAME, v.entity.id, f"{v.path}: {found}")
+                    yield Finding(NAME, v.entity.id, f"{v.path}: {found}")

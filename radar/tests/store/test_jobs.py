@@ -22,9 +22,9 @@ def test_load_writes_every_entity_event_snapshot_and_file() -> None:
     docs, files = stores.fresh(), stores.blobs()
     written = FX.load(docs, files)
     recorded = FX.rows("changes.jsonl")
-    entities = [r for r in FX.records if not r["id"].startswith(f"{layout.changes_prefix(FX.schema)}_")]
+    entities = [r for r in FX.records if not r["id"].startswith(f"{layout.changes_prefix(FX.model.schema)}_")]
     imported = [r for r in entities if r["id"] not in {c["entity"] for c in recorded}]
-    for e in FX.schema.entities:
+    for e in FX.model.schema.entities:
         rows = FX.rows(f"{e.collection}.jsonl") if (FX.out / "data" / f"{e.collection}.jsonl").exists() else []
         assert written.get(e.collection, 0) == len(rows) + (len(imported) if e.collection == layout.CHANGES else 0), (
             e.collection)
@@ -72,7 +72,7 @@ def test_the_cli_validates_first_and_writes_nothing_on_an_error(
         tmp_path: Path, broken: Callable[[Path], object], why: str) -> None:
     shutil.copytree(FX.out, tmp_path / "fx")
     broken(tmp_path / "fx")
-    fx = stores.Fixture(tmp_path / "fx", FX.schema, FX.registry, FX.records, FX.media)
+    fx = stores.Fixture(tmp_path / "fx", FX.model, FX.records, FX.media)
     place = stores.place()
     run = stores.cli(fx, place, *fx.load_cli(), check=False)
     assert run.returncode == 1 and "nothing written" in run.stderr and why in run.stderr
@@ -83,9 +83,9 @@ def test_store_validate_catches_a_slug_two_records_of_a_kind_share() -> None:
     kinds: dict[str, list[dict[str, Any]]] = {}
     for r in FX.records:
         if "slug" in r:
-            kinds.setdefault(FX.schema.kind_of(r["id"]) or "", []).append(r)
+            kinds.setdefault(FX.model.schema.kind_of(r["id"]) or "", []).append(r)
     first, second = next(rows for rows in kinds.values() if len(rows) > 1)[:2]
-    docs, path = stores.fresh_at(place[0]), layout.canonical(FX.schema, second["id"])
+    docs, path = stores.fresh_at(place[0]), layout.canonical(FX.model.schema, second["id"])
     docs.commit([Put(path, {**(docs.get(path) or {}), "slug": first["slug"]})])
     run = stores.cli(FX, place, "store", "validate", check=False)
     assert run.returncode == 1 and f"slug '{first['slug']}' is used by" in run.stderr
@@ -95,7 +95,7 @@ def test_load_backup_and_index_write_exactly_the_documented_layout() -> None:
     written = [*sorted(stores.everything(stores.fresh_at(place[0]))), *stores.objects(place[1])]
     section = (paths.DEV / "docs" / "SYSTEM.md").read_text(encoding="utf-8").split("## 1.")[1].split("## 2.")[0]
     rows = [line for line in section.splitlines() if line.startswith(("| `", "| Storage `"))]
-    entity = "|".join(e.collection for e in FX.schema.entities if e.collection)
+    entity = "|".join(e.collection for e in FX.model.schema.entities if e.collection)
     patterns = {d: re.compile("".join(f"(?:{entity})" if p == "<collection>" else "[^/]+" if p.startswith("{")
                                       else re.escape(p) for p in re.split(r"(\{[^}]+\}|<collection>)", d)))
                 for row in rows for d in re.findall(r"`([^`]+)`", row.split("|")[1])}
@@ -141,7 +141,7 @@ def test_store_validate_counts_each_kind_it_read() -> None:
     place = stores.place()
     moved = FX.json(place, *FX.load_cli())["docs"]
     report = FX.json(place, "store", "validate")
-    kinds = set(layout.collections(FX.schema).values())
+    kinds = set(layout.collections(FX.model.schema).values())
     assert (report["ok"] and report["errors"] == []
             and category_and_roles.NAME in {w["rule"] for w in report["warnings"]})
     assert report["counts"] == {c: n for c, n in moved.items() if c in kinds} != {}

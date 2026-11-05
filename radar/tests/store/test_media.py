@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 
 from radar.adapters.files import json_store
-from radar.adapters.files.model_json import load_schema
 from radar.adapters.firestore import layout, store
 from radar.domain.ports.store.docs import Put
 from radar.adapters.storage.blobs import StorageBlobStore, media_path
@@ -44,13 +43,13 @@ def test_backup_then_restore_reproduces_every_collection() -> None:
     assert again.returncode == 1 and "empty store" in again.stderr
 
 def test_export_writes_the_catalog_folder_that_loads_back_equal(tmp_path: Path) -> None:
-    place, out, schema = FX.loaded(), tmp_path / "store", load_schema()
+    place, out, schema = FX.loaded(), tmp_path / "store", FX.model.schema
     out.mkdir()
     (out / "gone.jsonl").write_text("{}\n", encoding="utf-8")
     counts = FX.json(place, "store", "export", str(out))["counts"]
     assert sorted(p.stem for p in out.glob("*.jsonl")) == sorted(counts)
     events = f"{layout.changes_prefix(schema)}_"
-    exported, given = ([r for r in layout.records_of(json_store.load_catalog(d, schema), schema)
+    exported, given = ([r for r in layout.records_of(json_store.load_catalog(d, FX.model), schema)
                         if not r["id"].startswith(events)] for d in (out, FX.out / "data"))
     assert exported == given
     refilled = (f"{place[0]}-refilled", place[1])
@@ -61,7 +60,7 @@ def test_export_writes_the_catalog_folder_that_loads_back_equal(tmp_path: Path) 
 def test_a_rights_change_moves_the_files_visibility_with_it() -> None:
     docs, files = FX.seeded()
     document = next(d for d in FX.rows("documents.jsonl") if FX.media[d["sha256"]].public)
-    private = next(k for k, t in FX.registry.vocabularies["media_rights"].items() if not t.public)
+    private = next(k for k, t in FX.model.registry.vocabularies["media_rights"].items() if not t.public)
     url = files.url(BlobRef(document["sha256"], document["mime"]), True)
     assert stores.status("GET", url) == 200
     for rights, readable in ((private, False), (document["rights"], True)):
@@ -79,14 +78,14 @@ def test_a_purge_lists_then_deletes_only_what_nothing_reads() -> None:
     for name in ("managed-exports/all_namespaces/export.json", "index/current.json", "index/blobs/live.json",
                  "index/blobs/stale.json", "media/zz/stray.pdf"):
         files.write(name, b"{}", "application/json")
-    found = store.purgeable(docs, files, FX.schema, {"index/current.json", "index/blobs/live.json"})
+    found = store.purgeable(docs, files, FX.model.schema, {"index/current.json", "index/blobs/live.json"})
     assert found.collections == {"public_search": 1, "research_queue": 1}
     assert found.orphans == ("changes/chg_gone000001", "versions/gone_0000000001/v/1")
     assert {n.split("/")[0] + "/" + n.split("/")[1] for n in found.objects} == {
         "backups/20260101T000000Z", "index/blobs"}
     assert "index/blobs/stale.json" in found.objects and "index/blobs/live.json" not in found.objects
     assert store.purge(docs, files, found) == 4 + len(found.objects)
-    assert store.purgeable(docs, files, FX.schema,
+    assert store.purgeable(docs, files, FX.model.schema,
                            {"index/current.json", "index/blobs/live.json"}) == store.Purge({}, (), {})
     names = {n for n, _ in files.sizes()}
     assert {"managed-exports/all_namespaces/export.json", "index/blobs/live.json", "media/zz/stray.pdf"} <= names

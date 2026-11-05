@@ -5,22 +5,22 @@ from dataclasses import dataclass
 import pytest
 
 from radar import paths
-from radar.adapters.files.model_json import load_registry, load_schema
+from radar.tests.fixtures.corpus import MODEL
 from radar.adapters.firestore.writer import StoreWriter
-from radar.domain.validation.context import InvalidChangeset
+from radar.domain.validation.verdict import InvalidChangeset
 from radar.adapters.firestore.ledgers.ai import CALLS, FirestoreBudget, FirestoreUsageLog, usage_collection
 from radar.domain.ai.budget import Use, caps_of, model_of
 from radar.domain.ai.meter import Capped, Meter
 from radar.domain.model.entities import AiModel
 from radar.domain.model.history.ids import keyed
-from radar.domain.model.changeset import Change, Changeset, PutEntity
+from radar.domain.model.history.changeset import Change, Changeset, PutEntity
 from radar.domain.ports.store.docs import Docs, Increment
 from radar.domain.ports.ai.usage_log import Ended, Outcome
 from radar.tests.store import stores
 
 DAY = "2026-10-20"
 USES = [u for u in Use if u is not Use.ALL]
-AI = load_registry().ai
+AI = MODEL.registry.ai
 DEFAULTS = caps_of(AI, [])
 
 @dataclass(frozen=True)
@@ -31,7 +31,7 @@ class Called:
         return Ended(Outcome.ANSWERED, 1000, 100)
 
 def _meter(docs: Docs, use: Use) -> Meter[AiModel]:
-    return Meter(FirestoreBudget(docs, load_schema(), AI), FirestoreUsageLog(docs), AI, use,
+    return Meter(FirestoreBudget(docs, MODEL), FirestoreUsageLog(docs), AI, use,
                  f"{use.value}/v1", lambda model: model)
 
 def _called(model: AiModel) -> Called:
@@ -44,10 +44,9 @@ def _outcomes(docs: Docs) -> list[str]:
     return sorted(f["outcome"] for _, f in docs.list(CALLS))
 
 def _cap(docs: Docs, use: Use, month_cad: float, day_calls: int, cap_id: str = "", model: str | None = None) -> None:
-    schema = load_schema()
     record = {"id": cap_id or keyed("cap", use.value), "use": use.value, "month_cad": month_cad, "day_calls": day_calls,
               **({"model": model} if model else {})}
-    StoreWriter(docs, schema, load_registry(schema=schema), lambda: f"{DAY}T00:00:00Z", stores.blobs()).apply(
+    StoreWriter(docs, MODEL, lambda: f"{DAY}T00:00:00Z", stores.blobs()).apply(
         Changeset((Change(PutEntity(record), "the founder approves this use's spend", "human", "founder", ()),)),
         "cap-test")
 

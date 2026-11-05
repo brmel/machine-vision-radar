@@ -1,20 +1,21 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, Callable, Collection, Mapping, Sequence
 
-from radar.adapters.files.json_parser import ParseError
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.history.projection import plain
-from radar.domain.model.registry import Registry
+from radar.domain.model.model import Model, ParseError
 from radar.domain.model.schema import FieldSpec, ModelSchema
 from radar.domain.ports.store.blob_store import BlobRef, BlobStore
 from radar.domain.model.entities import ActorKind
-from radar.domain.model.changeset import Applied, Change, Changeset, EntityChange, PutEntity, Retract, without_version
-from radar.domain.validation.context import Finding, InvalidChangeset, ValidationContext
-from radar.domain.validation.runner import validate
+from radar.domain.model.history.changeset import (Applied, Change, Changeset, EntityChange, PutEntity, Retract,
+                                                  without_version)
+from radar.domain.validation.context import Part
+from radar.domain.validation.verdict import Finding, InvalidChangeset
 from radar.domain.ports.store.docs import BATCH, Delete, Docs, Fields, Put
 from .layout import CHANGES, Record, canonical, canonical_doc, catalog_of, changes_prefix, read_records, version
 from .projection.neighborhood import Changed, Neighborhood, ReferenceGraph
@@ -22,6 +23,7 @@ from .projection.projector import Projector
 
 Clock = Callable[[], str]
 Writes = Mapping[str, Fields | None]
+CHANGESET, SLUG, STORED_FILE, RECORD_PARSE = "changeset", "slug", "stored_file", "record_parse"
 
 def commit(docs: Docs, writes: Writes, create: Collection[str] = ()) -> int:
     paths = sorted(writes)
@@ -67,11 +69,11 @@ def snapshots(entity: str, n: int, after: Mapping[str, Any] | None) -> dict[str,
     return {version(entity, n): {"json": json.dumps(without_version(after), ensure_ascii=False, separators=(",", ":"),
                                                     sort_keys=True)}}
 
-def _unparsed(schema: ModelSchema, record: Record) -> Finding | None:
+def _unparsed(model: Model, record: Record) -> Finding | None:
     try:
-        catalog_of(schema, [record])
+        catalog_of(model, [record])
     except (ParseError, KeyError) as exc:
-        return Finding("record_parse", record["id"], f"does not parse: {exc}")
+        return Finding(RECORD_PARSE, record["id"], f"does not parse: {exc}")
     return None
 
 def _let_go(record: Record, f: FieldSpec, entity: str) -> PutEntity | Retract:
@@ -92,11 +94,11 @@ class Planned:
                      for i, (b, a) in self.changed.items())
 
 class StoreWriter:
-    def __init__(self, docs: Docs, schema: ModelSchema, registry: Registry, clock: Clock, blobs: BlobStore) -> None:
-        self.docs, self.schema, self.registry, self.clock, self.blobs = docs, schema, registry, clock, blobs
-        self.graph, self.projector = ReferenceGraph(docs, schema), Projector(docs, schema, registry)
-        self.changes, self.counted = changes_prefix(schema), counted(schema)
-        self.public = registry.marked("media_rights", lambda t: t.public)
+    def __init__(self, docs: Docs, model: Model, clock: Clock, blobs: BlobStore) -> None:
+        self.docs, self.model, self.schema, self.clock, self.blobs = docs, model, model.schema, clock, blobs
+        self.graph, self.projector = ReferenceGraph(docs, model.schema), Projector(docs, model)
+        self.changes, self.counted = changes_prefix(model.schema), counted(model.schema)
+        self.public = model.registry.marked("media_rights", lambda t: t.public)
 
     def _last(self, changeset: Changeset, stored: Mapping[str, Record]) -> dict[str, int]:
         last: dict[str, int] = {}
@@ -105,12 +107,13 @@ class StoreWriter:
         return last
 
     def _stored(self, ids: list[str]) -> dict[str, Record]:
-        if len(set(ids)) != len(ids) or any(i.startswith(f"{self.changes}_") for i in ids):
-            raise InvalidChangeset(["a changeset changes each entity once, and never a Change event"])
-        try:
-            return read_records(self.docs, self.schema, ids)
-        except ValueError as exc:
-            raise InvalidChangeset([str(exc)]) from exc
+        counts = Counter(ids)
+        if twice := [i for i in ids if counts[i] > 1 or i.startswith(f"{self.changes}_")]:
+            raise InvalidChangeset([Finding(CHANGESET, twice[0],
+                                            "a changeset changes each entity once, and never a Change event")])
+        if unknown := [i for i in ids if not self.schema.kind_of(i)]:
+            raise InvalidChangeset([Finding(CHANGESET, unknown[0], "names no entity kind")])
+        return read_records(self.docs, self.schema, ids)
 
     def plan(self, changeset: Changeset, correlation_id: str) -> Planned:
         stored = self._stored([c.entity for c in changeset.changes])
@@ -120,7 +123,7 @@ class StoreWriter:
             before = stored.get(c.entity)
             body = dict(c.action.record) if isinstance(c.action, PutEntity) else None
             if before is None and body is None:
-                raise InvalidChangeset([f"{c.entity}: no such record to retract"])
+                raise InvalidChangeset([Finding(CHANGESET, c.entity, "no such record to retract")])
             if without_version(before) == (body or {}):
                 continue
             self._slug_free(c.entity, before, body)
@@ -136,12 +139,12 @@ class StoreWriter:
         if body is None or "slug" not in body:
             return
         if before is not None and body["slug"] != before.get("slug"):
-            raise InvalidChangeset([f"{entity}: a published slug never changes ({before.get('slug')})"])
+            raise InvalidChangeset([Finding(SLUG, entity, f"a published slug never changes ({before.get('slug')})")])
         taken = [f["id"]
                  for _, f in self.docs.where(canonical(self.schema, entity).split("/")[0], "slug", [body["slug"]])
                  if f["id"] != entity]
         if taken:
-            raise InvalidChangeset([f"{entity}: slug '{body['slug']}' belongs to {taken[0]}"])
+            raise InvalidChangeset([Finding(SLUG, entity, f"slug '{body['slug']}' belongs to {taken[0]}")])
 
     def _visibility(self, changed: Changed) -> list[tuple[BlobRef, bool]]:
         out = []
@@ -150,20 +153,25 @@ class StoreWriter:
                 continue
             ref, public = BlobRef(after["sha256"], after["mime"]), after["rights"] in self.public
             if not self.blobs.has(ref):
-                raise InvalidChangeset([f"{after['id']}: no stored file {ref.sha256}; add it first (radar media add)"])
+                raise InvalidChangeset([Finding(STORED_FILE, after["id"],
+                                                f"no stored file {ref.sha256}; add it first (radar media add)")])
             if before is None or (before.get("rights") in self.public) != public:
                 out.append((ref, public))
         return out
 
-    def _validate(self, hood: Neighborhood, changed: Changed, today: date) -> None:
-        if unparsed := [f for _, after in changed.values() if after and (f := _unparsed(self.schema, after))]:
-            raise InvalidChangeset(unparsed)
+    def _errors(self, hood: Neighborhood, changed: Changed, today: date) -> list[tuple[Finding, ...]]:
         try:
-            results = [validate(ValidationContext(catalog_of(self.schema, records.values()), self.registry, self.schema,
-                                                  today)).errors
-                       for records in (hood.records, hood.after(changed))]
+            return [self.model.check(catalog_of(self.model, records.values()), Part(), today).errors
+                    for records in (hood.records, hood.after(changed))]
         except (ParseError, KeyError) as exc:
-            raise InvalidChangeset([f"a stored record of its neighborhood does not parse: {exc}"]) from exc
+            stored = [f for r in hood.records.values() if r and (f := _unparsed(self.model, r))]
+            unchecked = Finding(RECORD_PARSE, "", f"the neighborhood does not check: {exc}")
+            raise InvalidChangeset(stored or [unchecked]) from exc
+
+    def _validate(self, hood: Neighborhood, changed: Changed, today: date) -> None:
+        if unparsed := [f for _, after in changed.values() if after and (f := _unparsed(self.model, after))]:
+            raise InvalidChangeset(unparsed)
+        results = self._errors(hood, changed, today)
         records = hood.records.keys() | changed.keys()
         added = sorted((f for f in set(results[1]) - set(results[0]) if f.entity_id in records),
                        key=lambda f: (f.entity_id, f.rule, f.message))
@@ -217,7 +225,7 @@ class StoreWriter:
                 self.blobs.publish(ref, not public)
             raise
         self._remove_withdrawn(planned.changed)
-        parsed = catalog_of(self.schema, planned.events)
+        parsed = catalog_of(self.model, planned.events)
         return Applied(tuple(plain(parsed.get(e["id"])) for e in planned.events), written)
 
     def _remove_withdrawn(self, changed: Changed) -> None:

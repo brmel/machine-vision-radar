@@ -5,9 +5,11 @@ from pathlib import Path
 from typing import Any
 
 from radar import paths
+from radar.domain.model.entities import AiSettings, CategoryProfile, CLASSES, FeedSettings, SearchSettings
+from radar.domain.model.model import Model, ParseError, RecordParser
 from radar.domain.model.registry import Banned, Filler, Language, Registry, composed
 from radar.domain.model.schema import ModelSchema, parse_schema
-from radar.adapters.files.json_parser import ModelParser, ParseError, read_json
+from radar.adapters.files.json_parser import read_json
 
 PROFILES_DIR = "category_profiles"
 
@@ -29,30 +31,28 @@ def _read(path: Path) -> Any:
         raise ParseError(f"registry file not found: {path}")
     return read_json(path)
 
-def _items(parser: ModelParser, schema: ModelSchema, type_name: str, path: Path) -> dict[str, Any]:
+def _items(parser: RecordParser, type_name: str, path: Path) -> dict[str, Any]:
     raw = _read(path)
     if not isinstance(raw, list):
         raise ParseError(f"{path.name}: expected an array of {type_name}")
     out: dict[str, Any] = {}
     for i, item in enumerate(raw):
-        obj = parser.record(item, schema.types[type_name], f"{path.name}[{i}]")
+        obj = parser.parse(item, CLASSES[type_name], f"{path.name}[{i}]")
         if obj.id in out:
             raise ParseError(f"{path.name}: duplicate id '{obj.id}'")
         out[obj.id] = obj
     return out
 
-def load_registry(reg_dir: Path = paths.REGISTRY, schema: ModelSchema | None = None) -> Registry:
-    schema = schema or load_schema()
-    parser = ModelParser(schema)
+def _registry(reg_dir: Path, schema: ModelSchema) -> Registry:
+    parser = RecordParser(schema)
     files = {t.registry_file: t.name for t in schema.registry_types if t.registry_file}
-    special = {f: _items(parser, schema, t, reg_dir / f) for f, t in files.items() if not f.endswith("/")}
+    special = {f: _items(parser, t, reg_dir / f) for f, t in files.items() if not f.endswith("/")}
     profiles_dir = reg_dir / PROFILES_DIR
     if not profiles_dir.is_dir():
         raise ParseError(f"registry directory not found: {profiles_dir}")
     groups = special["spec_groups.json"]
     try:
-        profiles = tuple(composed(parser.record(_read(p), schema.types["CategoryProfile"], f"{PROFILES_DIR}/{p.name}"),
-                                  groups)
+        profiles = tuple(composed(parser.parse(_read(p), CategoryProfile, f"{PROFILES_DIR}/{p.name}"), groups)
                          for p in sorted(profiles_dir.glob("*.json")))
     except (KeyError, ValueError) as exc:
         raise ParseError(f"{PROFILES_DIR}: {exc}") from exc
@@ -60,11 +60,15 @@ def load_registry(reg_dir: Path = paths.REGISTRY, schema: ModelSchema | None = N
         units=special["units.json"], dimensions=special["dimensions.json"],
         spec_definitions=special["spec_definitions.json"], categories=special["categories.json"], spec_groups=groups,
         profiles=profiles,
-        vocabularies={p.stem: _items(parser, schema, "Term", p)
+        vocabularies={p.stem: _items(parser, "Term", p)
                       for p in sorted((reg_dir / "vocabularies").glob("*.json"))},
-        search=parser.record(_read(reg_dir / "search.json"), schema.types["SearchSettings"], "search.json"),
-        feed=parser.record(_read(reg_dir / "feed.json"), schema.types["FeedSettings"], "feed.json"),
-        ai=parser.record(_read(reg_dir / "ai.json"), schema.types["AiSettings"], "ai.json"),
+        search=parser.parse(_read(reg_dir / "search.json"), SearchSettings, "search.json"),
+        feed=parser.parse(_read(reg_dir / "feed.json"), FeedSettings, "feed.json"),
+        ai=parser.parse(_read(reg_dir / "ai.json"), AiSettings, "ai.json"),
         filler=load_filler(),
         languages=LANGUAGES,
     )
+
+def load_model(reg_dir: Path | None = None) -> Model:
+    schema = load_schema()
+    return Model(schema, _registry(reg_dir or paths.REGISTRY, schema))

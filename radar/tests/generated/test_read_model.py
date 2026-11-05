@@ -10,15 +10,16 @@ from radar.build.llms import write_llms
 from radar.tests.store import stores
 
 FX = stores.fixture()
-PROFILES = {p.category_id: p for p in FX.registry.profiles}
-INTERNAL_IDS = re.compile(r"\b(?:" + "|".join(e.prefix for e in FX.schema.entities if e.internal) + r")_[0-9a-z]{10}\b")
-INTERNAL_KEYS = {e.collection for e in FX.schema.entities if e.internal}
+PROFILES = {p.category_id: p for p in FX.model.registry.profiles}
+INTERNAL_IDS = re.compile(r"\b(?:" + "|".join(e.prefix for e in FX.model.schema.entities if e.internal)
+                          + r")_[0-9a-z]{10}\b")
+INTERNAL_KEYS = {e.collection for e in FX.model.schema.entities if e.internal}
 ORIGIN = "https://example.com"
 
 @pytest.fixture(scope="module")
 def llms(tmp_path_factory: pytest.TempPathFactory) -> Path:
     out = tmp_path_factory.mktemp("llms")
-    write_llms(FX.read, out, FX.registry.default_language.code, ORIGIN)
+    write_llms(FX.read, out, FX.model.registry.default_language.code, ORIGIN)
     return out
 
 def test_rows_are_the_profile_sections_in_order() -> None:

@@ -43,7 +43,7 @@ def _queries(args: argparse.Namespace, queries: Sequence[EvalQuery]) -> float:
     if args.use == "search":
         return _search(args, queries)
     if args.use == "ask":
-        read_model, languages = args.wiring.repository(), tuple(l.code for l in args.wiring.model()[1].languages)
+        read_model, languages = args.wiring.repository(), tuple(l.code for l in args.wiring.model().registry.languages)
         return _graded(args, args.wiring.ask_meter(args.wiring.search_engine()),
                        [partial(graded_answer, read_model, q, locale) for q in queries for locale in languages])
     retriever = args.wiring.retriever(args.wiring.search_engine())
@@ -72,7 +72,7 @@ def run(args: argparse.Namespace) -> int:
         except (OSError, ValueError) as exc:
             return log.error(f"--cases {args.cases}: {exc}", code=2)
         return _scored(args, score)
-    queries = args.wiring.catalog(args.wiring.model()[0], ("EvalQuery",)).all(EvalQuery)
+    queries = args.wiring.catalog(("EvalQuery",)).all(EvalQuery)
     if not queries:
         return log.error("no EvalQuery records in the store: add them with `radar change apply`", code=2)
     return _scored(args, lambda: _queries(args, sorted(queries, key=lambda q: q.id)))
