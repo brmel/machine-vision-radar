@@ -495,7 +495,8 @@
     "description": "Where a model runs, tagged by the runner that calls it.",
     "variants": {
       "vertex": {"type": "string", "description": "Google ADK on the project's Vertex AI, in this region"},
-      "meta": {"type": "string", "description": "The Meta Model API, at this base URL"}
+      "meta": {"type": "string", "description": "The Meta Model API, at this base URL, with the MODEL_API_KEY key"},
+      "local": {"type": "string", "description": "An OpenAI-compatible server the caller runs (Ollama, llama.cpp, vLLM), at this base URL, with no key"}
     }
   },
   {

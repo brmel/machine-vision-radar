@@ -4,7 +4,7 @@ from collections import Counter
 from typing import Any, Mapping
 
 from radar.domain.ai.prompts import Prompt
-from radar.adapters.ai.prompted.reply import read
+from radar.adapters.ai.prompted.reply import ask, read
 from radar.domain.ports.ai.prompts import ModelRunner
 from radar.adapters.ai.prompted.specs import specs_json
 from radar.domain.model.entities import (ClaimValue, ClaimValueNone, ClaimValueQuantity, ClaimValueString,
@@ -39,7 +39,7 @@ class PromptedDatasheetExtractor:
 
     def extract(self, datasheet: Datasheet) -> Extraction:
         request = self._prompt.render(product=datasheet.product, source=datasheet.source.id, specs=self._specs)
-        reply = self._runner.reply(self._prompt, request, MAX_TOKENS,
+        reply = ask(self._runner, self._prompt, request, MAX_TOKENS,
                                  (datasheet.content, datasheet.mime))
         return read(reply, 
             lambda raw: Extraction(tuple(SpecValue(v["spec_key"], _value(v, self._defs.get(v["spec_key"])))

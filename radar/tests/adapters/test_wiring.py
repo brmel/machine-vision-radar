@@ -87,6 +87,14 @@ def test_a_model_opens_on_the_project_only_with_yes(sent: list[urllib.request.Re
         ask.call("2026-10-30", lambda model: model)
     assert sent and [r.full_url for r in sent if r.get_method() != "GET"] == []
 
+def test_muse_spark_on_the_meta_model_api_needs_its_key_before_anything_is_sent(
+        sent: list[urllib.request.Request], monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("MODEL_API_KEY", raising=False)
+    ask = Wiring(PROJECT, yes=True).ask_meter(Wiring(PROJECT).search_engine())
+    with pytest.raises(RuntimeError, match="MODEL_API_KEY"):
+        ask.call("2026-10-30", lambda model: model)
+    assert [r.full_url for r in sent if "meta.ai" in r.full_url] == []
+
 def test_no_token_no_project(sent: list[urllib.request.Request], monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("MVR_ACCESS_TOKEN")
     with pytest.raises(NoStore, match="MVR_ACCESS_TOKEN"):

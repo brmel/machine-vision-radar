@@ -18,7 +18,8 @@ from radar.adapters.ai.adk.runner import AdkRunner
 from radar.adapters.ai.meta.runner import MetaRunner
 from radar.domain.ai.answerer import Answerer
 from radar.domain.search.retriever import IndexRetriever, evidence_of
-from radar.domain.model.entities import AiProviderMeta, ClaimValueQuantity, ClaimValueTerm, Quantity, Source
+from radar.domain.model.entities import (AiProviderLocal, AiProviderMeta, ClaimValueQuantity, ClaimValueTerm, Quantity,
+                                         Source)
 from radar.domain.ports.ai.answer_model import AnswerModel, AnswerText, NeedText, Sentence
 from radar.domain.ports.ai.datasheet_extractor import Datasheet, SpecValue
 from radar.domain.ports.ai.image_judge import CandidateImage
@@ -35,6 +36,7 @@ FX = stores.fixture()
 READ, REGISTRY = FX.read, FX.registry
 GEMINI = REGISTRY.ai.models[0]
 MUSE = next(m for m in REGISTRY.ai.models if isinstance(m.provider, AiProviderMeta))
+GLIMMER = next(m for m in REGISTRY.ai.models if isinstance(m.provider, AiProviderLocal))
 RECORDED = (["prd_0000000002", "prd_0000000005"], "Which widget has a glossy finish, and what replaces it?")
 PAGE = Page("https://example.com/products/widget-two", "Widget Two", "A glossy widget, 93 g.",
             ("https://example.com/media/widget-two.pdf",), stores.NOW)
@@ -82,7 +84,8 @@ def _muse(url: str) -> MetaRunner:
     return MetaRunner(MUSE.id, f"{url}v1", "recorded")
 
 RUNNERS: dict[str, tuple[Callable[[str, list[str]], Answer], Callable[[str], ModelRunner]]] = {
-    "adk": (vertex_saying, _adk), "meta": (meta_saying, _muse)}
+    "adk": (vertex_saying, _adk), "meta": (meta_saying, _muse),
+    "local": (meta_saying, lambda url: MetaRunner(GLIMMER.id, f"{url}v1", None))}
 
 class Scripted:
     def __init__(self, *sentences: Sentence, needs: tuple[NeedText, ...] = ()) -> None:
@@ -280,15 +283,10 @@ def test_the_meta_runner_sends_a_datasheet_as_a_file_and_an_image_inline() -> No
                      "file": {"filename": "source.pdf", "file_data": f"data:application/pdf;base64,{pdf}"}}
     assert image == {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{png}"}}
 
-def test_a_meta_call_needs_its_key_and_a_refused_one_names_its_status_never_the_key() -> None:
-    heard: list[str] = []
-    refusing: Answer = lambda path, sent: (heard.append(path), (401, b'{"error": {"message": "invalid key"}}'))[1]
-    with serving(refusing, keep_alive=True) as url:
-        with pytest.raises(RuntimeError, match="MODEL_API_KEY"):
-            MetaRunner(MUSE.id, f"{url}/v1", "").reply(PROMPTS.prompt("ask"), "w", 10)
-        assert heard == []
-        with pytest.raises(OSError, match="HTTP 401") as refused:
-            MetaRunner(MUSE.id, f"{url}/v1", "mk-secret").reply(PROMPTS.prompt("ask"), "w", 10)
+def test_a_refused_meta_call_names_its_status_never_the_key() -> None:
+    refusing: Answer = lambda path, sent: (401, b'{"error": {"message": "invalid key"}}')
+    with serving(refusing, keep_alive=True) as url, pytest.raises(OSError, match="HTTP 401") as refused:
+        MetaRunner(MUSE.id, f"{url}/v1", "mk-secret").reply(PROMPTS.prompt("ask"), "w", 10)
     assert "mk-secret" not in str(refused.value)
 
 def test_a_refused_adk_call_is_an_os_error_naming_its_status() -> None:

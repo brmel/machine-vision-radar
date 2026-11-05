@@ -25,7 +25,7 @@ from radar.domain.ai.answerer import Answerer
 from radar.domain.ai.budget import Use
 from radar.domain.ai.meter import Meter
 from radar.domain.ai.prompts import Prompt
-from radar.domain.model.entities import AiModel, AiProviderMeta, AiProviderVertex
+from radar.domain.model.entities import AiModel, AiProviderLocal, AiProviderMeta, AiProviderVertex
 from radar.domain.ports.ai.article_model import ArticleModel
 from radar.domain.ports.ai.datasheet_extractor import DatasheetExtractor
 from radar.domain.ports.ai.image_judge import ImageJudge
@@ -64,7 +64,12 @@ class Models(Stores):
             case AiProviderVertex(vertex=location):
                 return AdkRunner(model.id, project, location, os.environ.get("MVR_ACCESS_TOKEN"))
             case AiProviderMeta(meta=base_url):
-                return MetaRunner(model.id, base_url, os.environ.get("MODEL_API_KEY", ""))
+                key = os.environ.get("MODEL_API_KEY")
+                if not key:
+                    raise RuntimeError(f"{model.id} runs on the Meta Model API: set MODEL_API_KEY in the environment")
+                return MetaRunner(model.id, base_url, key)
+            case AiProviderLocal(local=base_url):
+                return MetaRunner(model.id, base_url, None)
 
     def _meter(self, use: Use, prompted: Callable[[Prompt, ModelRunner], M], scripted: M,
                prompt_id: str | None = None) -> Meter[M]:
