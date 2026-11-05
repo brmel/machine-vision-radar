@@ -14,7 +14,7 @@
     "label": {"en": "Mechanics and environment", "fr": "Mécanique et environnement"},
     "specs": ["ip_rating", "operating_temperature", "housing_temperature", "supply_voltage", "weight", "body_length", "body_width", "body_height"]
   },
-  {"id": "laser", "label": {"en": "Laser", "fr": "Laser"}, "specs": ["laser_class", "wavelength"]},
+  {"id": "laser", "label": {"en": "Laser", "fr": "Laser"}, "specs": ["laser_class", "wavelength", "output_power"]},
   {"id": "compute", "label": {"en": "Compute", "fr": "Calcul"}, "specs": ["processor", "tops", "memory", "storage"]},
   {
     "id": "software_runtime",
