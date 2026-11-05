@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from typing import Callable, Mapping, Sequence
+from typing import Callable, Collection, Mapping, Sequence
 
 from .entities import (AiSettings, Category, CategoryProfile, Dimension, FeedSettings, Product, SearchSettings,
                        SpecDefinition, SpecGroup, Term, Unit)
@@ -85,6 +85,9 @@ class Registry:
     def keys(self, product: Product) -> frozenset[str]:
         sections = self.profile(product.category).sections
         return frozenset((*sections.core, *sections.detail, *self.group_specs(product.spec_groups or ())))
+
+    def unstated(self, product: Product, stated: Collection[str]) -> tuple[str, ...]:
+        return tuple(k for k in self.profile(product.category).required if k not in stated)
 
     def group_specs(self, groups: Sequence[str]) -> tuple[str, ...]:
         return tuple(k for g in groups for k in self.spec_groups[g].specs)

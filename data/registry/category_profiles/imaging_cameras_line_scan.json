@@ -15,6 +15,6 @@
     {"field": "chroma"},
     {"field": "lens_mount"}
   ],
-  "required_at_publish": ["interfaces"],
+  "required": ["interfaces"],
   "axis_dependent_keys": ["lens_mount", "chroma", "shutter_type", "width_px"]
 }

@@ -16,6 +16,6 @@
     {"field": "chroma"},
     {"field": "interfaces"}
   ],
-  "required_at_publish": ["resolution_megapixels"],
+  "required": ["resolution_megapixels"],
   "axis_dependent_keys": ["shutter_type", "width_px"]
 }

@@ -8,6 +8,6 @@
   },
   "groups": ["software_runtime", "ai_stack"],
   "facets": [{"field": "deployment"}, {"field": "vision_tasks"}],
-  "required_at_publish": ["deployment"],
+  "required": ["deployment"],
   "axis_dependent_keys": []
 }

@@ -8,6 +8,6 @@
   },
   "groups": ["ai_stack"],
   "facets": [{"field": "application"}, {"field": "industries"}, {"field": "system_components"}],
-  "required_at_publish": ["application"],
+  "required": ["application"],
   "axis_dependent_keys": ["resolution"]
 }

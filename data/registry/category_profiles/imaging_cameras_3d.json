@@ -18,6 +18,6 @@
     {"field": "laser_class"},
     {"field": "fieldbus"}
   ],
-  "required_at_publish": ["principle"],
+  "required": ["principle"],
   "axis_dependent_keys": ["shutter_type", "width_px"]
 }

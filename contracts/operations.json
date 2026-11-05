@@ -387,7 +387,7 @@
     },
     {
       "id": "quality.coverage",
-      "summary": "per category, each profile spec's share of products publishing a value of it, the most published first",
+      "summary": "per category, how many products miss a required spec, and each profile spec's share of products publishing a value of it, the most published first",
       "cli": "quality coverage",
       "admin": null,
       "mcp": null,
@@ -399,7 +399,7 @@
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["category", "products", "specs"],
+              "required": ["category", "products", "missing_required", "specs"],
               "properties": {
                 "specs": {"type": "array", "items": {"type": "object", "required": ["key", "products", "share"]}}
               }

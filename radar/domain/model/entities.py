@@ -320,12 +320,12 @@ class SpecGroup:
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class CategoryProfile:
-    """Presentation contract of one category: its own specs, the spec groups it takes, its filters and what a page must publish."""
+    """Presentation contract of one category: its own specs, the spec groups it takes, its filters and the specs a product must state."""
     category_id: TermId
     sections: ProfileSections
     groups: tuple[TermId, ...]
     facets: tuple[Facet, ...]
-    required_at_publish: tuple[str, ...]
+    required: tuple[str, ...]
     axis_dependent_keys: tuple[str, ...]
 
 @dataclass(frozen=True, slots=True, kw_only=True)

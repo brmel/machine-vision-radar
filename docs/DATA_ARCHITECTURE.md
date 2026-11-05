@@ -131,8 +131,8 @@ shows.
 - `facets`: the specs a category page filters on, in the spec's unit, the kind read off the datatype (term: one
   option, term set: several, quantity: a range, boolean: yes or no); a listing shows those its products publish, the
   most published first.
-- `required_at_publish`: specs a product page must publish to be indexed; a page missing one is `noindex` and out of
-  the sitemap.
+- `required`: the specs a product must state; every other spec is optional. A product missing one is a warning in a
+  whole catalog, `quality coverage` counts them per category, and its page is `noindex` and out of the sitemap.
 - `axis_dependent_keys`: specs a family's variants may vary along their declared axes.
 
 ### 5.3 Category rules
@@ -226,7 +226,7 @@ runs: an unknown or missing field, a wrong type, a bad id, an enum value outside
   vocabulary, each once, and a spec but a term set has one value ranked first per subject; a relation's qualifiers are
   keyed by spec and pass the same checks.
 - **claim_profile:** a product's claims use specs of its category's profile, groups included, or of the spec groups it
-  takes.
+  takes; in a whole catalog, a product with no claim of a spec its profile marks `required` is a warning.
 - **dates:** a PartialDate matches its precision; no date or Instant is in the future, except fields marked
   `future_allowed` and a LifecycleEvent in an `expected` state with a published cited Source, flagged for revision
   once its date passes.

@@ -129,6 +129,9 @@ def test_quality_market_and_export_read_the_store(place: tuple[str, str], tmp_pa
                                if any(x["key"] == c["key"] and "value" in x for x in (*v["core"], *v["detail"])))
                  for c in (*members[0]["core"], *members[0]["detail"])}
     assert shares["products"] == len(members) and {s["key"]: s["products"] for s in shares["specs"]} == published
+    stated = {(c["subject"], c["spec_key"]) for c in FX.rows("claims.jsonl")}
+    required = FX.model.registry.profile(category).required
+    assert shares["missing_required"] == sum(1 for v in members if any((v["id"], k) not in stated for k in required))
     assert any("none" in x.get("value", {}) for v in members for x in (*v["core"], *v["detail"])), (
         "a value stated as none counts as published")
     assert [s["products"] for s in shares["specs"]] == sorted(published.values(), reverse=True)

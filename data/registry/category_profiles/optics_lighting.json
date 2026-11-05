@@ -14,6 +14,6 @@
     {"field": "power"},
     {"field": "ip_rating"}
   ],
-  "required_at_publish": ["light_type"],
+  "required": ["light_type"],
   "axis_dependent_keys": ["color"]
 }

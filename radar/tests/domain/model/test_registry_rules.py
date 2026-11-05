@@ -76,7 +76,7 @@ REGISTRY_BREAKS: dict[str, tuple[Any, Any, str]] = {
                          "bounds run from 2 down to 1"),
     "string_with_unit": (registry_integrity, _spec(STRING, dimension="length", unit="m"), ""),
     "profile_unknown_key": (registry_integrity,
-                            _registry(profiles=(dataclasses.replace(_PROFILE, required_at_publish=("not_a_spec",)),
+                            _registry(profiles=(dataclasses.replace(_PROFILE, required=("not_a_spec",)),
                                                 *REGISTRY.profiles[1:])), ""),
     "profile_wrong_version_field": (registry_integrity, _registry(profiles=(dataclasses.replace(
         _PROFILE, sections=dataclasses.replace(_PROFILE.sections,
