@@ -31,14 +31,11 @@ def run_get(args: argparse.Namespace) -> int:
     if args.json and not args.out:
         return log.error("media get --json writes the file to --out and prints where", fix="add --out <file>", code=2)
     chunks = args.wiring.blobs().get(BlobRef(args.sha256, doc.mime))
-    try:
-        if not args.out:
-            output.write_bytes(chunks)
-            return 0
-        with open(args.out, "wb") as target:
-            size = sum(target.write(chunk) for chunk in chunks)
-    except (OSError, ValueError) as exc:
-        return log.error(f"media get {args.sha256}: {exc}")
+    if not args.out:
+        output.write_bytes(chunks)
+        return 0
+    with open(args.out, "wb") as target:
+        size = sum(target.write(chunk) for chunk in chunks)
     return output.format_output({"sha256": args.sha256, "bytes": size, "out": args.out}, args.json,
                                 lambda r: f"wrote {r['bytes']} bytes to {r['out']}")
 
@@ -48,12 +45,8 @@ def run_url(args: argparse.Namespace) -> int:
     if doc is None:
         return log.error(f"no Document has the file {args.sha256}")
     public = bool(args.wiring.model()[1].vocabularies["media_rights"][doc.rights].public)
-    try:
-        url = args.wiring.blobs().url(BlobRef(args.sha256, doc.mime), public)
-        output.format_output({"sha256": args.sha256, "url": url}, args.json, lambda r: r["url"])
-    except PermissionError as exc:
-        return log.error(f"{args.sha256} has {doc.rights} rights: {exc}")
-    return 0
+    url = args.wiring.blobs().url(BlobRef(args.sha256, doc.mime), public)
+    return output.format_output({"sha256": args.sha256, "url": url}, args.json, lambda r: r["url"])
 
 def register(commands: Commands) -> None:
     put = commands.verb("media", "put", help="store a file once; prints the fields its Document record needs",

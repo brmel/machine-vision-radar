@@ -46,11 +46,7 @@ def _market_lines(v: MarketView) -> str:
                                        f"{e.owner.slug}" for e in v.consolidation)])
 
 def run_market(args: argparse.Namespace) -> int:
-    try:
-        view = args.wiring.repository().market()
-    except LookupError as exc:
-        return log.error(str(exc))
-    return output.format_output(view, json_mode=args.json, text_formatter=_market_lines)
+    return output.format_output(args.wiring.repository().market(), json_mode=args.json, text_formatter=_market_lines)
 
 def register(commands: Commands) -> None:
     commands.verb("metrics", "market", func=run_market,

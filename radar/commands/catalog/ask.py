@@ -5,9 +5,7 @@ from typing import Sequence
 
 from radar.adapters.console import log, output
 from radar.domain.model.history.projection import plain
-from radar.domain.ai.meter import Capped
 from radar.domain.model.entities import AskAnswer, Citation
-from radar.domain.ports.search.search_engine import IndexMismatch, NoIndex
 from radar.adapters.console.parser import Commands
 
 def _cited(text: str, citations: Sequence[Citation]) -> str:
@@ -25,14 +23,7 @@ def run(args: argparse.Namespace) -> int:
     args.wiring.correlate("ask")
     meter, locale = (args.wiring.ask_meter(args.wiring.search_engine()), args.locale
                      or args.wiring.model()[1].default_language.code)
-    try:
-        asked, cad = meter.call(args.wiring.now()[:10], lambda answerer: answerer.ask(args.question, locale))
-    except (NoIndex, IndexMismatch) as exc:
-        return log.error(str(exc), code=2)
-    except Capped as exc:
-        return log.error(f"no answer: the AI budget's cap, {exc}")
-    except (OSError, ValueError, RuntimeError) as exc:
-        return log.error(f"no answer: {exc}")
+    asked, cad = meter.call(args.wiring.now()[:10], lambda answerer: answerer.ask(args.question, locale))
     answer = asked.answer
     if asked.text:
         log.info(f"answer model: {asked.text.tokens_in} tokens in, {asked.text.tokens_out} out, CAD {cad:.6f}")
