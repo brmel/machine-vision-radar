@@ -17,7 +17,9 @@
       "name": {"type": "string", "label": {"en": "Name", "fr": "Nom"}},
       "slug": {
         "type": "string",
-        "description": "URL key, permanent once published",
+        "unique": true,
+        "permanent": true,
+        "description": "URL key",
         "label": {"en": "Address (slug)", "fr": "Adresse (slug)"}
       },
       "summary": {"type": "LocalizedText", "optional": true, "label": {"en": "Summary", "fr": "Résumé"}},
@@ -106,7 +108,12 @@
         "label": {"en": "Other spec groups", "fr": "Autres groupes de spécifications"},
         "description": "Spec groups beyond its category's profile, for a product that does more than its category: a smart camera's compute"
       },
-      "slug": {"type": "string", "label": {"en": "Address (slug)", "fr": "Adresse (slug)"}},
+      "slug": {
+        "type": "string",
+        "unique": true,
+        "permanent": true,
+        "label": {"en": "Address (slug)", "fr": "Adresse (slug)"}
+      },
       "summary": {"type": "LocalizedText", "optional": true, "label": {"en": "Summary", "fr": "Résumé"}},
       "tags": {
         "type": "array",
@@ -431,6 +438,8 @@
       "bytes": {"type": "integer", "minimum": 1, "label": {"en": "Size (bytes)", "fr": "Taille (octets)"}},
       "sha256": {
         "type": "string",
+        "unique": true,
+        "permanent": true,
         "description": "64 lowercase hex characters; names the file",
         "label": {"en": "SHA-256", "fr": "SHA-256"}
       },
@@ -650,7 +659,7 @@
     "fields": {
       "id": {"type": "EntityId"},
       "version": {"type": "integer", "minimum": 1, "description": "Per-entity version counter: 1 when created, +1 on every Change"},
-      "slug": {"type": "string", "description": "URL key, permanent once published"},
+      "slug": {"type": "string", "unique": true, "permanent": true, "description": "URL key"},
       "kind": {"type": "TermId", "vocabulary": "feed_item_kinds"},
       "authorship": {
         "type": "enum",

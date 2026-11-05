@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-from collections import defaultdict
 
 from radar.domain.model.entities import Identifier
 from radar.domain.validation.context import ValidationContext
@@ -20,7 +19,6 @@ def check(ctx: ValidationContext) -> Findings:
         yield Finding(NAME, entity_id, f"id used by {n} entities")
     for (scheme, issuer, value), n in repeated((i.scheme, i.issuer, i.value) for i in ctx.catalog.all(Identifier)):
         yield Finding(NAME, value, f"identifier {scheme}/{issuer or '-'}/{value} is used {n} times")
-    yield from _unique_slugs(ctx)
     for i in ctx.catalog.all(Identifier):
         yield from _identifier(ctx, i)
 
@@ -39,13 +37,3 @@ def _identifier(ctx: ValidationContext, i: Identifier) -> Findings:
         yield Finding(NAME, i.id, f"{i.scheme} '{i.value}' fails its GS1 check digit")
     if scheme.subjects and kind not in scheme.subjects:
         yield Finding(NAME, i.id, f"{i.scheme} identifies {', '.join(scheme.subjects)}, not a {kind}")
-
-def _unique_slugs(ctx: ValidationContext) -> Findings:
-    slugged = {k.name for k in ctx.schema.entities if any(f.name == "slug" for f in k.fields)}
-    owners: defaultdict[tuple[str, str], list[str]] = defaultdict(list)
-    for e in entities(ctx.catalog, ctx.schema):
-        if type(e).__name__ in slugged:
-            owners[type(e).__name__, e.slug].append(e.id)
-    for (kind, slug), ids in owners.items():
-        if len(ids) > 1:
-            yield Finding(NAME, slug, f"{kind} slug '{slug}' is used by {', '.join(ids)}")

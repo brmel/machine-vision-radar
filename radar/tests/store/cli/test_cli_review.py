@@ -185,5 +185,4 @@ def test_dedupe_keeps_the_earliest_then_the_lowest_id_and_its_proposals_approve_
     for proposal in reversed(filed["filed"]):
         stores.cli(FX, place, "proposal", "approve", proposal, "--note", "One URL, one Source")
     assert FX.json(place, "source", "dedupe")["groups"] == []
-    validated = FX.json(place, "store", "validate")
-    assert validated["ok"] and [w for w in validated["warnings"] if w["rule"] == "unique"] == []
+    assert FX.json(place, "store", "validate")["ok"]

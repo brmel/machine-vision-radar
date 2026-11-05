@@ -67,7 +67,7 @@ def _twice(out: Path) -> None:
     (lambda out: _kept(out).unlink(), "no kept file for sha256"),
     (lambda out: (out / "blobs" / "ee").mkdir() or (out / "blobs" / "ee" / f"{'e' * 62}.pdf").write_bytes(b"x"),
      "has no Document"),
-    (_twice, "2 documents for one file")])
+    (_twice, "is also held by doc_00000000zz")])
 def test_the_cli_validates_first_and_writes_nothing_on_an_error(
         tmp_path: Path, broken: Callable[[Path], object], why: str) -> None:
     shutil.copytree(FX.out, tmp_path / "fx")
@@ -88,7 +88,7 @@ def test_store_validate_catches_a_slug_two_records_of_a_kind_share() -> None:
     docs, path = stores.fresh_at(place[0]), layout.canonical(FX.model.schema, second["id"])
     docs.commit([Put(path, {**(docs.get(path) or {}), "slug": first["slug"]})])
     run = stores.cli(FX, place, "store", "validate", check=False)
-    assert run.returncode == 1 and f"slug '{first['slug']}' is used by" in run.stderr
+    assert run.returncode == 1 and f".slug '{first['slug']}' is also held by" in run.stderr
 
 def test_load_backup_and_index_write_exactly_the_documented_layout() -> None:
     place = FX.loaded(("store", "backup"), ("index", "rebuild"))

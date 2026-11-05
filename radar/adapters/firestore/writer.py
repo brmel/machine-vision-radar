@@ -23,7 +23,7 @@ from .projection.projector import Projector
 
 Clock = Callable[[], str]
 Writes = Mapping[str, Fields | None]
-CHANGESET, SLUG, STORED_FILE, RECORD_PARSE = "changeset", "slug", "stored_file", "record_parse"
+CHANGESET, STORED_FILE, RECORD_PARSE = "changeset", "stored_file", "record_parse"
 
 def commit(docs: Docs, writes: Writes, create: Collection[str] = ()) -> int:
     paths = sorted(writes)
@@ -126,7 +126,6 @@ class StoreWriter:
                 raise InvalidChangeset([Finding(CHANGESET, c.entity, "no such record to retract")])
             if without_version(before) == (body or {}):
                 continue
-            self._slug_free(c.entity, before, body)
             n = _next(before, last.get(c.entity, 0))
             versioned = body is not None and self.schema.kind_of(c.entity) in self.counted
             changed[c.entity] = (before, {**body, "version": n} if versioned else body)
@@ -134,17 +133,6 @@ class StoreWriter:
                                 recorded_at=now, actor_kind=c.actor_kind, actor=c.actor, reason=c.reason,
                                 source_refs=c.source_refs, correlation_id=correlation_id, proposal=c.proposal))
         return Planned(changed, events)
-
-    def _slug_free(self, entity: str, before: Record | None, body: Record | None) -> None:
-        if body is None or "slug" not in body:
-            return
-        if before is not None and body["slug"] != before.get("slug"):
-            raise InvalidChangeset([Finding(SLUG, entity, f"a published slug never changes ({before.get('slug')})")])
-        taken = [f["id"]
-                 for _, f in self.docs.where(canonical(self.schema, entity).split("/")[0], "slug", [body["slug"]])
-                 if f["id"] != entity]
-        if taken:
-            raise InvalidChangeset([Finding(SLUG, entity, f"slug '{body['slug']}' belongs to {taken[0]}")])
 
     def _visibility(self, changed: Changed) -> list[tuple[BlobRef, bool]]:
         out = []

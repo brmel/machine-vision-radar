@@ -203,10 +203,11 @@ runs: an unknown or missing field, a wrong type, a bad id, an enum value outside
   `data/no_filler.json`, which the site's slop guard also reads.
 - **entity_ids:** an id carries its entity's prefix and is unique; no Identifier appears twice, and each is the whole
   of its scheme's `pattern`, passes the GS1 check digit where the scheme has `gs1_check`, and names a kind of subject
-  in its scheme's `subjects`; no two records of a kind share a slug.
-- **unique:** no two records of a kind hold one value in a field marked `unique`, a Source's `url` (one URL, one
-  Source). A write that adds a second holder is refused with a finding naming both; in a whole catalog a pair is a
-  warning, kept visible until `radar source dedupe` merges it through review.
+  in its scheme's `subjects`.
+- **unique:** no two records of a kind hold one value in a field marked `unique` (a slug, a Source's `url`: one URL,
+  one Source; a Document's `sha256`: one file, one Document), each holder named; and no Change replaces a field marked
+  `permanent` (a slug, a Document's `sha256`), a value that never changes once set. `radar source dedupe` merges a
+  URL's extra Sources through review.
 - **countries:** an organization's `country` is an assigned ISO 3166-1 alpha-2 code.
 - **references:** every reference resolves to an entity of a kind its `refs` allow (a Change may still name a record
   withdrawn since, if recorded while it existed); a product's thumbnail is an image Document about it under public
@@ -254,8 +255,7 @@ contracts', and `--check` fails on a file off that layout.
 ## 8. Permanent ids
 
 Product and organization ids and slugs are permanent, so no URL ever needs a redirect: a record leaves the read model
-only through a retract Change, the `CatalogWriter` refuses a slug change, and the validator refuses two records of a
-kind sharing one.
+only through a retract Change, and `entities.json` marks slugs `unique` and `permanent`, which rule `unique` checks.
 
 - **Ids** are `<prefix>_` + 10 lowercase Crockford base32 characters, opaque, kept by the store as they are. A new one
   is keyed on what makes the record that one, a Document's on its file's sha256 for example (`keyed` in
