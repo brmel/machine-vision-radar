@@ -33,5 +33,6 @@
   },
   {"id": "angle", "label": {"en": "Plane angle", "fr": "Angle plan"}, "canonical_unit": "deg"},
   {"id": "velocity", "label": {"en": "Velocity", "fr": "Vitesse"}, "canonical_unit": "m_per_s"},
-  {"id": "compute_rate", "label": {"en": "Compute rate", "fr": "Débit de calcul"}, "canonical_unit": "ops_per_s"}
+  {"id": "compute_rate", "label": {"en": "Compute rate", "fr": "Débit de calcul"}, "canonical_unit": "ops_per_s"},
+  {"id": "voltage", "label": {"en": "Voltage", "fr": "Tension"}, "canonical_unit": "v"}
 ]

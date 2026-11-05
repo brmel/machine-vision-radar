@@ -1,0 +1,8 @@
+[
+  {"id": "onnx", "label": {"en": "ONNX", "fr": "ONNX"}},
+  {"id": "tensorrt", "label": {"en": "TensorRT", "fr": "TensorRT"}},
+  {"id": "openvino", "label": {"en": "OpenVINO IR", "fr": "OpenVINO IR"}},
+  {"id": "tflite", "label": {"en": "TensorFlow Lite", "fr": "TensorFlow Lite"}},
+  {"id": "pytorch", "label": {"en": "PyTorch", "fr": "PyTorch"}},
+  {"id": "tensorflow", "label": {"en": "TensorFlow", "fr": "TensorFlow"}}
+]

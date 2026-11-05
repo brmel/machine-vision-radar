@@ -1,0 +1,12 @@
+[
+  {"id": "rest", "label": {"en": "REST API", "fr": "API REST"}},
+  {"id": "grpc", "label": {"en": "gRPC", "fr": "gRPC"}},
+  {
+    "id": "model_context_protocol",
+    "label": {"en": "Model Context Protocol (MCP)", "fr": "Model Context Protocol (MCP)"}
+  },
+  {"id": "ros2", "label": {"en": "ROS 2", "fr": "ROS 2"}},
+  {"id": "opc_ua", "label": {"en": "OPC UA", "fr": "OPC UA"}},
+  {"id": "mqtt", "label": {"en": "MQTT", "fr": "MQTT"}},
+  {"id": "api_unstated", "label": {"en": "API, kind not stated", "fr": "API, type non précisé"}}
+]

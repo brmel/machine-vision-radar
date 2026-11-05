@@ -24,5 +24,7 @@
   {"id": "deg", "symbol": "°", "dimension": "angle", "ucum": "deg", "factor": 1},
   {"id": "m_per_s", "symbol": "m/s", "dimension": "velocity", "ucum": "m/s", "factor": 1},
   {"id": "mm_per_s", "symbol": "mm/s", "dimension": "velocity", "ucum": "mm/s", "factor": 0.001},
-  {"id": "one", "symbol": "", "dimension": "ratio_dimensionless", "ucum": "1", "factor": 1}
+  {"id": "one", "symbol": "", "dimension": "ratio_dimensionless", "ucum": "1", "factor": 1},
+  {"id": "v", "symbol": "V", "dimension": "voltage", "ucum": "V", "factor": 1},
+  {"id": "bit", "symbol": "bit", "dimension": "digital_information", "ucum": "bit", "factor": 0.125}
 ]

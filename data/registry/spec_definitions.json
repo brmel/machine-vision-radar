@@ -22,8 +22,16 @@
     "id": "ai_methods",
     "datatype": "term_set",
     "vocabulary": "ai_methods",
-    "label": {"en": "Supported vision tasks", "fr": "Tâches de vision supportées"},
-    "description": {"en": "AI method families the product uses or offers, such as deep learning, classical machine learning, generative AI or vision-language models.", "fr": "Familles de méthodes d'IA que le produit utilise ou propose, par exemple apprentissage profond, apprentissage automatique classique, IA générative ou modèles vision-langage."}
+    "label": {"en": "AI methods", "fr": "Méthodes d'IA"},
+    "description": {"en": "AI method families the product uses or offers: deep learning, classical machine learning, generative AI, vision-language models, agents that plan and call tools, few-shot or zero-shot learning.", "fr": "Familles de méthodes d'IA que le produit utilise ou propose : apprentissage profond, apprentissage automatique classique, IA générative, modèles vision-langage, agents qui planifient et appellent des outils, apprentissage à partir de peu d'exemples ou sans entraînement."}
+  },
+  {
+    "id": "apis",
+    "datatype": "term_set",
+    "vocabulary": "apis",
+    "label": {"en": "APIs", "fr": "API"},
+    "description": {"en": "The programmatic interfaces other software, robots or AI agents use to drive the product.", "fr": "Les interfaces programmatiques par lesquelles d'autres logiciels, robots ou agents d'IA pilotent le produit."},
+    "aliases": ["API", "integration API", "interfaces", "REST", "MCP server", "API d'intégration", "Schnittstellen"]
   },
   {
     "id": "application",
@@ -54,6 +62,18 @@
     "aliases": ["baseline", "stereo base", "base distance", "camera baseline", "base stéréo", "entraxe des caméras", "ligne de base", "Basisabstand", "Stereobasis", "Basislänge"],
     "bounds": {"min": 1, "max": 5000},
     "precision": 1
+  },
+  {
+    "id": "bit_depth",
+    "datatype": "quantity",
+    "dimension": "digital_information",
+    "unit": "bit",
+    "better": "higher",
+    "label": {"en": "Bit depth", "fr": "Profondeur de bits"},
+    "description": {"en": "The largest number of bits per pixel the sensor's analog-to-digital conversion outputs.", "fr": "Le plus grand nombre de bits par pixel que produit la conversion analogique-numérique du capteur."},
+    "aliases": ["sensor bit depth", "ADC", "ADC resolution", "pixel depth", "profondeur de pixel", "Bittiefe"],
+    "bounds": {"min": 1, "max": 32},
+    "precision": 0
   },
   {
     "id": "camera_support",
@@ -208,6 +228,17 @@
     "precision": 1
   },
   {
+    "id": "exposure_time",
+    "datatype": "quantity",
+    "dimension": "time",
+    "unit": "us",
+    "label": {"en": "Exposure time", "fr": "Temps d'exposition"},
+    "description": {"en": "The range of exposure times the camera can be set to.", "fr": "La plage de temps d'exposition réglables de la caméra."},
+    "aliases": ["exposure time range", "shutter speed", "integration time", "temps de pose", "Belichtungszeit"],
+    "bounds": {"min": 0.001, "max": 1000000000.0},
+    "precision": 3
+  },
+  {
     "id": "f_number",
     "datatype": "quantity",
     "dimension": "ratio_dimensionless",
@@ -312,6 +343,17 @@
     "external": {"sfnc": "SensorHeight"}
   },
   {
+    "id": "housing_temperature",
+    "datatype": "quantity",
+    "dimension": "temperature",
+    "unit": "deg_c",
+    "label": {"en": "Housing temperature", "fr": "Température du boîtier"},
+    "description": {"en": "Temperature range of the device's housing in operation, as makers that specify the housing rather than the ambient air state it.", "fr": "Plage de température du boîtier de l'appareil en fonctionnement, telle que l'indiquent les fabricants qui spécifient le boîtier plutôt que l'air ambiant."},
+    "aliases": ["housing temperature during operation", "case temperature", "température du boîtier", "Gehäusetemperatur"],
+    "bounds": {"min": -100, "max": 200},
+    "precision": 0
+  },
+  {
     "id": "illumination",
     "datatype": "term_set",
     "vocabulary": "illuminations",
@@ -325,6 +367,14 @@
     "vocabulary": "industries",
     "label": {"en": "Industries", "fr": "Secteurs"},
     "description": {"en": "Industries the product is built or sold for, such as automotive, electronics, semiconductor, food or logistics.", "fr": "Secteurs pour lesquels le produit est conçu ou vendu, par exemple automobile, électronique, semi-conducteurs, agroalimentaire ou logistique."}
+  },
+  {
+    "id": "inference_targets",
+    "datatype": "term_set",
+    "vocabulary": "inference_targets",
+    "label": {"en": "Inference hardware", "fr": "Matériel d'inférence"},
+    "description": {"en": "The processors the product runs a trained model on, or deploys one to.", "fr": "Les processeurs sur lesquels le produit exécute un modèle entraîné, ou vers lesquels il le déploie."},
+    "aliases": ["supported hardware", "deployment targets", "accelerators", "matériel supporté", "Zielhardware"]
   },
   {
     "id": "integrated_vision",
@@ -552,6 +602,14 @@
     "description": {"en": "Main memory (RAM) available to the device's processor.", "fr": "Capacité de mémoire principale accessible au processeur de l'appareil."},
     "bounds": {"min": 10000, "max": 10000000000000},
     "precision": 0
+  },
+  {
+    "id": "model_formats",
+    "datatype": "term_set",
+    "vocabulary": "model_formats",
+    "label": {"en": "Model formats", "fr": "Formats de modèle"},
+    "description": {"en": "The trained-model formats the product imports, exports or runs.", "fr": "Les formats de modèles entraînés que le produit importe, exporte ou exécute."},
+    "aliases": ["model format", "supported frameworks", "frameworks", "format de modèle", "Modellformat"]
   },
   {
     "id": "onboard_processing",
@@ -800,6 +858,17 @@
     "description": {"en": "Built-in non-volatile storage capacity, such as eMMC, SSD or flash, not counting removable media.", "fr": "Capacité de stockage non volatil intégrée, comme eMMC, SSD ou flash, hors supports amovibles."},
     "bounds": {"min": 1000000, "max": 1000000000000000},
     "precision": 0
+  },
+  {
+    "id": "supply_voltage",
+    "datatype": "quantity",
+    "dimension": "voltage",
+    "unit": "v",
+    "label": {"en": "Supply voltage", "fr": "Tension d'alimentation"},
+    "description": {"en": "The DC or AC voltage range the device is powered from.", "fr": "La plage de tension continue ou alternative qui alimente l'appareil."},
+    "aliases": ["power supply", "input voltage", "operating voltage", "tension d'entrée", "Versorgungsspannung", "Betriebsspannung"],
+    "bounds": {"min": 0.5, "max": 1000},
+    "precision": 1
   },
   {
     "id": "system_components",
