@@ -1,6 +1,7 @@
 [
   {"id": "ip30", "label": {"en": "IP30", "fr": "IP30"}},
   {"id": "ip40", "label": {"en": "IP40", "fr": "IP40"}},
+  {"id": "ip50", "label": {"en": "IP50", "fr": "IP50"}},
   {"id": "ip54", "label": {"en": "IP54", "fr": "IP54"}},
   {"id": "ip65", "label": {"en": "IP65", "fr": "IP65"}},
   {"id": "ip66", "label": {"en": "IP66", "fr": "IP66"}},

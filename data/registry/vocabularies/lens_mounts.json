@@ -3,6 +3,8 @@
   {"id": "cs_mount", "label": {"en": "CS-mount", "fr": "Monture CS"}},
   {"id": "s_mount", "label": {"en": "S-mount (M12)", "fr": "Monture S (M12)"}},
   {"id": "f_mount", "label": {"en": "F-mount", "fr": "Monture F"}},
+  {"id": "rf_mount", "label": {"en": "RF-mount", "fr": "Monture RF"}},
+  {"id": "mft", "label": {"en": "Micro Four Thirds", "fr": "Micro Four Thirds"}},
   {"id": "m42", "label": {"en": "M42", "fr": "Monture M42"}},
   {"id": "m58", "label": {"en": "M58", "fr": "Monture M58"}},
   {"id": "m72", "label": {"en": "M72", "fr": "Monture M72"}},

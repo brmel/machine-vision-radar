@@ -19,6 +19,7 @@
   {"id": "cxp_12", "label": {"en": "CoaXPress CXP-12", "fr": "CoaXPress CXP-12"}},
   {"id": "mipi", "label": {"en": "MIPI CSI-2", "fr": "MIPI CSI-2"}},
   {"id": "gmsl2", "label": {"en": "GMSL2", "fr": "GMSL2"}},
+  {"id": "fpd_link_iii", "label": {"en": "FPD-Link III", "fr": "FPD-Link III"}},
   {"id": "lvds", "label": {"en": "LVDS", "fr": "LVDS"}},
   {"id": "sub_lvds", "label": {"en": "Sub-LVDS", "fr": "Sub-LVDS"}},
   {"id": "slvs_ec", "label": {"en": "SLVS-EC", "fr": "SLVS-EC"}},
