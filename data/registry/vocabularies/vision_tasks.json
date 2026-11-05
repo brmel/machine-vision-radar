@@ -5,5 +5,8 @@
   {"id": "anomaly", "label": {"en": "Anomaly detection", "fr": "Détection d'anomalies"}},
   {"id": "ocr", "label": {"en": "OCR", "fr": "OCR"}},
   {"id": "pose", "label": {"en": "Pose estimation", "fr": "Estimation de pose"}},
-  {"id": "defect_generation", "label": {"en": "Defect generation", "fr": "Génération de défauts"}}
+  {"id": "defect_generation", "label": {"en": "Defect generation", "fr": "Génération de défauts"}},
+  {"id": "tracking", "label": {"en": "Tracking", "fr": "Suivi"}},
+  {"id": "measurement", "label": {"en": "Measurement", "fr": "Mesure"}},
+  {"id": "counting", "label": {"en": "Counting", "fr": "Comptage"}}
 ]

@@ -131,8 +131,11 @@ shows.
 - Thermal and thermographic cameras are one category, `imaging.thermal_cameras`; spectral bands are specs
   (`spectral_range`, `sensor_technology`, `thermal_sensitivity_netd`) and tags (`swir`).
 - A SWIR area-scan or line-scan camera stays in its camera category; its band is its `spectral_range`.
-- Vision software capabilities are term-set specs (`ai_methods`, `vision_tasks`, `training`, `deployment`), not
-  categories.
+- Vision software capabilities are term-set specs, not categories. The `ai_stack` group (methods, tasks, model
+  formats, inference hardware, APIs) is taken by every category whose products build or run models; a product can
+  take it through `spec_groups`. An AI agent that builds or runs a vision application belongs to its role's category,
+  with `agentic` among its methods and its configuration style, and `model_context_protocol` among its APIs when it
+  speaks MCP.
 - **New tech enters as a tag**, and becomes a category or profile only when its products need a spec shape no profile
   can express.
 

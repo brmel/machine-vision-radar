@@ -6,7 +6,7 @@
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
-  "groups": ["software_runtime"],
+  "groups": ["software_runtime", "ai_stack"],
   "facets": [
     {"field": "ai_methods"},
     {"field": "vision_tasks"},

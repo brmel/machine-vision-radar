@@ -6,7 +6,7 @@
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
-  "groups": ["software_runtime", "connectivity"],
+  "groups": ["software_runtime", "connectivity", "ai_stack"],
   "facets": [
     {"field": "config_style"},
     {"field": "camera_support"},

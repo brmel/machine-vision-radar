@@ -17,6 +17,8 @@ IDENTICAL_ALLOWLIST = frozenset({
     "APS-C", "Super 35", "OCR", "PDF417",
     "GigE Vision", "USB3 Vision", "GenICam", "GigE Vision 2.2", "USB3 Vision 1.2", "CoaXPress 2.1",
     "Camera Link HS 1.2", "EMVA 1288 4.0", "OPC UA Machine Vision 1.0", "FCC Part 15", "REACH", "RoHS",
+    "FPGA", "Hailo", "MQTT", "Model Context Protocol (MCP)", "NVIDIA Jetson", "ONNX", "OpenVINO IR", "PyTorch", "ROS 2",
+    "TensorFlow", "TensorFlow Lite", "TensorRT", "gRPC",
 })
 
 def test_registry_labels_fr_not_identical_to_en_without_allowlist() -> None:

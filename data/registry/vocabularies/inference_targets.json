@@ -1,0 +1,9 @@
+[
+  {"id": "nvidia_gpu", "label": {"en": "NVIDIA GPU", "fr": "GPU NVIDIA"}},
+  {"id": "nvidia_jetson", "label": {"en": "NVIDIA Jetson", "fr": "NVIDIA Jetson"}},
+  {"id": "intel", "label": {"en": "Intel CPU, GPU or NPU", "fr": "CPU, GPU ou NPU Intel"}},
+  {"id": "hailo", "label": {"en": "Hailo", "fr": "Hailo"}},
+  {"id": "arm_cpu", "label": {"en": "Arm CPU", "fr": "CPU Arm"}},
+  {"id": "fpga", "label": {"en": "FPGA", "fr": "FPGA"}},
+  {"id": "vendor_npu", "label": {"en": "The maker's own NPU", "fr": "NPU du fabricant"}}
+]

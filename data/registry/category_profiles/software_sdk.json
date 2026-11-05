@@ -2,11 +2,11 @@
   "category_id": "software.sdk",
   "sections": {
     "core": ["deep_learning", "languages", "os"],
-    "detail": ["vision_tasks", "compliance"],
+    "detail": ["compliance"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
-  "groups": ["software_runtime"],
+  "groups": ["software_runtime", "ai_stack"],
   "facets": [{"field": "languages"}, {"field": "os"}, {"field": "deep_learning"}, {"field": "deployment"}],
   "required_at_publish": ["languages"],
   "axis_dependent_keys": ["deployment"]
