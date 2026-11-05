@@ -84,7 +84,7 @@ export const ProposalDetail: FC<{ id: string }> = ({ id }) => {
         ))}
       </Section>
       {p.sources.length > 0
-        && <p className="text-caption">{t("adminSources")}: <span
+        && <p className="text-caption">{t("tabSources")}: <span
           className="font-mono">{p.sources.join(", ")}</span></p>}
       {p.edits.length > 0 && (
         <Section title={t("adminEdits")}>

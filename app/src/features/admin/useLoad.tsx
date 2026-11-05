@@ -86,7 +86,7 @@ export function useSubmit<T>(what: string, run: () => Promise<T>, done: (value: 
 export const Pager: FC<{ page: number; total: number; onPage: (page: number) => void }> = ({ page, total, onPage }) => {
   const { t } = useI18n();
   const labels = usePagerLabels();
-  const summaryText = (start: number, end: number, all: number) => t("adminPageSummary", { start, end, total: all });
+  const summaryText = (start: number, end: number, all: number) => t("paginationRows", { start, end, total: all });
   return <Pagination page={page} pageSize={ROWS} totalCount={total}
     onPageChange={onPage} {...labels} summaryText={summaryText} />;
 };

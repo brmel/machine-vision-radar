@@ -86,7 +86,7 @@ inEachLocale("agents", (locale) => {
       const listed = page.locator("tbody tr");
       await expect(listed).toHaveCount(20);
       const pager = page.getByRole("navigation", { name: T.paginationLabel });
-      await expect(pager).toContainText(T.adminPageSummary.replace("{start}", "1").replace("{end}", "20")
+      await expect(pager).toContainText(T.paginationRows.replace("{start}", "1").replace("{end}", "20")
         .replace("{total}", String(all)));
       await pager.getByRole("button", { name: T.paginationNext }).click();
       await expect(page).toHaveURL(/\/admin\/agents\?page=2$/);

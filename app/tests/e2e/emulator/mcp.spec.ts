@@ -73,7 +73,7 @@ inEachLocale("an outside agent over MCP", (locale) => {
     await page.goto("/admin/queue");
     await page.getByRole("link", { name: new RegExp(reason) }).click();
     await expect(page.locator("article header p").first()).toContainText(`${agent} (${T.adminActorAgent})`);
-    await expect(page.getByText(`${T.adminSources}: ${source?.id}`)).toBeVisible();
+    await expect(page.getByText(`${T.tabSources}: ${source?.id}`)).toBeVisible();
     await expect(page.getByRole("cell", { name: String(value) })).toBeVisible();
     await decide(page, T, `Checked against the datasheet (${locale})`);
     await noAxeViolations(page, [`/admin/queue/${filed.id}`]);

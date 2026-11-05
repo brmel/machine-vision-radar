@@ -37,8 +37,8 @@ export const STATUS: Readonly<Record<ProposalView["status"], MessageKey>> = {
 export const ACTOR: Readonly<Record<ProposalView["actor_kind"], MessageKey>> = { human: "adminActorHuman",
   agent: "adminActorAgent", import: "adminActorImport" };
 export const ACTION: Readonly<Record<LogEntryView["action"], MessageKey>> = {
-  submit: "adminActionSubmit", edit: "adminActionEdit", approve: "adminActionApprove", reject: "adminActionReject",
-  retract: "adminActionRetract",
+  submit: "adminActionSubmit", edit: "adminActionEdit", approve: "adminStatusApproved", reject: "adminStatusRejected",
+  retract: "adminStatusRetracted",
 };
 export const SCOPE: Readonly<Record<AgentTokenView["scope"], MessageKey>> = { read: "adminAgentsScopeRead",
   propose: "adminAgentsScopePropose" };

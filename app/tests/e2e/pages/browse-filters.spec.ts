@@ -115,7 +115,7 @@ inEachLocale("Browse filters", (locale) => {
       return el.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2));
     });
     const list = page.url();
-    const toggle = page.getByRole("button", { name: t.filtersToggleLabel });
+    const toggle = page.getByRole("button", { name: t.filtersTitle });
     const aside = page.locator("aside");
     await toggle.click();
     expect(await aside.boundingBox()).toMatchObject({ x: 0, y: 0, width: 375 });

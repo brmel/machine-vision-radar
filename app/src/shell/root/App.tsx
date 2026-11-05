@@ -86,7 +86,7 @@ const RadarApp: FC<Ports> = ({ start, repository: injectedReader }) => {
     { key: "browse", label: t("navBrowse"), active: ["browse", "category"].includes(route.name),
       route: browseRoute(browseQuery({})) },
     { key: "ask", label: t("navAsk"), active: route.name === "search", route: { name: "search", ask: "" } },
-    { key: "news", label: t("navNews"), active: ["news", "article"].includes(route.name),
+    { key: "news", label: t("newsTitle"), active: ["news", "article"].includes(route.name),
       route: { name: "news", query: "" } },
     { key: "about", label: t("navAbout"), active: route.name === "about", route: { name: "about" } },
   ];
