@@ -26,7 +26,7 @@ from radar.domain.model.entities import AiModel, FilesOn, Organization
 from radar.domain.ports.ai.image_judge import ImageJudge
 from radar.domain.ports.ai.research_agent import ResearchAgent
 from radar.domain.ports.review.research_runs import ResearchRun, Status, Step
-from radar.domain.model.changeset import Changeset, PutEntity, without_version
+from radar.domain.model.history.changeset import Changeset, PutEntity, without_version
 from radar.domain.ports.store.blob_store import BlobRef
 from radar.domain.ports.store.docs import Docs
 from radar.domain.ports.web.page_fetcher import Unfetchable

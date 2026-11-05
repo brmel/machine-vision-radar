@@ -6,7 +6,7 @@ from dataclasses import dataclass, replace
 from typing import Literal
 
 from radar.domain.model.entities import ActorKind, FilesOn, ProposalAction, ProposalStatus, Risk
-from radar.domain.model.changeset import Changeset, EntityChange, changeset_json
+from radar.domain.model.history.changeset import Changeset, EntityChange, changeset_json
 from radar.domain.validation.context import InvalidChangeset
 
 Verdict = Literal[ProposalAction.APPROVE, ProposalAction.REJECT, ProposalAction.RETRACT]

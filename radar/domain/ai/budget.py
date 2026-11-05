@@ -6,7 +6,7 @@ from typing import Iterable, Mapping
 from radar.domain.model.entities import AiCap, AiCapRow, AiCaps, AiModel, AiSettings, FilesOn, Use
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.history.projection import plain
-from radar.domain.model.changeset import Change, Changeset, PutEntity
+from radar.domain.model.history.changeset import Change, Changeset, PutEntity
 from radar.domain.review.requests import Changes
 
 METERED = tuple(u for u in Use if u is not Use.ALL)

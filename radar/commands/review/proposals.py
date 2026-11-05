@@ -12,7 +12,7 @@ from radar.adapters.console.parser import Commands
 from radar.domain.model.entities import ActorKind, FilesOn, ProposalStatus, Source
 from radar.domain.ports.catalog.held_records import HeldRecords
 from radar.domain.model.history.projection import ROWS, plain
-from radar.domain.model.changeset import Change, Changeset, PutEntity, parse_changeset
+from radar.domain.model.history.changeset import Change, Changeset, PutEntity, parse_changeset
 from radar.domain.ports.review.proposal_queue import Query
 from radar.domain.review.proposal import Outcome, Shown
 from radar.domain.review.requests import (Approval, Bundled, Changes, Founder, Picked, Rejection, Retraction, Revision,

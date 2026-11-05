@@ -5,7 +5,7 @@ from typing import Callable
 from urllib.parse import urlsplit
 
 from radar.domain.ai.meter import Capped, Meter
-from radar.domain.model.changeset import Change, PutEntity
+from radar.domain.model.history.changeset import Change, PutEntity
 from radar.domain.model.entities import ProductCard
 from radar.domain.ports.ai.image_judge import CandidateImage, ImageEvaluation, ImageJudge
 from radar.domain.ports.ai.research_agent import FileDraft

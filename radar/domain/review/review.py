@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Callable, Sequence, assert_never
 
-from radar.domain.model.changeset import Change, Changeset, EntityChange, PutEntity, Retract
+from radar.domain.model.history.changeset import Change, Changeset, EntityChange, PutEntity, Retract
 from radar.domain.model.entities import ActorKind, FilesOn, LogEntryView, LogPage, ProposalAction, ProposalStatus
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.history.projection import every_page

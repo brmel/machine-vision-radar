@@ -7,7 +7,7 @@ from typing import Callable
 from urllib.parse import urlsplit
 
 from radar.domain.ai.meter import Capped, Meter
-from radar.domain.model.changeset import Change
+from radar.domain.model.history.changeset import Change
 from radar.domain.model.entities import ResearchMeasures
 from radar.domain.model.registry import Registry
 from radar.domain.model.schema import ModelSchema

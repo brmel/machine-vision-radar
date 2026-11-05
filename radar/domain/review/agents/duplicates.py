@@ -8,7 +8,7 @@ from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model import entities as generated
 from radar.domain.model.entities import FilesOn, Identifier, Name, Product, ProductOrgRole, Source
 from radar.domain.model.history.projection import plain
-from radar.domain.model.changeset import Change, Changeset, PutEntity, Retract, without_version
+from radar.domain.model.history.changeset import Change, Changeset, PutEntity, Retract, without_version
 from radar.domain.model.schema import ModelSchema
 from radar.domain.review.agents.drafts import References, said, swapped, without
 from radar.domain.review.proposal import Proposal

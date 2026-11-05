@@ -24,7 +24,7 @@ from radar.adapters.files.model_json import load_registry, load_schema
 from radar.adapters.firestore import layout, store
 from radar.adapters.firestore.docs import FirestoreDocs
 from radar.adapters.firestore.repository import StoreChangeLog, StoreProposalQueue, StoreVersionStore
-from radar.domain.model.changeset import Changeset, parse_changeset
+from radar.domain.model.history.changeset import Changeset, parse_changeset
 from radar.domain.ports.store.docs import Docs, Fields, Write
 from radar.adapters.firestore.writer import StoreWriter
 from radar.adapters.ai.search.engine import ShardedSearch

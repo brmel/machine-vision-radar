@@ -12,7 +12,7 @@ from radar.domain.model.entities import (ActorKind, AdminRecord, CategoryPage, C
                                          Source, StoredFile)
 from radar.domain.model.history.projection import Projection, json_text, later, page_of, paged, plain
 from radar.domain.model.schema import ModelSchema
-from radar.domain.model.changeset import changeset_json, parse_changeset
+from radar.domain.model.history.changeset import changeset_json, parse_changeset
 from radar.domain.ports.history.change_log import ChangePage
 from radar.domain.ports.review.proposal_queue import Query, QueuePage
 from radar.domain.model.history.ids import ENTITY_ID, keyed

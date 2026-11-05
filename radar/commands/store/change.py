@@ -6,7 +6,7 @@ from pathlib import Path
 
 from radar.adapters.console import log, output
 from radar.domain.validation.context import InvalidChangeset
-from radar.domain.model.changeset import Changeset, parse_changeset
+from radar.domain.model.history.changeset import Changeset, parse_changeset
 from radar.domain.review.requests import Founder, Rollback
 from radar.domain.model.history.projection import plain
 from radar.domain.review.views import shown_view

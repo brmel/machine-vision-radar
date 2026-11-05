@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from radar.domain.model.history.projection import field_diff, plain, replay
 from radar.domain.model.entities import Change
-from radar.domain.model.changeset import without_version
+from radar.domain.model.history.changeset import without_version
 from radar.domain.validation.context import ValidationContext, ValidationResult
 
 NAME = "changes"

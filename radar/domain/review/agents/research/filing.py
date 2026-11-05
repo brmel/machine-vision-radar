@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Any, Callable, Mapping
 
-from radar.domain.model.changeset import Change, Changeset, PutEntity, without_version
+from radar.domain.model.history.changeset import Change, Changeset, PutEntity, without_version
 from radar.domain.model.entities import Claim, Document, FilesOn, Source
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.history.projection import plain

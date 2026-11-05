@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from radar.adapters.firestore import layout, store
-from radar.domain.model.changeset import Retract, parse_changeset
+from radar.domain.model.history.changeset import Retract, parse_changeset
 from radar.domain.model.entities import FilesOn, ProposalStatus, Risk
 from radar.domain.ports.review.proposal_queue import Query
 from radar.domain.ports.store.docs import Put

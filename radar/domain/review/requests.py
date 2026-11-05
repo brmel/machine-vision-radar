@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import ClassVar, Literal, Mapping, get_args
 
-from radar.domain.model.changeset import Changeset, parse_changeset
+from radar.domain.model.history.changeset import Changeset, parse_changeset
 from radar.domain.model.entities import ActorKind, FilesOn, ProposalAction
 from radar.domain.review.agents.tokens import AgentToken
 

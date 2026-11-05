@@ -4,7 +4,7 @@ import json
 from dataclasses import replace
 from typing import Any, Callable, Iterator, Mapping
 
-from radar.domain.model.changeset import Change
+from radar.domain.model.history.changeset import Change
 from radar.domain.model.entities import Claim, Name, Product, ProductOrgRole, ProductVersion, Source, SpecDefinition
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.registry import Registry

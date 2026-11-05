@@ -9,7 +9,7 @@ from radar.domain.model.entities import (AdminModel, AiCap, BundleMember, Bundle
                                          TermList, TermRef, UnitShape)
 from radar.domain.model.registry import Registry
 from radar.domain.model.schema import FieldSpec, ModelSchema, SchemaError, TypeSpec
-from radar.domain.model.changeset import EntityChange, changeset_json
+from radar.domain.model.history.changeset import EntityChange, changeset_json
 from radar.domain.model.history.projection import json_text
 from radar.domain.ports.review.proposal_queue import QueuePage
 from radar.domain.review.proposal import Member, Outcome, Proposal, Shown

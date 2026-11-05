@@ -13,7 +13,7 @@ from radar.domain.ai.budget import Use, caps_of, model_of
 from radar.domain.ai.meter import Capped, Meter
 from radar.domain.model.entities import AiModel
 from radar.domain.model.history.ids import keyed
-from radar.domain.model.changeset import Change, Changeset, PutEntity
+from radar.domain.model.history.changeset import Change, Changeset, PutEntity
 from radar.domain.ports.store.docs import Docs, Increment
 from radar.domain.ports.ai.usage_log import Ended, Outcome
 from radar.tests.store import stores

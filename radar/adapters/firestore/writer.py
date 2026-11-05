@@ -12,7 +12,8 @@ from radar.domain.model.registry import Registry
 from radar.domain.model.schema import FieldSpec, ModelSchema
 from radar.domain.ports.store.blob_store import BlobRef, BlobStore
 from radar.domain.model.entities import ActorKind
-from radar.domain.model.changeset import Applied, Change, Changeset, EntityChange, PutEntity, Retract, without_version
+from radar.domain.model.history.changeset import (Applied, Change, Changeset, EntityChange, PutEntity, Retract,
+                                                  without_version)
 from radar.domain.validation.context import Finding, InvalidChangeset, ValidationContext
 from radar.domain.validation.runner import validate
 from radar.domain.ports.store.docs import BATCH, Delete, Docs, Fields, Put

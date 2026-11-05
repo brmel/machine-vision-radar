@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Callable, Sequence
 
-from radar.domain.model.changeset import EntityChange, PutEntity
+from radar.domain.model.history.changeset import EntityChange, PutEntity
 from radar.domain.model.entities import Risk
 from radar.domain.review.agents.drafts import References, naming
 from radar.domain.review.proposal import Proposal
