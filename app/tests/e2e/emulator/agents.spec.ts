@@ -11,7 +11,7 @@ const WIDGET = rows<{ subject: string; value: string }>("names.jsonl")
 const UNREAD = "prd_0000000005";
 const CHECKED = {
   en: { intl: "en-GB", filed: 0, reason: "The maker's page gives Widget Two's mass as 93 g", shown: /\(g\)\s*93/,
-    file: 2, href: "https://example.com/media/widget-two.svg",
+    file: 2, href: "https://example.com/media/widget-two.png",
         review: "leave out" },
   fr: { intl: "fr-FR", filed: 0, reason: "The maker's page gives Widget Two's reach as 125 mm", shown: /\(mm\)\s*125/,
     file: 2, href: "https://example.com/media/widget-two.pdf",

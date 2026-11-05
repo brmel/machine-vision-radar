@@ -34,7 +34,7 @@ def recorded_page(path: str, headers: Mapping[str, str]) -> tuple[int, Mapping[s
     found = FIXTURE["pages"].get(path, {"status": 404, "body": "no such page"})
     sent = {"Content-Type": found.get("type", "text/html; charset=utf-8"),
             **({"Location": found["location"]} if "location" in found else {})}
-    return found.get("status", 200), sent, found["body"].encode()
+    return found.get("status", 200), sent, content(found) if "mime" in found else found["body"].encode()
 
 def _write(path: Path, content: object) -> None:
     path.write_text(json.dumps(content, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
