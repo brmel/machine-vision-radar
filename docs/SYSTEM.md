@@ -14,7 +14,8 @@ snapshot (`radar store export`) stays in the maintainers' private data repo. Pag
 
 - **Read path:** static and prerendered, real URLs, no hash routing, no SSR server. `app/scripts/prerender/` streams the
   read model through `CatalogRepository` (each category's listing pages by cursor, each page's products in one batch
-  read, the organizations a hundred at a time) and writes each page's body as the app's server render of its route
+  read and rendered on a pool of worker threads, one per core; the organizations a hundred at a time) and writes each
+  page's body as the app's server render of its route
   (`app/src/shell/root/server.tsx`, built by `vite build --ssr`): the `App` the browser mounts, in the default language
   with no saved choice, its reads made first, in passes. It writes every product (its view embedded as JSON,
   `#mvr-product`) and its history, vendor, article and static route; each category's hub (`/category/<id>`, with its

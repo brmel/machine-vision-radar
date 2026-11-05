@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { availableParallelism, tmpdir } from "node:os";
 import { join, relative } from "node:path";
 import { DEV, resolveFirestoreDocs } from "../../scripts/head.ts";
 import { describe, expect, it, vi } from "vitest";
@@ -20,21 +20,22 @@ function prerender(env: Record<string, string>, heapMiB?: number): { out: string
   mkdirSync(join(out, "read-model"));
   writeFileSync(join(out, "read-model", "index.json"), "{}");
   const probe = join(out, "..", `${relative(tmpdir(), out)}-rss.mjs`);
-  writeFileSync(probe, `import fs from "node:fs"; const sent = []; const real = globalThis.fetch;
+  writeFileSync(`${probe}.log`, "");
+  writeFileSync(probe, `import fs from "node:fs"; import { isMainThread } from "node:worker_threads";
+const real = globalThis.fetch;
 globalThis.fetch = (url, init) => {
-  sent.push(\`\${init?.method ?? "GET"} \${decodeURIComponent(String(url))}\`);
+  const sent = \`\${init?.method ?? "GET"} \${decodeURIComponent(String(url))}\\n\`;
+  fs.appendFileSync(${JSON.stringify(`${probe}.log`)}, sent);
   return real(url, init);
 };
-process.on("exit", () => {
-  fs.writeFileSync(${JSON.stringify(`${probe}.txt`)}, String(process.resourceUsage().maxRSS * 1024));
-  fs.writeFileSync(${JSON.stringify(`${probe}.json`)}, JSON.stringify(sent));
-});`);
+if (isMainThread) process.on("exit", () =>
+  fs.writeFileSync(${JSON.stringify(`${probe}.txt`)}, String(process.resourceUsage().maxRSS * 1024)));`);
   execFileSync("node", ["--experimental-strip-types", `--import=${probe}`,
     ...(heapMiB ? [`--max-old-space-size=${heapMiB}`] : []), "scripts/prerender/main.ts"], {
     cwd: APP, stdio: "pipe", env: { ...process.env, MVR_SITE_URL: ORIGIN, MVR_PRERENDER_OUT: out, ...env },
   });
   return { out, rss: Number(readFileSync(`${probe}.txt`, "utf-8")),
-    requests: JSON.parse(readFileSync(`${probe}.json`, "utf-8")) };
+    requests: readFileSync(`${probe}.log`, "utf-8").split("\n").filter(Boolean) };
 }
 
 function fixture(extra = 16): string {
@@ -186,7 +187,7 @@ describe("prerender", () => {
     expect(index).toHaveLength(2);
     expect(Math.max(...perFile)).toBeLessThanOrEqual(limit);
     expect(perFile.reduce((a, b) => a + b, 0)).toBeGreaterThan(total);
-    expect(rss).toBeLessThan(768 * 1024 * 1024);
+    expect(rss).toBeLessThan((768 + 128 * availableParallelism()) * 1024 * 1024);
     rmSync(pub, { recursive: true });
     rmSync(out, { recursive: true });
   }, 600_000);
