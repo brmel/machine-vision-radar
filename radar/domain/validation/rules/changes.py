@@ -34,7 +34,8 @@ def _check_entity(ctx: ValidationContext, entity_id: str, changes: list[Change])
     for diff in field_diff(replayed, without_version(plain(entity)))[:1]:
         yield Finding(NAME, entity_id,
                       f"patches replay to {diff.before!r} at '{diff.path}', the stored entity has {diff.after!r}")
-    yield from _check_changes(changes, sourced=hasattr(entity, "source_refs"))
+    fields = ctx.schema.types[type(entity).__name__].fields
+    yield from _check_changes(changes, sourced=any(f.name == "source_refs" for f in fields))
 
 def _check_changes(changes: list[Change], sourced: bool) -> Findings:
     for c in changes:

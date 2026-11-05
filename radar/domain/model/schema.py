@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field, fields as fields_of
-from typing import Any, Literal, Mapping, Sequence
+from typing import Literal, Mapping, Sequence
 
 PRIMITIVES = ("string", "number", "integer", "boolean")
 CONTAINERS = ("array", "map", "enum")
 Kind = Literal["scalar", "enum", "map", "record", "union", "entity"]
+type Json = None | bool | int | float | str | list[Json] | dict[str, Json]
 
 def variant_class(union: str, tag: str) -> str:
     return union + "".join(p.capitalize() for p in tag.split("_"))
@@ -30,7 +31,7 @@ class FieldSpec:
     unique: bool = False
     description: str | None = None
     label: Mapping[str, str] | None = None
-    default: Any = None
+    default: Json = None
     format: str | None = None
 
     @property
@@ -120,7 +121,7 @@ class ModelSchema:
 _FIELD_KEYS = {f.name for f in fields_of(FieldSpec)} - {"name"}
 _LISTS = ("values", "refs", "required_keys")
 
-def _field(owner: str, name: str, raw: Mapping[str, Any] | str) -> FieldSpec:
+def _field(owner: str, name: str, raw: Mapping[str, Json] | str) -> FieldSpec:
     if isinstance(raw, str):
         raw = {"type": raw}
     unknown = set(raw) - _FIELD_KEYS
@@ -128,7 +129,7 @@ def _field(owner: str, name: str, raw: Mapping[str, Any] | str) -> FieldSpec:
         raise SchemaError(f"{owner}.{name}: unknown field spec keys {sorted(unknown)}")
     return FieldSpec(name=name, **{k: tuple(v) if k in _LISTS else v for k, v in raw.items()})
 
-def _type(raw: Mapping[str, Any], kind: Kind | None = None) -> TypeSpec:
+def _type(raw: Mapping[str, Json], kind: Kind | None = None) -> TypeSpec:
     name = str(raw["id"])
     if raw.get("kind") == "enum" and not raw.get("values"):
         raise SchemaError(f"{name}: enum without values")
@@ -177,7 +178,7 @@ def _check_tools(schema: ModelSchema) -> None:
         if tool.output not in schema.types:
             raise SchemaError(f"{tool.name}: unknown output type '{tool.output}'")
 
-ModelFile = Sequence[Mapping[str, Any]]
+ModelFile = Sequence[Mapping[str, Json]]
 
 def parse_schema(value_types: ModelFile, registry_types: ModelFile, entities: ModelFile, views: ModelFile,
                  tools: ModelFile) -> ModelSchema:

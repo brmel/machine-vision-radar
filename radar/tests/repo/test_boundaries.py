@@ -15,7 +15,6 @@ UNTYPED: dict[str, dict[str, int]] = {
     ANY: {
         "radar/domain/model/history/changeset.py": 12,
         "radar/domain/model/history/projection.py": 12,
-        "radar/domain/model/schema.py": 4,
         "radar/domain/ports/ai/research_agent.py": 1,
         "radar/domain/ports/catalog/held_records.py": 2,
         "radar/domain/ports/catalog/views.py": 2,
@@ -38,12 +37,10 @@ UNTYPED: dict[str, dict[str, int]] = {
         "radar/domain/review/feed/news.py": 1,
         "radar/domain/search/hits.py": 1,
         "radar/domain/search/sources.py": 2,
-        "radar/domain/validation/rules/registry/vocabularies.py": 1,
     },
     REFLECTION: {
         "radar/domain/model/history/projection.py": 1,
         "radar/domain/read_model/products/views.py": 1,
-        "radar/domain/validation/rules/changes.py": 1,
         "radar/domain/validation/rules/registry/registry_integrity.py": 2,
         "radar/domain/validation/walk.py": 2,
     },

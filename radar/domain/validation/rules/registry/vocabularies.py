@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Iterable
+from typing import Iterable
 
 from radar.domain.validation.context import ValidationContext
 from radar.domain.validation.verdict import Finding, Findings
@@ -8,7 +8,7 @@ from radar.domain.validation.walk import Visit, visits
 
 NAME = "vocabularies"
 
-def _bound(v: Visit) -> Iterable[tuple[str, Any]]:
+def _bound(v: Visit) -> Iterable[tuple[str, object]]:
     if v.spec.vocabulary:
         yield from ((v.spec.vocabulary, x) for x in (v.value.values() if v.spec.type == "map" else v.items))
     if v.spec.key_vocabulary:

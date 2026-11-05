@@ -12,9 +12,8 @@ from ..validation.runner import check
 from ..validation.verdict import Verdict
 from .entities import CLASSES
 from .registry import Registry
-from .schema import FieldSpec, ModelSchema, TypeSpec, variant_class
+from .schema import FieldSpec, Json, ModelSchema, TypeSpec, variant_class
 
-type Json = None | bool | int | float | str | list[Json] | dict[str, Json]
 T = TypeVar("T")
 
 class ParseError(ValueError):
