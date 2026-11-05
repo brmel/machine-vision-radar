@@ -7,7 +7,6 @@ import type { CatalogRepository } from "../../domain/ports/CatalogRepository.ts"
 import { CompareTray } from "../../features/compare/CompareTray.tsx";
 import { useComparedIds } from "../../features/compare/useComparedIds.ts";
 import { RegistryProvider, useRead } from "../../ui/index.ts";
-import { NO_REGISTRY } from "../../ui/specs/RegistryContext.tsx";
 import { ThemeProvider } from "../layout/ThemeProvider.tsx";
 import { I18nProvider, useI18n } from "../i18n/index.tsx";
 import { SiteHeader, type NavItem } from "../layout/SiteHeader.tsx";
@@ -93,7 +92,6 @@ const RadarApp: FC<Ports> = ({ start, repository: injectedReader }) => {
   ];
 
   return (
-    <RegistryProvider value={loaded?.registry ?? NO_REGISTRY}>
     <div className={`min-h-screen flex flex-col bg-page text-fg transition-colors ${showTray ? "pb-24" : ""}`}>
       <a
         href="#main-content"
@@ -108,6 +106,7 @@ const RadarApp: FC<Ports> = ({ start, repository: injectedReader }) => {
         {loadError || !loaded ? (
           <ReadState failed={loadError} skeleton={{ count: 4 }} />
         ) : (
+          <RegistryProvider value={loaded.registry}>
           <RouteView
             route={route}
             go={go}
@@ -121,6 +120,7 @@ const RadarApp: FC<Ports> = ({ start, repository: injectedReader }) => {
             onHomeSearchQueryChange={setHomeSearchQuery}
             compare={compare}
           />
+          </RegistryProvider>
         )}
       </main>
 
@@ -130,7 +130,6 @@ const RadarApp: FC<Ports> = ({ start, repository: injectedReader }) => {
 
       <SiteFooter onOpen={(name) => navigate({ name })} />
     </div>
-    </RegistryProvider>
   );
 };
 
