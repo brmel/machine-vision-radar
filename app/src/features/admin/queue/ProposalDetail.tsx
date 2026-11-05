@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent, type FC } from "react";
 import type { Review } from "../../../domain/ports/review/Review.ts";
-import type { ProposalView } from "../../../domain/views.ts";
+import type { FieldChangeView, ProposalView } from "../../../domain/views.ts";
 import { CONTROL, Field, Section, formatDate } from "../../../ui/index.ts";
 import { useI18n } from "../../../shell/i18n/index.tsx";
 import type { MessageKey } from "../../../shell/i18n/messages.ts";
@@ -11,12 +11,6 @@ import { Decision, type Action } from "./Decision.tsx";
 import { ProposalHeader } from "./ProposalHeader.tsx";
 import { useAdmin } from "../model.ts";
 
-interface DiffRow {
-  readonly path: string;
-  readonly before?: string;
-  readonly after?: string;
-}
-
 function flatten(value: unknown, prefix = "", out = new Map<string, string>()): Map<string, string> {
   if (value !== null && typeof value === "object" && !Array.isArray(value)) {
     for (const [key, inner] of Object.entries(value)) flatten(inner, prefix ? `${prefix}.${key}` : key, out);
@@ -26,7 +20,7 @@ function flatten(value: unknown, prefix = "", out = new Map<string, string>()): 
   return out;
 }
 
-function diffRows(before?: string, after?: string): DiffRow[] {
+function diffRows(before?: string, after?: string): FieldChangeView[] {
   const [a, b] = [flatten(before ? JSON.parse(before) : {}), flatten(after ? JSON.parse(after) : {})];
   return [...new Set([...a.keys(), ...b.keys()])]
     .sort()

@@ -7,7 +7,7 @@ import { useI18n } from "../../../../shell/i18n/index.tsx";
 import { logger } from "../../../../shell/logger.ts";
 import type { MessageKey } from "../../../../shell/i18n/messages.ts";
 import { terms, useAdmin } from "../../model.ts";
-import { isRecord, partialDate } from "../drafts.ts";
+import { isRecord, partialDate, text } from "../drafts.ts";
 import { TermSelect } from "./TermSelect.tsx";
 
 interface Props {
@@ -17,8 +17,6 @@ interface Props {
   disabled?: boolean;
 }
 
-const text = (value: Json | undefined): string =>
-  (typeof value === "string" || typeof value === "number" ? String(value) : "");
 const texts = (value: Json | undefined): Readonly<Record<string, string>> =>
   isRecord(value) ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, text(v)])) : {};
 

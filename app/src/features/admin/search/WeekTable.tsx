@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { CELL, LoadingSkeleton, NUM, ROW_HEAD, Section, formatDate, formatNumber } from "../../../ui/index.ts";
+import { CELL, NUM, ROW_HEAD, Section, formatDate, formatNumber } from "../../../ui/index.ts";
 import { useI18n } from "../../../shell/i18n/index.tsx";
 import { useAdmin } from "../model.ts";
 import { useLoad } from "../useLoad.tsx";
@@ -13,7 +13,7 @@ const COUNTS = [
 export const WeekTable: FC = () => {
   const { search } = useAdmin();
   const { t, locale } = useI18n();
-  const weekly = useLoad(() => search.weekly(), "search-weekly");
+  const weekly = useLoad(() => search.weekly(), "search-weekly", 2, 2);
   const table = weekly.value && (
     <AdminTable columns={[["adminSearchWeek"], ...COUNTS.map(([, label]) => [label, "text-right"] as const)]}>
       {weekly.value.weeks.map((w) => (
@@ -27,8 +27,7 @@ export const WeekTable: FC = () => {
   );
   return (
     <Section title={t("adminSearchWeekly")}>
-      {table || (weekly.failed ? <p role="alert" className="text-caption text-danger">{t("adminFailed")}</p>
-        : <LoadingSkeleton label={t("loading")} count={2} />)}
+      {table || weekly.pending}
     </Section>
   );
 };

@@ -5,12 +5,10 @@ import { CONTROL, Field, localized } from "../../../../../ui/index.ts";
 import { useI18n } from "../../../../../shell/i18n/index.tsx";
 import type { MessageKey } from "../../../../../shell/i18n/messages.ts";
 import { terms, useAdmin } from "../../../model.ts";
-import { isRecord } from "../../drafts.ts";
+import { isRecord, text } from "../../drafts.ts";
 import { TermSelect } from "../TermSelect.tsx";
 
 const record = (value: Json | null | undefined): JsonRecord => (isRecord(value) ? value : {});
-const str = (value: Json | undefined): string =>
-  (typeof value === "string" || typeof value === "number" ? String(value) : "");
 
 interface Render {
   label: string;
@@ -24,7 +22,7 @@ interface Render {
 
 function quantity(r: Render): ReactNode {
   const q = record(r.value.quantity ?? r.value.range);
-  const [from, to, unit] = [str(q.value ?? q.min), str(q.max), str(q.unit) || (r.spec.unit ?? "")];
+  const [from, to, unit] = [text(q.value ?? q.min), text(q.max), text(q.unit) || (r.spec.unit ?? "")];
   const units = Object.entries(r.model.units).filter(([, u]) => u.dimension === r.spec.dimension);
   const put = (low: string, high: string, measured: string) =>
     r.put(low === "" ? null : high === "" ? { quantity: { value: Number(low), unit: measured } }
@@ -51,11 +49,11 @@ function quantity(r: Render): ReactNode {
 
 const RENDER: { readonly [D in SpecShape["datatype"]]: (r: Render) => ReactNode } = {
   quantity,
-  term: (r) => <TermSelect label={r.label} terms={terms(r.model, r.spec.vocabulary)} value={str(r.value.term)}
+  term: (r) => <TermSelect label={r.label} terms={terms(r.model, r.spec.vocabulary)} value={text(r.value.term)}
     onChange={(v) => r.put(v ? { term: v } : null)} />,
   term_set: (r) => (
     <Field label={r.label}>
-      <select multiple className={`${CONTROL} h-28`} value={Array.isArray(r.value.terms) ? r.value.terms.map(str) : []}
+      <select multiple className={`${CONTROL} h-28`} value={Array.isArray(r.value.terms) ? r.value.terms.map(text) : []}
         onChange={(e) => r.put(e.target.selectedOptions.length
           ? { terms: [...e.target.selectedOptions].map((o) => o.value) } : null)}>
         {terms(r.model, r.spec.vocabulary)
@@ -75,7 +73,7 @@ const RENDER: { readonly [D in SpecShape["datatype"]]: (r: Render) => ReactNode 
   ),
   string: (r) => (
     <Field label={r.label}>
-      <input className={CONTROL} value={str(r.value.string)}
+      <input className={CONTROL} value={text(r.value.string)}
         onChange={(e) => r.put(e.target.value ? { string: e.target.value } : null)} />
     </Field>
   ),
@@ -90,7 +88,7 @@ export const SpecInput: FC<{ specKey: string; label: string; value: Json | null 
   const none = model.none_datatypes.includes(spec.datatype) && (
     <TermSelect label={t("adminFieldPart", { field: label, part: t("adminNoneBecause") })}
       terms={terms(model, model.none_vocabulary)}
-      value={str(record(value).none)} onChange={(v) => onChange(v ? { none: v } : null)} />
+      value={text(record(value).none)} onChange={(v) => onChange(v ? { none: v } : null)} />
   );
   return <>{RENDER[spec.datatype]({ label, spec, value: record(value), put: onChange, model, locale, t })}{none}</>;
 };
