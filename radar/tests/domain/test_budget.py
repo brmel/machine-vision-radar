@@ -7,7 +7,7 @@ import pytest
 from radar import paths
 from radar.tests.fixtures.corpus import MODEL
 from radar.adapters.firestore.writer import StoreWriter
-from radar.domain.validation.context import InvalidChangeset
+from radar.domain.validation.verdict import InvalidChangeset
 from radar.adapters.firestore.ledgers.ai import CALLS, FirestoreBudget, FirestoreUsageLog, usage_collection
 from radar.domain.ai.budget import Use, caps_of, model_of
 from radar.domain.ai.meter import Capped, Meter

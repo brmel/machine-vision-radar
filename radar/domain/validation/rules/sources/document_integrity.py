@@ -3,7 +3,8 @@ from __future__ import annotations
 import re
 
 from radar.domain.model.entities import Document
-from radar.domain.validation.context import ValidationContext, ValidationResult
+from radar.domain.validation.context import ValidationContext
+from radar.domain.validation.verdict import Finding, Findings
 from radar.domain.validation.walk import repeated
 
 NAME = "document_integrity"
@@ -33,15 +34,15 @@ def _file_problems(ctx: ValidationContext, doc: Document) -> list[str]:
         return [f"the kept file is {kept.bytes} bytes of {kept.mime}, not {doc.bytes} bytes of {doc.mime}"]
     return []
 
-def check(ctx: ValidationContext, res: ValidationResult) -> None:
+def check(ctx: ValidationContext) -> Findings:
     docs = list(ctx.catalog.all(Document))
     for sha, n in repeated(d.sha256 for d in docs):
-        res.error(NAME, sha[:12], f"{n} documents for one file (sha256 {sha[:12]}…); keep one")
+        yield Finding(NAME, sha[:12], f"{n} documents for one file (sha256 {sha[:12]}…); keep one")
     for doc in docs:
         if not SHA256.match(doc.sha256):
-            res.error(NAME, doc.id, f"invalid sha256 '{doc.sha256}'")
+            yield Finding(NAME, doc.id, f"invalid sha256 '{doc.sha256}'")
             continue
         for problem in (*_shape(ctx, doc), *_file_problems(ctx, doc)):
-            res.error(NAME, doc.id, problem)
+            yield Finding(NAME, doc.id, problem)
     for sha in sorted(set(ctx.kept_files or ()) - {d.sha256 for d in docs}):
-        res.error(NAME, sha[:12], f"kept file {sha[:12]}… has no Document")
+        yield Finding(NAME, sha[:12], f"kept file {sha[:12]}… has no Document")

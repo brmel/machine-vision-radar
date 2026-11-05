@@ -2,9 +2,14 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from datetime import date
 from types import MappingProxyType
 from typing import Mapping, TypeVar
 
+from ..ports.catalog.catalog import Catalog
+from ..validation.context import KeptFile, Scope, ValidationContext
+from ..validation.runner import check
+from ..validation.verdict import Verdict
 from .entities import CLASSES
 from .registry import Registry
 from .schema import FieldSpec, ModelSchema, TypeSpec, variant_class
@@ -122,3 +127,7 @@ class Model:
 
     def parse(self, raw: Json, kind: type[T], where: str = "") -> T:
         return Parser(self.schema).parse(raw, kind, where or kind.__name__)
+
+    def check(self, catalog: Catalog, scope: Scope, today: date,
+              kept_files: Mapping[str, KeptFile] | None = None) -> Verdict:
+        return check(ValidationContext(catalog, self.registry, self.schema, today, scope, kept_files))

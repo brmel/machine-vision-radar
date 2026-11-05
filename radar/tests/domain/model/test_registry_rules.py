@@ -8,9 +8,9 @@ import pytest
 
 from radar.adapters.files.json_parser import parse_catalog
 from radar.domain.model.entities import Bounds
-from radar.domain.validation.context import ValidationContext
+from radar.domain.validation.context import Part, ValidationContext
 from radar.domain.validation.rules.registry import registry_integrity
-from radar.domain.validation.runner import validate
+from radar.domain.validation.runner import check
 from radar.tests.fixtures.corpus import CORPUS, MODEL, REGISTRY, SCHEMA
 
 SPECS = sorted(REGISTRY.spec_definitions.values(), key=lambda s: s.id)
@@ -116,9 +116,8 @@ _PROFILE.sections, core=(), detail=(*_PROFILE.sections.core, *_PROFILE.sections.
 @pytest.mark.parametrize("name", sorted(REGISTRY_BREAKS))
 def test_registry_break_fails_its_rule(name: str) -> None:
     rule, registry, message = REGISTRY_BREAKS[name]
-    errors = [e.message
-              for e in validate(ValidationContext(parse_catalog(CORPUS, MODEL), registry, SCHEMA, date(2026, 10, 17)),
-                                [rule]).errors]
+    ctx = ValidationContext(parse_catalog(CORPUS, MODEL), registry, SCHEMA, date(2026, 10, 17), Part())
+    errors = [e.message for e in check(ctx, [rule.check]).errors]
     assert errors and all(message in e for e in errors), errors
 
 def test_registry_entries_carry_no_status() -> None:

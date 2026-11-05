@@ -6,7 +6,7 @@ from typing import Any, Callable, Mapping, TypeVar
 
 from radar.adapters.console import log
 from radar.adapters.web.api import payload
-from radar.domain.validation.context import InvalidChangeset
+from radar.domain.validation.verdict import InvalidChangeset
 from radar.domain.ports.web.endpoint import Request, Response
 from radar.domain.ports.store.records import Records
 from radar.domain.ai.meter import Capped
@@ -16,7 +16,6 @@ from radar.domain.ports.review.identity import Identity
 from radar.domain.ports.review.proposal_queue import Query
 from radar.domain.read_model.history import Histories
 from radar.domain.review.agents.tokens import Refused
-from radar.domain.review.proposal import findings
 from radar.domain.review.requests import Founder, decision_of, draft_of
 from radar.domain.review.review import Review
 from radar.domain.review.views import bundle_view, outcome_view, page_view, shown_view
@@ -82,7 +81,7 @@ class AdminEndpoint:
             parts = tuple(request.path.removeprefix("/api/admin/").strip("/").split("/"))
             return self._route(request.method, parts, request.query, payload(request), founder)
         except InvalidChangeset as exc:
-            return Response(422, {"error": "the change is refused", "findings": list(findings(exc))})
+            return Response(422, {"error": "the change is refused", "findings": [str(f) for f in exc.findings]})
         except Refused as exc:
             return Response(403, {"error": str(exc)})
         except ValueError as exc:
@@ -125,7 +124,7 @@ class AdminEndpoint:
         if outcome.refused and not outcome.done:
             return Response(422,
                             {"error": "the change is refused",
-                             "findings": [f for r in outcome.refused for f in r.findings]})
+                             "findings": [str(f) for r in outcome.refused for f in r.findings]})
         log.info("admin: decided", done=len(outcome.done), refused=len(outcome.refused), held=len(outcome.held))
         return Response(200, plain(outcome_view(outcome)))
 

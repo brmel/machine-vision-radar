@@ -10,7 +10,7 @@ import pytest
 from radar.adapters.firestore import layout, store
 from radar.adapters.firestore.repository import StoreChangeLog
 from radar.domain.model.history.ids import keyed
-from radar.domain.validation.context import InvalidChangeset
+from radar.domain.validation.verdict import InvalidChangeset
 from radar.tests.store import stores
 
 FX = stores.fixture()

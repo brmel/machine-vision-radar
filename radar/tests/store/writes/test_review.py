@@ -14,8 +14,8 @@ from radar.domain.review.agents.tokens import Limits, Refused, Scope, issue
 from radar.domain.review.proposal import AlreadyProposed, Filed, ProposalError
 from radar.domain.review.requests import (Agent, Approval, Bundle, Bundled, Changes, Enactment, Founder, Job, Picked,
                                           Reader, Rejection, Report, Retraction, Revision, Rollback, Withdrawal)
-from radar.domain.validation.context import InvalidChangeset, ValidationContext
-from radar.domain.validation.runner import validate
+from radar.domain.validation.context import Part
+from radar.domain.validation.verdict import InvalidChangeset
 from radar.tests.store import stores
 
 FX = stores.fixture()
@@ -98,8 +98,7 @@ def test_retracting_a_proposal_that_added_a_source_returns_the_catalog_to_before
         assert docs.get(layout.canonical(FX.model.schema, r["id"])) is None
         assert [v.version for v in versions.history(r["id"]).versions] == [2, 1]
     today, records = date.fromisoformat(stores.NOW[:10]), list(store.scan(docs, FX.model.schema))
-    assert validate(ValidationContext(layout.catalog_of(FX.model, records), FX.model.registry, FX.model.schema,
-                                      today)).errors == []
+    assert FX.model.check(layout.catalog_of(FX.model, records), Part(), today).errors == ()
     review.decide(Enactment(_changes(FilesOn.CREATE, "A page", "src_00000000zz",
                                      ({**added[0], "id": "src_00000000zz"}, ["src_00000000zz"]))), FOUNDER)
     review.decide(Enactment(Withdrawal("src_00000000zz", "Gone")), FOUNDER)
@@ -109,8 +108,7 @@ def test_retracting_a_proposal_that_added_a_source_returns_the_catalog_to_before
     for moved in ("2026-10-18T23:00:00Z",
                   "2026-01-01T00:00:00Z"):
         events = [{**r, "recorded_at": moved} if r["id"] == approved.applied[-1].change else r for r in records]
-        [finding] = validate(ValidationContext(layout.catalog_of(FX.model, events), FX.model.registry, FX.model.schema,
-                                               today)).errors
+        [finding] = FX.model.check(layout.catalog_of(FX.model, events), Part(), today).errors
         assert finding.message == f"Change.source_refs: '{cited[0]}' does not exist", (
             "history cites a source that existed when it was recorded")
 
@@ -136,7 +134,7 @@ def test_review_refuses_what_it_cannot_apply() -> None:
             and review.decide(Approval(Picked((edited.id,)), "Fixed"), FOUNDER).changed)
     review.decide(Approval(Picked((good.id,)), "Revision B"), FOUNDER)
     [refused] = review.decide(Retraction(Picked((report.id,)), "Wrong after all"), FOUNDER).refused
-    assert "changed after" in refused.findings[0]
+    assert "changed after" in refused.findings[0].message
     rollback = review.submit(Rollback(claim["id"], 1, "Back to the first datasheet"), FOUNDER).proposal
     review.decide(Approval(Picked((rollback.id,)), "Back to v1"), FOUNDER)
     assert FX.stored(docs, claim["id"])["value"] == claim["value"]

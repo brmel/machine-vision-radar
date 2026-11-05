@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from radar.domain.model.entities import Change, Document, Product, ProductVersion
-from radar.domain.validation.context import ValidationContext, ValidationResult
+from radar.domain.validation.context import ValidationContext
+from radar.domain.validation.verdict import Finding, Findings
 from radar.domain.validation.walk import visits
 
 NAME = "references"
@@ -14,7 +15,7 @@ def _withdrawn(ctx: ValidationContext) -> dict[str, tuple[str, str]]:
             out[c.entity] = (min(first, c.recorded_at), max(last, c.recorded_at))
     return out
 
-def _check_thumbnails(ctx: ValidationContext, res: ValidationResult) -> None:
+def _check_thumbnails(ctx: ValidationContext) -> Findings:
     kinds = ctx.registry.vocabularies.get("document_kinds", {})
     rights_vocab = ctx.registry.vocabularies.get("media_rights", {})
     for prod in ctx.catalog.all(Product):
@@ -25,21 +26,21 @@ def _check_thumbnails(ctx: ValidationContext, res: ValidationResult) -> None:
             continue
         kind = kinds.get(doc.kind)
         if not any(m.startswith("image/") for m in (kind.mime_types if kind else ())):
-            res.error(NAME, prod.id, f"thumbnail '{doc.id}' is not an image (kind '{doc.kind}')")
+            yield Finding(NAME, prod.id, f"thumbnail '{doc.id}' is not an image (kind '{doc.kind}')")
         rights = rights_vocab.get(doc.rights)
         if not (rights and rights.public):
-            res.error(NAME, prod.id, f"thumbnail '{doc.id}' rights are not public ('{doc.rights}')")
+            yield Finding(NAME, prod.id, f"thumbnail '{doc.id}' rights are not public ('{doc.rights}')")
         if prod.id not in doc.subjects:
-            res.error(NAME, prod.id, f"thumbnail '{doc.id}' is not about product '{prod.id}'")
+            yield Finding(NAME, prod.id, f"thumbnail '{doc.id}' is not about product '{prod.id}'")
 
-def _check_documents(ctx: ValidationContext, res: ValidationResult) -> None:
+def _check_documents(ctx: ValidationContext) -> Findings:
     kinds = ctx.registry.vocabularies.get("document_kinds", {})
     for doc in ctx.catalog.all(Document):
         kind = kinds.get(doc.kind)
         if kind and kind.version and not any(isinstance(ctx.catalog.get(s), ProductVersion) for s in doc.subjects):
-            res.error(NAME, doc.id, f"document '{doc.id}' of kind '{doc.kind}' must name a ProductVersion")
+            yield Finding(NAME, doc.id, f"document '{doc.id}' of kind '{doc.kind}' must name a ProductVersion")
 
-def check(ctx: ValidationContext, res: ValidationResult) -> None:
+def check(ctx: ValidationContext) -> Findings:
     withdrawn = _withdrawn(ctx)
     for v in visits(ctx):
         if not v.spec.refs:
@@ -50,10 +51,10 @@ def check(ctx: ValidationContext, res: ValidationResult) -> None:
             if target is None and isinstance(v.entity, Change) and first <= v.entity.recorded_at <= last:
                 continue
             if target is None:
-                res.error(NAME, v.entity.id, f"{v.path}: '{target_id}' does not exist")
+                yield Finding(NAME, v.entity.id, f"{v.path}: '{target_id}' does not exist")
             elif type(target).__name__ not in v.spec.refs:
-                res.error(NAME, v.entity.id,
-                          f"{v.path}: '{target_id}' is of type {type(target).__name__}, expected "
-                          f"{' or '.join(v.spec.refs)}")
-    _check_thumbnails(ctx, res)
-    _check_documents(ctx, res)
+                yield Finding(NAME, v.entity.id,
+                              f"{v.path}: '{target_id}' is of type {type(target).__name__}, expected "
+                              f"{' or '.join(v.spec.refs)}")
+    yield from _check_thumbnails(ctx)
+    yield from _check_documents(ctx)

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
-from dataclasses import asdict
 from datetime import date
 from pathlib import Path
 
@@ -13,14 +12,14 @@ from radar.adapters.firestore import layout, store
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.entities import Document
 from radar.domain.model.registry import Registry
-from radar.domain.validation.context import ValidationContext, ValidationResult
-from radar.domain.validation.runner import validate
+from radar.domain.validation.context import Part, Whole
+from radar.domain.validation.verdict import Verdict
 from radar.adapters.console.parser import Commands
 
-def _errors(res: ValidationResult) -> int:
-    for e in res.errors:
-        log.error(f"[{e.rule}] {e.entity_id}: {e.message}")
-    return len(res.errors)
+def _errors(verdict: Verdict) -> int:
+    for e in verdict.errors:
+        log.error(str(e))
+    return len(verdict.errors)
 
 def _media(catalog: Catalog, registry: Registry, files: Path) -> dict[str, store.Media]:
     public = registry.marked("media_rights", lambda t: t.public)
@@ -30,15 +29,14 @@ def _media(catalog: Catalog, registry: Registry, files: Path) -> dict[str, store
 def run_load(args: argparse.Namespace) -> int:
     cid, now = args.wiring.correlate("load"), args.wiring.now()
     model = args.wiring.model()
-    schema, registry = model.schema, model.registry
     catalog_dir, files = Path(args.catalog), Path(args.blobs) if args.blobs else None
     catalog = json_store.load_catalog(catalog_dir, model)
     kept = kept_files(files) if files else {}
-    if _errors(validate(ValidationContext(catalog, registry, schema, date.fromisoformat(now[:10]), kept_files=kept))):
+    if _errors(model.check(catalog, Part(), date.fromisoformat(now[:10]), kept)):
         return log.error("the catalog does not validate: nothing written")
-    media = _media(catalog, registry, files) if files else {}
+    media = _media(catalog, model.registry, files) if files else {}
     docs, blobs = args.wiring.store(), args.wiring.blobs()
-    written = store.load(docs, blobs, model, layout.records_of(catalog, schema), media, cid, now)
+    written = store.load(docs, blobs, model, layout.records_of(catalog, model.schema), media, cid, now)
     log.info(f"load: {sum(written.values())} docs in {len(written)} collections, {len(media)} file(s)")
     return output.format_output({"correlation_id": cid, "docs": written, "blobs": len(media)}, json_mode=True)
 
@@ -52,20 +50,19 @@ def run_export(args: argparse.Namespace) -> int:
 def run_validate(args: argparse.Namespace) -> int:
     cid = args.wiring.correlate("validate")
     model = args.wiring.model()
-    schema, registry = model.schema, model.registry
+    schema = model.schema
     records = list(store.scan(args.wiring.store(), schema))
     log.info(f"validate: {len(records)} entities read")
-    res = validate(ValidationContext(layout.catalog_of(model, records), registry, schema,
-                                     args.wiring.today(), whole_catalog=True))
+    verdict = model.check(layout.catalog_of(model, records), Whole(), args.wiring.today())
     counts = dict(sorted(Counter(schema.collection(schema.kind_of(r["id"]) or "") for r in records).items()))
-    failed = _errors(res)
+    failed = _errors(verdict)
     if args.json:
-        output.format_output({"correlation_id": cid, "ok": res.ok, "counts": counts,
-                              "errors": [asdict(f) for f in res.errors], "warnings": [asdict(f) for f in res.warnings]},
-                             json_mode=True)
+        output.format_output({"correlation_id": cid, "ok": verdict.ok, "counts": counts,
+                              "errors": [f.report() for f in verdict.errors],
+                              "warnings": [f.report() for f in verdict.warnings]}, json_mode=True)
         return 1 if failed else 0
     if failed:
-        return log.error(f"{len(res.errors)} validation error(s) in the store")
+        return log.error(f"{failed} validation error(s) in the store")
     return output.format_output(f"store validation OK: {len(records)} entities "
                                 f"({', '.join(f'{n} {kind}' for kind, n in counts.items())})")
 

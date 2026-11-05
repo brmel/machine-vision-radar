@@ -7,6 +7,16 @@ write (the `CatalogWriter`), on the store (`radar store validate`) and on a cata
 The store, the read model and the read and write paths: [SYSTEM.md](SYSTEM.md); search and every AI use:
 [SEARCH.md](SEARCH.md).
 
+**The interface** is one object, `Model` (`radar/domain/model/model.py`), holding the schema and the registry; the
+wiring loads it once and every caller takes it.
+
+- `Model.parse(raw, kind, where)`: the one edge parser of records, JSON in and the generated `kind` out, or a
+  `ParseError` naming the path.
+- `Model.check(catalog, scope, today)`: every `Rule` (`radar/domain/validation/rule.py`) on the catalog, returning an
+  immutable `Verdict` of `Finding`s (rule, entity, message, `Severity` error or warning). The `scope` is `Whole()`,
+  the whole store or a catalog folder, or `Part()`, a write's neighborhood, a catalog file or the registry alone.
+- A refused write raises `InvalidChangeset`, which holds findings only.
+
 ## 1. Principles
 
 1. **Technology-neutral:** machine-vision concepts, independent of databases, wire formats or UI state.

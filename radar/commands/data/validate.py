@@ -1,29 +1,25 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict
 
 from radar.adapters.console import log, output
-from radar.domain.validation.context import ValidationContext
-from radar.domain.validation.runner import validate
 from radar.adapters.console.parser import Commands
 
 def run(args: argparse.Namespace) -> int:
-    model = args.wiring.model()
-    catalog, whole = args.wiring.catalog_at(args.path)
-    res = validate(ValidationContext(catalog, model.registry, model.schema, args.wiring.today(), whole_catalog=whole))
+    catalog, scope = args.wiring.catalog_at(args.path)
+    verdict = args.wiring.model().check(catalog, scope, args.wiring.today())
     if args.json:
-        output.format_output({"ok": res.ok, "errors": [asdict(f) for f in res.errors],
-                              "warnings": [asdict(f) for f in res.warnings]}, json_mode=True)
-        return 0 if res.ok else 1
+        output.format_output({"ok": verdict.ok, "errors": [f.report() for f in verdict.errors],
+                              "warnings": [f.report() for f in verdict.warnings]}, json_mode=True)
+        return 0 if verdict.ok else 1
 
-    for w in res.warnings:
-        log.warn(f"[{w.rule}] {w.entity_id}: {w.message}")
-    for e in res.errors:
-        log.error(f"[{e.rule}] {e.entity_id}: {e.message}")
+    for w in verdict.warnings:
+        log.warn(str(w))
+    for e in verdict.errors:
+        log.error(str(e))
 
-    if not res.ok:
-        return log.error(f"{len(res.errors)} validation error(s)")
+    if not verdict.ok:
+        return log.error(f"{len(verdict.errors)} validation error(s)")
 
     return output.format_output("catalog validation OK")
 

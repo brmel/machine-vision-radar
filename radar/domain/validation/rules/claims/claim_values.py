@@ -5,7 +5,8 @@ from collections import defaultdict
 from radar.domain.model.entities import (Claim, ClaimValue, ClaimValueBoolean, ClaimValueNone, ClaimValueQuantity,
                                          ClaimValueRange, ClaimValueString, ClaimValueTerm, ClaimValueTerms, Relation,
                                          SpecDefinition)
-from radar.domain.validation.context import ValidationContext, ValidationResult
+from radar.domain.validation.context import ValidationContext
+from radar.domain.validation.verdict import Finding, Findings
 
 NAME = "claim_values"
 
@@ -45,24 +46,24 @@ def _errors(ctx: ValidationContext, value: ClaimValue, spec: SpecDefinition) -> 
             return _terms(ctx, ts, spec)
     return []
 
-def check(ctx: ValidationContext, res: ValidationResult) -> None:
+def check(ctx: ValidationContext) -> Findings:
     first: dict[tuple[str, str], list[Claim]] = defaultdict(list)
     for c in ctx.catalog.all(Claim):
         spec = ctx.registry.spec_definitions.get(c.spec_key)
         if spec is None:
             continue
         for message in _errors(ctx, c.value, spec):
-            res.error(NAME, c.id, f"{c.spec_key}: {message}")
+            yield Finding(NAME, c.id, f"{c.spec_key}: {message}")
         if c.rank == 1 and spec.datatype != "term_set":
             first[(c.subject, c.spec_key)].append(c)
     for (subject, key), claims in first.items():
         if len({repr(c.value) for c in claims}) > 1:
-            res.error(NAME, claims[-1].id, f"{key}: {subject} has {len(claims)} different values ranked first")
-    _qualifiers(ctx, res)
+            yield Finding(NAME, claims[-1].id, f"{key}: {subject} has {len(claims)} different values ranked first")
+    yield from _qualifiers(ctx)
 
-def _qualifiers(ctx: ValidationContext, res: ValidationResult) -> None:
+def _qualifiers(ctx: ValidationContext) -> Findings:
     for r in ctx.catalog.all(Relation):
         for key, value in (r.qualifiers or {}).items():
             spec = ctx.registry.spec_definitions.get(key)
             for message in _errors(ctx, value, spec) if spec else [f"'{key}' is not a spec"]:
-                res.error(NAME, r.id, f"qualifier {key}: {message}")
+                yield Finding(NAME, r.id, f"qualifier {key}: {message}")

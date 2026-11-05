@@ -18,13 +18,12 @@ from radar.domain.review.agents.duplicates import Proposed, merged, unproposed
 from radar.domain.review.agents.tokens import Refused
 from radar.domain.review.bundle import RANK, after, ordered, risk
 from radar.domain.review.proposal import (AlreadyProposed, AppliedChange, Filed, Held, Member, Outcome, Proposal,
-                                          ProposalError, Receipt, Refusal, Shown, Unfiled, Verdict, content_hash,
-                                          findings)
+                                          ProposalError, Receipt, Refusal, Shown, Unfiled, Verdict, content_hash)
 from radar.domain.review.requests import (Agent, Approval, Bundle, Bundled, Changes, Decision, Draft, Enactment,
                                           Founder, Job, Picked, Reader, Rejection, Report, Retraction, Revision,
                                           Rollback, Submitter, Target, Withdrawal)
 from radar.domain.review.views import OWNED
-from radar.domain.validation.context import Finding, InvalidChangeset
+from radar.domain.validation.verdict import Finding, InvalidChangeset
 
 FILES = {Founder: (Changes, Withdrawal, Rollback), Agent: (Changes,), Job: (Changes, Withdrawal), Reader: (Report,)}
 
@@ -172,7 +171,7 @@ class Review:
             return AlreadyProposed(refusals)
         except InvalidChangeset as exc:
             whole = draft.changeset.changes
-            kept = without(whole, {f.entity_id for f in exc.findings if isinstance(f, Finding)}, self._refs)
+            kept = without(whole, {f.entity_id for f in exc.findings}, self._refs)
             if 1 < len(kept) < len(whole) and kept[0] == whole[0]:
                 return self._filing(replace(draft, changeset=Changeset(kept)), bundle, by, (*refusals, str(exc)))
             return Unfiled((*refusals, str(exc)))
@@ -216,7 +215,7 @@ class Review:
                 if missing := tuple(w for w in waits[p.id] if w not in approved):
                     held.append(Held(p, missing))
                 else:
-                    refused.append(Refusal(p, findings(exc)))
+                    refused.append(Refusal(p, exc.findings))
         return Outcome(tuple(done), tuple(refused), tuple(held))
 
     def _approve(self, proposal: Proposal, note: str, by: Founder) -> Proposal:
@@ -246,9 +245,9 @@ class Review:
                              for e in self._writer.apply(undo, by.correlation_id).events) if undo.changes else ()
                 done.append(self._decided(p, ProposalAction.RETRACT, note, by, made))
             except InvalidChangeset as exc:
-                refused.append(Refusal(p, findings(exc)))
+                refused.append(Refusal(p, exc.findings))
             except ProposalError as exc:
-                refused.append(Refusal(p, (str(exc),)))
+                refused.append(Refusal(p, (Finding("proposal", p.id, str(exc)),)))
         return Outcome(tuple(done), tuple(refused))
 
     def _undo(self, proposal: Proposal, applied: AppliedChange, note: str, by: Founder) -> Change:

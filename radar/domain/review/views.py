@@ -43,7 +43,8 @@ def bundle_view(bundle: str, members: Sequence[Member]) -> BundleView:
 
 def outcome_view(outcome: Outcome) -> DecisionOutcome:
     return DecisionOutcome(done=tuple(proposal_view(p) for p in outcome.done),
-                           refused=tuple(RefusedProposal(proposal=proposal_view(r.proposal), findings=r.findings)
+                           refused=tuple(RefusedProposal(proposal=proposal_view(r.proposal),
+                                                         findings=tuple(map(str, r.findings)))
                                          for r in outcome.refused),
                            held=tuple(HeldProposal(proposal=proposal_view(h.proposal), waits_on=h.waits_on)
                                       for h in outcome.held))

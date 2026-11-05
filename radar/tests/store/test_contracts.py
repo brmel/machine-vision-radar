@@ -14,7 +14,7 @@ from radar.adapters.firestore.ledgers.agents import FirestoreAgentTokens, Firest
 from radar.domain.ports.store.docs import Docs, Fields, Put
 from radar.adapters.firestore.repository import (StoreCatalogRepository, StoreChangeLog, StoreRecords,
                                                  StoreVersionStore, proposal_doc)
-from radar.domain.validation.context import InvalidChangeset
+from radar.domain.validation.verdict import InvalidChangeset
 from radar.domain.ports.history.change_log import ChangeLog, ChangePage
 from radar.adapters.storage.memory_change_log import MemoryChangeLog
 from radar.domain.model.history.projection import Projection, every_page, plain

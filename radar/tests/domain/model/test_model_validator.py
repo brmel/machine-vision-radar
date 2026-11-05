@@ -8,7 +8,7 @@ from typing import Any, Callable
 import pytest
 
 from radar.adapters.files.json_parser import parse_catalog
-from radar.domain.validation.context import ValidationContext
+from radar.domain.validation.context import Part, ValidationContext, Whole
 from radar.domain.validation.rules.catalog import (category_and_roles, countries, entity_ids, references, variant_axes,
                                                    versions)
 from radar.domain.validation.rules.claims import claim_profile, claim_values, dates, lifecycle
@@ -16,7 +16,7 @@ from radar.domain.validation.rules import changes, feed, unique
 from radar.domain.validation.rules.registry import no_filler_text, vocabularies
 from radar.domain.validation.rules.sources import source_integrity, source_preference
 from radar.domain.model.registry import composed
-from radar.domain.validation.runner import ALL_RULES, validate
+from radar.domain.validation.runner import RULES, check
 from radar.tests.fixtures.corpus import CORPUS, MODEL, REGISTRY, SCHEMA
 
 TODAY = date(2026, 10, 17)
@@ -28,7 +28,7 @@ OUTSIDE = next(s.id for s in SPECS if s.datatype == "quantity" and s.dimension =
                and s.id not in {*_PROFILED.core, *_PROFILED.detail})
 
 def _ctx(raw: dict[str, Any], registry=REGISTRY) -> ValidationContext:
-    return ValidationContext(parse_catalog(raw, MODEL), registry, SCHEMA, TODAY)
+    return ValidationContext(parse_catalog(raw, MODEL), registry, SCHEMA, TODAY, Part())
 
 def _claim(raw: dict, n: int) -> dict:
     return next(c for c in raw["claims"] if c["id"] == f"clm_{n:010d}")
@@ -135,8 +135,8 @@ BREAKS: dict[str, tuple[Any, Callable[[dict], None]]] = {
                                           {**IMAGE, "kind": "release_notes", "mime": "application/pdf"})),
 }
 
-def _errors(ctx: ValidationContext, rules=ALL_RULES) -> list[str]:
-    return [f"{f.rule}: {f.entity_id}: {f.message}" for f in validate(ctx, rules).errors]
+def _errors(ctx: ValidationContext, rules=RULES) -> list[str]:
+    return [f"{f.rule}: {f.entity_id}: {f.message}" for f in check(ctx, rules).errors]
 
 def test_corpus_passes_every_rule() -> None:
     assert _errors(_ctx(CORPUS)) == []
@@ -176,24 +176,24 @@ def test_rule_fails_and_passes_when_removed(name: str) -> None:
     ctx = _ctx(raw)
     errors = _errors(ctx)
     assert errors and all(e.startswith(f"{rule.NAME}:") for e in errors), errors
-    assert _errors(ctx, [r for r in ALL_RULES if r is not rule]) == []
+    assert _errors(ctx, [r for r in RULES if r is not rule.check]) == []
 
 def test_one_url_is_one_sources_its_new_version_included_and_a_whole_catalogs_pair_only_warns() -> None:
     raw = copy.deepcopy(CORPUS)
     held = raw["sources"][1]
     raw["sources"][1] = {**held, "version": 2, "retrieved_at": "2026-10-01T09:00:00Z"}
-    assert _errors(_ctx(raw), [unique]) == []
+    assert _errors(_ctx(raw), [unique.check]) == []
     raw["sources"].append({**held, "id": "src_0000000009"})
     ctx = _ctx(raw)
-    assert _errors(ctx, [unique]) == [
+    assert _errors(ctx, [unique.check]) == [
         f"unique: src_0000000009: Source.url '{held['url']}' is held by {held['id']} and src_0000000009"]
-    whole = validate(dataclasses.replace(ctx, whole_catalog=True), [unique])
+    whole = check(dataclasses.replace(ctx, scope=Whole()), [unique.check])
     assert whole.ok and [w.entity_id for w in whole.warnings] == ["src_0000000009"]
 
 def test_planned_event_past_its_date_is_flagged() -> None:
     raw = copy.deepcopy(CORPUS)
     raw["lifecycle_events"][1]["date"] = {"value": "2026-01", "precision": "month"}
-    res = validate(_ctx(raw), [dates])
+    res = check(_ctx(raw), [dates.check])
     assert res.ok and any("has passed" in w.message for w in res.warnings)
 
 def test_a_product_takes_a_spec_group_beyond_its_profile() -> None:
@@ -205,9 +205,9 @@ def test_a_product_takes_a_spec_group_beyond_its_profile() -> None:
                        if REGISTRY.spec_definitions[k].dimension == "length")
     raw["claims"].append({**_claim(raw, 1), "id": "clm_0000000096", "spec_key": spec.id,
                           "value": {"quantity": {"value": 16, "unit": "mm"}}})
-    assert _errors(_ctx(raw), (claim_profile,))
+    assert _errors(_ctx(raw), (claim_profile.check,))
     product["spec_groups"] = [group.id]
-    assert _errors(_ctx(raw), (claim_profile,)) == []
+    assert _errors(_ctx(raw), (claim_profile.check,)) == []
 
 def test_a_profile_takes_no_spec_twice() -> None:
     taken = next(p for p in REGISTRY.profiles if p.groups)

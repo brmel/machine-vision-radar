@@ -13,8 +13,8 @@ from radar.domain.ports.store.blob_store import BlobRef, BlobStore
 from radar.domain.model.entities import ActorKind
 from radar.domain.model.history.changeset import (Applied, Change, Changeset, EntityChange, PutEntity, Retract,
                                                   without_version)
-from radar.domain.validation.context import Finding, InvalidChangeset, ValidationContext
-from radar.domain.validation.runner import validate
+from radar.domain.validation.context import Part
+from radar.domain.validation.verdict import Finding, InvalidChangeset
 from radar.domain.ports.store.docs import BATCH, Delete, Docs, Fields, Put
 from .layout import CHANGES, Record, canonical, canonical_doc, catalog_of, changes_prefix, read_records, version
 from .projection.neighborhood import Changed, Neighborhood, ReferenceGraph
@@ -22,6 +22,7 @@ from .projection.projector import Projector
 
 Clock = Callable[[], str]
 Writes = Mapping[str, Fields | None]
+CHANGESET, SLUG, RECORD_PARSE = "changeset", "slug", "record_parse"
 
 def commit(docs: Docs, writes: Writes, create: Collection[str] = ()) -> int:
     paths = sorted(writes)
@@ -71,7 +72,7 @@ def _unparsed(model: Model, record: Record) -> Finding | None:
     try:
         catalog_of(model, [record])
     except (ParseError, KeyError) as exc:
-        return Finding("record_parse", record["id"], f"does not parse: {exc}")
+        return Finding(RECORD_PARSE, record["id"], f"does not parse: {exc}")
     return None
 
 def _let_go(record: Record, f: FieldSpec, entity: str) -> PutEntity | Retract:
@@ -105,12 +106,12 @@ class StoreWriter:
         return last
 
     def _stored(self, ids: list[str]) -> dict[str, Record]:
-        if len(set(ids)) != len(ids) or any(i.startswith(f"{self.changes}_") for i in ids):
-            raise InvalidChangeset(["a changeset changes each entity once, and never a Change event"])
-        try:
-            return read_records(self.docs, self.schema, ids)
-        except ValueError as exc:
-            raise InvalidChangeset([str(exc)]) from exc
+        if twice := [i for i in ids if ids.count(i) > 1 or i.startswith(f"{self.changes}_")]:
+            raise InvalidChangeset([Finding(CHANGESET, twice[0],
+                                            "a changeset changes each entity once, and never a Change event")])
+        if unknown := [i for i in ids if not self.schema.kind_of(i)]:
+            raise InvalidChangeset([Finding(CHANGESET, unknown[0], "names no entity kind")])
+        return read_records(self.docs, self.schema, ids)
 
     def plan(self, changeset: Changeset, correlation_id: str) -> Planned:
         stored = self._stored([c.entity for c in changeset.changes])
@@ -120,7 +121,7 @@ class StoreWriter:
             before = stored.get(c.entity)
             body = dict(c.action.record) if isinstance(c.action, PutEntity) else None
             if before is None and body is None:
-                raise InvalidChangeset([f"{c.entity}: no such record to retract"])
+                raise InvalidChangeset([Finding(CHANGESET, c.entity, "no such record to retract")])
             if without_version(before) == (body or {}):
                 continue
             self._slug_free(c.entity, before, body)
@@ -136,12 +137,12 @@ class StoreWriter:
         if body is None or "slug" not in body:
             return
         if before is not None and body["slug"] != before.get("slug"):
-            raise InvalidChangeset([f"{entity}: a published slug never changes ({before.get('slug')})"])
+            raise InvalidChangeset([Finding(SLUG, entity, f"a published slug never changes ({before.get('slug')})")])
         taken = [f["id"]
                  for _, f in self.docs.where(canonical(self.schema, entity).split("/")[0], "slug", [body["slug"]])
                  if f["id"] != entity]
         if taken:
-            raise InvalidChangeset([f"{entity}: slug '{body['slug']}' belongs to {taken[0]}"])
+            raise InvalidChangeset([Finding(SLUG, entity, f"slug '{body['slug']}' belongs to {taken[0]}")])
 
     def _visibility(self, changed: Changed) -> list[tuple[BlobRef, bool]]:
         out = []
@@ -150,7 +151,8 @@ class StoreWriter:
                 continue
             ref, public = BlobRef(after["sha256"], after["mime"]), after["rights"] in self.public
             if not self.blobs.has(ref):
-                raise InvalidChangeset([f"{after['id']}: no stored file {ref.sha256}; add it first (radar media add)"])
+                raise InvalidChangeset([Finding("stored_file", after["id"],
+                                                f"no stored file {ref.sha256}; add it first (radar media add)")])
             if before is None or (before.get("rights") in self.public) != public:
                 out.append((ref, public))
         return out
@@ -159,11 +161,11 @@ class StoreWriter:
         if unparsed := [f for _, after in changed.values() if after and (f := _unparsed(self.model, after))]:
             raise InvalidChangeset(unparsed)
         try:
-            results = [validate(ValidationContext(catalog_of(self.model, records.values()), self.model.registry,
-                                                  self.schema, today)).errors
+            results = [self.model.check(catalog_of(self.model, records.values()), Part(), today).errors
                        for records in (hood.records, hood.after(changed))]
         except (ParseError, KeyError) as exc:
-            raise InvalidChangeset([f"a stored record of its neighborhood does not parse: {exc}"]) from exc
+            raise InvalidChangeset([Finding(RECORD_PARSE, min(changed),
+                                            f"a stored record of its neighborhood does not parse: {exc}")]) from exc
         records = hood.records.keys() | changed.keys()
         added = sorted((f for f in set(results[1]) - set(results[0]) if f.entity_id in records),
                        key=lambda f: (f.entity_id, f.rule, f.message))

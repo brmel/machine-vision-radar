@@ -1,23 +1,22 @@
 from __future__ import annotations
 
-from types import ModuleType
-from typing import Sequence
+from collections.abc import Sequence
 
-from .context import ValidationContext, ValidationResult
+from .context import ValidationContext
+from .rule import Rule
 from .rules.catalog import ai_caps, category_and_roles, countries, entity_ids, references, variant_axes, versions
 from .rules.claims import claim_profile, claim_values, dates, lifecycle
 from .rules import changes, feed, unique
 from .rules.registry import no_filler_text, registry_integrity, vocabularies
 from .rules.sources import document_integrity, source_integrity, source_preference
+from .verdict import Verdict
 
-ALL_RULES: tuple[ModuleType, ...] = (
-    registry_integrity, entity_ids, countries, references, vocabularies, claim_values, claim_profile, dates, versions,
-    variant_axes, source_preference, no_filler_text, category_and_roles, source_integrity, document_integrity,
-    lifecycle, changes, ai_caps, feed, unique,
+RULES: tuple[Rule, ...] = (
+    registry_integrity.check, entity_ids.check, countries.check, references.check, vocabularies.check,
+    claim_values.check, claim_profile.check, dates.check, versions.check, variant_axes.check, source_preference.check,
+    no_filler_text.check, category_and_roles.check, source_integrity.check, document_integrity.check, lifecycle.check,
+    changes.check, ai_caps.check, feed.check, unique.check,
 )
 
-def validate(ctx: ValidationContext, rules: Sequence[ModuleType] = ALL_RULES) -> ValidationResult:
-    res = ValidationResult()
-    for rule in rules:
-        rule.check(ctx, res)
-    return res
+def check(ctx: ValidationContext, rules: Sequence[Rule] = RULES) -> Verdict:
+    return Verdict(tuple(f for rule in rules for f in rule(ctx)))

@@ -38,6 +38,7 @@ from radar.domain.read_model.products.values import Terms
 from radar.domain.read_model.derived.identity import ProductIdentity
 from radar.domain.review.agents.duplicates import HELD
 from radar.domain.review.review import Review
+from radar.domain.validation.context import Part, Scope, Whole
 
 DEMO = "demo-"
 METADATA_TOKEN = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
@@ -155,15 +156,15 @@ class Stores:
     def catalog(self, kinds: tuple[str, ...] = ()) -> Catalog:
         return catalog_of(self.model(), scan(self.store(), self.model().schema, kinds))
 
-    def catalog_at(self, path: str | None) -> tuple[Catalog, bool]:
+    def catalog_at(self, path: str | None) -> tuple[Catalog, Scope]:
         if not path:
-            return MemoryCatalog(), False
+            return MemoryCatalog(), Part()
         p, model = Path(path), self.model()
         if not p.exists():
             raise ParseError(f"model file not found: {p}")
         if p.is_dir() or p.name.endswith(".jsonl"):
-            return json_store.load_catalog(p if p.is_dir() else p.parent, model), True
-        return json_parser.load_catalog_file(p, model), False
+            return json_store.load_catalog(p if p.is_dir() else p.parent, model), Whole()
+        return json_parser.load_catalog_file(p, model), Part()
 
     def datasheet_cases(self, path: Path) -> tuple[DatasheetCase, ...]:
         return json_parser.parse_datasheet_set(json_parser.read_json(path), self.model())
