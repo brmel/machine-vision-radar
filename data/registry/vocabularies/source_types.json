@@ -15,8 +15,16 @@
   {"id": "press_release", "label": {"en": "Press release", "fr": "Communiqué de presse"}, "preference": 5},
   {"id": "website", "label": {"en": "Vendor website", "fr": "Site du fabricant"}, "research": true, "preference": 4},
   {
+    "id": "trade_article",
+    "label": {"en": "Trade press article", "fr": "Article de presse spécialisée"},
+    "preference": 6
+  },
+  {"id": "distributor_listing", "label": {"en": "Distributor listing", "fr": "Fiche distributeur"}, "preference": 7},
+  {"id": "code_repository", "label": {"en": "Code repository", "fr": "Dépôt de code"}, "preference": 4},
+  {"id": "regulatory_filing", "label": {"en": "Regulatory filing", "fr": "Dépôt réglementaire"}, "preference": 6},
+  {
     "id": "inherited_record_source",
     "label": {"en": "Unclassified source", "fr": "Source non classée"},
-    "preference": 6
+    "preference": 8
   }
 ]

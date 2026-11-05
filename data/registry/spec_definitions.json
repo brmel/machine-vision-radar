@@ -655,6 +655,17 @@
     "description": {"en": "Operating systems the product runs on or supports.", "fr": "Systèmes d'exploitation sur lesquels le produit fonctionne ou qu'il prend en charge."}
   },
   {
+    "id": "output_power",
+    "datatype": "quantity",
+    "dimension": "power",
+    "unit": "w",
+    "label": {"en": "Laser output power", "fr": "Puissance de sortie du laser"},
+    "description": {"en": "Optical power the device's laser or light source emits, not the electrical power it draws.", "fr": "Puissance optique émise par le laser ou la source de lumière de l'appareil, et non la puissance électrique qu'il absorbe."},
+    "aliases": ["laser power", "output power", "optical power", "optical output power", "laser output", "puissance laser", "puissance de sortie", "puissance optique", "Laserleistung", "Ausgangsleistung"],
+    "bounds": {"min": 1e-06, "max": 100000},
+    "precision": 3
+  },
+  {
     "id": "pcie_generation",
     "datatype": "term",
     "vocabulary": "pcie_generations",
@@ -705,7 +716,7 @@
     "better": "lower",
     "label": {"en": "Power consumption", "fr": "Consommation électrique"},
     "description": {"en": "Electrical power the device draws in operation, typical or maximum as the source states it.", "fr": "Puissance électrique absorbée par l'appareil en fonctionnement, typique ou maximale selon la source."},
-    "aliases": ["power", "power draw", "power dissipation", "rated power", "wattage", "puissance consommée", "puissance absorbée", "consommation", "Leistungsaufnahme", "Stromverbrauch", "Leistungsbedarf", "power consumption", "power requirements", "camera power requirements"],
+    "aliases": ["power draw", "power dissipation", "puissance consommée", "puissance absorbée", "consommation", "Leistungsaufnahme", "Stromverbrauch", "Leistungsbedarf", "power consumption", "power requirements", "camera power requirements"],
     "bounds": {"min": 0.0001, "max": 20000},
     "precision": 3
   },
