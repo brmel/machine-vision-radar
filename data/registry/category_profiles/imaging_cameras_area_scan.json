@@ -2,7 +2,7 @@
   "category_id": "imaging.cameras.area_scan",
   "sections": {
     "core": ["resolution_megapixels", "frame_rate", "interfaces", "shutter_type"],
-    "detail": ["lens_mount", "form_factor", "dynamic_range", "latency", "temporal_resolution", "contrast_threshold", "max_event_rate", "spectral_range"],
+    "detail": ["lens_mount", "form_factor", "dynamic_range", "latency", "temporal_resolution", "contrast_threshold", "max_event_rate", "spectral_range", "power"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },

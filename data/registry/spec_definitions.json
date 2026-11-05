@@ -111,7 +111,7 @@
     "vocabulary": "standards",
     "label": {"en": "Standards and compliance", "fr": "Normes et conformité"},
     "description": {"en": "The interface standards, by version, and the compliance marks the product's maker states it meets.", "fr": "Les normes d'interface, par version, et les marquages de conformité que le fabricant déclare respectés par le produit."},
-    "aliases": ["GenICam compliant", "GenICam support", "standards compliance", "certifications", "approvals", "conformité", "Normen", "Zulassungen", "GenICam-konform"]
+    "aliases": ["GenICam compliant", "GenICam support", "standards compliance", "certifications", "approvals", "conformité", "Normen", "Zulassungen", "GenICam-konform", "conformity", "conformité", "Konformität"]
   },
   {
     "id": "component_type",
@@ -344,7 +344,7 @@
     "vocabulary": "interfaces",
     "label": {"en": "Interfaces", "fr": "Interfaces"},
     "description": {"en": "Data and control interfaces of the device, such as GigE Vision, USB3 Vision, CoaXPress, Camera Link, MIPI or serial lines.", "fr": "Interfaces de données et de commande de l'appareil, par exemple GigE Vision, USB3 Vision, CoaXPress, Camera Link, MIPI ou liaisons série."},
-    "aliases": ["data interface", "camera interface", "connectivity", "I/O interface", "interface de données", "connectique", "connectivité", "Schnittstelle", "Schnittstellen", "Datenschnittstelle", "Kameraschnittstelle"]
+    "aliases": ["data interface", "camera interface", "connectivity", "I/O interface", "interface de données", "connectique", "connectivité", "Schnittstelle", "Schnittstellen", "Datenschnittstelle", "Kameraschnittstelle", "image data interface", "communication interface"]
   },
   {
     "id": "ip_rating",
@@ -629,7 +629,7 @@
     "better": "lower",
     "label": {"en": "Power consumption", "fr": "Consommation électrique"},
     "description": {"en": "Electrical power the device draws in operation, typical or maximum as the source states it.", "fr": "Puissance électrique absorbée par l'appareil en fonctionnement, typique ou maximale selon la source."},
-    "aliases": ["power", "power draw", "power dissipation", "rated power", "wattage", "puissance consommée", "puissance absorbée", "consommation", "Leistungsaufnahme", "Stromverbrauch", "Leistungsbedarf"],
+    "aliases": ["power", "power draw", "power dissipation", "rated power", "wattage", "puissance consommée", "puissance absorbée", "consommation", "Leistungsaufnahme", "Stromverbrauch", "Leistungsbedarf", "power consumption", "power requirements", "camera power requirements"],
     "bounds": {"min": 0.0001, "max": 20000},
     "precision": 3
   },
@@ -719,6 +719,14 @@
     "aliases": ["X range", "measuring range X", "FOV width", "field of view X", "plage X", "champ de mesure en X", "largeur de champ", "Messbereich X", "X-Messbereich", "Sichtfeldbreite"],
     "bounds": {"min": 0.1, "max": 100000},
     "precision": 1
+  },
+  {
+    "id": "sensor_format",
+    "datatype": "term",
+    "vocabulary": "sensor_formats",
+    "label": {"en": "Sensor format", "fr": "Format du capteur"},
+    "description": {"en": "The image sensor's optical format, the inch-type size class its maker states, such as 1/1.8-inch, 2/3-inch or APS-C.", "fr": "Le format optique du capteur d'image, la classe de taille en pouces que son fabricant indique, par exemple 1/1,8 de pouce, 2/3 de pouce ou APS-C."},
+    "aliases": ["sensor size", "optical format", "taille du capteur", "format optique du capteur", "Sensorgröße", "optisches Format"]
   },
   {
     "id": "sensor_length",

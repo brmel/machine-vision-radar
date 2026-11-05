@@ -2,7 +2,7 @@
   {
     "id": "image_sensor",
     "label": {"en": "Image sensor", "fr": "Capteur d'image"},
-    "specs": ["sensor_manufacturer", "sensor_model", "sensor_technology", "shutter_type", "chroma", "resolution_megapixels", "width_px", "height_px", "pixel_size", "capabilities"]
+    "specs": ["sensor_manufacturer", "sensor_model", "sensor_technology", "shutter_type", "chroma", "resolution_megapixels", "width_px", "height_px", "pixel_size", "sensor_format", "capabilities"]
   },
   {
     "id": "connectivity",
