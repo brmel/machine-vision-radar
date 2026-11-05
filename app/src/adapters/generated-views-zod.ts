@@ -238,7 +238,12 @@ export const ModelRowSchema: z.ZodType<M.ModelRow> = z.strictObject({
   id: z.string(),
   slug: z.string(),
   name: z.string(),
-  specs: z.array(z.lazy(() => SpecCellSchema)),
+  specs: z.array(z.lazy(() => ModelSpecSchema)),
+});
+
+export const ModelSpecSchema: z.ZodType<M.ModelSpec> = z.strictObject({
+  key: z.string(),
+  value: z.lazy(() => ViewValueSchema).optional(),
 });
 
 export const VersionRowSchema: z.ZodType<M.VersionRow> = z.strictObject({

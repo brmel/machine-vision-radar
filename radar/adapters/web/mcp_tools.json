@@ -149,15 +149,22 @@
             "additionalProperties": false
           },
           "ModelRow": {
-            "description": "One model of a family, with its core specs.",
+            "description": "One model of a family, with its core spec values; the model's own page cites them.",
             "type": "object",
             "properties": {
               "id": {"type": "string"},
               "slug": {"type": "string"},
               "name": {"type": "string"},
-              "specs": {"type": "array", "items": {"$ref": "#/$defs/SpecCell"}}
+              "specs": {"type": "array", "items": {"$ref": "#/$defs/ModelSpec"}}
             },
             "required": ["id", "slug", "name", "specs"],
+            "additionalProperties": false
+          },
+          "ModelSpec": {
+            "description": "One core spec of a model row: its value, or none when no sourced claim gives it.",
+            "type": "object",
+            "properties": {"key": {"type": "string"}, "value": {"$ref": "#/$defs/ViewValue"}},
+            "required": ["key"],
             "additionalProperties": false
           },
           "OfferingRow": {

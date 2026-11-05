@@ -270,12 +270,18 @@ export interface HubRef {
   readonly users: number;
 }
 
-/** One model of a family, with its core specs. */
+/** One model of a family, with its core spec values; the model's own page cites them. */
 export interface ModelRow {
   readonly id: string;
   readonly slug: string;
   readonly name: string;
-  readonly specs: readonly SpecCell[];
+  readonly specs: readonly ModelSpec[];
+}
+
+/** One core spec of a model row: its value, or none when no sourced claim gives it. */
+export interface ModelSpec {
+  readonly key: string;
+  readonly value?: ViewValue;
 }
 
 /** One product version, holding the fields its CategoryProfile shows. */

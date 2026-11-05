@@ -259,13 +259,19 @@
   {
     "id": "ModelRow",
     "kind": "record",
-    "description": "One model of a family, with its core specs.",
+    "description": "One model of a family, with its core spec values; the model's own page cites them.",
     "fields": {
       "id": {"type": "string"},
       "slug": {"type": "string"},
       "name": {"type": "string"},
-      "specs": {"type": "array", "items": "SpecCell"}
+      "specs": {"type": "array", "items": "ModelSpec"}
     }
+  },
+  {
+    "id": "ModelSpec",
+    "kind": "record",
+    "description": "One core spec of a model row: its value, or none when no sourced claim gives it.",
+    "fields": {"key": {"type": "string"}, "value": {"type": "ViewValue", "optional": true}}
   },
   {
     "id": "VersionRow",

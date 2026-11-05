@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Collection, Iterable
+from typing import Any, Collection, Iterable, Mapping, Sequence
 
 from radar.domain.ports.catalog.catalog import Catalog
-from radar.domain.model.entities import FeedItem, FeedPageView, Organization, OrgRelation, Product, ProductView, Source
+from radar.domain.model.entities import (FeedItem, FeedPageView, ModelRow, Organization, OrgRelation, Product,
+                                         ProductView, Source)
 from radar.domain.model.history.projection import Projection, plain
 from radar.domain.model.registry import Registry
 from radar.domain.model.schema import ModelSchema
@@ -38,8 +39,8 @@ class ReadModel:
         return {k: v for k, v in self.index.items() if k not in ("products", "organizations")}
 
 def product_views(catalog: Catalog, registry: Registry, schema: ModelSchema, checked: Check, media_url: MediaUrl,
-                  revised: Collection[str],
-                  ids: Iterable[str] | None = None) -> tuple[ProductViews, dict[str, ProductView]]:
+                  revised: Collection[str], ids: Iterable[str] | None = None,
+                  kept: Mapping[str, Sequence[ModelRow]] | None = None) -> tuple[ProductViews, dict[str, ProductView]]:
     orgs = {o.id: o for o in catalog.all(Organization)}
     products = {p.id: p for p in catalog.all(Product)}
     wanted = sorted(products if ids is None else ids)
@@ -47,7 +48,7 @@ def product_views(catalog: Catalog, registry: Registry, schema: ModelSchema, che
     missing = [pid for pid in wanted if pid not in makers or pid not in names]
     if missing:
         raise ValueError(f"product {missing[0]} has no vendor role or no primary name")
-    builder = ProductViews(catalog, registry, schema, products, media_url)
+    builder = ProductViews(catalog, registry, schema, products, media_url, wanted, kept)
     views = {pid: builder.view(products[pid], names, brief(orgs[makers[pid]]), pid in revised) for pid in wanted}
     for pid, view in views.items():
         checked(plain(view), "ProductView", pid)

@@ -45,6 +45,9 @@ def patch(before: Mapping[str, Any], after: Mapping[str, Any]) -> list[Record]:
            if before.get(k) != v]
     return ops + [{"op": "remove", "path": k} for k in before if k not in after]
 
+def _next(before: Record | None, last: int) -> int:
+    return (before or {}).get("version", last) + 1
+
 def change_id(prefix: str, entity: str, n: int) -> str:
     return keyed(prefix, f"{entity}:{n}")
 
@@ -95,10 +98,11 @@ class StoreWriter:
         self.changes, self.counted = changes_prefix(schema), counted(schema)
         self.public = registry.marked("media_rights", lambda t: t.public)
 
-    def _next(self, entity: str, before: Record | None) -> int:
-        if before:
-            return before.get("version", 0) + 1
-        return max((f["version"] for _, f in self.docs.where(CHANGES, "entity", [entity])), default=0) + 1
+    def _last(self, changeset: Changeset, stored: Mapping[str, Record]) -> dict[str, int]:
+        last: dict[str, int] = {}
+        for _, f in self.docs.where(CHANGES, "entity", [c.entity for c in changeset.changes if c.entity not in stored]):
+            last[f["entity"]] = max(last.get(f["entity"], 0), f["version"])
+        return last
 
     def _stored(self, ids: list[str]) -> dict[str, Record]:
         if len(set(ids)) != len(ids) or any(i.startswith(f"{self.changes}_") for i in ids):
@@ -110,6 +114,7 @@ class StoreWriter:
 
     def plan(self, changeset: Changeset, correlation_id: str) -> Planned:
         stored = self._stored([c.entity for c in changeset.changes])
+        last = self._last(changeset, stored)
         now, changed, events = self.clock(), {}, []
         for c in changeset.changes:
             before = stored.get(c.entity)
@@ -119,7 +124,7 @@ class StoreWriter:
             if without_version(before) == (body or {}):
                 continue
             self._slug_free(c.entity, before, body)
-            n = self._next(c.entity, before)
+            n = _next(before, last.get(c.entity, 0))
             versioned = body is not None and self.schema.kind_of(c.entity) in self.counted
             changed[c.entity] = (before, {**body, "version": n} if versioned else body)
             events.append(event(c.entity, n, before, body, change_id=change_id(self.changes, c.entity, n),
