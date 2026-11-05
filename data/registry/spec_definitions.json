@@ -64,6 +64,17 @@
     "precision": 1
   },
   {
+    "id": "beam_angle",
+    "datatype": "quantity",
+    "dimension": "angle",
+    "unit": "deg",
+    "label": {"en": "Beam angle", "fr": "Angle d'éclairage"},
+    "description": {"en": "Angle at which a light emits or is aimed at the object, as its maker states it.", "fr": "Angle sous lequel un éclairage émet ou est orienté vers l'objet, tel que l'indique son fabricant."},
+    "aliases": ["irradiation angle", "emission angle", "lighting angle", "angle d'éclairage", "Abstrahlwinkel"],
+    "bounds": {"min": 0, "max": 360},
+    "precision": 0
+  },
+  {
     "id": "bit_depth",
     "datatype": "quantity",
     "dimension": "digital_information",
@@ -162,6 +173,17 @@
     "aliases": ["light color", "light colour", "LED color", "emission color", "couleur de la lumière", "couleur des LED", "Lichtfarbe", "LED-Farbe", "Leuchtfarbe"]
   },
   {
+    "id": "color_temperature",
+    "datatype": "quantity",
+    "dimension": "color_temperature",
+    "unit": "k",
+    "label": {"en": "Colour temperature", "fr": "Température de couleur"},
+    "description": {"en": "Correlated colour temperature of a white light source.", "fr": "Température de couleur proximale d'une source de lumière blanche."},
+    "aliases": ["CCT", "correlated color temperature", "colour temperature", "Farbtemperatur"],
+    "bounds": {"min": 1000, "max": 20000},
+    "precision": 0
+  },
+  {
     "id": "compliance",
     "datatype": "term_set",
     "vocabulary": "standards",
@@ -244,6 +266,18 @@
     "description": {"en": "Largest outer dimension of the component, such as the diameter of a round optic or the longer side of a rectangular one.", "fr": "Plus grande dimension extérieure du composant, par exemple le diamètre d'une optique ronde ou le plus grand côté d'une optique rectangulaire."},
     "bounds": {"min": 0.1, "max": 5000},
     "precision": 1
+  },
+  {
+    "id": "distortion",
+    "datatype": "quantity",
+    "dimension": "ratio_dimensionless",
+    "unit": "percent",
+    "better": "lower",
+    "label": {"en": "Distortion", "fr": "Distorsion"},
+    "description": {"en": "Largest optical distortion of a lens across its image, as a percentage, as its maker states it.", "fr": "Distorsion optique maximale d'un objectif sur son image, en pourcentage, selon son fabricant."},
+    "aliases": ["optical distortion", "TV distortion", "distorsion optique", "Verzeichnung"],
+    "bounds": {"min": 0, "max": 100},
+    "precision": 2
   },
   {
     "id": "dynamic_range",

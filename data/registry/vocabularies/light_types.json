@@ -4,6 +4,7 @@
   {"id": "bar", "label": {"en": "Bar light", "fr": "Barre d'éclairage"}},
   {"id": "spot", "label": {"en": "Spot light", "fr": "Spot"}},
   {"id": "coaxial", "label": {"en": "Coaxial light", "fr": "Éclairage coaxial"}},
+  {"id": "flat", "label": {"en": "Flat (panel)", "fr": "Plane (panneau)"}},
   {"id": "backlight", "label": {"en": "Backlight", "fr": "Rétroéclairage"}},
   {"id": "structured", "label": {"en": "Structured light", "fr": "Lumière structurée"}},
   {"id": "dark_field", "label": {"en": "Dark field", "fr": "Fond noir"}},

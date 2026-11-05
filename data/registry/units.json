@@ -26,5 +26,6 @@
   {"id": "mm_per_s", "symbol": "mm/s", "dimension": "velocity", "ucum": "mm/s", "factor": 0.001},
   {"id": "one", "symbol": "", "dimension": "ratio_dimensionless", "ucum": "1", "factor": 1},
   {"id": "v", "symbol": "V", "dimension": "voltage", "ucum": "V", "factor": 1},
-  {"id": "bit", "symbol": "bit", "dimension": "digital_information", "ucum": "bit", "factor": 0.125}
+  {"id": "bit", "symbol": "bit", "dimension": "digital_information", "ucum": "bit", "factor": 0.125},
+  {"id": "k", "symbol": "K", "dimension": "color_temperature", "ucum": "K", "factor": 1}
 ]
