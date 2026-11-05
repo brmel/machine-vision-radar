@@ -78,7 +78,7 @@ class Wiring(Models):
         schema, registry = self.model()
         docs = self.store()
         return Detector(StoreChangeLog(docs, schema), self.feed(), registry.feed,
-                        StoreFeedReads(docs, schema, self.repository()))
+                        StoreFeedReads(docs, schema, self.repository()), schema)
 
     def feed(self, review: Review | None = None) -> Feed:
         schema, registry = self.model()

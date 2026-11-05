@@ -172,9 +172,6 @@ class StoreFeedReads:
     def __init__(self, docs: Docs, schema: ModelSchema, repository: CatalogRepository) -> None:
         self._docs, self._schema, self._repository = docs, schema, repository
 
-    def kind_of(self, entity_id: str) -> str:
-        return self._schema.kind_of(entity_id) or ""
-
     def records(self, ids: Sequence[str]) -> dict[str, dict[str, Any]]:
         return read_records(self._docs, self._schema, ids)
 

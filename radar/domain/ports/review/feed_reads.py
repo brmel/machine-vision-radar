@@ -3,9 +3,6 @@ from __future__ import annotations
 from typing import Any, Mapping, Protocol, Sequence
 
 class FeedReads(Protocol):
-    def kind_of(self, entity_id: str) -> str:
-        ...
-
     def records(self, ids: Sequence[str]) -> Mapping[str, Mapping[str, Any]]:
         ...
 
