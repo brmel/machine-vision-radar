@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type FC } from "react";
+import { useMemo, type FC } from "react";
 import type { CatalogRepository } from "../../../domain/ports/CatalogRepository.ts";
 import { PAGE_SIZE } from "../../../domain/ports/CatalogRepository.ts";
 import type { FeedBrief } from "../../../domain/views.ts";
@@ -8,7 +8,7 @@ import { useI18n } from "../../../shell/i18n/index.tsx";
 import { usePagerLabels } from "../../../shell/i18n/labels.ts";
 import { ReadState } from "../../../shell/layout/ReadState.tsx";
 import { buildNewsHeadMeta } from "../../../shell/seo/news.ts";
-import { syncDocumentHead } from "../../../shell/seo/documentHead.ts";
+import { useRecordHead } from "../../../shell/seo/documentHead.ts";
 import { SITE_ORIGIN } from "../../../shell/seo/siteOrigin.ts";
 import { logger } from "../../../shell/logger.ts";
 import { NewsList } from "./NewsList.tsx";
@@ -37,9 +37,7 @@ export const NewsView: FC<NewsViewProps> = ({ repository, query, onQuery, onOpen
     (err) => logger.error("news: the articles failed to load", { page: "news" }, err));
   const head = useMemo(() => (news.value
     ? buildNewsHeadMeta(news.value.items.slice(0, PAGE_SIZE), news.value.total, SITE_ORIGIN) : null), [news.value]);
-  useEffect(() => {
-    if (head) syncDocumentHead(head);
-  }, [head]);
+  useRecordHead(head);
 
   const feeds = (
     <>

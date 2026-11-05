@@ -7,7 +7,7 @@ import { useI18n } from "../../../shell/i18n/index.tsx";
 import { usePagerLabels, useValueLabels } from "../../../shell/i18n/labels.ts";
 import { ReadState } from "../../../shell/layout/ReadState.tsx";
 import { buildHubHeadMeta, componentHub } from "../../../shell/seo/hubs.ts";
-import { syncDocumentHead } from "../../../shell/seo/documentHead.ts";
+import { useRecordHead } from "../../../shell/seo/documentHead.ts";
 import { SITE_ORIGIN } from "../../../shell/seo/siteOrigin.ts";
 import { useComponentHub } from "../hooks/useComponentHub.ts";
 
@@ -32,9 +32,7 @@ export const ComponentHub: FC<ComponentHubProps> = ({ repository, path, slug, pa
   const hub = useComponentHub(repository, path, slug, page);
   const head = useMemo(() => (hub.phase === "ready"
     ? buildHubHeadMeta(componentHub(hub.product, hub.category, hub.users, hub.total), SITE_ORIGIN) : null), [hub]);
-  useEffect(() => {
-    if (head) syncDocumentHead(head);
-  }, [head]);
+  useRecordHead(head);
   useEffect(() => {
     if (hub.phase === "missing") onMissing();
   }, [hub.phase, onMissing]);
