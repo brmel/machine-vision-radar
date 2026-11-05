@@ -36,6 +36,9 @@ inEachLocale("Firestore read model", (locale) => {
     await page.getByRole("button",
       { name: T.paginationPage.replace("{page}", "2").replace("{totalPages}", "2"), exact: true }).click();
     await expect(page.getByRole("main").getByRole("article")).toHaveCount(products.length - PAGE_SIZE);
+    await expect(page).toHaveURL(/[?&]page=2$/);
+    await expect(page.getByText(T.paginationSummary.replace("{start}", String(PAGE_SIZE + 1))
+      .replace("{end}", String(products.length)).replace("{total}", String(products.length)))).toBeVisible();
     expect(seen.reads).toHaveLength(4);
     expect(seen.reads.filter((r) => /public_index\/cards|public_search/.test(r))).toEqual([]);
     expect(Math.max(...seen.listed)).toBeLessThanOrEqual(PAGE_SIZE);

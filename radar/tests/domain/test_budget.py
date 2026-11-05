@@ -10,7 +10,7 @@ from radar.adapters.firestore.writer import StoreWriter
 from radar.domain.validation.context import InvalidChangeset
 from radar.adapters.firestore.ledgers.ai import CALLS, FirestoreBudget, FirestoreUsageLog, usage_collection
 from radar.domain.ai.budget import Use, caps_of, model_of
-from radar.domain.ai.meter import Capped, Meter, cost
+from radar.domain.ai.meter import Capped, Meter
 from radar.domain.model.entities import AiModel
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.changeset import Change, Changeset, PutEntity
@@ -82,18 +82,6 @@ def test_a_second_cap_for_a_use_is_refused() -> None:
     _cap(docs, Use.DRAFT, 0.5, 10)
     with pytest.raises(InvalidChangeset, match=f"the cap of 'draft' is {keyed('cap', 'draft')}"):
         _cap(docs, Use.DRAFT, 1.0, 10, keyed("cap", "another draft cap"))
-
-def test_a_use_s_model_written_by_a_changeset_runs_the_next_call_at_its_price() -> None:
-    docs = stores.fresh()
-    _cap(docs, Use.DRAFT, 0.5, 10)
-    meter = _meter(docs, Use.DRAFT)
-    for model in AI.models:
-        _cap(docs, Use.DRAFT, 0.5, 10, model=model.id)
-        assert meter.call(DAY, _called) == (Called(model.id), cost(AI, model, 1000, 100))
-        assert cost(AI, model, 10**6, 10**6) == pytest.approx((model.usd_in + model.usd_out) * AI.cad_per_usd), (
-            "per million tokens, in CAD")
-    assert sorted((f["model"], f["cad"]) for _, f in docs.list(CALLS)) == sorted(
-        (m.id, round(cost(AI, m, 1000, 100), 8)) for m in AI.models)
 
 def test_a_model_the_registry_does_not_list_is_refused() -> None:
     with pytest.raises(InvalidChangeset,

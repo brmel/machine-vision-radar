@@ -8,6 +8,14 @@ const GATE = new URL(process.env.SMOKE_BASE_URL ?? "http://127.0.0.1").hostname 
 const A_PRODUCT = "a product page";
 const A_HUB = "a category hub";
 const AN_ARTICLE = "an article";
+const A_VENDOR = "a vendor page";
+const HEADERS = {
+  "strict-transport-security": "max-age=31556926; includeSubDomains; preload",
+  "x-content-type-options": "nosniff",
+  "x-frame-options": "DENY",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "permissions-policy": "camera=(), microphone=(), geolocation=()",
+};
 
 const locsOf = async (request: APIRequestContext, url: string): Promise<string[]> =>
   [...(await (await request.get(url)).text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
@@ -71,11 +79,24 @@ test("the Atom and JSON feeds of the news are served, well formed, and list the 
   expect(atom.ids.map((id) => new URL(id ?? "").pathname)).toEqual(latest);
 });
 
+test("the site is served with HSTS, the security headers and a CSP without eval or a CDN", async ({ request }) => {
+  const res = await request.get("/");
+  expect(res.status()).toBe(200);
+  const headers = res.headers();
+  for (const [key, value] of Object.entries(HEADERS)) expect(headers[key], key).toBe(value);
+  const csp = headers["content-security-policy"];
+  expect(csp).toContain("default-src 'self'");
+  expect(csp).toContain("script-src 'self' ");
+  for (const banned of ["preload", "jsdelivr", "unsafe-eval", "huggingface", "worker-src"])
+    expect(csp).not.toContain(banned);
+});
+
 inEachLocale("Smoke", (locale) => {
   test.beforeEach(({ page }) => watchCsp(page));
 
   const pages = [
-    ["/", 200, null], [A_PRODUCT, 200, null], [A_HUB, 200, null], ["/news", 200, null], [AN_ARTICLE, 200, null],
+    ["/", 200, null], ["/browse", 200, null], [A_PRODUCT, 200, null], [A_HUB, 200, null], [A_VENDOR, 200, null],
+    ["/compare", 200, null], ["/news", 200, null], [AN_ARTICLE, 200, null],
     ["/terms", 200, null], ["/privacy", 200, null], ["/product/does-not-exist", 404, "productNotFound"],
     ["/vendor/does-not-exist", 404, "vendorNotFound"], ["/news/does-not-exist", 404, "articleNotFound"],
     ["/no-such-page", 404, "notFoundTitle"],
@@ -83,7 +104,8 @@ inEachLocale("Smoke", (locale) => {
   for (const [name, status, notFound] of pages) {
     test(`${name} answers ${status} with the security headers and no CSP violation`, async ({ page, request }) => {
       const errors = consoleErrors(page, /status of 404/);
-      const kinds: Record<string, string> = { [A_PRODUCT]: "product", [A_HUB]: "category" };
+      const kinds: Record<string, string> = { [A_PRODUCT]: "product", [A_HUB]: "category",
+        [A_VENDOR]: "vendor" };
       const path = name === AN_ARTICLE ? (await pagesOf(request, "news"))[0] : kinds[name]
         ? await aPage(request, kinds[name]) : name;
       test.skip(path === undefined, "no article is published yet");
@@ -127,6 +149,12 @@ inEachLocale("Smoke", (locale) => {
       await page.waitForLoadState("networkidle");
       expect(await page.evaluate(() => window.__cspViolations)).toEqual([]);
     }
+    await page.route("https://apis.google.com/js/gen_204*",
+      (route) => route.fulfill({ status: 302, headers: { location: "https://www.google.com/images/cleardot.gif" } }));
+    await page.route("https://www.google.com/**", (route) => route.fulfill({ status: 200, contentType: "image/gif" }));
+    expect(await page.evaluate(async () => (await fetch("https://apis.google.com/js/gen_204?c=1", { mode: "no-cors" }))
+      .type)).toBe("opaque");
+    expect(await page.evaluate(() => window.__cspViolations)).toEqual([]);
     expect(errors).toEqual([]);
   });
 

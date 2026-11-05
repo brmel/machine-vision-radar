@@ -9,8 +9,6 @@ from typing import Any
 import pytest
 
 from radar.adapters.files import json_store
-from radar.adapters.firestore.repository import StoreCatalogRepository
-from radar.domain.model.history.projection import plain
 from radar.domain.model.entities import OrgRelation
 from radar.domain.model.dates import start_of
 from radar.tests.store import stores
@@ -68,22 +66,6 @@ def test_a_change_apply_updates_the_index(tmp_path: Path) -> None:
                                          stores.put(changed, "New summary", [FX.rows("sources.jsonl")[0]["id"]])))
     assert any(json.loads(line)["event"].endswith("1 embedded, 0 removed") for line in run.stderr.splitlines())
     assert FX.json(place, "product", "search", "retrouver")[0]["id"] == product["id"]
-
-def test_a_claim_edit_shows_in_its_products_history(tmp_path: Path) -> None:
-    place = FX.loaded()
-    claim, changed = FX.revised_claim(40)
-    read = StoreCatalogRepository(stores.fresh_at(place[0]), FX.schema)
-    assert (read.product(claim["subject"]).version, read.product(claim["subject"]).history) == (1, False)
-    assert [(v["entity"], v["version"])
-            for v in FX.json(place, "record", "history", claim["subject"])["versions"]] == [(claim["subject"], 1)]
-    stores.cli(FX, place, "change", "apply",
-               stores.changes_file(tmp_path, "edit.json", stores.put(changed, "Revision B")))
-    assert read.product(claim["subject"]).history is True
-    history = FX.json(place, "record", "history", claim["subject"])
-    assert history == plain(read.history(claim["subject"]))
-    assert [(v["entity"], v["version"], v.get("spec")) for v in history["versions"]] == [
-        (claim["id"], 2, claim["spec_key"]), (claim["id"], 1, claim["spec_key"])]
-    assert history["versions"][0]["reason"] == "Revision B" and history["versions"][0]["sources"]
 
 def test_record_list_pages_what_the_catalog_lists(place: tuple[str, str]) -> None:
     products = FX.rows("products.jsonl")

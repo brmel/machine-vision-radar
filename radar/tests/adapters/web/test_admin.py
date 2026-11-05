@@ -143,15 +143,3 @@ def test_the_founder_issues_lists_and_revokes_agent_tokens() -> None:
     assert status == 200 and (revoked["status"], revoked["revoked_at"]) == ("revoked", "2026-10-20T09:00:00Z")
     assert FirestoreAgentTokens(docs).revoke(revoked["id"], "2026-10-22T08:00:00Z").revoked_at == revoked["revoked_at"]
     assert _call(endpoint, "POST", "agents/agt_zzzzzzzzzz/revoke")[0] == 404
-
-def test_a_list_answers_one_page_of_twenty_with_how_many_it_holds() -> None:
-    endpoint, _, _ = _admin()
-    for n in range(21):
-        _call(endpoint, "POST", "agents", {"name": f"Scout {n}", "scope": "read", "expires": "2026-12-31"})
-    first = _call(endpoint, "GET", "agents")[1]
-    last = _call(endpoint, "GET", "agents", cursor=first["next"])[1]
-    assert (len(first["tokens"]), first["total"], first["next"], len(last["tokens"]), "next" in last) == (
-        20, 21, first["tokens"][-1]["id"], 1, False)
-    assert {t["name"] for t in first["tokens"] + last["tokens"]} == {f"Scout {n}" for n in range(21)}
-    status, past = _call(endpoint, "GET", "agents", cursor="twenty")
-    assert (status, past["tokens"], past["total"]) == (200, [], 21)

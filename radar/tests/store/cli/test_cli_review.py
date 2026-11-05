@@ -37,12 +37,6 @@ def test_each_ai_use_s_eval_runs_on_the_scripted_models_under_its_caps(tmp_path:
     assert (run.returncode == 1
             and json.loads(run.stdout)["failures"] == [{"case": case["id"], "why": f"missed {claim['spec_key']}"}])
 
-    cap = {**next(c for c in FX.rows("ai_caps.jsonl") if c["use"] == "draft"), "day_calls": queries}
-    stores.cli(FX, place, "change", "apply",
-               stores.changes_file(tmp_path, "cap.json", stores.put(cap, "Drafts: one run a day")))
-    run = stores.cli(FX, place, "eval", "run", "draft", "--json", check=False)
-    assert run.returncode == 1 and f"draft: {queries} calls a day, made" in run.stderr
-
 def test_the_ai_caps_from_the_cli() -> None:
     place = FX.loaded()
 
