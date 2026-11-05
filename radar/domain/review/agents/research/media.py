@@ -16,7 +16,7 @@ from radar.domain.review.agents.files import Files, Staged
 from radar.domain.review.agents.research.filing import RESEARCHER, Filing, Log, as_put
 from radar.domain.review.requests import Agent
 
-IMAGES = (".svg", ".png", ".jpg", ".jpeg", ".webp")
+IMAGES = (".png", ".jpg", ".jpeg", ".webp")
 
 def _best_photo(evaluation: ImageEvaluation) -> str | None:
     photos = [j for j in evaluation.judged if j.kind == "photo"]

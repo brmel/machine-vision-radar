@@ -88,7 +88,7 @@ def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
     run = _run(docs, heard, waits)
 
     assert [path for path, _ in heard] == ["/robots.txt", "/", "/widget-two", "/products/widget-two",
-                                           "/media/widget-two.svg", "/media/widget-two.pdf", "/products/widget-nine",
+                                           "/media/widget-two.png", "/media/widget-two.pdf", "/products/widget-nine",
                                            "/account", "/widgets.pdf", "/partner"], \
         ("the links the model names, but one off the site, one the page does not hold and a sixth, which a later page "
          "names again")
@@ -116,7 +116,7 @@ def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
     assert (token.id, token.name, token.revoked_at) == (run.token, RESEARCHER, NOW), "its own token, revoked at its end"
     assert {(p.actor_kind, p.author, p.token, p.status) for p in filed if p} == {
         ("agent", RESEARCHER, run.token, "suggested")}
-    found = [f"{SITE}/media/widget-two.svg", f"{SITE}/media/widget-two.pdf", f"{SITE}/media/widget-two.pdf"]
+    found = [f"{SITE}/media/widget-two.png", f"{SITE}/media/widget-two.pdf", f"{SITE}/media/widget-two.pdf"]
     assert [(p.files_on, p.source_url) for p in filed if p] == [
         (FilesOn.UPDATE, None), (FilesOn.UPDATE, None), *((FilesOn.UPDATE, url) for url in found),
         (FilesOn.UPDATE, None), (FilesOn.CREATE, None)]
@@ -285,6 +285,7 @@ def test_a_product_run_proposes_the_best_photo_privately_and_what_the_page_state
     assert [len(run.said(s)) for s in (Step.FILED, Step.MEDIA, Step.DATASHEET)] == [4, 1, 1] and run.cad > 0
     assert "The maker's page shows a photo of Widget Two: an open proposal holds it" in run.said(Step.SKIPPED), (
         "the judged photo, not twice")
+    assert "/media/widget-two.svg" not in [path for path, _ in heard], "the page's SVG is never sent to the judge"
     prop, *stated = (FX.queue(docs[0]).get(p) for p in run.said(Step.FILED))
     assert stated[-1] and stated[-1].changeset and stated[-1].reason == "This is Widget Two's own page"
     [own] = (c.action.record for c in stated[-1].changeset.changes if c.entity == "prd_0000000002")

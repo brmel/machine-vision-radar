@@ -23,23 +23,23 @@ class MetaRunner:
     def __init__(self, model: str, base_url: str, key: str) -> None:
         self.model, self._base_url, self._key = model, base_url, key
 
-    def _body(self, agent: str, prompt: Prompt, request: str, max_tokens: int,
+    def _body(self, prompt: Prompt, request: str, max_tokens: int,
               file: tuple[bytes, str] | None) -> bytes:
         parts = [{"type": "text", "text": request}, *([_part(file)] if file else [])]
         return json.dumps({
             "model": self.model, "max_completion_tokens": max_tokens, "reasoning_effort": "minimal",
             "messages": [{"role": "system", "content": prompt.instruction}, {"role": "user", "content": parts}],
             "response_format": {"type": "json_schema",
-                                "json_schema": {"name": agent, "schema": json.loads(prompt.output_schema)}},
+                                "json_schema": {"name": prompt.id, "schema": json.loads(prompt.output_schema)}},
         }).encode()
 
-    def reply(self, agent: str, prompt: Prompt, request: str, max_tokens: int,
+    def reply(self, prompt: Prompt, request: str, max_tokens: int,
               file: tuple[bytes, str] | None = None) -> Reply:
         if not self._key:
             raise RuntimeError("a model call on the Meta Model API needs MODEL_API_KEY in the environment")
         log.debug("model request", prompt=prompt.id, model=self.model, request=request)
         req = urllib.request.Request(f"{self._base_url}/chat/completions", method="POST",
-                                     data=self._body(agent, prompt, request, max_tokens, file),
+                                     data=self._body(prompt, request, max_tokens, file),
                                      headers={"Authorization": f"Bearer {self._key}",
                                               "Content-Type": "application/json"})
         try:

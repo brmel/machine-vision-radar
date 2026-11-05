@@ -34,5 +34,5 @@ class PromptedAnswerModel:
     def answer(self, question: str, evidence: Evidence, locale: str) -> AnswerText:
         request = self._prompt.render(language=LANGUAGES.get(locale, locale), evidence=evidence_json(evidence),
                                       question=question)
-        reply = self._runner.reply("catalog_answerer", self._prompt, request, MAX_TOKENS)
+        reply = self._runner.reply(self._prompt, request, MAX_TOKENS)
         return read(reply, lambda raw: _text(raw, reply.tokens_in, reply.tokens_out))

@@ -285,8 +285,13 @@ def test_a_meta_call_needs_its_key_and_a_refused_one_names_its_status_never_the_
     refusing: Answer = lambda path, sent: (heard.append(path), (401, b'{"error": {"message": "invalid key"}}'))[1]
     with serving(refusing, keep_alive=True) as url:
         with pytest.raises(RuntimeError, match="MODEL_API_KEY"):
-            MetaRunner(MUSE.id, f"{url}/v1", "").reply("catalog_answerer", PROMPTS.prompt("ask"), "w", 10)
+            MetaRunner(MUSE.id, f"{url}/v1", "").reply(PROMPTS.prompt("ask"), "w", 10)
         assert heard == []
         with pytest.raises(OSError, match="HTTP 401") as refused:
-            MetaRunner(MUSE.id, f"{url}/v1", "mk-secret").reply("catalog_answerer", PROMPTS.prompt("ask"), "w", 10)
+            MetaRunner(MUSE.id, f"{url}/v1", "mk-secret").reply(PROMPTS.prompt("ask"), "w", 10)
     assert "mk-secret" not in str(refused.value)
+
+def test_a_refused_adk_call_is_an_os_error_naming_its_status() -> None:
+    refusing: Answer = lambda path, sent: (400, b'{"error": {"code": 400, "message": "invalid argument"}}')
+    with serving(refusing, keep_alive=True) as url, pytest.raises(OSError, match="HTTP 400"):
+        _adk(f"{url}/").reply(PROMPTS.prompt("ask"), "w", 10)

@@ -69,10 +69,6 @@ class Models(Stores):
     def _meter(self, use: Use, prompted: Callable[[Prompt, ModelRunner], M], scripted: M,
                prompt_id: str | None = None) -> Meter[M]:
         prompt, project = self.prompts().prompt(prompt_id or use.value), self._real
-        if project:
-            self._token()
-        else:
-            self._demo()
 
         def opened(model: AiModel) -> M:
             if project and not self._yes:

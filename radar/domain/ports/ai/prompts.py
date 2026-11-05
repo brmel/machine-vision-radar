@@ -17,6 +17,6 @@ class Reply:
     prompt: str
 
 class ModelRunner(Protocol):
-    def reply(self, agent: str, prompt: Prompt, request: str, max_tokens: int,
+    def reply(self, prompt: Prompt, request: str, max_tokens: int,
               file: tuple[bytes, str] | None = None) -> Reply:
         ...
