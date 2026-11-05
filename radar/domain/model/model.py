@@ -23,7 +23,7 @@ def _describe(raw: Json) -> str:
     return ("null" if raw is None
             else {dict: "object", list: "array", str: "string", bool: "boolean"}.get(type(raw), type(raw).__name__))
 
-class Parser:
+class RecordParser:
     def __init__(self, schema: ModelSchema) -> None:
         self._schema = schema
 
@@ -57,7 +57,7 @@ class Parser:
         if f.type == "map":
             return self._map(raw, f.leaf_type, path, None, ())
         out = self._value(raw, f.type, path)
-        if f.minimum is not None and isinstance(out, (int, float)) and out < f.minimum:
+        if f.minimum is not None and out < f.minimum:
             raise ParseError(f"{path}: must be at least {f.minimum:g}, got {out}")
         return out
 
@@ -72,7 +72,7 @@ class Parser:
         if spec.kind == "map":
             out = self._map(raw, spec.items or "string", path, spec.key_pattern, spec.required_keys, spec.name)
             for k, v in out.items():
-                if spec.min_length and len(str(v).strip()) < spec.min_length:
+                if spec.min_length and len(v.strip()) < spec.min_length:
                     raise ParseError(f"{path}.{k}: {spec.name} text must not be empty")
             return out
         if spec.kind == "union":
@@ -115,7 +115,7 @@ def _member(raw: Json, values: tuple[str, ...], path: str) -> Json:
 
 def _scalar(raw: Json, spec: TypeSpec, path: str) -> Json:
     out = _primitive(raw, spec.base or "string", f"{path} ({spec.name})")
-    if spec.pattern and isinstance(out, str) and not re.fullmatch(spec.pattern, out):
+    if spec.pattern and not re.fullmatch(spec.pattern, out):
         raise ParseError(f"{path}: {out!r} is not a valid {spec.name}")
     return out
 
@@ -125,7 +125,7 @@ class Model:
     registry: Registry
 
     def parse(self, raw: Json, kind: type[T], where: str = "") -> T:
-        return Parser(self.schema).parse(raw, kind, where or kind.__name__)
+        return RecordParser(self.schema).parse(raw, kind, where or kind.__name__)
 
     def check(self, catalog: Catalog, scope: Scope, today: date,
               kept_files: Mapping[str, KeptFile] | None = None) -> Verdict:

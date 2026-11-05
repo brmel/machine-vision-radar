@@ -6,7 +6,7 @@ from typing import Any
 
 from radar import paths
 from radar.domain.model.entities import AiSettings, CategoryProfile, CLASSES, FeedSettings, SearchSettings
-from radar.domain.model.model import Model, ParseError, Parser
+from radar.domain.model.model import Model, ParseError, RecordParser
 from radar.domain.model.registry import Banned, Filler, Language, Registry, composed
 from radar.domain.model.schema import ModelSchema, parse_schema
 from radar.adapters.files.json_parser import read_json
@@ -31,7 +31,7 @@ def _read(path: Path) -> Any:
         raise ParseError(f"registry file not found: {path}")
     return read_json(path)
 
-def _items(parser: Parser, type_name: str, path: Path) -> dict[str, Any]:
+def _items(parser: RecordParser, type_name: str, path: Path) -> dict[str, Any]:
     raw = _read(path)
     if not isinstance(raw, list):
         raise ParseError(f"{path.name}: expected an array of {type_name}")
@@ -44,7 +44,7 @@ def _items(parser: Parser, type_name: str, path: Path) -> dict[str, Any]:
     return out
 
 def _registry(reg_dir: Path, schema: ModelSchema) -> Registry:
-    parser = Parser(schema)
+    parser = RecordParser(schema)
     files = {t.registry_file: t.name for t in schema.registry_types if t.registry_file}
     special = {f: _items(parser, t, reg_dir / f) for f, t in files.items() if not f.endswith("/")}
     profiles_dir = reg_dir / PROFILES_DIR

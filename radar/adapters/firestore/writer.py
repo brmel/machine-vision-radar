@@ -22,7 +22,7 @@ from .projection.projector import Projector
 
 Clock = Callable[[], str]
 Writes = Mapping[str, Fields | None]
-CHANGESET, SLUG, RECORD_PARSE = "changeset", "slug", "record_parse"
+CHANGESET, SLUG, STORED_FILE, RECORD_PARSE = "changeset", "slug", "stored_file", "record_parse"
 
 def commit(docs: Docs, writes: Writes, create: Collection[str] = ()) -> int:
     paths = sorted(writes)
@@ -151,21 +151,25 @@ class StoreWriter:
                 continue
             ref, public = BlobRef(after["sha256"], after["mime"]), after["rights"] in self.public
             if not self.blobs.has(ref):
-                raise InvalidChangeset([Finding("stored_file", after["id"],
+                raise InvalidChangeset([Finding(STORED_FILE, after["id"],
                                                 f"no stored file {ref.sha256}; add it first (radar media add)")])
             if before is None or (before.get("rights") in self.public) != public:
                 out.append((ref, public))
         return out
 
+    def _errors(self, hood: Neighborhood, changed: Changed, today: date) -> list[tuple[Finding, ...]]:
+        try:
+            return [self.model.check(catalog_of(self.model, records.values()), Part(), today).errors
+                    for records in (hood.records, hood.after(changed))]
+        except (ParseError, KeyError) as exc:
+            if not (stored := [f for r in hood.records.values() if r and (f := _unparsed(self.model, r))]):
+                raise
+            raise InvalidChangeset(stored) from exc
+
     def _validate(self, hood: Neighborhood, changed: Changed, today: date) -> None:
         if unparsed := [f for _, after in changed.values() if after and (f := _unparsed(self.model, after))]:
             raise InvalidChangeset(unparsed)
-        try:
-            results = [self.model.check(catalog_of(self.model, records.values()), Part(), today).errors
-                       for records in (hood.records, hood.after(changed))]
-        except (ParseError, KeyError) as exc:
-            raise InvalidChangeset([Finding(RECORD_PARSE, min(changed),
-                                            f"a stored record of its neighborhood does not parse: {exc}")]) from exc
+        results = self._errors(hood, changed, today)
         records = hood.records.keys() | changed.keys()
         added = sorted((f for f in set(results[1]) - set(results[0]) if f.entity_id in records),
                        key=lambda f: (f.entity_id, f.rule, f.message))

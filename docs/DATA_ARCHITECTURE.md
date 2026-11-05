@@ -13,8 +13,9 @@ wiring loads it once and every caller takes it.
 - `Model.parse(raw, kind, where)`: the one edge parser of records, JSON in and the generated `kind` out, or a
   `ParseError` naming the path.
 - `Model.check(catalog, scope, today)`: every `Rule` (`radar/domain/validation/rule.py`) on the catalog, returning an
-  immutable `Verdict` of `Finding`s (rule, entity, message, `Severity` error or warning). The `scope` is `Whole()`,
-  the whole store or a catalog folder, or `Part()`, a write's neighborhood, a catalog file or the registry alone.
+  immutable `Verdict` of `Finding`s (rule, entity, message, `Severity` error or warning). The `scope` is `Whole()`
+  for the store (`store validate`) and a folder `model validate` reads, else `Part()`: a write's neighborhood, a
+  catalog `store load` seeds, a catalog file or the registry alone.
 - A refused write raises `InvalidChangeset`, which holds findings only.
 
 ## 1. Principles
