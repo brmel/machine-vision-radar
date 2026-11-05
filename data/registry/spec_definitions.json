@@ -174,12 +174,6 @@
     "description": {"en": "Dataset tools the platform includes, such as labeling, dataset management, active learning or synthetic data generation.", "fr": "Outils de données inclus dans la plateforme, par exemple annotation, gestion de jeux de données, apprentissage actif ou génération de données synthétiques."}
   },
   {
-    "id": "deep_learning",
-    "datatype": "boolean",
-    "label": {"en": "Deep learning support", "fr": "Support du Deep Learning"},
-    "description": {"en": "Whether the SDK includes deep-learning tools to train or run neural networks.", "fr": "Indique si le SDK inclut des outils d'apprentissage profond pour entraîner ou exécuter des réseaux de neurones."}
-  },
-  {
     "id": "deployment",
     "datatype": "term_set",
     "vocabulary": "deployments",
@@ -248,12 +242,6 @@
     "aliases": ["aperture", "f-stop", "f/#", "F#", "focal ratio", "aperture range", "iris range", "ouverture", "nombre f", "plage d'ouverture", "Blende", "Blendenzahl", "Blendenbereich", "Lichtstärke"],
     "bounds": {"min": 0.5, "max": 128},
     "precision": 2
-  },
-  {
-    "id": "few_shot",
-    "datatype": "boolean",
-    "label": {"en": "Few-shot learning capable", "fr": "Apprentissage par peu d'exemples"},
-    "description": {"en": "Whether the platform trains a usable model from a few labeled images, typically tens or fewer per class.", "fr": "Indique si la plateforme entraîne un modèle exploitable à partir de quelques images annotées, en général quelques dizaines par classe au plus."}
   },
   {
     "id": "field_of_view",
@@ -381,12 +369,6 @@
     "datatype": "boolean",
     "label": {"en": "Integrated vision sensor", "fr": "Capteur de vision intégré"},
     "description": {"en": "Whether the laser system includes a camera to locate parts or verify marks.", "fr": "Indique si le système laser intègre une caméra pour localiser les pièces ou vérifier les marquages."}
-  },
-  {
-    "id": "integration_api",
-    "datatype": "boolean",
-    "label": {"en": "Integration API", "fr": "API d'intégration"},
-    "description": {"en": "Whether the platform exposes a documented API that other software can call, such as REST or an SDK.", "fr": "Indique si la plateforme expose une API documentée que d'autres logiciels peuvent appeler, comme REST ou un SDK."}
   },
   {
     "id": "interfaces",
