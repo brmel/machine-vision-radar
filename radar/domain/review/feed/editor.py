@@ -117,11 +117,7 @@ class Feed:
         return _row(found.item, found.proposal) if isinstance(found, Pending) else _row(found)
 
     def find(self, item_id: str) -> Pending | FeedItem:
-        found = next((d for d in self.drafts() if item_id in (d.item.id, d.item.slug)), None) or next(
-            (i for i in self.items() if item_id in (i.id, i.slug)), None)
-        if found is None:
-            raise LookupError(f"no draft or published item {item_id}")
-        return found
+        return next((d for d in self.drafts() if item_id in (d.item.id, d.item.slug)), None) or self.item(item_id)
 
     def item(self, item_id: str) -> FeedItem:
         found = next((i for i in self.items() if item_id in (i.id, i.slug)), None)
