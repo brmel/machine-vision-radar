@@ -37,7 +37,8 @@ Every AI use renders a versioned prompt from `data/prompts/` and runs it through
 against per-use caps before each call and logged after it with its tokens and cost. This build adds **Muse Spark**,
 through the Meta Model API (`radar/adapters/ai/meta/runner.py`), and points every use at it in
 `data/registry/ai.json`; a model's `provider` entry picks its runner, so Muse Spark and Gemini (through Google ADK)
-are each one registry line away. The live site still runs Gemini: it switches to Muse Spark once its Meta key is set.
+are each one registry line away ([docs/SEARCH.md](docs/SEARCH.md)). The live site still runs Gemini: it switches to
+Muse Spark once its Meta key is set.
 
 Code: Apache-2.0. Catalog: CC BY-NC 4.0. The catalog lives in Firestore and Cloud Storage behind the app and is served
 through the site, the API and MCP; this repo holds the code and the registry it is driven by, not the data.
@@ -68,8 +69,7 @@ maker sites ──► research agent ──► proposals ──► review (a per
 - **Agents suggest, people decide.** Nothing an agent finds reaches the catalog without approval.
 - **One typed model.** `contracts/model/` generates the Python dataclasses, the TypeScript types and the Zod
   schemas, so every layer agrees on the shape.
-- **Any model.** Every AI use runs through one `ModelRunner` port: Muse Spark on the Meta Model API in this build,
-  Gemini through ADK by a registry change; another provider is one new runner file.
+- **Any model.** Every AI use runs through one `ModelRunner` port; another provider is one new runner file.
 - **Search and Ask** rank on words, then on meaning (fastembed), on the server. Ask answers only from catalog
   records and cites them.
 

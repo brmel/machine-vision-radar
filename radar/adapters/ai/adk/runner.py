@@ -19,7 +19,7 @@ class AdkRunner:
         self.model, self._project, self._location, self._token, self._base_url = (
             model, project, location, token, base_url)
 
-    def _agent(self, agent: str, prompt: Prompt, max_tokens: int) -> Any:
+    def _agent(self, prompt: Prompt, max_tokens: int) -> Any:
         try:
             from google.adk.agents import LlmAgent
             from google.adk.models.google_llm import Gemini
@@ -32,14 +32,14 @@ class AdkRunner:
         client = Client(vertexai=True, project=self._project, location=self._location, credentials=credentials,
                         http_options=types.HttpOptions(base_url=self._base_url) if self._base_url else None)
         schema = json.loads(prompt.output_schema)
-        return LlmAgent(name=agent, model=Gemini(model=self.model, client=client),
+        return LlmAgent(name=prompt.id, model=Gemini(model=self.model, client=client),
                         static_instruction=prompt.instruction, output_schema=schema,
                         generate_content_config=types.GenerateContentConfig(
                             temperature=0, max_output_tokens=max_tokens))
 
-    async def _run(self, agent: str, prompt: Prompt, request: str, max_tokens: int,
+    async def _run(self, prompt: Prompt, request: str, max_tokens: int,
                    file: tuple[bytes, str] | None) -> Reply:
-        built = self._agent(agent, prompt, max_tokens)
+        built = self._agent(prompt, max_tokens)
         from google.adk.runners import InMemoryRunner
         from google.genai import types
 
@@ -55,9 +55,7 @@ class AdkRunner:
                 text = "".join(p.text or "" for p in event.content.parts)
         return Reply(text, tokens_in, tokens_out, prompt.id)
 
-    def reply(self, agent: str, prompt: Prompt, request: str, max_tokens: int,
+    def reply(self, prompt: Prompt, request: str, max_tokens: int,
               file: tuple[bytes, str] | None = None) -> Reply:
-        if self._project.startswith("demo-"):
-            raise RuntimeError("a model call needs Gemini on Vertex AI in the project: pass --project")
         log.debug("model request", prompt=prompt.id, model=self.model, request=request)
-        return asyncio.run(self._run(agent, prompt, request, max_tokens, file))
+        return asyncio.run(self._run(prompt, request, max_tokens, file))

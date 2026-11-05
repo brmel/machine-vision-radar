@@ -45,14 +45,13 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   output, with that reason, and the asker gets the `not_enough_evidence` refusal.
 - **The AI uses** (their ports: AGENTS.md rule 15) are answers, web research with its image judge (on research's model
   and caps), datasheet extraction and news drafts, each on its prompt (`ask`, `research`, `image_judge`, `datasheet`,
-  `draft`) and its registry model, run through the `ModelRunner` port (`radar/domain/ports/ai/prompts.py`). The
-  registry points every use at Muse Spark (`muse-spark-1.3`, Standard mode) through the Meta Model API
+  `draft`) and its registry model, run through the `ModelRunner` port (`radar/domain/ports/ai/prompts.py`). A model's
+  `provider` picks its runner (`radar/adapters/wiring/models.py`). `meta` runs on the Meta Model API
   (`radar/adapters/ai/meta/runner.py`): its OpenAI-compatible chat completions, the prompt's instruction as the system
   message, its output schema as `response_format`, a datasheet as a `file` part and an image as an `image_url` part,
-  with minimal reasoning; the key is `MODEL_API_KEY`, from the environment, never a file. The function has no Meta key
-  yet, so production's `AiCap` records keep each use on Gemini. A model whose `provider` is `vertex` runs on Gemini on the project's Vertex AI through ADK
-  (`radar/adapters/ai/adk/runner.py`) instead, with the service account's credentials or the CLI's access token; the
-  match on `provider` is in `radar/adapters/wiring/models.py`. The full request is logged at debug level only. On
+  with minimal reasoning, and the key `MODEL_API_KEY` from the environment, never a file. `vertex` runs on Gemini on
+  the project's Vertex AI through ADK (`radar/adapters/ai/adk/runner.py`), with the service account's credentials or
+  the CLI's access token. The full request is logged at debug level only. On
   the emulators, for the tests, the gates and the CLI, the scripted models (`radar/adapters/ai/scripted.py`) stand
   in, metered at the use's model's price.
 - **Prompts** are files, `data/prompts/<id>.md`, one each, with its inputs, output schema, instruction and message,

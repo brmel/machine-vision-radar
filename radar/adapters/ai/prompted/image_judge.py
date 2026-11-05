@@ -23,7 +23,7 @@ class PromptedImageJudge:
         tokens_in, tokens_out = 0, 0
         for candidate in candidates:
             request = self._prompt.render(product=product_name, url=candidate.url)
-            reply = self._runner.reply("image_judge", self._prompt, request, MAX_TOKENS,
+            reply = self._runner.reply(self._prompt, request, MAX_TOKENS,
                                      (candidate.content, candidate.mime))
             tokens_in, tokens_out = tokens_in + reply.tokens_in, tokens_out + reply.tokens_out
             judged.append(

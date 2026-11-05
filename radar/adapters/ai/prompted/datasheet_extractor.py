@@ -39,7 +39,7 @@ class PromptedDatasheetExtractor:
 
     def extract(self, datasheet: Datasheet) -> Extraction:
         request = self._prompt.render(product=datasheet.product, source=datasheet.source.id, specs=self._specs)
-        reply = self._runner.reply("datasheet_extractor", self._prompt, request, MAX_TOKENS,
+        reply = self._runner.reply(self._prompt, request, MAX_TOKENS,
                                  (datasheet.content, datasheet.mime))
         return read(reply, 
             lambda raw: Extraction(tuple(SpecValue(v["spec_key"], _value(v, self._defs.get(v["spec_key"])))

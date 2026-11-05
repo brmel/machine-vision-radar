@@ -49,5 +49,5 @@ code (`test_data_driven`); code reads it from the registry.
 - **A language:** an entry in `languages.json`, a folder `app/src/shell/i18n/messages/<code>/` with every key of the
   default language, and that language in every label of the registry (`i18n-keys.test.ts`,
   `test_third_language_added_to_contract_needs_no_code_change`).
-- **A prompt change:** edit `prompts/<use>.md`, keeping its inputs and output schema
+- **A prompt change:** edit `data/prompts/<use>.md`, keeping its inputs and output schema
   (`test_prompts`); run its eval (`radar eval run <use>`; on the project it spends, `docs/CLI.md`).

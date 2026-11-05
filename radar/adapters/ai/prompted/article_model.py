@@ -16,6 +16,6 @@ class PromptedArticleModel:
     def draft(self, subject: Evidence, about: str, locale: str) -> ArticleText:
         request = self._prompt.render(language=LANGUAGES.get(locale, locale), about=about,
                                       evidence=evidence_json(subject))
-        reply = self._runner.reply("article_writer", self._prompt, request, MAX_TOKENS)
+        reply = self._runner.reply(self._prompt, request, MAX_TOKENS)
         return read(reply, lambda raw: ArticleText(raw["title"], raw["summary"], sentences_of(raw), reply.tokens_in,
                                                   reply.tokens_out))

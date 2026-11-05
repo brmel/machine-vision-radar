@@ -129,7 +129,7 @@ Binding for every change. A rule a tool enforces names it in parentheses; the to
 15. **Agent seam.** LLM code sits behind one SDK-agnostic port per role in `domain/ports/ai/`, our own types in and out,
     each with a scripted model for tests and emulators. A use's adapter (`adapters/ai/prompted/`) renders its prompt
     and runs it on the `ModelRunner` port, server-side only. Its runners are the Meta Model API
-    (`adapters/ai/meta/runner.py`, this build's, for Muse Spark) and Google ADK on Vertex AI
+    (`adapters/ai/meta/runner.py`) and Google ADK on Vertex AI
     (`adapters/ai/adk/runner.py`); a model's `provider` in `data/registry/ai.json` picks one in
     `adapters/wiring/models.py`, so each use runs on exactly one, never one as the other's fallback. Every
     prompt is one file a use in `data/prompts/` (`test_prompts`); every model call goes through the `Meter` (caps

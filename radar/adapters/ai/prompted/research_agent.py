@@ -42,6 +42,6 @@ class PromptedResearchAgent:
                                       known=known, terms=json.dumps(reading.terms, ensure_ascii=False), specs=specs,
                                       profiles=profiles, page=reading.page.text[:PAGE],
                                       links="\n".join(reading.page.links))
-        reply = self._runner.reply("research_agent", self._prompt, request, MAX_TOKENS)
+        reply = self._runner.reply(self._prompt, request, MAX_TOKENS)
         return read(reply, lambda raw: Findings(tuple(_draft(p) for p in raw["proposals"]), tuple(raw["follow"]),
                                                reply.tokens_in, reply.tokens_out))
