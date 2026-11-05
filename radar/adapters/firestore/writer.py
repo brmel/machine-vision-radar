@@ -145,7 +145,7 @@ class StoreWriter:
                 continue
             ref, public = BlobRef(after["sha256"], after["mime"]), after["rights"] in self.public
             if not self.blobs.has(ref):
-                raise InvalidChangeset([f"{after['id']}: no stored file {ref.sha256}; put it first (radar media put)"])
+                raise InvalidChangeset([f"{after['id']}: no stored file {ref.sha256}; add it first (radar media add)"])
             if before is None or (before.get("rights") in self.public) != public:
                 out.append((ref, public))
         return out

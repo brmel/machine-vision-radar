@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import mimetypes
-from pathlib import Path
 
 from radar.adapters.console import log, output
 from radar.domain.model.entities import Document
@@ -11,17 +9,6 @@ from radar.adapters.console.parser import Commands
 
 def _document(args: argparse.Namespace, sha256: str) -> Document | None:
     return next(iter(args.wiring.held().matching(Document, "sha256", sha256)), None)
-
-def run_put(args: argparse.Namespace) -> int:
-    args.wiring.correlate("media")
-    path = Path(args.file)
-    mime = args.mime or mimetypes.guess_type(path.name)[0] or ""
-    if not mime:
-        return log.error(f"no mime for {path.name}; pass --mime")
-    blobs = args.wiring.blobs()
-    ref = blobs.put(path.read_bytes(), mime, args.public)
-    return output.format_output({"sha256": ref.sha256, "bytes": path.stat().st_size, "mime": mime,
-                                 "storage_path": blobs.path_of(ref)}, json_mode=True)
 
 def run_get(args: argparse.Namespace) -> int:
     args.wiring.correlate("media")
@@ -49,11 +36,6 @@ def run_url(args: argparse.Namespace) -> int:
     return output.format_output({"sha256": args.sha256, "url": url}, args.json, lambda r: r["url"])
 
 def register(commands: Commands) -> None:
-    put = commands.verb("media", "put", help="store a file once; prints the fields its Document record needs",
-                        func=run_put)
-    put.add_argument("file", help="the file to store")
-    put.add_argument("--mime", help="the file's mime (default: from its name)")
-    put.add_argument("--public", action="store_true", help="the file's rights are public (own, open licence)")
     get = commands.verb("media", "get", help="stream a file, verifying its sha256", func=run_get)
     get.add_argument("sha256", help="the file's sha256")
     get.add_argument("--out", help="write to this file (default: stdout; required with --json)")

@@ -186,14 +186,6 @@
       "output": {"type": "object", "required": ["correlation_id", "events", "writes"]}
     },
     {
-      "id": "media.put",
-      "summary": "store a media file by sha256",
-      "cli": "media put",
-      "admin": "/admin/records/new/Document",
-      "mcp": null,
-      "output": {"type": "object", "required": ["sha256", "bytes", "mime", "storage_path"]}
-    },
-    {
       "id": "media.get",
       "summary": "read a media file, verifying its sha256",
       "cli": "media get",
