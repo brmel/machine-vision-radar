@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, Callable, Collection, Mapping, Sequence
@@ -106,7 +107,8 @@ class StoreWriter:
         return last
 
     def _stored(self, ids: list[str]) -> dict[str, Record]:
-        if twice := [i for i in ids if ids.count(i) > 1 or i.startswith(f"{self.changes}_")]:
+        counts = Counter(ids)
+        if twice := [i for i in ids if counts[i] > 1 or i.startswith(f"{self.changes}_")]:
             raise InvalidChangeset([Finding(CHANGESET, twice[0],
                                             "a changeset changes each entity once, and never a Change event")])
         if unknown := [i for i in ids if not self.schema.kind_of(i)]:
@@ -162,9 +164,9 @@ class StoreWriter:
             return [self.model.check(catalog_of(self.model, records.values()), Part(), today).errors
                     for records in (hood.records, hood.after(changed))]
         except (ParseError, KeyError) as exc:
-            if not (stored := [f for r in hood.records.values() if r and (f := _unparsed(self.model, r))]):
-                raise
-            raise InvalidChangeset(stored) from exc
+            stored = [f for r in hood.records.values() if r and (f := _unparsed(self.model, r))]
+            unchecked = Finding(RECORD_PARSE, "", f"the neighborhood does not check: {exc}")
+            raise InvalidChangeset(stored or [unchecked]) from exc
 
     def _validate(self, hood: Neighborhood, changed: Changed, today: date) -> None:
         if unparsed := [f for _, after in changed.values() if after and (f := _unparsed(self.model, after))]:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from types import MappingProxyType
 from typing import Mapping, TypeVar
@@ -123,9 +123,13 @@ def _scalar(raw: Json, spec: TypeSpec, path: str) -> Json:
 class Model:
     schema: ModelSchema
     registry: Registry
+    _parser: RecordParser = field(init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "_parser", RecordParser(self.schema))
 
     def parse(self, raw: Json, kind: type[T], where: str = "") -> T:
-        return RecordParser(self.schema).parse(raw, kind, where or kind.__name__)
+        return self._parser.parse(raw, kind, where or kind.__name__)
 
     def check(self, catalog: Catalog, scope: Scope, today: date,
               kept_files: Mapping[str, KeptFile] | None = None) -> Verdict:

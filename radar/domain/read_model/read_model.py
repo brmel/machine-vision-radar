@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Collection, Iterable, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Collection, Iterable, Mapping, Sequence
 
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.entities import (FeedItem, FeedPageView, ModelRow, Organization, OrgRelation, Product,
                                          ProductView, Source)
 from radar.domain.model.history.projection import Projection, plain
-from radar.domain.model.model import Model
 from radar.domain.model.registry import Registry
 from radar.domain.ports.catalog.views import Check, MediaUrl
 from radar.domain.ports.history.change_log import ChangeLog
@@ -19,6 +18,9 @@ from .organizations import brief, organization_view
 from .products.views import ProductViews
 from radar.domain.review.feed.news import Cited, news
 from radar.domain.read_model.derived.identity import identities
+
+if TYPE_CHECKING:
+    from radar.domain.model.model import Model
 
 View = dict[str, Any]
 
