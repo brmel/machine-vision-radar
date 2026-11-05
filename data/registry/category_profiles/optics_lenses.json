@@ -2,11 +2,11 @@
   "category_id": "optics.lenses",
   "sections": {
     "core": ["focal_length", "f_number", "lens_mount", "max_sensor_format", "lens_kind"],
-    "detail": ["working_distance", "magnification", "telecentric", "iris_type", "focus_type"],
+    "detail": ["working_distance", "magnification", "telecentric", "iris_type", "focus_type", "distortion"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
-  "groups": [],
+  "groups": ["environment"],
   "facets": [
     {"field": "lens_mount"},
     {"field": "max_sensor_format"},
