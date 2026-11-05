@@ -49,9 +49,12 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   `provider` picks its runner (`radar/adapters/wiring/models.py`). `meta` runs on the Meta Model API
   (`radar/adapters/ai/meta/runner.py`): its OpenAI-compatible chat completions, the prompt's instruction as the system
   message, its output schema as `response_format`, a datasheet as a `file` part and an image as an `image_url` part,
-  with minimal reasoning, and the key `MODEL_API_KEY` from the environment, never a file. `vertex` runs on Gemini on
-  the project's Vertex AI through ADK (`radar/adapters/ai/adk/runner.py`), with the service account's credentials or
-  the CLI's access token. The full request is logged at debug level only. On
+  with minimal reasoning, and the key `MODEL_API_KEY` from the environment, never a file. `local` runs on the same
+  runner against an OpenAI-compatible server the caller runs, with no key: Muse Glimmer, Meta's open-weight model
+  distilled from Muse Spark, served by Ollama (`ollama run muse-glimmer`) at `localhost:11434`, for the CLI on that
+  machine; it reads text and images, not PDFs, so the datasheet use stays on a model that reads files. `vertex` runs
+  on Gemini on the project's Vertex AI through ADK (`radar/adapters/ai/adk/runner.py`), with the service account's
+  credentials or the CLI's access token. The full request is logged at debug level only. On
   the emulators, for the tests, the gates and the CLI, the scripted models (`radar/adapters/ai/scripted.py`) stand
   in, metered at the use's model's price.
 - **Prompts** are files, `data/prompts/<id>.md`, one each, with its inputs, output schema, instruction and message,

@@ -1,11 +1,15 @@
 import type { FC } from "react";
-import type { AiCaps } from "../../../../domain/views.ts";
+import type { AiCaps, AiProvider } from "../../../../domain/views.ts";
 import { CELL, NUM, ROW_HEAD, formatDate, formatNumber } from "../../../../ui/index.ts";
 import { useI18n } from "../../../../shell/i18n/index.tsx";
 import { AdminTable } from "../AdminTable.tsx";
 
 const COLUMNS = [["adminSettingsModel"], ["adminSettingsRegion"], ["adminSettingsPriceIn", "text-right"],
   ["adminSettingsPriceOut", "text-right"], ["adminSettingsPriceRead"]] as const;
+
+const runsOn = (provider: AiProvider): string =>
+  "vertex" in provider ? `vertex · ${provider.vertex}` : "meta" in provider ? `meta · ${provider.meta}`
+    : `local · ${provider.local}`;
 
 export const ModelsTable: FC<{ caps: AiCaps }> = ({ caps }) => {
   const { t, locale } = useI18n();
@@ -18,7 +22,7 @@ export const ModelsTable: FC<{ caps: AiCaps }> = ({ caps }) => {
               {m.label} <span className="font-mono text-muted whitespace-nowrap">{m.id}</span>
             </th>
             <td className={`${CELL} font-mono whitespace-nowrap`}>
-              {"vertex" in m.provider ? `vertex · ${m.provider.vertex}` : `meta · ${m.provider.meta}`}
+              {runsOn(m.provider)}
             </td>
             <td className={`${CELL} ${NUM}`}>{formatNumber(m.usd_in, locale)}</td>
             <td className={`${CELL} ${NUM}`}>{formatNumber(m.usd_out, locale)}</td>

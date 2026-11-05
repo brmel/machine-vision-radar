@@ -1031,8 +1031,13 @@ class AiProviderMeta:
     """AiProvider tagged 'meta'."""
     meta: str
 
+@dataclass(frozen=True, slots=True, kw_only=True)
+class AiProviderLocal:
+    """AiProvider tagged 'local'."""
+    local: str
+
 # Where a model runs, tagged by the runner that calls it.
-AiProvider = AiProviderVertex | AiProviderMeta
+AiProvider = AiProviderVertex | AiProviderMeta | AiProviderLocal
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class AiModel:

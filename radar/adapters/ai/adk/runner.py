@@ -4,7 +4,6 @@ import asyncio
 import json
 from typing import Any
 
-from radar.adapters.console import log
 from radar.domain.ai.prompts import Prompt
 from radar.domain.ports.ai.prompts import Reply
 
@@ -63,5 +62,4 @@ class AdkRunner:
 
     def reply(self, prompt: Prompt, request: str, max_tokens: int,
               file: tuple[bytes, str] | None = None) -> Reply:
-        log.debug("model request", prompt=prompt.id, model=self.model, request=request)
         return asyncio.run(self._run(prompt, request, max_tokens, file))

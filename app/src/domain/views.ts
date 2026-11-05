@@ -459,7 +459,7 @@ export interface SearchSettings {
 }
 
 /** Where a model runs, tagged by the runner that calls it. */
-export type AiProvider = { readonly vertex: string } | { readonly meta: string };
+export type AiProvider = { readonly vertex: string } | { readonly meta: string } | { readonly local: string };
 
 /** A language model an AI use may run, where it runs, and its online price in US dollars per million tokens in (text and files) and out (text and thinking), as its source stated it on the day it was read. */
 export interface AiModel {

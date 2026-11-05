@@ -27,6 +27,15 @@
       "usd_out": 4.25,
       "source": "https://dev.meta.ai/docs/pricing-rate-limits",
       "read": "2026-11-04"
+    },
+    {
+      "id": "muse-glimmer",
+      "label": "Muse Glimmer (local)",
+      "provider": {"local": "http://localhost:11434/v1"},
+      "usd_in": 0,
+      "usd_out": 0,
+      "source": "https://dev.meta.ai/docs/muse-glimmer",
+      "read": "2026-11-04"
     }
   ],
   "uses": [

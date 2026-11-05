@@ -406,7 +406,7 @@ export const SearchSettingsSchema: z.ZodType<M.SearchSettings> = z.strictObject(
   stopwords: z.array(z.string()),
 });
 
-export const AiProviderSchema: z.ZodType<M.AiProvider> = z.union([z.strictObject({ vertex: z.string() }), z.strictObject({ meta: z.string() })]);
+export const AiProviderSchema: z.ZodType<M.AiProvider> = z.union([z.strictObject({ vertex: z.string() }), z.strictObject({ meta: z.string() }), z.strictObject({ local: z.string() })]);
 
 export const AiModelSchema: z.ZodType<M.AiModel> = z.strictObject({
   id: z.string(),

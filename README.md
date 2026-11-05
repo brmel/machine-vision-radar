@@ -37,8 +37,9 @@ Every AI use renders a versioned prompt from `data/prompts/` and runs it through
 against per-use caps before each call and logged after it with its tokens and cost. This build adds **Muse Spark**,
 through the Meta Model API (`radar/adapters/ai/meta/runner.py`), and points every use at it in
 `data/registry/ai.json`; a model's `provider` entry picks its runner, so Muse Spark and Gemini (through Google ADK)
-are each one registry line away ([docs/SEARCH.md](docs/SEARCH.md)). The live site still runs Gemini: it switches to
-Muse Spark once its Meta key is set.
+are each one registry line away ([docs/SEARCH.md](docs/SEARCH.md)). With no API key, **Muse Glimmer**, Meta's
+open-weight model distilled from Muse Spark, runs on the same runner from a local Ollama server
+(`ollama run muse-glimmer`). The live site still runs Gemini: it switches to Muse Spark once its Meta key is set.
 
 Code: Apache-2.0. Catalog: CC BY-NC 4.0. The catalog lives in Firestore and Cloud Storage behind the app and is served
 through the site, the API and MCP; this repo holds the code and the registry it is driven by, not the data.
