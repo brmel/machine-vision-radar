@@ -11,33 +11,25 @@ from radar.domain.validation.context import ValidationContext, ValidationResult
 NAME = "changes"
 PROPOSAL = re.compile(r"prp_[0-9a-hjkmnp-tv-z]{10}")
 
-def _replayed(changes: list[Change]) -> dict | None:
-    try:
-        return replay(changes)
-    except ValueError:
-        return None
-
 def _check_entity(ctx: ValidationContext, res: ValidationResult, entity_id: str, changes: list[Change]) -> None:
     versions = sorted(c.version for c in changes)
     if versions != list(range(1, len(versions) + 1)):
         res.error(NAME, entity_id, f"change versions are {versions}; they must run 1..{len(versions)} without gaps")
         return
-    entity = ctx.catalog.get(entity_id)
-    if entity is None:
-        if _replayed(changes) != {}:
-            res.error(NAME, entity_id,
-                      "changes for an entity that is not stored (only a retraction's last change empties it)")
-        return
-    if getattr(entity, "version", None) != versions[-1]:
-        res.error(NAME, entity_id,
-                  f"stored version {getattr(entity, 'version', None)} is not the latest change version {versions[-1]}")
     try:
         replayed = replay(changes)
     except ValueError as exc:
         res.error(NAME, entity_id, f"patches do not apply: {exc}")
         return
-    stored = without_version(plain(entity))
-    for diff in field_diff(replayed, stored)[:1]:
+    entity = ctx.catalog.get(entity_id)
+    if entity is None:
+        if replayed != {}:
+            res.error(NAME, entity_id,
+                      "changes for an entity that is not stored (only a retraction's last change empties it)")
+        return
+    if entity.version != versions[-1]:
+        res.error(NAME, entity_id, f"stored version {entity.version} is not the latest change version {versions[-1]}")
+    for diff in field_diff(replayed, without_version(plain(entity)))[:1]:
         res.error(NAME, entity_id,
                   f"patches replay to {diff.before!r} at '{diff.path}', the stored entity has {diff.after!r}")
     _check_changes(res, changes, sourced=hasattr(entity, "source_refs"))
