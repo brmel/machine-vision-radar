@@ -20,7 +20,7 @@ export const SourceFields: FC<{ sources: readonly JsonRecord[]; source: SourceCh
   const types = terms(model, entity(model, "Source").fields.find((f) => f.name === "type")?.vocabulary);
   return (
     <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <legend className={`${TYPE.section} mb-2`}>{t("adminSource")}</legend>
+      <legend className={`${TYPE.section} mb-2`}>{t("mediaSource")}</legend>
       <Field label={`${t("adminSourceCited")} *`}>
         <select className={CONTROL} value={"existing" in source ? source.existing : ""} onChange={pick}>
           {sources.map((s) =>

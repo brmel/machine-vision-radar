@@ -9,6 +9,7 @@ from typing import Sequence
 from .adapters.console import log
 from .adapters.wiring.root import Wiring
 from .adapters.wiring.stores import NoStore
+from .domain.ports.search.search_engine import IndexMismatch, NoIndex
 from .commands.catalog import ask, compare, evaluation, get, history, search, sources
 from .commands.data import category, hub, metrics, quality, validate
 from .commands.build import export, gen_model, index
@@ -44,7 +45,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args.wiring = Wiring(args.project, args.yes)
     try:
         return int(args.func(args) or 0)
-    except NoStore as exc:
+    except (NoStore, NoIndex, IndexMismatch) as exc:
         return log.error(str(exc), code=2)
     except Exception as exc:
         log.debug(traceback.format_exc())

@@ -31,7 +31,7 @@ export const ArticlePage: FC<{ id: string }> = ({ id }) => {
       )}
       <ArticleForm row={row} onSaved={onDone} />
       {row.published_at && <Decision noteLabel={t("adminNewsRetractNote")}
-        actions={[{ label: t("adminNewsRetract"), run: retract }]} />}
+        actions={[{ label: t("adminRetract"), run: retract }]} />}
     </section>
   );
 };

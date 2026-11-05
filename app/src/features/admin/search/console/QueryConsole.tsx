@@ -25,7 +25,7 @@ export const QueryConsole: FC<{ onFail: (err: unknown) => void }> = ({ onFail })
           required /></Field>
         <label className="flex items-center gap-2 text-body"><input type="checkbox" checked={semantic}
           onChange={onSemantic} />{t("adminConsoleSemantic")}</label>
-        <Button type="submit">{t("adminConsoleFind")}</Button>
+        <Button type="submit">{t("adminSearch")}</Button>
       </form>
       {hits && (
         <RowList ordered label={t("adminConsoleHits")}>

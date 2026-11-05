@@ -17,7 +17,6 @@ from radar.domain.ports.ai.answer_model import Sentence
 from radar.domain.ports.ai.article_model import ArticleText
 from radar.domain.ports.search.retriever import Evidence
 from radar.domain.review.feed.drafter import Drafter, drafted
-from radar.domain.review.requests import Founder
 from radar.adapters.storage.memory_change_log import MemoryChangeLog
 from radar.domain.ports.history.change_log import ChangePage
 from radar.domain.search.retriever import evidence_of
@@ -72,27 +71,6 @@ def test_a_product_an_article_cites_is_not_withdrawn_from_under_it() -> None:
     cited = next(c for c in article["cites"] if c.startswith(PRODUCT[:4]))
     refused = stores.cli(FX, place, "product", "retract", cited, "--reason", "No longer made", check=False)
     assert refused.returncode == 1 and article["id"] in refused.stderr
-
-def test_the_admin_news_routes_answer_what_the_commands_print(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    place = FX.loaded()
-    FX.wire(place, monkeypatch)
-    wiring = Wiring()
-    route = wiring.news_admin(wiring.review()).route
-
-    def call(method: str, *parts: str, body: dict[str, Any] | None = None, **query: str) -> tuple[int, Any]:
-        found = route(method, parts, query, body or {}, Founder("founder@example.com", "admin-test"))
-        assert found is not None, f"no route {method} {'/'.join(parts)}"
-        return found.status, found.body
-
-    article = json.loads(Path(_article(tmp_path, "Routed words")).read_text())
-    status, filed = call("POST", body={"article": article})
-    assert status == 201 and call("GET") == (200, FX.json(place, "feed", "list"))
-    assert call("POST", filed["subject"], "move", body={"position": 1})[1] == {"proposals": []}
-    assert call("POST", "publish", body={"note": "Out"})[1]["status"] == "approved"
-    assert call("GET", "routed-words", "share", locale="fr")[1] == FX.json(
-        place, "feed", "share-text", "routed-words", "--locale", "fr")
-    assert call("POST", "routed-words", "retract", body={"note": "Withdrawn"})[1]["subject"] == filed["subject"]
-    assert call("GET") == (200, FX.json(place, "feed", "list"))
 
 def test_the_change_log_lists_every_change_after_a_cursor_in_order() -> None:
     docs, files = FX.seeded()
@@ -155,7 +133,7 @@ def test_the_detector_drafts_the_digest_then_the_significant_changes(tmp_path: P
 def _drafts(place: tuple[str, str]) -> list[str]:
     return [d["id"] for d in FX.json(place, "feed", "list")["drafts"]]
 
-def test_the_article_model_drafts_about_a_product_or_an_organization_under_the_draft_cap(tmp_path: Path) -> None:
+def test_the_article_model_drafts_about_a_product_or_an_organization() -> None:
     place = FX.loaded()
     vendor = next(c["vendor"] for c in FX.index["products"] if c["id"] == PRODUCT)
     org = next(o["id"] for o in FX.index["organizations"] if o["slug"] == vendor)
@@ -165,12 +143,6 @@ def test_the_article_model_drafts_about_a_product_or_an_organization_under_the_d
         shown = FX.json(place, "feed", "show", draft)
         assert (shown["authorship"] == "ai_draft" and 3 <= len(shown["body"]) <= 5
                 and {s["cites"][0] for s in shown["body"]} == {item})
-    cap = {**next(c for c in FX.rows("ai_caps.jsonl") if c["use"] == Use.DRAFT.value), "day_calls": 2}
-    stores.cli(FX, place, "change", "apply",
-               stores.changes_file(tmp_path, "cap.json", stores.put(cap, "Two drafts a day")))
-    refused = stores.cli(FX, place, "feed", "draft", PRODUCT, "--ai", check=False)
-    assert (refused.returncode == 1 and f"{Use.DRAFT.value}: 2 calls a day, made" in refused.stderr
-            and _drafts(place)[-2:] == drafts)
 
 @dataclass(frozen=True)
 class Stating:

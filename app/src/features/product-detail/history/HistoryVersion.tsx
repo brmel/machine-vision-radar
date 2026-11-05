@@ -12,7 +12,7 @@ export const HistoryVersion: FC<{ version: HistoryEntry; productId: string }> = 
     { human: t("historyActor_human"), agent: t("historyActor_agent"), import: t("historyActor_import") };
   const field = (path: string) =>
     (path.split(".")[0] in specs ? specRowLabel(path.split(".")[0], specs, locale) : path);
-  const version = t("historyVersion", { version: v.version });
+  const version = t("footerVersion", { version: v.version });
   const heading = v.entity === productId ? version
     : `${v.spec && v.spec in specs ? specRowLabel(v.spec, specs, locale) : v.spec ?? v.entity} · ${version}`;
   const change = (c: FieldChangeView) => (

@@ -7,9 +7,9 @@ from typing import Callable, Sequence, TypeVar
 
 from radar.adapters.console import log, output
 from radar.domain.ai.eval import Graded, graded_answer, graded_draft, graded_extraction, graded_solution
-from radar.domain.ai.meter import Capped, Meter
+from radar.domain.ai.meter import Meter
 from radar.domain.model.entities import EvalQuery
-from radar.domain.ports.search.search_engine import IndexMismatch, NoIndex, SearchRequest
+from radar.domain.ports.search.search_engine import SearchRequest
 from radar.domain.search.eval import evaluate
 from radar.adapters.console.parser import Commands
 
@@ -50,14 +50,7 @@ def _queries(args: argparse.Namespace, queries: Sequence[EvalQuery]) -> float:
     return _graded(args, args.wiring.draft_meter(), [partial(graded_draft, retriever, q) for q in queries])
 
 def _scored(args: argparse.Namespace, score: Callable[[], float]) -> int:
-    try:
-        rate = score()
-    except (NoIndex, IndexMismatch) as exc:
-        return log.error(str(exc), code=2)
-    except Capped as exc:
-        return log.error(f"eval stopped at the AI budget's cap: {exc}")
-    except (OSError, ValueError, RuntimeError) as exc:
-        return log.error(f"eval failed: {exc}")
+    rate = score()
     if args.floor is not None and rate < args.floor:
         return log.error(f"{args.use}: {rate:.2f} is under the floor {args.floor}")
     return 0

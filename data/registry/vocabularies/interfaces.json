@@ -4,6 +4,7 @@
   {"id": "5gige", "label": {"en": "5GigE", "fr": "5GigE"}},
   {"id": "10gige", "label": {"en": "10GigE", "fr": "10GigE"}},
   {"id": "25gige", "label": {"en": "25GigE", "fr": "25GigE"}},
+  {"id": "100gige", "label": {"en": "100GigE", "fr": "100GigE"}},
   {"id": "gige_vision", "label": {"en": "GigE Vision", "fr": "GigE Vision"}},
   {"id": "poe", "label": {"en": "Power over Ethernet", "fr": "Alimentation par Ethernet (PoE)"}},
   {"id": "usb2", "label": {"en": "USB 2.0", "fr": "USB 2.0"}},

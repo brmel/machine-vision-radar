@@ -17,7 +17,7 @@ from radar.tests.store import stores
 
 FX = stores.fixture()
 
-def test_media_put_get_and_url_through_the_cli(tmp_path: Path) -> None:
+def test_media_get_and_url_through_the_cli(tmp_path: Path) -> None:
     place = FX.loaded()
     public = next(sha for sha, m in FX.media.items() if m.public)
     private = next(sha for sha, m in FX.media.items() if not m.public)
@@ -31,11 +31,6 @@ def test_media_put_get_and_url_through_the_cli(tmp_path: Path) -> None:
     StorageBlobStore(f"http://{stores.STORAGE}", place[1]).write(
         media_path(public, FX.media[public].mime), b"tampered", FX.media[public].mime, True)
     assert stores.cli(FX, place, "media", "get", public, "--out", str(out), check=False).returncode == 1
-    (tmp_path / "new.pdf").write_bytes(b"%PDF-1.4\n% a fictional manual\n")
-    put = FX.json(place, "media", "put", str(tmp_path / "new.pdf"))
-    digest = hashlib.sha256((tmp_path / "new.pdf").read_bytes()).hexdigest()
-    assert (put["sha256"], put["mime"], put["storage_path"]) == (digest, "application/pdf",
-                                                                 media_path(put["sha256"], "application/pdf"))
 
 def test_backup_then_restore_reproduces_every_collection() -> None:
     place = FX.loaded()

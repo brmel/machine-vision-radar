@@ -1,9 +1,9 @@
 import { type FC } from "react";
 import type { CatalogRepository } from "../../../domain/ports/CatalogRepository.ts";
-import { Breadcrumbs, DetailState, PageHeader, StatePanel, useRead } from "../../../ui/index.ts";
+import { Breadcrumbs, PageHeader, StatePanel, useRead } from "../../../ui/index.ts";
 import { browsePath, productPath } from "../../../domain/paths.ts";
 import { useI18n } from "../../../shell/i18n/index.tsx";
-import { useDetailStateLabels } from "../../../shell/i18n/labels.ts";
+import { DetailState } from "../../../shell/layout/DetailState.tsx";
 import { logger } from "../../../shell/logger.ts";
 import { HistoryVersion } from "./HistoryVersion.tsx";
 
@@ -22,11 +22,10 @@ export const ProductHistory: FC<ProductHistoryProps> = ({ repository, productId,
     `history:${productId}`,
     (err) => logger.error("history page: failed to load", { product: productId }, err),
   );
-  const labels = useDetailStateLabels(t("productNotFound"));
   const catalog = { label: t("catalogTitle"), href: browsePath(""), onOpen: onBrowse };
   if (read.error || !read.value?.product) {
     return <DetailState loading={read.isLoading} failed={read.error} trail={<Breadcrumbs label={t("breadcrumbLabel")}
-      trail={[catalog]} />} labels={labels} skeleton={{ count: 3, type: "row" }} />;
+      trail={[catalog]} />} missing={t("productNotFound")} skeleton={{ count: 3, type: "row" }} />;
   }
   const { product, history } = read.value;
   const versions = history?.versions ?? [];

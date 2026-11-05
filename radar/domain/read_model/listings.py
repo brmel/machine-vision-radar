@@ -38,11 +38,11 @@ def index_card(view: ProductView) -> ProductCard:
     return card(view, tuple([c.key for c in view.core if c.value is not None][:CARD_SPECS]))
 
 def listing_card(registry: Registry, view: ProductView) -> ProductCard:
-    profile = next(p for p in registry.profiles if p.category_id == view.category)
+    profile = registry.profile(view.category)
     return card(view, tuple(dict.fromkeys((*profile.sections.core, *(f.field for f in profile.facets)))))
 
 def paginate(registry: Registry, category: str, cards: Sequence[ProductCard]) -> list[CategoryPage]:
-    profile = next(p for p in registry.profiles if p.category_id == category)
+    profile = registry.profile(category)
     sorted_cards = sorted(cards, key=lambda c: (c.name.lower(), c.id))
     ordered = [plain(c) for c in sorted_cards]
     facets = compute_category_facets(registry, profile, ordered)

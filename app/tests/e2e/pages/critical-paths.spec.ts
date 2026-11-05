@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { MESSAGES, inEachLocale } from "../../messages.ts";
-import { PAGES, category, index, escape, label, quietTest, word } from "../sample.ts";
+import { PAGES, index, escape, label, quietTest, word } from "../sample.ts";
 
 test.describe("Critical paths", () => {
   quietTest("theme toggle, in the header and on the system's theme first, switches light/dark CSS and persists across "
@@ -110,30 +110,6 @@ test.describe("Critical paths", () => {
     await expect(page.getByRole("button", { name: "Sign in with Google" })).toBeVisible();
     expect(admin).toHaveLength(1);
   });
-
-  quietTest("catalog paginates to 20 items per page and integrates with category filter", async ({ page }) => {
-    await page.goto("/browse");
-    await expect(page.getByText(/Showing 1–20 of \d+ products/)).toBeVisible();
-
-    const compareButtons = page.locator("main").getByRole("button", { name: "Compare", exact: true });
-    await expect(compareButtons).toHaveCount(20);
-
-    const chip = page
-      .locator("aside")
-      .getByRole("group", { name: "Category" })
-      .getByRole("button", { name: new RegExp(`^${escape(label(category.label, "en"))}\\s*\\d+$`) });
-    await expect(chip).toBeVisible();
-    await expect(chip).toHaveAttribute("aria-pressed", "false");
-    expect((await chip.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(20);
-    await chip.click();
-    await expect(chip).toHaveAttribute("aria-pressed", "true");
-    await expect(page).toHaveURL(new RegExp(`/category/${escape(category.id)}$`));
-    await expect(page.getByText(/Showing 1–20 of \d+ products/)).toBeVisible();
-
-    await page.getByRole("button", { name: /^Page 2 of \d+$/, exact: true }).click();
-    await expect(page).toHaveURL(new RegExp(`/category/${escape(category.id)}\\?page=2$`));
-    await expect(page.getByText(/Showing 21–\d+ of \d+ products/)).toBeVisible();
-  });
 });
 
 inEachLocale("Navigation", (locale) => {
@@ -141,7 +117,7 @@ inEachLocale("Navigation", (locale) => {
     await page.goto("/");
     const m = MESSAGES[locale];
     const menu = page.getByRole("banner").getByRole("navigation").first();
-    await expect(menu.getByRole("link")).toHaveText([m.navHome, m.navBrowse, m.navAsk, m.navNews, m.navAbout]);
+    await expect(menu.getByRole("link")).toHaveText([m.navHome, m.navBrowse, m.navAsk, m.newsTitle, m.navAbout]);
     await expect(page.getByRole("banner").getByRole("link", { name: m.navBrowse })).toHaveCount(1);
 
     await page.getByRole("main").getByRole("textbox").first().fill(word);

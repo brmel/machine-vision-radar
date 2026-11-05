@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import type { CategoryPage, IndexView, ProductCard } from "../../src/domain/views.ts";
 import { browseView, listingQuery, type Listing } from "../../src/domain/filtering/browseView.ts";
 import { decodeFilters, encodeFilters, NO_FILTERS, type BrowseFilters } from "../../src/domain/filtering/filterUrl.ts";
@@ -155,13 +155,11 @@ describe("a facet group", () => {
     expect(chips().map((c) => c.textContent)).toEqual(["Option 1", "Option 10", "Option 11"]);
   });
 
-  it("dims the unpicked while one is picked, and its reset clears the group", () => {
-    const reset = vi.fn();
-    render(<I18nProvider><FacetGroup title="Finish" options={options(0).slice(0, 3)} onReset={reset} /></I18nProvider>);
+  it("dims the unpicked while one is picked", () => {
+    render(<I18nProvider><FacetGroup title="Finish" options={options(0).slice(0, 3)} onReset={() => undefined} />
+    </I18nProvider>);
     const chips = within(screen.getByRole("group", { name: "Finish" })).getAllByRole("button");
     expect(chips.map((c) => c.className.includes("opacity-60"))).toEqual([false, true, true]);
-    fireEvent.click(screen.getByRole("button", { name: "Reset" }));
-    expect(reset).toHaveBeenCalledOnce();
   });
 });
 

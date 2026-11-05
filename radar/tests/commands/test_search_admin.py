@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Sequence
+from pathlib import Path
+from typing import Any
 
 import pytest
 
-from radar.adapters.ai.search.fastembed_embedder import FastembedEmbedder
 from radar.adapters.web.admin.search import SearchAdmin
 from radar.adapters.wiring.root import Wiring
 from radar.domain.ai.budget import Use
@@ -54,11 +54,10 @@ def test_an_update_is_recorded_and_the_settings_name_the_registry_s_one_model(pl
         _route(admin, "POST", "caps", body={"use": Use.ASK.value, "model": "", "reason": "a mistake"})
 
 def test_a_failed_rebuild_is_answered_with_its_error_and_recorded(
-        place: tuple[str, str], monkeypatch: pytest.MonkeyPatch) -> None:
-    def unloaded(self: FastembedEmbedder, texts: Sequence[str]) -> list[list[float]]:
-        raise RuntimeError("the model did not load")
-
-    monkeypatch.setattr(FastembedEmbedder, "embed", unloaded)
+        place: tuple[str, str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HF_HUB_OFFLINE", "1")
+    monkeypatch.setenv("FASTEMBED_CACHE_PATH", str(tmp_path))
     status, body = _route(_admin(), "POST", "rebuild")
-    assert (status, body) == (500, {"error": "the index rebuild failed: the model did not load"})
-    assert _route(_admin(), "GET", "status")[1]["runs"][0]["error"] == "the model did not load"
+    error = _route(_admin(), "GET", "status")[1]["runs"][0]["error"]
+    assert (status, body) == (500, {"error": f"the index rebuild failed: {error}"})
+    assert error.startswith(f"fastembed could not load {FX.registry.search.model}")

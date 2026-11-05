@@ -155,9 +155,9 @@ inEachLocale("the review queue", (locale) => {
     await page.getByRole("link", { name: T.adminLogTitle }).click();
     await expect(page).toHaveURL(/\/admin\/queue\/log$/);
     await page.reload();
-    for (const action of [T.adminActionSubmit, T.adminActionEdit, T.adminActionApprove, T.adminActionReject,
-      T.adminActionRetract]) await expect(page.getByText(action, { exact: true }).first()).toBeVisible();
-    expect(await page.getByText(T.adminActionApprove, { exact: true }).count()).toBeGreaterThanOrEqual(6);
+    for (const action of [T.adminActionSubmit, T.adminActionEdit, T.adminStatusApproved, T.adminStatusRejected,
+      T.adminStatusRetracted]) await expect(page.getByText(action, { exact: true }).first()).toBeVisible();
+    expect(await page.getByText(T.adminStatusApproved, { exact: true }).count()).toBeGreaterThanOrEqual(6);
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem("cspViolations") ?? "[]"))).toEqual([]);
     await page.goto(`/admin/queue/log?actor=${encodeURIComponent(`nobody ${run}`)}`);
     await expect(page.getByText(T.adminLogEmpty, { exact: true })).toBeVisible();

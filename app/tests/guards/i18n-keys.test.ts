@@ -54,11 +54,9 @@ describe("languages and their strings", () => {
 
   it("translates every string, except names and words French writes the same way", () => {
     const sameInBoth =
-      new Set(["adminSearchNavIndex", "adminSearchNavConsole", "adminSearchVersion", "adminConsoleQuestion",
-        "footerVersion", "tabSources", "navAdmin", "historyVersion", "versionField_label", "adminActorAgent",
-        "adminActorImport",
-      "adminSources", "adminSource", "adminNavAgents", "mediaSource", "agentsClientClaudeCode", "agentsClientCursor",
-      "productDescription"]);
+      new Set(["adminSearchNavIndex", "adminSearchNavConsole", "adminConsoleQuestion", "footerVersion", "tabSources",
+        "navAdmin", "versionField_label", "adminActorAgent", "adminActorImport", "mediaSource", "adminNavAgents",
+        "agentsClientClaudeCode", "agentsClientCursor", "productDescription"]);
     const untranslated = Object.entries(MESSAGES.fr).filter(([key, text]) =>
       text === MESSAGES.en[key as keyof typeof DEFAULT_MESSAGES] && !sameInBoth.has(key)).map(([key]) => key);
     expect(untranslated).toEqual([]);

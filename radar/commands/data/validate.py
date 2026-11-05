@@ -4,18 +4,13 @@ import argparse
 from dataclasses import asdict
 
 from radar.adapters.console import log, output
-from radar.domain.model.schema import SchemaError
 from radar.domain.validation.context import ValidationContext
 from radar.domain.validation.runner import validate
 from radar.adapters.console.parser import Commands
 
 def run(args: argparse.Namespace) -> int:
-    try:
-        schema, registry = args.wiring.model()
-        catalog, whole = args.wiring.catalog_at(args.path)
-    except (SchemaError, ValueError) as exc:
-        return log.error(str(exc))
-
+    schema, registry = args.wiring.model()
+    catalog, whole = args.wiring.catalog_at(args.path)
     res = validate(ValidationContext(catalog, registry, schema, args.wiring.today(), whole_catalog=whole))
     if args.json:
         output.format_output({"ok": res.ok, "errors": [asdict(f) for f in res.errors],

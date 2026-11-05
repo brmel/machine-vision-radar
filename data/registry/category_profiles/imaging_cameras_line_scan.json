@@ -2,7 +2,7 @@
   "category_id": "imaging.cameras.line_scan",
   "sections": {
     "core": ["width_px", "line_rate", "interfaces"],
-    "detail": ["lens_mount", "sensor_length", "spectral_range"],
+    "detail": ["lens_mount", "sensor_length", "spectral_range", "power"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },

@@ -4,7 +4,7 @@ import json
 from typing import Any
 
 from radar.domain.ai.prompts import Prompt
-from radar.adapters.ai.prompted.reply import ask, read
+from radar.adapters.ai.prompted.reply import read
 from radar.domain.ports.ai.prompts import ModelRunner
 from radar.adapters.files.model_json import LANGUAGES as CONTRACT_LANGUAGES
 from radar.domain.ports.ai.answer_model import AnswerText, NeedText, Sentence
@@ -34,5 +34,5 @@ class PromptedAnswerModel:
     def answer(self, question: str, evidence: Evidence, locale: str) -> AnswerText:
         request = self._prompt.render(language=LANGUAGES.get(locale, locale), evidence=evidence_json(evidence),
                                       question=question)
-        reply = ask(self._runner, self._prompt, request, MAX_TOKENS)
+        reply = self._runner.reply(self._prompt, request, MAX_TOKENS)
         return read(reply, lambda raw: _text(raw, reply.tokens_in, reply.tokens_out))

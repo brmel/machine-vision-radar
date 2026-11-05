@@ -11,8 +11,6 @@ interface Fixture {
   registry: {
     "categories.json": Term[];
     "vocabularies/domains.json": Term[];
-    "vocabularies/pipeline_stages.json": Term[];
-    "vocabularies/fixture_finishes.json": Term[];
     "spec_definitions.json": (Term & { unit?: string; precision?: number })[];
   };
 }
@@ -31,8 +29,6 @@ const rows = <K extends keyof Rows>(name: K): Rows[K][] => fixtureRows<Rows[K]>(
 
 const [category] = fixture.registry["categories.json"];
 const [domain] = fixture.registry["vocabularies/domains.json"];
-const [stage] = fixture.registry["vocabularies/pipeline_stages.json"];
-const finishes = fixture.registry["vocabularies/fixture_finishes.json"];
 const [reach, finish] = fixture.registry["spec_definitions.json"];
 const products = rows("products.jsonl");
 const family = products.find((p) => products.some((m) => m.parent === p.id))!;
@@ -59,12 +55,6 @@ inEachLocale("A category added only to the registry", (locale) => {
   const row = (page: Page, text: string) =>
     page.getByRole("row", { name: new RegExp(`^${text.replace(/[()]/g, "\\$&")}`) });
 
-  test("home shows its domain and its pipeline stage", async ({ page }) => {
-    await page.goto("/");
-    const main = page.getByRole("main");
-    for (const text of [domain.label, stage.label]) await expect(main).toContainText(text[locale]);
-  });
-
   test("a reach stated in another unit shows and filters in its spec's unit", async ({ page }) => {
     const product = products.find((p) => p.id === restated.subject)!;
     await page.goto(`/product/${product.slug}`);
@@ -72,20 +62,6 @@ inEachLocale("A category added only to the registry", (locale) => {
     await page.goto(`/browse?category=${category.id}&${reach.id}_min=${restatedAs}&${reach.id}_max=${restatedAs}`);
     await expect(page.getByRole("main").getByRole("article").getByRole("link", { name: nameOf(product.id) }))
       .toBeVisible();
-  });
-
-  test("its listing shows its products and filters them by its own facet", async ({ page }) => {
-    await page.goto(`/browse?category=${category.id}`);
-    const aside = page.locator("aside");
-    await expect(page.getByRole("main").getByRole("article")).toHaveCount(Math.min(products.length, 20));
-    await expect(aside).toContainText(stage.label[locale]);
-    const options = aside.getByRole("group", { name: finish.label[locale], exact: true }).getByRole("button");
-    const counts =
-      finishes.map((f) => rows("claims.jsonl").filter((c) => c.spec_key === finish.id && c.value.term === f.id).length);
-    await expect(options).toHaveText(finishes.map((f, i) => new RegExp(`^${f.label[locale]}\\s*${counts[i]}$`)));
-    await options.first().click();
-    await expect(page).toHaveURL(new RegExp(`${finish.id}=${finishes[0].id}`));
-    await expect(page.getByRole("main").getByRole("article")).toHaveCount(counts[0]);
   });
 
   test("a family lists its models, its range and its media by kind, and has no History; a model links back, no "

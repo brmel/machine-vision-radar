@@ -109,9 +109,6 @@ class StorageBlobStore:
             if not token:
                 return
 
-    def path_of(self, ref: BlobRef) -> str:
-        return media_path(ref.sha256, ref.mime)
-
     def url(self, ref: BlobRef, public: bool) -> str:
         if public:
             return f"{self._object(media_path(ref.sha256, ref.mime))}?alt=media"

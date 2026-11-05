@@ -22,7 +22,7 @@ inEachLocale("the news's desk", (locale) => {
       if (SOCIAL.test(new URL(r.url()).hostname)) social.push(r.url());
     });
     await page.goto("/admin/news");
-    await expect(page.getByRole("heading", { level: 1, name: T.adminNewsTitle })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: T.adminNavNews })).toBeVisible();
 
     const write = async (title: string, vendorDate = "") => {
       await page.getByRole("button", { name: T.adminNewsWrite }).click();
@@ -36,7 +36,7 @@ inEachLocale("the news's desk", (locale) => {
         await page.getByLabel(T.adminNewsEventSource).fill(source.id);
       }
       await page.getByRole("button", { name: T.adminNewsSave }).click();
-      await expect(page.getByRole("heading", { level: 1, name: T.adminNewsTitle })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: T.adminNavNews })).toBeVisible();
     };
     const [first, second] = [`First ${run}`, `Second ${run}`];
     await write(first, "2026-06");
@@ -85,8 +85,8 @@ inEachLocale("the news's desk", (locale) => {
       await page.goto("/admin/news");
       await page.getByRole("region", { name: T.adminNewsPublished }).getByRole("link", { name: title }).click();
       await page.getByLabel(T.adminNewsRetractNote).fill(`Withdrawn (${locale})`);
-      await page.getByRole("button", { name: T.adminNewsRetract }).click();
-      await expect(page.getByRole("heading", { level: 1, name: T.adminNewsTitle })).toBeVisible();
+      await page.getByRole("button", { name: T.adminRetract }).click();
+      await expect(page.getByRole("heading", { level: 1, name: T.adminNavNews })).toBeVisible();
     };
     await retract(first);
     await retract(second);

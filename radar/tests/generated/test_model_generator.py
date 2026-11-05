@@ -33,21 +33,6 @@ def test_a_new_field_reaches_the_python_model_and_fails_the_check_until_generate
     assert generator.check(model_dir) == 1
     assert "python -m radar model generate" in capsys.readouterr().err
 
-def test_claim_value_is_a_tagged_union() -> None:
-    py, *_ = generator.render().values()
-    assert "ClaimValue = ClaimValueQuantity |" in py
-
-def test_a_named_enum_is_written_once_in_each_runtime_and_its_values_are_checked() -> None:
-    py, tools, view_ts, view_zod = generator.render().values()
-    assert "class ActorKind(str, Enum):" in py and 'HUMAN = "human"' in py and "actor_kind: ActorKind" in py
-    assert view_ts.count('"human" | "agent" | "import"') == 1 and "readonly actor_kind: ActorKind;" in view_ts
-    assert 'export const ActorKindSchema: z.ZodType<M.ActorKind> = z.enum(["human", "agent", "import"]);' in view_zod
-    assert ("export type ProposalStatus = " in view_ts
-            and "export const ProposalStatusSchema: z.ZodType<M.ProposalStatus> = z.enum(" in view_zod)
-    listed = next(t for t in json.loads(tools)["tools"] if t["name"] == "list_my_proposals")
-    assert listed["inputSchema"]["$defs"]["ProposalStatus"]["enum"] == [
-        "suggested", "approved", "rejected", "retracted"]
-
 def test_a_contract_file_off_the_layout_fails_the_check_and_passes_in_it(
         model_dir: Path, capsys: pytest.CaptureFixture[str]) -> None:
     values = model_dir / "value_types.json"

@@ -1,10 +1,10 @@
 import { useMemo, type FC } from "react";
 import type { CatalogRepository } from "../../../domain/ports/CatalogRepository.ts";
-import { Badge, Breadcrumbs, DetailState, Facts, PageHeader, SourceChip, formatDate, formatPartialDate, localized,
+import { Badge, Breadcrumbs, Facts, PageHeader, SourceChip, formatDate, formatPartialDate, localized,
   useRead } from "../../../ui/index.ts";
 import { NEWS_PATH } from "../../../domain/paths.ts";
 import { useI18n } from "../../../shell/i18n/index.tsx";
-import { useDetailStateLabels } from "../../../shell/i18n/labels.ts";
+import { DetailState } from "../../../shell/layout/DetailState.tsx";
 import { buildArticleHeadMeta } from "../../../shell/seo/news.ts";
 import { useRecordHead } from "../../../shell/seo/documentHead.ts";
 import { SITE_ORIGIN } from "../../../shell/seo/siteOrigin.ts";
@@ -25,13 +25,12 @@ export const ArticleView: FC<ArticleViewProps> = ({ repository, slug, onNews, on
     (err) => logger.error("news: an article failed to load", { page: "article", slug }, err));
   const view = article.value;
   const head = useMemo(() => (view ? buildArticleHeadMeta(view, SITE_ORIGIN, locale) : null), [view, locale]);
-  const labels = useDetailStateLabels(t("articleNotFound"));
   useRecordHead(head, !article.isLoading && !article.error, t("articleNotFound"));
 
   const trail =
     <Breadcrumbs label={t("breadcrumbLabel")} trail={[{ label: t("newsTitle"), href: NEWS_PATH, onOpen: onNews }]} />;
-  if (!view) return <DetailState loading={article.isLoading} failed={article.error} trail={trail} labels={labels}
-    skeleton={{ count: 3, type: "row" }} />;
+  if (!view) return <DetailState loading={article.isLoading} failed={article.error} trail={trail}
+    missing={t("articleNotFound")} skeleton={{ count: 3, type: "row" }} />;
   const facts = [{ key: "added", label: t("newsAdded"),
     value: <time dateTime={view.published_at}>{formatDate(view.published_at, locale)}</time> }];
   if (view.event_date && view.event_source) {

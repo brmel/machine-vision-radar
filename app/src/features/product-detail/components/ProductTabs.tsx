@@ -1,4 +1,4 @@
-import { type FC } from "react";
+import { type FC, useState } from "react";
 import type { ProductView } from "../../../domain/views.ts";
 import { Section, Segmented, SpecTable, localized, localizedLang, specRowLabel,
   useRegistry } from "../../../ui/index.ts";
@@ -9,12 +9,8 @@ import { SourcesList } from "./SourcesList.tsx";
 import { ProductLifecycle } from "./ProductLifecycle.tsx";
 import { ProductMedia } from "./ProductMedia.tsx";
 
-export type ProductDetailTab = "specs" | "sources";
-
 interface ProductTabsProps {
   product: ProductView;
-  activeTab: ProductDetailTab;
-  onTabChange: (tab: ProductDetailTab) => void;
   onSelectProduct: (slug: string) => void;
 }
 
@@ -28,7 +24,8 @@ function byGroup(cells: Cells): { group?: string; cells: Cells }[] {
   }, []);
 }
 
-export const ProductTabs: FC<ProductTabsProps> = ({ product, activeTab, onTabChange, onSelectProduct }) => {
+export const ProductTabs: FC<ProductTabsProps> = ({ product, onSelectProduct }) => {
+  const [activeTab, setActiveTab] = useState<"specs" | "sources">("specs");
   const { t, locale, plural } = useI18n();
   const { spec_definitions: specDefs, spec_groups: groups } = useRegistry();
   const labels = useValueLabels();
@@ -42,7 +39,7 @@ export const ProductTabs: FC<ProductTabsProps> = ({ product, activeTab, onTabCha
   const unpublished = cells.filter((c) => c.value === undefined);
   return (
     <>
-      <Segmented look="tab" label={t("productTabsLabel")} value={activeTab} onChange={onTabChange} options={[
+      <Segmented look="tab" label={t("productTabsLabel")} value={activeTab} onChange={setActiveTab} options={[
         { id: "specs", label: t("tabSpecs"), count: cells.length - unpublished.length },
         { id: "sources", label: t("tabSources"), count: product.sources.length },
       ]} />

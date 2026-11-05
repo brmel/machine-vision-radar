@@ -1,11 +1,11 @@
 import type { FC } from "react";
 import type { CatalogRepository } from "../../domain/ports/CatalogRepository.ts";
 import type { ProductView } from "../../domain/views.ts";
-import { PageHeader, Table, localized, termLabel, useRead, useRegistry } from "../../ui/index.ts";
+import { PageHeader, StatePanel, Table, localized, termLabel, useRead, useRegistry } from "../../ui/index.ts";
 import { useI18n } from "../../shell/i18n/index.tsx";
 import { logger } from "../../shell/logger.ts";
 import { CompareActions } from "./CompareActions.tsx";
-import { CompareState } from "./CompareState.tsx";
+import { ReadState } from "../../shell/layout/ReadState.tsx";
 import { CompareHead } from "./table/CompareHead.tsx";
 import { CompareSection } from "./table/CompareSection.tsx";
 import { CompareTableRow, STICKY } from "./table/CompareTableRow.tsx";
@@ -36,7 +36,17 @@ export const CompareView: FC<CompareViewProps> = ({ repository, comparedIds, onC
   const onlyDifferences = showsOnlyDifferences(query);
 
   if (isLoading || error || products.length === 0) {
-    return <CompareState isLoading={isLoading} error={error} onBrowseMore={onBrowseMore} />;
+    return (
+      <div className="space-y-3">
+        <PageHeader title={t("compareTitle")} lead={t("compareSubtitle")} />
+        {isLoading || error ? (
+          <ReadState failed={error} skeleton={{ count: 3, type: "row" }} level={2} />
+        ) : (
+          <StatePanel tone="empty" title={t("compareEmptyTitle")}
+            action={{ label: t("addProductsToCompare"), onClick: onBrowseMore }} />
+        )}
+      </div>
+    );
   }
 
   const categoryById = (p: ProductView) => {
