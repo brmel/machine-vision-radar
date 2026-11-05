@@ -23,7 +23,7 @@ from radar.paths import DEV
 from radar.tests.store import stores
 
 FX = stores.fixture()
-PUBLIC, SCHEMA, READ, REGISTRY = FX.public, FX.schema, FX.read, FX.registry
+PUBLIC, MODEL, READ, REGISTRY = FX.public, FX.model, FX.read, FX.model.registry
 
 EMBEDDER = REGISTRY.search.model
 OTHER_MODEL = "BAAI/bge-small-en-v1.5"
@@ -77,11 +77,11 @@ def test_the_manifest_names_the_model_and_fingerprints_every_product() -> None:
 def test_an_update_embeds_only_the_changed_product_and_drops_the_removed_one(tmp_path: Path) -> None:
     public = Path(shutil.copytree(PUBLIC, tmp_path / "public"))
     bucket = stores.blobs()
-    engine = _engine(bucket, read=FilesCatalogRepository(public, SCHEMA))
+    engine = _engine(bucket, read=FilesCatalogRepository(public, MODEL))
     engine.index("rebuild")
     assert engine.index("update").embedded == ()
 
-    changed, removed = FilesCatalogRepository(public, SCHEMA).index().products[:2]
+    changed, removed = FilesCatalogRepository(public, MODEL).index().products[:2]
     view = json.loads((public / "products" / f"{changed.id}.json").read_text())
     (public / "products" / f"{changed.id}.json").write_text(
         json.dumps({**view, "summary": {"en": "A changed summary.", "fr": "Un résumé changé."}}))
@@ -147,7 +147,7 @@ def _summarised(tmp_path: Path, summaries: list[str]) -> tuple[ShardedSearch, li
     index = json.loads((public / "index.json").read_text())
     index["products"] = [{**c, "summary": said[c["id"]]} if c["id"] in said else c for c in index["products"]]
     (public / "index.json").write_text(json.dumps(index))
-    engine = _engine(stores.blobs(), read=FilesCatalogRepository(public, SCHEMA))
+    engine = _engine(stores.blobs(), read=FilesCatalogRepository(public, MODEL))
     engine.index("rebuild")
     return engine, ids
 

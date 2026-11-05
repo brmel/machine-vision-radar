@@ -35,9 +35,8 @@ def run_org(args: argparse.Namespace) -> int:
         day = datetime.date.fromisoformat(args.on) if args.on else args.wiring.today()
     except ValueError:
         return log.error(f"--on wants a date as YYYY-MM-DD, got '{args.on}'", code=2)
-    schema, registry = args.wiring.model()
-    org = _organization(args.wiring.catalog(schema, (Organization.__name__, OrgRelation.__name__)), registry, args.id,
-                        day)
+    org = _organization(args.wiring.catalog((Organization.__name__, OrgRelation.__name__)),
+                        args.wiring.model().registry, args.id, day)
     if org is None:
         return log.error(f"no organization '{args.id}'")
     return output.format_output(org, json_mode=True)

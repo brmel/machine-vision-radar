@@ -12,7 +12,7 @@ def run(args: argparse.Namespace) -> int:
     return check(as_json=args.json) if args.check else generate(as_json=args.json)
 
 def run_show(args: argparse.Namespace) -> int:
-    return output.format_output(plain(admin_model(*args.wiring.model())), json_mode=True)
+    return output.format_output(plain(admin_model(args.wiring.model())), json_mode=True)
 
 def register(commands: Commands) -> None:
     p = commands.verb("model", "generate", help="regenerate Python, TypeScript and Zod types from contracts/model/",

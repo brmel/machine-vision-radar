@@ -9,9 +9,9 @@ from radar.domain.validation.runner import validate
 from radar.adapters.console.parser import Commands
 
 def run(args: argparse.Namespace) -> int:
-    schema, registry = args.wiring.model()
+    model = args.wiring.model()
     catalog, whole = args.wiring.catalog_at(args.path)
-    res = validate(ValidationContext(catalog, registry, schema, args.wiring.today(), whole_catalog=whole))
+    res = validate(ValidationContext(catalog, model.registry, model.schema, args.wiring.today(), whole_catalog=whole))
     if args.json:
         output.format_output({"ok": res.ok, "errors": [asdict(f) for f in res.errors],
                               "warnings": [asdict(f) for f in res.warnings]}, json_mode=True)

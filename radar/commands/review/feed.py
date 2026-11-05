@@ -49,7 +49,7 @@ def _draft(args: argparse.Namespace) -> int:
     return _done(args, [args.wiring.drafter().draft(args.id, args.wiring.correlate("feed-draft"))])
 
 def _list(args: argparse.Namespace) -> int:
-    code = args.wiring.model()[1].default_language.code
+    code = args.wiring.model().registry.default_language.code
     return output.format_output(args.wiring.feed().desk(args.cursor), json_mode=args.json,
                                 text_formatter=lambda v: output.paged(plain(v), [
 *(f"draft {r.position:>3}  {r.slug}  {r.title[code]}" for r in v.drafts),
@@ -59,8 +59,8 @@ def _show(args: argparse.Namespace) -> int:
     return output.format_output(args.wiring.feed().row(args.id), json_mode=True)
 
 def _share(args: argparse.Namespace) -> int:
-    view = share_view(args.wiring.feed().item(args.id), args.locale or args.wiring.model()[1].default_language.code,
-                      paths.site_origin())
+    view = share_view(args.wiring.feed().item(args.id),
+                      args.locale or args.wiring.model().registry.default_language.code, paths.site_origin())
     return output.format_output(view, json_mode=args.json, text_formatter=lambda v: v["text"])
 
 def _acted(p: argparse.ArgumentParser, note: bool = True) -> argparse.ArgumentParser:

@@ -7,6 +7,7 @@ from radar.domain.model.entities import (AdminModel, AiCap, BundleMember, Bundle
                                          HeldProposal, KindEntry, OwnedShape, ProposalEdit, ProposalPage, ProposalView,
                                          ProposedChange, RefusedProposal, SectionKeys, SpecGroup, SpecShape, Term,
                                          TermList, TermRef, UnitShape)
+from radar.domain.model.model import Model
 from radar.domain.model.registry import Registry
 from radar.domain.model.schema import FieldSpec, ModelSchema, SchemaError, TypeSpec
 from radar.domain.model.history.changeset import EntityChange, changeset_json
@@ -96,7 +97,8 @@ def _specs(registry: Registry) -> dict[str, SpecShape]:
     return {k: SpecShape(label=dict(s.label), datatype=s.datatype, dimension=s.dimension, unit=s.unit,
                          vocabulary=s.vocabulary) for k, s in registry.spec_definitions.items()}
 
-def admin_model(schema: ModelSchema, registry: Registry) -> AdminModel:
+def admin_model(model: Model) -> AdminModel:
+    schema, registry = model.schema, model.registry
     types = [t for t in schema.entities if t.name not in OWNED]
     [absence] = [v.vocabulary for v in schema.types["ClaimValue"].variants if v.vocabulary]
     vocabularies = _vocabularies(types, registry, absence)

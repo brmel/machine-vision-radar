@@ -33,7 +33,7 @@ from radar.tests.store import stores
 from radar.tests.adapters.stub_server import EXCHANGE, META_EXCHANGE, Answer, meta_saying, serving, vertex_saying
 
 FX = stores.fixture()
-READ, REGISTRY = FX.read, FX.registry
+READ, REGISTRY = FX.read, FX.model.registry
 GEMINI = REGISTRY.ai.models[0]
 MUSE = next(m for m in REGISTRY.ai.models if isinstance(m.provider, AiProviderMeta))
 GLIMMER = next(m for m in REGISTRY.ai.models if isinstance(m.provider, AiProviderLocal))

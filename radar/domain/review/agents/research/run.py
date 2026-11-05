@@ -9,8 +9,7 @@ from urllib.parse import urlsplit
 from radar.domain.ai.meter import Capped, Meter
 from radar.domain.model.history.changeset import Change
 from radar.domain.model.entities import ResearchMeasures
-from radar.domain.model.registry import Registry
-from radar.domain.model.schema import ModelSchema
+from radar.domain.model.model import Model
 from radar.domain.ports.ai.image_judge import ImageJudge
 from radar.domain.ports.ai.research_agent import FileDraft, ProposalDraft, Reading, RecordsDraft, ResearchAgent
 from radar.domain.ports.ai.usage_log import Unparsed
@@ -44,17 +43,18 @@ def _read_through(run: ResearchRun) -> tuple[Ending, str]:
 class Researcher:
     def __init__(self, meter: Meter[ResearchAgent], judge: Meter[ImageJudge], fetcher: PageFetcher, files: Files,
                  review: Proposing, runs: ResearchRunLog, tokens: AgentTokens, read: CatalogRepository,
-                 held: HeldRecords, schema: ModelSchema, registry: Registry, now: Callable[[], str],
+                 held: HeldRecords, model: Model, now: Callable[[], str],
                  clock: Callable[[], float] = time.monotonic) -> None:
         self._meter, self._fetcher, self._runs, self._tokens, self._read, self._held = (
             meter, fetcher, runs, tokens, read, held)
         self._now, self._clock = now, clock
+        registry = model.registry
         self._page_type = next(k for k, t in registry.vocabularies["source_types"].items() if t.research)
-        self._terms, self._refs = terms(schema, registry), references(schema)
+        self._terms, self._refs = terms(model), references(model.schema)
         self._specs, self._words = registry.spec_definitions, words(registry)
-        self._filing = Filing(review, schema, held, self._log)
+        self._filing = Filing(review, model.schema, held, self._log)
         self._media = Media(fetcher, files, judge, self._filing, self._log, now)
-        self._measure = Measure(runs, review, read, held, schema, registry)
+        self._measure = Measure(runs, review, read, held, model)
 
     def start(self, scope: RunScope, by: Founder | Job) -> str:
         sites = sites_of(scope, self._held.organizations(), self._read)

@@ -17,7 +17,7 @@ from radar.domain.validation.rules.registry import no_filler_text, vocabularies
 from radar.domain.validation.rules.sources import source_integrity, source_preference
 from radar.domain.model.registry import composed
 from radar.domain.validation.runner import ALL_RULES, validate
-from radar.tests.fixtures.corpus import CORPUS, REGISTRY, SCHEMA
+from radar.tests.fixtures.corpus import CORPUS, MODEL, REGISTRY, SCHEMA
 
 TODAY = date(2026, 10, 17)
 
@@ -28,7 +28,7 @@ OUTSIDE = next(s.id for s in SPECS if s.datatype == "quantity" and s.dimension =
                and s.id not in {*_PROFILED.core, *_PROFILED.detail})
 
 def _ctx(raw: dict[str, Any], registry=REGISTRY) -> ValidationContext:
-    return ValidationContext(parse_catalog(raw, SCHEMA), registry, SCHEMA, TODAY)
+    return ValidationContext(parse_catalog(raw, MODEL), registry, SCHEMA, TODAY)
 
 def _claim(raw: dict, n: int) -> dict:
     return next(c for c in raw["claims"] if c["id"] == f"clm_{n:010d}")

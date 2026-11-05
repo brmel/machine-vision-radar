@@ -7,6 +7,7 @@ from typing import Any, Callable, Iterator, Mapping
 from radar.domain.model.history.changeset import Change
 from radar.domain.model.entities import Claim, Name, Product, ProductOrgRole, ProductVersion, Source, SpecDefinition
 from radar.domain.model.history.ids import keyed
+from radar.domain.model.model import Model
 from radar.domain.model.registry import Registry
 from radar.domain.model.schema import ModelSchema
 from radar.domain.ports.ai.research_agent import RecordsDraft, Terms
@@ -17,10 +18,10 @@ PROVENANCE = ("source_refs", "recorded_at", "method", "fetched_at")
 References = Mapping[str, list[tuple[str, str]]]
 Words = Mapping[str, Mapping[str, str]]
 
-def terms(schema: ModelSchema, registry: Registry) -> Terms:
-    return {kind.__name__: {f.name + ("" if f.optional else "*"): tuple(registry.items(v))
+def terms(model: Model) -> Terms:
+    return {kind.__name__: {f.name + ("" if f.optional else "*"): tuple(model.registry.items(v))
                             if (v := f.vocabulary or f.key_vocabulary) else ()
-                            for f in schema.types[kind.__name__].fields if f.name not in SET_BY_RUN}
+                            for f in model.schema.types[kind.__name__].fields if f.name not in SET_BY_RUN}
             for kind in PROPOSED}
 
 def references(schema: ModelSchema) -> References:

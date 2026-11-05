@@ -8,8 +8,7 @@ from typing import Mapping, Sequence
 from radar.domain.model.entities import (CategoryCells, Claim, Product, ProposalStatus, ResearchLine, ResearchMeasures,
                                          ResearchRunList, ResearchRunRow, ResearchRunView)
 from radar.domain.model.history.projection import every_page
-from radar.domain.model.registry import Registry
-from radar.domain.model.schema import ModelSchema
+from radar.domain.model.model import Model
 from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.ports.catalog.held_records import HeldRecords
 from radar.domain.ports.review.proposal_queue import Query
@@ -60,10 +59,11 @@ class _Value:
 
 class Measure:
     def __init__(self, runs: ResearchRunLog, review: Proposing, read: CatalogRepository, held: HeldRecords,
-                 schema: ModelSchema, registry: Registry) -> None:
-        self._runs, self._review, self._read, self._held, self._schema = runs, review, read, held, schema
-        self._filters = {p.category_id: frozenset(f.field for f in p.facets) for p in registry.profiles}
-        self._shown = {p.category_id: frozenset((*p.sections.core, *p.sections.detail)) for p in registry.profiles}
+                 model: Model) -> None:
+        self._runs, self._review, self._read, self._held, self._schema = runs, review, read, held, model.schema
+        profiles = model.registry.profiles
+        self._filters = {p.category_id: frozenset(f.field for f in p.facets) for p in profiles}
+        self._shown = {p.category_id: frozenset((*p.sections.core, *p.sections.detail)) for p in profiles}
 
     def since(self, instant: str, by: Founder) -> ResearchMeasures:
         runs, categories = _started(self._runs, instant), {card.id: card.category

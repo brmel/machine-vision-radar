@@ -6,7 +6,8 @@ from typing import Any, Iterable
 
 from radar.adapters.files.json_parser import parse_catalog
 from radar.adapters.storage.blobs import media_path
-from radar.domain.model import entities as model
+from radar.domain.model import entities
+from radar.domain.model.model import Model
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.history.projection import plain
 from radar.domain.read_model.listings import Tally, index_card
@@ -44,10 +45,10 @@ def held(docs: Docs, schema: ModelSchema, entity_id: str) -> Record | None:
     return record_of(found) if schema.kind_of(entity_id) and (found := docs.get(canonical(schema, entity_id))) else None
 
 def ranked_first(docs: Docs, schema: ModelSchema, record: Record) -> str | None:
-    if schema.kind_of(record["id"]) != model.Claim.__name__:
+    if schema.kind_of(record["id"]) != entities.Claim.__name__:
         return None
     return next((f["id"]
-                 for _, f in docs.where(schema.collection(model.Claim.__name__), "subject", [record.get("subject")])
+                 for _, f in docs.where(schema.collection(entities.Claim.__name__), "subject", [record.get("subject")])
                  if f.get("spec_key") == record.get("spec_key") and f.get("rank") == 1), None)
 
 def canonical_doc(record: dict[str, Any]) -> Fields:
@@ -61,16 +62,16 @@ def record_of(fields: Fields) -> Record:
 def read_records(docs: Docs, schema: ModelSchema, ids: Iterable[str]) -> dict[str, Record]:
     return {f["id"]: record_of(f) for f in docs.get_many([canonical(schema, i) for i in ids]).values()}
 
-def catalog_of(schema: ModelSchema, records: Iterable[Record]) -> Catalog:
+def catalog_of(model: Model, records: Iterable[Record]) -> Catalog:
     grouped: dict[str, list[Record]] = {}
     for r in sorted(records, key=lambda r: r["id"]):
-        kind = schema.kind_of(r["id"])
+        kind = model.schema.kind_of(r["id"])
         if kind:
-            grouped.setdefault(schema.collection(kind), []).append(r)
-    return parse_catalog(grouped, schema)
+            grouped.setdefault(model.schema.collection(kind), []).append(r)
+    return parse_catalog(grouped, model)
 
 def records_of(catalog: Catalog, schema: ModelSchema) -> list[Record]:
-    return [plain(e) for t in schema.entities if t.collection for e in catalog.all(getattr(model, t.name))]
+    return [plain(e) for t in schema.entities if t.collection for e in catalog.all(entities.CLASSES[t.name])]
 
 def value_at(fields: Fields, path: str) -> Any:
     value: Any = fields
@@ -96,7 +97,7 @@ def doc(value: Any, **extra: Any) -> Fields:
 def doc_value(found: Fields | None) -> Any:
     return json.loads(found["json"]) if found else None
 
-def product_doc(view: model.ProductView) -> Fields:
+def product_doc(view: entities.ProductView) -> Fields:
     return doc(view, slug=view.slug, card=as_json(index_card(view)), category=view.category,
                vendor=view.vendor.slug, name_key=view.name.lower(), vendor_key=view.vendor.name.lower(),
                uses=[c.id for c in view.components])
@@ -127,5 +128,5 @@ def public_docs(rm: ReadModel) -> dict[str, Fields]:
     out[f"{INDEX}/market"] = doc(rm.market)
     return out
 
-def news_docs(articles: dict[str, Any], feed: model.FeedPageView) -> dict[str, Fields]:
+def news_docs(articles: dict[str, Any], feed: entities.FeedPageView) -> dict[str, Fields]:
     return {f"{INDEX}/news": doc(feed), **{f"{NEWS}/{slug}": doc(v) for slug, v in articles.items()}}

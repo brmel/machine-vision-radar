@@ -34,9 +34,9 @@ FX = stores.fixture()
 @pytest.fixture(params=("files", "emulator"))
 def repository(request: pytest.FixtureRequest) -> CatalogRepository:
     if request.param == "files":
-        return FilesCatalogRepository(FX.public, FX.schema)
+        return FilesCatalogRepository(FX.public, FX.model)
     docs, _ = FX.seeded()
-    return StoreCatalogRepository(docs, FX.schema)
+    return StoreCatalogRepository(docs, FX.model)
 
 def test_catalog_repository(repository: CatalogRepository) -> None:
     index = repository.index()
@@ -110,7 +110,7 @@ def history(request: pytest.FixtureRequest) -> tuple[ChangeLog, VersionStore]:
         return log, Projection(log)
     docs = stores.fresh()
     docs.commit([Put(f"{layout.CHANGES}/{c.id}", plain(c)) for c in changes])
-    store_log = StoreChangeLog(docs, FX.schema)
+    store_log = StoreChangeLog(docs, FX.model)
     return store_log, StoreVersionStore(docs, store_log)
 
 class CountingDocs:
@@ -153,7 +153,7 @@ class CountingDocs:
 def test_a_second_detect_reads_none_of_the_changes_before_its_cursor() -> None:
     docs = CountingDocs(stores.fresh())
     docs.commit([Put(f"{layout.CHANGES}/{c.id}", plain(c)) for c in _changes("org_0000000001", "org_0000000002")])
-    log = StoreChangeLog(docs, FX.schema)
+    log = StoreChangeLog(docs, FX.model)
     first = log.after()
     assert len(first.changes) == docs.docs_read == 56
     second = log.after(first.cursor)
@@ -164,7 +164,7 @@ def test_a_rename_reads_referrers_per_reference_field_not_per_product() -> None:
     counted, org = CountingDocs(docs), FX.rows("organizations.jsonl")[0]
     renamed = stores.put({**org, "name": "Halden Imaging"}, "Renamed", [FX.rows("sources.jsonl")[0]["id"]])
     FX.writer(counted, files).check(stores.changeset(renamed))
-    fields = sum(1 for e in FX.schema.entities if e.collection for _ in FX.schema.reference_paths(e.name))
+    fields = sum(1 for e in FX.model.schema.entities if e.collection for _ in FX.model.schema.reference_paths(e.name))
     assert counted.queries <= 3 * fields, (counted.queries, fields)
 
 def test_change_log_and_version_store(history: tuple[ChangeLog, VersionStore]) -> None:
@@ -260,13 +260,13 @@ def test_admin_lists_read_at_most_one_page_of_documents() -> None:
     docs = CountingDocs(inner)
     queue, blobs = FX.queue(docs), stores.blobs()
     made = [_proposal(n, "scout", FilesOn.UPDATE, f"2026-10-18T10:{n:02d}:00Z") for n in range(25)]
-    inner.commit([Put(f"{layout.PROPOSALS}/{p.id}", proposal_doc(p, FX.registry.proposal_kinds()[p.files_on]))
+    inner.commit([Put(f"{layout.PROPOSALS}/{p.id}", proposal_doc(p, FX.model.registry.proposal_kinds()[p.files_on]))
                   for p in made]
                  + [Put(f"{layout.LOG}/{layout.newest_first(p.created_at)}-{p.id}-s-c",
                         plain(_entry(p, "submit", p.created_at))) for p in made])
 
     tokens, runs, records = (FirestoreAgentTokens(docs), FirestoreResearchRuns(docs),
-                             StoreRecords(docs, FX.schema, blobs))
+                             StoreRecords(docs, FX.model, blobs))
     docs.commit([Put(f"{TOKENS}/{t.id}",
                      {**dataclasses.asdict(t), "scope": t.scope.value, "expires": t.expires.isoformat()})
                  for t, _ in [issue(f"agt-{n}", Scope.READ, date(2026, 12, 31), Limits(), "2026-10-20T09:00:00Z")

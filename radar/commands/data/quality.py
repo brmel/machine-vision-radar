@@ -24,12 +24,12 @@ def _text(payload: dict[str, Any], coverage: Coverage, filing: bool) -> str:
     return "\n".join(lines)
 
 def run(args: argparse.Namespace) -> int:
-    schema, registry = args.wiring.model()
-    cat = args.wiring.catalog(schema)
+    model = args.wiring.model()
+    cat, registry = args.wiring.catalog(), model.registry
     found = Provenance.of(cat, registry, args.wiring.today())
     weak = sorted((f for f in found if f.weak), key=lambda f: f.product)
     names = identities(cat, registry)[0]
-    coverage = Coverage.of(cat, registry, read_model.thin(cat, registry, schema, *args.wiring.views()))
+    coverage = Coverage.of(cat, registry, read_model.thin(cat, model, *args.wiring.views()))
     filed: list[str] = []
     if args.file:
         review, job = args.wiring.review(), Job(ACTOR, args.wiring.correlate("quality"))
@@ -42,10 +42,10 @@ def run(args: argparse.Namespace) -> int:
     return output.format_output(payload, json_mode=args.json, text_formatter=lambda p: _text(p, coverage, args.file))
 
 def run_coverage(args: argparse.Namespace) -> int:
-    schema, registry = args.wiring.model()
+    registry = args.wiring.model().registry
     if args.category and args.category not in registry.categories:
         return log.error(f"no category '{args.category}'", fix="radar category list", code=2)
-    shares = spec_shares(args.wiring.catalog(schema), registry, args.category)
+    shares = spec_shares(args.wiring.catalog(), registry, args.category)
     return output.format_output({"categories": shares}, json_mode=args.json, text_formatter=lambda p: "\n".join(
         f"{c['category']} ({c['products']} products)\n" + "\n".join(
             f"  {s['share']:>6.1%}  {s['key']}" for s in c["specs"]) for c in p["categories"]))

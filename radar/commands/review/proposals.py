@@ -121,7 +121,7 @@ def run_put(args: argparse.Namespace) -> int:
     changeset = Changeset(tuple(c if c.source_refs else replace(c, source_refs=tuple(args.source or ()))
                                 for c in read.changes))
     return _file(args, FilesOn.CREATE if args.verb == "add" else FilesOn.UPDATE, changeset,
-                 changeset.subject(args.wiring.model()[0].types[NOUNS[args.cmd]]))
+                 changeset.subject(args.wiring.model().schema.types[NOUNS[args.cmd]]))
 
 def run_retract(args: argparse.Namespace) -> int:
     return show(args, args.wiring.review().submit(Withdrawal(args.id, args.reason), _founder(args)))

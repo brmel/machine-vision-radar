@@ -12,7 +12,7 @@ import pytest
 from radar.paths import DEV
 from radar.adapters.files.json_parser import parse_catalog
 from radar.domain.model.entities import ClaimValueQuantity, VersionRange
-from radar.tests.fixtures.corpus import CORPUS, FIXTURE, REGISTRY, SCHEMA
+from radar.tests.fixtures.corpus import CORPUS, FIXTURE, MODEL, REGISTRY
 
 def _cli(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run([sys.executable, "-m", "radar", *args], cwd=DEV, capture_output=True, text=True)
@@ -76,14 +76,14 @@ def _vrange(**kw: Any) -> VersionRange:
     return VersionRange(product="prd_0000000002", **kw)
 
 def test_catalog_is_typed_and_orders_versions_by_scheme() -> None:
-    cat = parse_catalog(CORPUS, SCHEMA)
+    cat = parse_catalog(CORPUS, MODEL)
     assert isinstance(cat.claims_for("prd_0000000002")[0].value, ClaimValueQuantity)
     assert [v.label for v in cat.versions_of("prd_0000000002")] == ["1.2.0", "1.10.0"]
     assert [v.label for v in cat.resolve(_vrange(min="1.10.0"))] == ["1.10.0"]
     assert [v.label for v in cat.resolve(_vrange(exclude=("1.2.0",)))] == ["1.10.0"]
     twice = parse_catalog({**CORPUS,
                            "product_versions": [*CORPUS["product_versions"],
-                                                {**CORPUS["product_versions"][0], "id": "ver_0000000099"}]}, SCHEMA)
+                                                {**CORPUS["product_versions"][0], "id": "ver_0000000099"}]}, MODEL)
     assert len(twice.resolve(_vrange(min="1.2.0"))) == 3
     scoped = next(c["spec_key"] for c in CORPUS["claims"] if c.get("applies_to_versions"))
     assert scoped not in {c.spec_key for c in cat.claims_for("prd_0000000002")}
@@ -93,4 +93,4 @@ def test_unknown_version_scheme_is_refused() -> None:
     for v in raw["product_versions"]:
         v["scheme"] = "lunar"
     with pytest.raises(ValueError, match="no ordering for version scheme 'lunar'"):
-        parse_catalog(raw, SCHEMA).versions_of("prd_0000000002")
+        parse_catalog(raw, MODEL).versions_of("prd_0000000002")

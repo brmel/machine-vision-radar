@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from radar.adapters.files.model_json import load_registry
-
-REGISTRY = load_registry()
+from radar.tests.fixtures.corpus import REGISTRY
 IDENTICAL_ALLOWLIST = frozenset({
     "Cloud", "Autofocus", "Multispectral", "Interface", "Article", "LiDAR", "Ultraviolet (UV)", "Services", "Transport",
     "Code", "Brochure", "Image", "Monochrome", "Radar", "Classification", "Segmentation", "Applications", "Interfaces",

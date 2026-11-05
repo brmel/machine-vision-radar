@@ -44,8 +44,8 @@ from radar.tests.store import stores
 M = TypeVar("M")
 
 FX = stores.fixture()
-DOCUMENTS = FX.registry.vocabularies["document_kinds"]
-NOW, SITE = stores.NOW, "https://example.com"
+REGISTRY, NOW, SITE = FX.model.registry, stores.NOW, "https://example.com"
+DOCUMENTS = REGISTRY.vocabularies["document_kinds"]
 MAKER = next(o for o in FX.rows("organizations.jsonl") if o["website"] == SITE)
 Heard = list[tuple[str, Mapping[str, str]]]
 
@@ -67,17 +67,16 @@ def _run(seeded: tuple[Docs, Any], heard: Heard, waits: list[float], on_get: Cal
         return serve(path, headers)
 
     def meter(use: Use, opened: Callable[[AiModel], M]) -> Meter[M]:
-        return Meter(FirestoreBudget(docs, FX.schema, FX.registry.ai), FirestoreUsageLog(docs), FX.registry.ai, use,
-                     "scripted", opened)
+        return Meter(FirestoreBudget(docs, FX.model), FirestoreUsageLog(docs), REGISTRY.ai, use, "scripted", opened)
 
     with serving(model, pages=page) as base:
         researcher = Researcher(meter(Use.RESEARCH, lambda chosen: agent(base, chosen)),
                                 meter(Use.RESEARCH, lambda chosen: judge(base, chosen)),
                                 PoliteFetcher(f"{SITE}/about", lambda: NOW, DOCUMENTS, base, lambda: 0.0, waits.append),
                                 Files(files, meter(Use.DATASHEET, lambda chosen: ScriptedDatasheetExtractor()),
-                                      FX.registry.vocabularies), FX.review(docs, files), FirestoreResearchRuns(docs),
-                                FirestoreAgentTokens(docs), StoreCatalogRepository(docs, FX.schema),
-                                StoreHeldRecords(docs, FX.schema), FX.schema, FX.registry, lambda: NOW, clock)
+                                      REGISTRY.vocabularies), FX.review(docs, files), FirestoreResearchRuns(docs),
+                                FirestoreAgentTokens(docs), StoreCatalogRepository(docs, FX.model),
+                                StoreHeldRecords(docs, FX.model), FX.model, lambda: NOW, clock)
         return researcher.status(researcher.start(scope, Founder("founder", Stores().correlate("research"))))
 
 def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
@@ -146,7 +145,7 @@ def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
 
 def _on_runner(base: str, chosen: AiModel) -> ResearchAgent:
     runner = MetaRunner(chosen.id, f"{base}/v1", "recorded")
-    return PromptedResearchAgent(FilesPromptRegistry(paths.PROMPTS).prompt("research"), runner, FX.registry)
+    return PromptedResearchAgent(FilesPromptRegistry(paths.PROMPTS).prompt("research"), runner, REGISTRY)
 
 def test_a_reply_cut_short_refuses_its_page_and_counts_in_the_run_s_cost(docs: tuple[Docs, Any]) -> None:
     run = _run(docs, [], [], agent=_on_runner, model=meta_saying('{"proposals": [{"files_on": "upd', []))
@@ -159,7 +158,7 @@ def test_a_run_on_its_model_gives_it_the_catalog_s_terms_and_refuses_a_draft_nam
         docs: tuple[Docs, Any]) -> None:
     card = next(p.id for p in FX.read.index().products if p.vendor == MAKER["slug"])
     model_id = "prd_0000000099"
-    first = {name: next(iter(FX.registry.vocabularies[name]))
+    first = {name: next(iter(REGISTRY.vocabularies[name]))
              for name in ("product_kinds", "product_org_roles", "version_kinds")}
     unknown = [{"id": model_id, "kind": first["product_kinds"], "category": "lighting.displays.touch",
                 "slug": "example-devices__touch"},
@@ -175,7 +174,7 @@ def test_a_run_on_its_model_gives_it_the_catalog_s_terms_and_refuses_a_draft_nam
     run = _run(docs, [], [], agent=_on_runner, model=meta_saying(json.dumps(said), heard))
 
     asked = json.loads(heard[0])["messages"][1]["content"][0]["text"]
-    assert all(f'"{term}"' in asked for term in (*FX.registry.categories, *FX.registry.spec_definitions)), (
+    assert all(f'"{term}"' in asked for term in (*REGISTRY.categories, *REGISTRY.spec_definitions)), (
         "every category and spec key")
     assert '"slug*": []' in asked and '"name' not in asked.split('"Product"', 1)[1].split("}", 1)[0], (
         "every Product field, required ones marked")
@@ -215,7 +214,7 @@ def test_a_file_is_staged_privately_and_public_only_once_approved_under_rights_t
     assert not readable(photo) and not readable(sheet), "staged privately"
     review.decide(Approval(Picked((photo.id,)), "The maker's photo"), founder).one()
     assert not readable(photo), "the maker's rights keep it private"
-    public = next(k for k, t in FX.registry.vocabularies["media_rights"].items() if t.public)
+    public = next(k for k, t in REGISTRY.vocabularies["media_rights"].items() if t.public)
     opened = Changeset(tuple(replace(c, action=PutEntity({**c.action.record, "rights": public}))
                              if c.entity.startswith("doc_") else c for c in sheet.changeset.changes))
     review.decide(Revision(sheet.id, opened, "The maker licenses its datasheets openly"), founder).one()
@@ -295,6 +294,6 @@ def test_a_product_run_proposes_the_best_photo_privately_and_what_the_page_state
     assert prop is not None and prop.subject == "prd_0000000002" and "Widget Two" in prop.reason
     assert prop.changeset is not None
     doc = next(c.action.record for c in prop.changeset.changes if c.entity.startswith("doc_"))
-    research = next(k for k, t in FX.registry.vocabularies["media_rights"].items() if t.research)
+    research = next(k for k, t in REGISTRY.vocabularies["media_rights"].items() if t.research)
     assert doc["rights"] == research, "a maker's photo is never labelled with a public right"
     assert all(c.entity != "prd_0000000002" for c in prop.changeset.changes), "nor made a thumbnail without one"

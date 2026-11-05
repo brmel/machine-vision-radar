@@ -173,7 +173,7 @@ broadcast capture unless marketed for machine vision. **Boundaries:**
 
 ## 6. Validation
 
-Parsing (`radar/adapters/files/json_parser.py`, driven by the model schema) rejects a wrong shape before any rule
+Parsing (`Model.parse`, driven by the model schema) rejects a wrong shape before any rule
 runs: an unknown or missing field, a wrong type, a bad id, an enum value outside its list, a LocalizedText without
 `en` or with empty text, NaN or Infinity, a number below its minimum (a Claim `rank` below 1), too few items (empty
 `source_refs` where one is required). The rules (`radar/domain/validation/rules/`) then check:

@@ -5,10 +5,9 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any, Callable, Collection, Mapping, Sequence
 
-from radar.adapters.files.json_parser import ParseError
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.history.projection import plain
-from radar.domain.model.registry import Registry
+from radar.domain.model.model import Model, ParseError
 from radar.domain.model.schema import FieldSpec, ModelSchema
 from radar.domain.ports.store.blob_store import BlobRef, BlobStore
 from radar.domain.model.entities import ActorKind
@@ -68,9 +67,9 @@ def snapshots(entity: str, n: int, after: Mapping[str, Any] | None) -> dict[str,
     return {version(entity, n): {"json": json.dumps(without_version(after), ensure_ascii=False, separators=(",", ":"),
                                                     sort_keys=True)}}
 
-def _unparsed(schema: ModelSchema, record: Record) -> Finding | None:
+def _unparsed(model: Model, record: Record) -> Finding | None:
     try:
-        catalog_of(schema, [record])
+        catalog_of(model, [record])
     except (ParseError, KeyError) as exc:
         return Finding("record_parse", record["id"], f"does not parse: {exc}")
     return None
@@ -93,11 +92,11 @@ class Planned:
                      for i, (b, a) in self.changed.items())
 
 class StoreWriter:
-    def __init__(self, docs: Docs, schema: ModelSchema, registry: Registry, clock: Clock, blobs: BlobStore) -> None:
-        self.docs, self.schema, self.registry, self.clock, self.blobs = docs, schema, registry, clock, blobs
-        self.graph, self.projector = ReferenceGraph(docs, schema), Projector(docs, schema, registry)
-        self.changes, self.counted = changes_prefix(schema), counted(schema)
-        self.public = registry.marked("media_rights", lambda t: t.public)
+    def __init__(self, docs: Docs, model: Model, clock: Clock, blobs: BlobStore) -> None:
+        self.docs, self.model, self.schema, self.clock, self.blobs = docs, model, model.schema, clock, blobs
+        self.graph, self.projector = ReferenceGraph(docs, model.schema), Projector(docs, model)
+        self.changes, self.counted = changes_prefix(model.schema), counted(model.schema)
+        self.public = model.registry.marked("media_rights", lambda t: t.public)
 
     def _last(self, changeset: Changeset, stored: Mapping[str, Record]) -> dict[str, int]:
         last: dict[str, int] = {}
@@ -157,11 +156,11 @@ class StoreWriter:
         return out
 
     def _validate(self, hood: Neighborhood, changed: Changed, today: date) -> None:
-        if unparsed := [f for _, after in changed.values() if after and (f := _unparsed(self.schema, after))]:
+        if unparsed := [f for _, after in changed.values() if after and (f := _unparsed(self.model, after))]:
             raise InvalidChangeset(unparsed)
         try:
-            results = [validate(ValidationContext(catalog_of(self.schema, records.values()), self.registry, self.schema,
-                                                  today)).errors
+            results = [validate(ValidationContext(catalog_of(self.model, records.values()), self.model.registry,
+                                                  self.schema, today)).errors
                        for records in (hood.records, hood.after(changed))]
         except (ParseError, KeyError) as exc:
             raise InvalidChangeset([f"a stored record of its neighborhood does not parse: {exc}"]) from exc
@@ -218,7 +217,7 @@ class StoreWriter:
                 self.blobs.publish(ref, not public)
             raise
         self._remove_withdrawn(planned.changed)
-        parsed = catalog_of(self.schema, planned.events)
+        parsed = catalog_of(self.model, planned.events)
         return Applied(tuple(plain(parsed.get(e["id"])) for e in planned.events), written)
 
     def _remove_withdrawn(self, changed: Changed) -> None:

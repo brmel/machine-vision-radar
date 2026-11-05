@@ -5,8 +5,10 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from radar.adapters.storage.memory_catalog import MemoryCatalog
+from radar.domain.model.entities import CLASSES
+from radar.domain.model.model import Model
 from radar.domain.model.schema import ModelSchema
-from radar.adapters.files.json_parser import ModelParser, refuse_constant
+from radar.adapters.files.json_parser import refuse_constant
 
 def write_catalog(data_dir: Path, schema: ModelSchema, records: Iterable[dict[str, Any]]) -> dict[str, int]:
     by_collection: dict[str, list[dict[str, Any]]] = {}
@@ -23,11 +25,10 @@ def write_catalog(data_dir: Path, schema: ModelSchema, records: Iterable[dict[st
         (data_dir / f"{collection}.jsonl").write_text("".join(lines), encoding="utf-8")
     return {c: len(rows) for c, rows in sorted(by_collection.items())}
 
-def load_catalog(data_dir: Path, schema: ModelSchema) -> MemoryCatalog:
-    parser = ModelParser(schema)
+def load_catalog(data_dir: Path, model: Model) -> MemoryCatalog:
     all_entities: list[Any] = []
 
-    for ent_type, target_file in ((t, data_dir / f"{t.collection}.jsonl") for t in schema.entities):
+    for ent_type, target_file in ((t, data_dir / f"{t.collection}.jsonl") for t in model.schema.entities):
         if not target_file.is_file():
             continue
         for line_no, line in enumerate(target_file.read_text(encoding="utf-8").splitlines(), 1):
@@ -38,6 +39,6 @@ def load_catalog(data_dir: Path, schema: ModelSchema) -> MemoryCatalog:
                 raw = json.loads(s, parse_constant=refuse_constant)
             except json.JSONDecodeError as exc:
                 raise ValueError(f"{target_file.name}:{line_no}: invalid JSON: {exc}") from exc
-            all_entities.append(parser.record(raw, schema.types[ent_type.name], f"{target_file.name}:{line_no}"))
+            all_entities.append(model.parse(raw, CLASSES[ent_type.name], f"{target_file.name}:{line_no}"))
 
     return MemoryCatalog(sorted(all_entities, key=lambda e: e.id))

@@ -9,7 +9,6 @@ from typing import Callable
 import pytest
 
 from radar import paths
-from radar.adapters.files.model_json import load_registry
 from radar.domain.ports.store.docs import Put
 from radar.adapters.wiring.root import Wiring
 from radar.adapters.wiring.stores import TEST_ONLY, NoStore

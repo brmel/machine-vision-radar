@@ -29,31 +29,33 @@ def _media(catalog: Catalog, registry: Registry, files: Path) -> dict[str, store
 
 def run_load(args: argparse.Namespace) -> int:
     cid, now = args.wiring.correlate("load"), args.wiring.now()
-    schema, registry = args.wiring.model()
+    model = args.wiring.model()
+    schema, registry = model.schema, model.registry
     catalog_dir, files = Path(args.catalog), Path(args.blobs) if args.blobs else None
-    catalog = json_store.load_catalog(catalog_dir, schema)
+    catalog = json_store.load_catalog(catalog_dir, model)
     kept = kept_files(files) if files else {}
     if _errors(validate(ValidationContext(catalog, registry, schema, date.fromisoformat(now[:10]), kept_files=kept))):
         return log.error("the catalog does not validate: nothing written")
     media = _media(catalog, registry, files) if files else {}
     docs, blobs = args.wiring.store(), args.wiring.blobs()
-    written = store.load(docs, blobs, schema, registry, layout.records_of(catalog, schema), media, cid, now)
+    written = store.load(docs, blobs, model, layout.records_of(catalog, schema), media, cid, now)
     log.info(f"load: {sum(written.values())} docs in {len(written)} collections, {len(media)} file(s)")
     return output.format_output({"correlation_id": cid, "docs": written, "blobs": len(media)}, json_mode=True)
 
 def run_export(args: argparse.Namespace) -> int:
     cid = args.wiring.correlate("export")
-    schema, _ = args.wiring.model()
+    schema = args.wiring.model().schema
     counts = json_store.write_catalog(Path(args.catalog), schema, store.scan(args.wiring.store(), schema))
     log.info(f"export: {sum(counts.values())} entities in {len(counts)} file(s) to {args.catalog}")
     return output.format_output({"correlation_id": cid, "counts": counts}, json_mode=True)
 
 def run_validate(args: argparse.Namespace) -> int:
     cid = args.wiring.correlate("validate")
-    schema, registry = args.wiring.model()
+    model = args.wiring.model()
+    schema, registry = model.schema, model.registry
     records = list(store.scan(args.wiring.store(), schema))
     log.info(f"validate: {len(records)} entities read")
-    res = validate(ValidationContext(layout.catalog_of(schema, records), registry, schema,
+    res = validate(ValidationContext(layout.catalog_of(model, records), registry, schema,
                                      args.wiring.today(), whole_catalog=True))
     counts = dict(sorted(Counter(schema.collection(schema.kind_of(r["id"]) or "") for r in records).items()))
     failed = _errors(res)
@@ -69,9 +71,8 @@ def run_validate(args: argparse.Namespace) -> int:
 
 def run_replay(args: argparse.Namespace) -> int:
     cid = args.wiring.correlate("replay")
-    schema, registry = args.wiring.model()
     source, target = args.wiring.store(), args.wiring.store(args.into)
-    written = store.replay(source, target, schema, registry)
+    written = store.replay(source, target, args.wiring.model())
     diffs = store.differences(source, target, source.collections())
     for d in diffs:
         log.error(f"replay: {d} differs from the live store")
@@ -81,8 +82,7 @@ def run_replay(args: argparse.Namespace) -> int:
 
 def run_reproject(args: argparse.Namespace) -> int:
     cid = args.wiring.correlate("reproject")
-    schema, registry = args.wiring.model()
-    written = store.reproject(args.wiring.store(), schema, registry)
+    written = store.reproject(args.wiring.store(), args.wiring.model())
     log.info(f"reproject: {written} public doc(s) written")
     return output.format_output({"correlation_id": cid, "written": written}, json_mode=True)
 
@@ -99,9 +99,8 @@ def run_restore(args: argparse.Namespace) -> int:
 
 def run_purge(args: argparse.Namespace) -> int:
     cid = args.wiring.correlate("purge")
-    schema, _ = args.wiring.model()
     docs, blobs = args.wiring.store(), args.wiring.blobs()
-    found = store.purgeable(docs, blobs, schema, args.wiring.index_in_use())
+    found = store.purgeable(docs, blobs, args.wiring.model().schema, args.wiring.index_in_use())
     deleted = store.purge(docs, blobs, found) if args.apply else 0
     report = {"correlation_id": cid, "applied": args.apply, "collections": found.collections,
               "orphans": list(found.orphans), "objects": sorted(found.objects), "bytes": sum(found.objects.values()),

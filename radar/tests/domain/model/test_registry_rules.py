@@ -11,7 +11,7 @@ from radar.domain.model.entities import Bounds
 from radar.domain.validation.context import ValidationContext
 from radar.domain.validation.rules.registry import registry_integrity
 from radar.domain.validation.runner import validate
-from radar.tests.fixtures.corpus import CORPUS, REGISTRY, SCHEMA
+from radar.tests.fixtures.corpus import CORPUS, MODEL, REGISTRY, SCHEMA
 
 SPECS = sorted(REGISTRY.spec_definitions.values(), key=lambda s: s.id)
 QUANTITY, TERM, STRING = (next(s.id for s in SPECS if s.datatype == d) for d in ("quantity", "term", "string"))
@@ -117,7 +117,7 @@ _PROFILE.sections, core=(), detail=(*_PROFILE.sections.core, *_PROFILE.sections.
 def test_registry_break_fails_its_rule(name: str) -> None:
     rule, registry, message = REGISTRY_BREAKS[name]
     errors = [e.message
-              for e in validate(ValidationContext(parse_catalog(CORPUS, SCHEMA), registry, SCHEMA, date(2026, 10, 17)),
+              for e in validate(ValidationContext(parse_catalog(CORPUS, MODEL), registry, SCHEMA, date(2026, 10, 17)),
                                 [rule]).errors]
     assert errors and all(message in e for e in errors), errors
 

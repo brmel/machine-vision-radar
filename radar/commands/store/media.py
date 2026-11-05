@@ -31,7 +31,7 @@ def run_url(args: argparse.Namespace) -> int:
     doc = _document(args, args.sha256)
     if doc is None:
         return log.error(f"no Document has the file {args.sha256}")
-    public = bool(args.wiring.model()[1].vocabularies["media_rights"][doc.rights].public)
+    public = bool(args.wiring.model().registry.vocabularies["media_rights"][doc.rights].public)
     url = args.wiring.blobs().url(BlobRef(args.sha256, doc.mime), public)
     return output.format_output({"sha256": args.sha256, "url": url}, args.json, lambda r: r["url"])
 

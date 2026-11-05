@@ -20,7 +20,7 @@ import pytest
 from radar import paths
 from radar.adapters.files import json_store
 from radar.adapters.files.blob_files import kept_path
-from radar.adapters.files.model_json import load_registry, load_schema
+from radar.adapters.files.model_json import load_model
 from radar.adapters.firestore import layout, store
 from radar.adapters.firestore.docs import FirestoreDocs
 from radar.adapters.firestore.repository import StoreChangeLog, StoreProposalQueue, StoreVersionStore
@@ -33,8 +33,7 @@ from radar.adapters.ai.search.files import BlobStoreIndexFiles
 from radar.adapters.storage.blobs import StorageBlobStore
 from radar.domain.model.entities import Document
 from radar.domain.model.history.projection import plain
-from radar.domain.model.registry import Registry
-from radar.domain.model.schema import ModelSchema
+from radar.domain.model.model import Model
 from radar.domain.read_model.derived.identity import ProductIdentity
 from radar.domain.review.agents.duplicates import HELD
 from radar.domain.review.review import Review
@@ -92,8 +91,7 @@ def blobs() -> StorageBlobStore:
 @dataclass(frozen=True)
 class Fixture:
     out: Path
-    schema: ModelSchema
-    registry: Registry
+    model: Model
     records: list[dict[str, Any]]
     media: dict[str, store.Media]
 
@@ -103,7 +101,7 @@ class Fixture:
 
     @functools.cached_property
     def read(self) -> FilesCatalogRepository:
-        return FilesCatalogRepository(self.public, self.schema)
+        return FilesCatalogRepository(self.public, self.model)
 
     @functools.cached_property
     def index(self) -> dict[str, Any]:
@@ -111,8 +109,8 @@ class Fixture:
 
     @functools.cached_property
     def search_engine(self) -> ShardedSearch:
-        engine = ShardedSearch(BlobStoreIndexFiles(blobs()), FastembedEmbedder(self.registry.search.model),
-                               self.registry, self.read)
+        engine = ShardedSearch(BlobStoreIndexFiles(blobs()), FastembedEmbedder(self.model.registry.search.model),
+                               self.model.registry, self.read)
         engine.index("rebuild")
         return engine
 
@@ -136,7 +134,7 @@ class Fixture:
         return ("store", "load", str(self.out / "data"), "--blobs", str(self.out / "blobs"))
 
     def load(self, docs: Docs, files: Any, cid: str = "load-test") -> dict[str, int]:
-        return store.load(docs, files, self.schema, self.registry, self.records, self.media, cid, NOW)
+        return store.load(docs, files, self.model, self.records, self.media, cid, NOW)
 
     def seeded(self) -> tuple[FirestoreDocs, StorageBlobStore]:
         docs, files = fresh(), blobs()
@@ -150,30 +148,30 @@ class Fixture:
         return claim, changed
 
     def writer(self, docs: Docs, files: Any) -> StoreWriter:
-        return StoreWriter(docs, self.schema, self.registry, lambda: NOW, files)
+        return StoreWriter(docs, self.model, lambda: NOW, files)
 
     def versions(self, docs: Docs) -> StoreVersionStore:
-        return StoreVersionStore(docs, StoreChangeLog(docs, self.schema))
+        return StoreVersionStore(docs, StoreChangeLog(docs, self.model))
 
     def queue(self, docs: Docs) -> StoreProposalQueue:
-        return StoreProposalQueue(docs, self.registry.proposal_kinds())
+        return StoreProposalQueue(docs, self.model.registry.proposal_kinds())
 
     def review(self, docs: Docs, files: Any) -> Review:
         ticks = iter(f"2026-10-18T13:{n // 60:02d}:{n % 60:02d}Z" for n in range(3600))
-        held = lambda: layout.catalog_of(self.schema, store.scan(docs, self.schema, tuple(HELD)))
+        held = lambda: layout.catalog_of(self.model, store.scan(docs, self.model.schema, tuple(HELD)))
         return Review(self.queue(docs), self.writer(docs, files), self.versions(docs), held,
-                      ProductIdentity.of(self.registry), self.schema, lambda: next(ticks))
+                      ProductIdentity.of(self.model.registry), self.model.schema, lambda: next(ticks))
 
     def apply(self, docs: Docs, files: Any, cid: str, *changes: dict[str, Any]) -> None:
         self.writer(docs, files).apply(changeset(*changes), cid)
 
     def stored(self, docs: Docs, entity_id: str) -> dict[str, Any]:
-        return layout.record_of(docs.get(layout.canonical(self.schema, entity_id)))
+        return layout.record_of(docs.get(layout.canonical(self.model.schema, entity_id)))
 
     def holding(self, records: list[dict[str, Any]]) -> tuple[str, str]:
         where = place()
-        store.load(fresh_at(where[0]), StorageBlobStore(f"http://{STORAGE}", where[1]), self.schema, self.registry,
-                   records, self.media, "load-test", NOW)
+        store.load(fresh_at(where[0]), StorageBlobStore(f"http://{STORAGE}", where[1]), self.model, records,
+                   self.media, "load-test", NOW)
         return where
 
     def loaded(self, *then: tuple[str, ...]) -> tuple[str, str]:
@@ -188,13 +186,12 @@ class Fixture:
 @functools.cache
 def fixture() -> Fixture:
     out = built()
-    schema = load_schema()
-    registry = load_registry(out / "registry", schema)
-    catalog = json_store.load_catalog(out / "data", schema)
-    public = {k: bool(t.public) for k, t in registry.vocabularies["media_rights"].items()}
+    model = load_model(out / "registry")
+    catalog = json_store.load_catalog(out / "data", model)
+    public = {k: bool(t.public) for k, t in model.registry.vocabularies["media_rights"].items()}
     media = {d.sha256: store.Media(kept_path(out / "blobs", d.sha256), d.mime, public[d.rights])
              for d in catalog.all(Document)}
-    return Fixture(out, schema, registry, layout.records_of(catalog, schema), media)
+    return Fixture(out, model, layout.records_of(catalog, model.schema), media)
 
 _OPS_DOC = json.loads((paths.CONTRACTS / "operations.json").read_text(encoding="utf-8"))
 OUTPUTS = {op["cli"]: {"$defs": _OPS_DOC["$defs"], **op["output"]} for op in _OPS_DOC["operations"]}

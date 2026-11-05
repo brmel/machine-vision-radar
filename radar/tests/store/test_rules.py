@@ -38,7 +38,7 @@ def _path(place: tuple[str, str], collection: str) -> str:
     return next((p for p, _ in found), f"{collection}/absent")
 
 PUBLIC = (*layout.PUBLIC, layout.PAGES)
-CLOSED = (*(e.collection for e in FX.schema.entities if e.collection), layout.SNAPSHOTS)
+CLOSED = (*(e.collection for e in FX.model.schema.entities if e.collection), layout.SNAPSHOTS)
 
 @pytest.mark.parametrize(("collection", "status"), [*((c, 200) for c in PUBLIC), *((c, 403) for c in CLOSED)])
 @pytest.mark.parametrize("reader", ("anonymous", "signed-in"))

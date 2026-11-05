@@ -10,7 +10,7 @@ from radar.adapters.console.parser import Commands
 def run(args: argparse.Namespace) -> int:
     hits = args.wiring.search_engine().search(SearchRequest(args.query, args.limit, args.semantic, args.category,
                                                             args.tag))
-    found = hits_json(hits, args.wiring.model()[1])
+    found = hits_json(hits, args.wiring.model().registry)
     lines = [f"{h['score']:>8}  {h['id']}  {h['name']} ({h['vendor_name']})" for h in found]
     return output.format_output(found, json_mode=args.json, text_formatter=lambda _: "\n".join(lines) or "no matches")
 

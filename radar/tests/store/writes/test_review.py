@@ -95,21 +95,21 @@ def test_retracting_a_proposal_that_added_a_source_returns_the_catalog_to_before
     review.decide(Retraction(Picked((approved.id,)), "Never sold"), FOUNDER)
     versions = FX.versions(docs)
     for r in added:
-        assert docs.get(layout.canonical(FX.schema, r["id"])) is None
+        assert docs.get(layout.canonical(FX.model.schema, r["id"])) is None
         assert [v.version for v in versions.history(r["id"]).versions] == [2, 1]
-    today, records = date.fromisoformat(stores.NOW[:10]), list(store.scan(docs, FX.schema))
-    assert validate(ValidationContext(layout.catalog_of(FX.schema, records), FX.registry, FX.schema,
+    today, records = date.fromisoformat(stores.NOW[:10]), list(store.scan(docs, FX.model.schema))
+    assert validate(ValidationContext(layout.catalog_of(FX.model, records), FX.model.registry, FX.model.schema,
                                       today)).errors == []
     review.decide(Enactment(_changes(FilesOn.CREATE, "A page", "src_00000000zz",
                                      ({**added[0], "id": "src_00000000zz"}, ["src_00000000zz"]))), FOUNDER)
     review.decide(Enactment(Withdrawal("src_00000000zz", "Gone")), FOUNDER)
-    assert docs.get(layout.canonical(FX.schema, "src_00000000zz")) is None, (
+    assert docs.get(layout.canonical(FX.model.schema, "src_00000000zz")) is None, (
         "a source its Change events cite is withdrawn; they keep it")
-    records = list(store.scan(docs, FX.schema))
+    records = list(store.scan(docs, FX.model.schema))
     for moved in ("2026-10-18T23:00:00Z",
                   "2026-01-01T00:00:00Z"):
         events = [{**r, "recorded_at": moved} if r["id"] == approved.applied[-1].change else r for r in records]
-        [finding] = validate(ValidationContext(layout.catalog_of(FX.schema, events), FX.registry, FX.schema,
+        [finding] = validate(ValidationContext(layout.catalog_of(FX.model, events), FX.model.registry, FX.model.schema,
                                                today)).errors
         assert finding.message == f"Change.source_refs: '{cited[0]}' does not exist", (
             "history cites a source that existed when it was recorded")
@@ -148,7 +148,7 @@ def test_a_withdrawal_lets_go_of_the_record_everywhere_and_never_leaves_a_refere
     shared = next(d for d in FX.rows("documents.jsonl") if d["subjects"])
     product, last = shared["subjects"][0], FX.rows("products.jsonl")[-1]["id"]
     if len(shared["subjects"]) == 1:
-        docs.commit([Put(layout.canonical(FX.schema, shared["id"]),
+        docs.commit([Put(layout.canonical(FX.model.schema, shared["id"]),
                          {**FX.stored(docs, shared["id"]), "subjects": [product, last]})])
     filed = review.submit(Withdrawal(product, "Never sold"), FOUNDER).proposal
     retracted = ({c.entity for c in filed.changeset.changes if isinstance(c.action, Retract)} if filed.changeset
@@ -156,15 +156,15 @@ def test_a_withdrawal_lets_go_of_the_record_everywhere_and_never_leaves_a_refere
     needing = {r["id"] for f in ("names.jsonl", "claims.jsonl") for r in FX.rows(f) if r["subject"] == product}
     assert {product} | needing <= retracted and shared["id"] not in retracted
     review.decide(Approval(Picked((filed.id,)), "Checked"), FOUNDER)
-    assert (docs.get(layout.canonical(FX.schema, product)) is None
+    assert (docs.get(layout.canonical(FX.model.schema, product)) is None
             and product not in FX.stored(docs, shared["id"])["subjects"])
     assert FX.versions(docs).history(product).versions
     claim = next(c for c in FX.rows("claims.jsonl") if c["subject"] not in (product, last))
-    docs.commit([Put(layout.canonical(FX.schema, claim["id"]),
+    docs.commit([Put(layout.canonical(FX.model.schema, claim["id"]),
                      {**FX.stored(docs, claim["id"]), "applies_to_versions": {"product": last}})])
     with pytest.raises(InvalidChangeset, match=f"applies_to_versions.product: '{last}' does not exist"):
         review.decide(Enactment(Withdrawal(last, "Never sold")), FOUNDER)
-    assert docs.get(layout.canonical(FX.schema, last)) is not None
+    assert docs.get(layout.canonical(FX.model.schema, last)) is not None
 
 def _run_drafts() -> dict[str, Changes]:
     source, product, name, role = (FX.rows(f)[0]

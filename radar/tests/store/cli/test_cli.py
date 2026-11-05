@@ -72,7 +72,7 @@ def test_a_change_apply_updates_the_index(tmp_path: Path) -> None:
 def test_a_claim_edit_shows_in_its_products_history(tmp_path: Path) -> None:
     place = FX.loaded()
     claim, changed = FX.revised_claim(40)
-    read = StoreCatalogRepository(stores.fresh_at(place[0]), FX.schema)
+    read = StoreCatalogRepository(stores.fresh_at(place[0]), FX.model)
     assert (read.product(claim["subject"]).version, read.product(claim["subject"]).history) == (1, False)
     assert [(v["entity"], v["version"])
             for v in FX.json(place, "record", "history", claim["subject"])["versions"]] == [(claim["subject"], 1)]
@@ -94,13 +94,13 @@ def test_record_list_pages_what_the_catalog_lists(place: tuple[str, str]) -> Non
     assert [r["id"] for r in FX.json(place, "record", "list", "Product", "--query",
                                      products[0]["id"])["records"]] == [products[0]["id"]]
     category = products[0]["category"]
-    other = next(c for c in FX.registry.categories if c != category)
+    other = next(c for c in FX.model.registry.categories if c != category)
     assert FX.json(place, "record", "list", "Product", "--category", category)["total"] == sum(
         1 for p in products if p["category"] == category)
     assert FX.json(place, "record", "list", "Product", "--category", other)["records"] == []
 
 def test_get_names_an_organizations_owners_as_they_were_named_on_a_date(place: tuple[str, str]) -> None:
-    relations = list(json_store.load_catalog(FX.out / "data", FX.schema).all(OrgRelation))
+    relations = list(json_store.load_catalog(FX.out / "data", FX.model).all(OrgRelation))
     first, second = sorted((r for r in relations if r.type == "acquired_by" and r.valid_from),
                            key=lambda r: start_of(r.valid_from))
     [renamed] = [r for r in relations if r.type == "renamed_from"]
@@ -175,4 +175,4 @@ def test_every_admin_read_has_its_command(place: tuple[str, str]) -> None:
     missing = stores.cli(FX, place, "record", "get", "prd_zzzzzzzzzz", check=False)
     assert missing.returncode == 1 and "no record with id prd_zzzzzzzzzz" in missing.stderr
     assert {e["id"] for e in FX.json(place, "model", "show")["entities"]} >= {"Product", "Organization", "Claim"}
-    assert FX.json(place, "index", "settings")["search"]["rrf_k"] == FX.registry.search.rrf_k
+    assert FX.json(place, "index", "settings")["search"]["rrf_k"] == FX.model.registry.search.rrf_k

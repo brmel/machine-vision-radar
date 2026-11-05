@@ -27,11 +27,11 @@ class Tokens:
 def _admin() -> tuple[AdminEndpoint, list[bool], Docs]:
     docs, files = FX.seeded()
     reindexed: list[bool] = []
-    histories = Histories(FX.versions(docs), StoreCatalogRepository(docs, FX.schema),
-                          lambda ids: catalog_of(FX.schema, read_records(docs, FX.schema, ids).values()),
-                          Terms(FX.registry).source_view)
-    endpoint = AdminEndpoint(FX.review(docs, files), Tokens(), StoreRecords(docs, FX.schema, files),
-                             histories, admin_model(FX.schema, FX.registry),
+    histories = Histories(FX.versions(docs), StoreCatalogRepository(docs, FX.model),
+                          lambda ids: catalog_of(FX.model, read_records(docs, FX.model.schema, ids).values()),
+                          Terms(FX.model.registry).source_view)
+    endpoint = AdminEndpoint(FX.review(docs, files), Tokens(), StoreRecords(docs, FX.model, files),
+                             histories, admin_model(FX.model),
                              lambda job: f"{job}-test", lambda actor, cid: reindexed.append(True) or True,
                              {"agents": AgentsAdmin(FirestoreAgentTokens(docs), lambda: "2026-10-20T09:00:00Z").route})
     return endpoint, reindexed, docs
@@ -49,7 +49,7 @@ def test_the_admin_api_answers_the_founder_only_and_files_everything_as_proposal
             and _call(endpoint, "GET", "proposals", token="reader")[0] == 403)
     status, model = _call(endpoint, "GET", "model")
     assert status == 200 and {e["id"] for e in model["entities"]} >= {"Product", "Organization", "Document"}
-    assert {k["files_on"] for k in model["kinds"]} == set(FX.registry.proposal_kinds())
+    assert {k["files_on"] for k in model["kinds"]} == set(FX.model.registry.proposal_kinds())
     claim = FX.rows("claims.jsonl")[0]
     changed = {k: v for k, v in claim.items() if k != "version"} | {
         "value": {"range": {**claim["value"]["range"], "max": 999.0}}}

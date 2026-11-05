@@ -46,7 +46,7 @@ def test_an_update_is_recorded_and_the_settings_name_the_registry_s_one_model(pl
     assert status == 200 and (view["runs"][0]["action"], view["runs"][0]["actor"]) == ("update", FOUNDER.name)
     settings = _route(admin, "GET", "settings")[1]
     assert (settings["current"]["model_id"] == settings["search"]["model"]
-            and settings["search"] == plain(FX.registry.search))
+            and settings["search"] == plain(FX.model.registry.search))
     assert admin.route("POST", ("model",), {}, {"model": "no/such-model"}, FOUNDER) is None
     with pytest.raises(ValueError, match="day_calls: must be at least 0, got -1"):
         _route(admin, "POST", "caps", body={"use": Use.ASK.value, "day_calls": -1, "reason": "a mistake"})
@@ -60,4 +60,4 @@ def test_a_failed_rebuild_is_answered_with_its_error_and_recorded(
     status, body = _route(_admin(), "POST", "rebuild")
     error = _route(_admin(), "GET", "status")[1]["runs"][0]["error"]
     assert (status, body) == (500, {"error": f"the index rebuild failed: {error}"})
-    assert error.startswith(f"fastembed could not load {FX.registry.search.model}")
+    assert error.startswith(f"fastembed could not load {FX.model.registry.search.model}")

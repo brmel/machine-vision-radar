@@ -10,9 +10,9 @@ from typing import Callable, Mapping
 from radar.adapters.console import log
 from radar.adapters.firestore.layout import catalog_of, newest_first, record_of
 from radar.domain.ai.budget import METERED, Cap, Usage, Use, caps_of
-from radar.domain.model.entities import AiCap, AiSettings, AskAnswer, Citation
+from radar.domain.model.entities import AiCap, AskAnswer, Citation
 from radar.domain.model.history.projection import plain
-from radar.domain.model.schema import ModelSchema
+from radar.domain.model.model import Model
 from radar.domain.ports.ai.usage_log import ModelCall
 from radar.domain.model.entities import IndexRunView
 from radar.domain.ports.store.docs import Docs, Increment, Put
@@ -25,13 +25,13 @@ def usage_collection(use: Use) -> str:
 COLLECTIONS = (CACHE, METRICS, CALLS, RUNS, *map(usage_collection, METERED))
 
 class FirestoreBudget:
-    def __init__(self, docs: Docs, schema: ModelSchema, ai: AiSettings) -> None:
-        self._docs, self._schema, self._ai = docs, schema, ai
-        self._caps = schema.collection(AiCap.__name__)
+    def __init__(self, docs: Docs, model: Model) -> None:
+        self._docs, self._model = docs, model
+        self._caps = model.schema.collection(AiCap.__name__)
 
     def caps(self) -> Mapping[Use, Cap]:
-        return caps_of(self._ai,
-                       catalog_of(self._schema, [record_of(f) for _, f in self._docs.list(self._caps)]).all(AiCap))
+        return caps_of(self._model.registry.ai,
+                       catalog_of(self._model, [record_of(f) for _, f in self._docs.list(self._caps)]).all(AiCap))
 
     def usage(self, use: Use, day: str, client: str | None = None) -> Usage:
         today = self._docs.get(f"{usage_collection(use)}/{day}") or {}
