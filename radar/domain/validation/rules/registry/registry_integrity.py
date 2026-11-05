@@ -86,6 +86,9 @@ def _facets(ctx: ValidationContext, p: CategoryProfile) -> Iterator[tuple[str, s
         spec = ctx.registry.spec_definitions.get(f.field)
         if spec is None:
             yield p.category_id, f"facet '{f.field}' is not a spec"
+        elif spec.datatype not in ("quantity", "term", "term_set", "boolean"):
+            yield p.category_id, (f"facet '{f.field}' points to a {spec.datatype} spec; facets must be Term, Quantity "
+                                  "or boolean")
 
 def _coverage(ctx: ValidationContext) -> Iterator[tuple[str, str]]:
     reg = ctx.registry
