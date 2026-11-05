@@ -1,9 +1,10 @@
 import { useState, type FC, type FormEvent, type ReactNode } from "react";
 import { RefusedChange } from "../../domain/ports/review/Review.ts";
-import { AppLink, LoadingSkeleton, Pagination, StatePanel, formatNumber, prevented, useRead } from "../../ui/index.ts";
+import { AppLink, Pagination, formatNumber, prevented, useRead } from "../../ui/index.ts";
 import { useI18n } from "../../shell/i18n/index.tsx";
 import { usePagerLabels } from "../../shell/i18n/labels.ts";
 import { logger } from "../../shell/logger.ts";
+import { ReadState } from "../../shell/layout/ReadState.tsx";
 import { pageOf } from "../../domain/paths.ts";
 import { useAdmin } from "./model.ts";
 
@@ -15,13 +16,11 @@ interface Loaded<T> {
 }
 
 export function useLoad<T>(load: () => Promise<T>, key: string, skeleton = 3, level: 1 | 2 = 1): Loaded<T> {
-  const { t } = useI18n();
   const [round, setRound] = useState(0);
   const reload = () => setRound((n) => n + 1);
   const read =
     useRead(load, `${key}#${round}`, (err) => logger.error("admin: a read failed", { page: "admin", key }, err));
-  const pending = read.error ? <StatePanel tone="error" level={level} title={t("errorTitle")}
-    retryLabel={t("errorRetry")} /> : <LoadingSkeleton label={t("loading")} count={skeleton} />;
+  const pending = <ReadState failed={read.error} skeleton={{ count: skeleton }} level={level} />;
   return { value: read.isLoading || read.error ? null : read.value, failed: read.error, reload, pending };
 }
 

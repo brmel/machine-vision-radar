@@ -1,8 +1,6 @@
 import { useMemo } from "react";
 import { MAX_COMPARED } from "../../domain/compare.ts";
 import type { SpecValueLabels } from "../../ui/specs/specFormat.ts";
-import type { DetailStateLabels } from "../../ui/feedback/DetailState.tsx";
-import type { ReadStateLabels } from "../../ui/feedback/ReadState.tsx";
 import { useI18n } from "./index.tsx";
 
 export function useValueLabels(): SpecValueLabels {
@@ -19,16 +17,6 @@ export function usePagerLabels() {
     pageLabel: (page: number, totalPages: number) => t("paginationPage", { page, totalPages }),
     summaryText: (start: number, end: number, total: number) => t("paginationSummary", { start, end, total }),
   };
-}
-
-export function useReadStateLabels(): ReadStateLabels {
-  const { t } = useI18n();
-  return { loading: t("loading"), errorTitle: t("errorTitle"), errorDescription: t("catalogLoadErrorDesc"),
-    retry: t("errorRetry") };
-}
-
-export function useDetailStateLabels(missing: string): DetailStateLabels {
-  return { ...useReadStateLabels(), missing };
 }
 
 export function useCompareControl(comparedIds: readonly string[], onToggle: (productId: string) => void) {

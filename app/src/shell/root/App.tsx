@@ -6,12 +6,13 @@ import { HttpReportInbox, type AppCheckConfig } from "../../adapters/review/Http
 import type { CatalogRepository } from "../../domain/ports/CatalogRepository.ts";
 import { CompareTray } from "../../features/compare/CompareTray.tsx";
 import { useComparedIds } from "../../features/compare/useComparedIds.ts";
-import { LoadingSkeleton, RegistryProvider, StatePanel, useRead } from "../../ui/index.ts";
+import { RegistryProvider, useRead } from "../../ui/index.ts";
 import { NO_REGISTRY } from "../../ui/specs/RegistryContext.tsx";
 import { ThemeProvider } from "../layout/ThemeProvider.tsx";
 import { I18nProvider, useI18n } from "../i18n/index.tsx";
 import { SiteHeader, type NavItem } from "../layout/SiteHeader.tsx";
 import { SiteFooter } from "../layout/SiteFooter.tsx";
+import { ReadState } from "../layout/ReadState.tsx";
 import { STATIC_ROUTES, browseRoute, pathFromRoute } from "../routing/router.ts";
 import { browseQuery } from "../../domain/filtering/filterUrl.ts";
 import { RouteView, type Navigation } from "../routing/RouteView.tsx";
@@ -104,11 +105,8 @@ const RadarApp: FC<Ports> = ({ start, repository: injectedReader }) => {
       <SiteHeader navItems={navItems} onNavigate={navigate} />
 
       <main id="main-content" className="flex-1 max-w-page w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        {loadError ? (
-          <StatePanel tone="error" level={1} title={t("errorTitle")} description={t("catalogLoadErrorDesc")}
-            retryLabel={t("errorRetry")} />
-        ) : !loaded ? (
-          <LoadingSkeleton label={t("loading")} count={4} />
+        {loadError || !loaded ? (
+          <ReadState failed={loadError} skeleton={{ count: 4 }} />
         ) : (
           <RouteView
             route={route}

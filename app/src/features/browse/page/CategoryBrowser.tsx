@@ -3,9 +3,8 @@ import type { CatalogRepository } from "../../../domain/ports/CatalogRepository.
 import type { SearchEvent } from "../../../domain/ports/AskApi.ts";
 import type { ProductSearch } from "../../../domain/ports/ProductSearch.ts";
 import { withoutFilters, withQuery } from "../../../domain/filtering/filterTransitions.ts";
-import { ReadState } from "../../../ui/index.ts";
 import { useI18n } from "../../../shell/i18n/index.tsx";
-import { useReadStateLabels } from "../../../shell/i18n/labels.ts";
+import { ReadState } from "../../../shell/layout/ReadState.tsx";
 import { useBrowse } from "../hooks/useBrowse.ts";
 import { useProductSearch } from "../hooks/useProductSearch.ts";
 import { CatalogSearch } from "../components/CatalogSearch.tsx";
@@ -36,7 +35,6 @@ interface CategoryBrowserProps {
 export const CategoryBrowser: FC<CategoryBrowserProps> = ({ repository, productSearch, onCounted, query,
   onNavigate, onSelectProduct, onSelectVendor, onToggleCompare, comparedIds, news }) => {
   const { t, locale } = useI18n();
-  const states = useReadStateLabels();
   const rank = useProductSearch(productSearch, onCounted);
   const { index, view, searched, error, change } = useBrowse(repository, rank, query, onNavigate);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -50,7 +48,7 @@ export const CategoryBrowser: FC<CategoryBrowserProps> = ({ repository, productS
       <div className="space-y-3">
         <BrowseHeader hub={hub} />
         <ReadState failed={Boolean(error)} skeleton={{ count: 6 }} level={2}
-          labels={{ ...states, errorTitle: t(error === "search" ? "searchErrorTitle" : "errorTitle") }} />
+          title={error === "search" ? "searchErrorTitle" : "errorTitle"} />
       </div>
     );
   }

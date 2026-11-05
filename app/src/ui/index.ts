@@ -25,8 +25,6 @@ export { SourceChip } from "./specs/SourceChip.tsx";
 export { RegistryProvider, useRegistry } from "./specs/RegistryContext.tsx";
 export { StatePanel } from "./feedback/StatePanel.tsx";
 export { LoadingSkeleton } from "./feedback/LoadingSkeleton.tsx";
-export { DetailState } from "./feedback/DetailState.tsx";
-export { ReadState } from "./feedback/ReadState.tsx";
 export { PreparedReadsContext, useRead, type Read } from "./feedback/useRead.ts";
 export { BrandLogo } from "./theme/BrandLogo.tsx";
 export { BrandLinks } from "./theme/BrandLinks.tsx";
