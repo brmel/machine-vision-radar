@@ -175,17 +175,16 @@ runs: an unknown or missing field, a wrong type, a bad id, an enum value outside
 `en` or with empty text, NaN or Infinity, a number below its minimum (a Claim `rank` below 1), too few items (empty
 `source_refs` where one is required). The rules (`radar/domain/validation/rules/`) then check:
 
-- **registry_integrity:** a quantity spec has a known dimension and a unit of it, and
-  only a quantity takes those, `better`, `bounds` (min below max) and `precision`; only a term or term-set spec names a
-  vocabulary, a known one; a dimension's canonical unit is one of its units with factor 1, and no two of its units
-  share a UCUM code; each category has one profile, with valid keys and a core spec, and every spec is in a profile's
-  core or detail; every vocabulary is used; every registry field bound to a registry holds its ids; a component hub
-  has a path of its own, free of the site's routes, and a known relation; in a vocabulary no two terms share a label or
-  alias, and a description (in every language) or a relation side one term gives, every term gives; `proposal_kinds`
-  files each event once; ai.json sets each AI use once, each on one of its models but all uses together on none;
-  version schemes match the orderings in `radar/domain/model/versions.py`.
+- **registry_integrity:** a quantity spec has a known dimension and a unit of it, and only a quantity takes those,
+  `better`, `bounds` (min below max) and `precision`; only a term or term-set spec names a vocabulary, a known one; a
+  dimension's canonical unit is one of its units with factor 1, and no two of its units share a UCUM code; each category
+  has one profile, with valid keys, a core spec and facets on term, term-set, quantity or boolean specs, and every spec
+  is in a profile's core or detail; every vocabulary is used; every registry field bound to a registry holds its ids; a
+  component hub has a path of its own, free of the site's routes, and a known relation; in a vocabulary no two terms
+  share a label or alias, and a description (in every language) or a relation side one term gives, every term gives;
+  `proposal_kinds` files each event once; ai.json sets each AI use once, each on one of its models but all uses together
+  on none; version schemes match the orderings in `radar/domain/model/versions.py`.
 - **vocabularies:** every registry-bound field of a record holds an id of that registry.
-- **profile_facets:** a facet names a term, term-set, quantity or boolean spec.
 - **no_filler_text:** no placeholder or marketing filler in a text field: the `placeholders` and `anywhere` patterns of
   `data/no_filler.json`, which the site's slop guard also reads.
 - **entity_ids:** an id carries its entity's prefix and is unique; no Identifier appears twice, and each is the whole
@@ -224,11 +223,10 @@ runs: an unknown or missing field, a wrong type, a bad id, an enum value outside
 - **changes:** an entity's change versions run 1..n without gaps, n its stored `version`; the patches replay to the
   stored entity (or to nothing after a retraction); a change that sets a sourced fact cites a source; a `proposal` has
   the proposal id shape.
-- **feed_sources:** an article's `cites` is exactly what its sentences cite (so withdrawing one finds the article, and
-  **references** refuses it while cited), and its `event_source` is among them.
-- **feed_dates:** `event_date` and `event_source` come together; `revised_at` only once published.
-- **feed_review:** the byline is feed.json's, the brand's, never a personal name.
-- **feed_slugs:** a slug is lowercase words joined by hyphens, an address under /news/.
+- **feed:** an article's `cites` is exactly what its sentences cite (so withdrawing one finds the article, and
+  **references** refuses it while cited), and its `event_source` is among them; `event_date` and `event_source` come
+  together; `revised_at` only once published; the byline is feed.json's, the brand's, never a personal name; a slug is
+  lowercase words joined by hyphens, an address under /news/.
 
 ## 7. Evolving the model
 

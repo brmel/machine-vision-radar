@@ -2,17 +2,14 @@ from __future__ import annotations
 
 import argparse
 
-from radar.adapters.console import log, output
-from radar.domain.ports.search.search_engine import IndexMismatch, NoIndex, SearchRequest
+from radar.adapters.console import output
+from radar.domain.ports.search.search_engine import SearchRequest
 from radar.domain.search.hits import hits_json
 from radar.adapters.console.parser import Commands
 
 def run(args: argparse.Namespace) -> int:
-    try:
-        hits = args.wiring.search_engine().search(SearchRequest(args.query, args.limit, args.semantic, args.category,
-                                                                args.tag))
-    except (NoIndex, IndexMismatch) as exc:
-        return log.error(str(exc), code=2)
+    hits = args.wiring.search_engine().search(SearchRequest(args.query, args.limit, args.semantic, args.category,
+                                                            args.tag))
     found = hits_json(hits, args.wiring.model()[1])
     lines = [f"{h['score']:>8}  {h['id']}  {h['name']} ({h['vendor_name']})" for h in found]
     return output.format_output(found, json_mode=args.json, text_formatter=lambda _: "\n".join(lines) or "no matches")

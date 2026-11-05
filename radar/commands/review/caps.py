@@ -3,8 +3,7 @@ from __future__ import annotations
 import argparse
 from typing import Any
 
-from radar.adapters.console import log, output
-from radar.domain.validation.context import InvalidChangeset
+from radar.adapters.console import output
 from radar.domain.ai.budget import Use, cap_draft
 from radar.domain.ai.meter import caps_today
 from radar.domain.model.history.ids import keyed
@@ -30,10 +29,7 @@ def run_set(args: argparse.Namespace) -> int:
     use = Use(args.use)
     cap = args.wiring.budget().caps()[use].changed(args.month_cad, args.day_calls, args.client_calls, args.model)
     founder = Founder(args.actor, args.wiring.correlate("ai-caps"))
-    try:
-        approved = args.wiring.review().decide(Enactment(cap_draft(use, cap, args.reason, founder.name)), founder).one()
-    except InvalidChangeset as exc:
-        return log.error(f"the cap is refused: {exc}")
+    approved = args.wiring.review().decide(Enactment(cap_draft(use, cap, args.reason, founder.name)), founder).one()
     return output.format_output(plain(proposal_view(approved)), json_mode=args.json,
                                 text_formatter=lambda v: f"{v['id']}: {args.use} set, {v['reason']}")
 

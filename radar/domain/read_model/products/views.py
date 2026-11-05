@@ -25,7 +25,6 @@ class ProductViews:
         self.catalog, self.registry, self.schema, self.terms, self.exported = (
             catalog, registry, schema, Terms(registry), exported)
         self.media_url = media_url
-        self.profiles = {p.category_id: p for p in registry.profiles}
         self.hubs = {c.id: c.component_hub for c in registry.categories.values() if c.component_hub}
         used = [r for r in catalog.all(Relation) if r.from_entity in exported and r.to_entity in exported
                 and (hub := self.hubs.get(exported[r.to_entity].category)) is not None and r.type == hub.relation]
@@ -70,7 +69,7 @@ class ProductViews:
         return out
 
     def view(self, p: Product, names: dict[str, str], vendor: OrgBrief, history: bool) -> ProductView:
-        profile = self.profiles[p.category]
+        profile = self.registry.profile(p.category)
         cited: dict[str, Source] = {}
         models = self._models(p, names, profile, cited)
         core, detail = self._specs(p, profile, cited)

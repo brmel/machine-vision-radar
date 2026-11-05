@@ -44,7 +44,7 @@ UNTYPED: dict[str, dict[str, int]] = {
     REFLECTION: {
         "radar/domain/model/history/projection.py": 1,
         "radar/domain/read_model/products/views.py": 1,
-        "radar/domain/validation/rules/changes.py": 3,
+        "radar/domain/validation/rules/changes.py": 1,
         "radar/domain/validation/rules/registry/registry_integrity.py": 2,
         "radar/domain/validation/walk.py": 3,
     },

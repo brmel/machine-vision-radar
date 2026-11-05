@@ -28,11 +28,7 @@ def _apply(args: argparse.Namespace, changeset: Changeset, cid: str) -> int:
 
 def run_apply(args: argparse.Namespace) -> int:
     cid = args.wiring.correlate("change")
-    try:
-        changeset = parse_changeset(json.loads(Path(args.changeset).read_text(encoding="utf-8")))
-    except (OSError, ValueError) as exc:
-        return log.error(f"the changeset does not parse: {exc}")
-    return _apply(args, changeset, cid)
+    return _apply(args, parse_changeset(json.loads(Path(args.changeset).read_text(encoding="utf-8"))), cid)
 
 def run_rollback(args: argparse.Namespace) -> int:
     shown = args.wiring.review().submit(Rollback(args.id, args.to, args.reason),

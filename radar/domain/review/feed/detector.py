@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Mapping, Sequence
 
 from radar.domain.model.entities import Change, FeedRule, FeedSentence, FeedSettings, PartialDate
+from radar.domain.model.schema import ModelSchema
 from radar.domain.ports.history.change_log import ChangeLog
 from radar.domain.ports.review.feed_reads import FeedReads
 from radar.domain.review.feed.editor import Article, Feed
@@ -29,11 +30,12 @@ def _dated(batch: list[Found]) -> tuple[PartialDate | None, str | None]:
     return (PartialDate(**date), sources[0]) if date and sources else (None, None)
 
 class Detector:
-    def __init__(self, log: ChangeLog, feed: Feed, settings: FeedSettings, store: FeedReads) -> None:
-        self._log, self._feed, self._settings, self._store = log, feed, settings, store
+    def __init__(self, log: ChangeLog, feed: Feed, settings: FeedSettings, store: FeedReads,
+                 schema: ModelSchema) -> None:
+        self._log, self._feed, self._settings, self._store, self._schema = log, feed, settings, store, schema
 
     def _rule(self, change: Change, record: Record) -> FeedRule | None:
-        kind = self._store.kind_of(change.entity)
+        kind = self._schema.kind_of(change.entity)
         return next((r for r in self._settings.rules if r.entity == kind
                      and all(record.get(k) == v for k, v in (r.match or {}).items())), None)
 

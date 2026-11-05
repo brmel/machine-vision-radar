@@ -30,10 +30,7 @@ def run_history(args: argparse.Namespace) -> int:
     return output.format_output(view, json_mode=args.json, text_formatter=lambda _: "\n".join(lines))
 
 def run_diff(args: argparse.Namespace) -> int:
-    try:
-        diff = args.wiring.histories().diff(args.id, args.v1, args.v2)
-    except ValueError as exc:
-        return log.error(str(exc))
+    diff = args.wiring.histories().diff(args.id, args.v1, args.v2)
     text = "\n".join(f"{c.path}: {c.before or '-'} -> {c.after or '-'}" for c in diff.changes)
     return output.format_output(plain(diff), json_mode=args.json, text_formatter=lambda _: text or "no difference")
 

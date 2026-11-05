@@ -18,12 +18,9 @@ class Cited:
     sources: Mapping[str, SourceView]
 
     def cite(self, ref: str) -> Row:
-        if ref in self.products:
-            return {"id": ref, "kind": "product", "label": self.products[ref]["name"],
-                    "slug": self.products[ref]["slug"]}
-        if ref in self.organizations:
-            return {"id": ref, "kind": "organization", "label": self.organizations[ref]["name"],
-                    "slug": self.organizations[ref]["slug"]}
+        for kind, rows in (("product", self.products), ("organization", self.organizations)):
+            if ref in rows:
+                return {"id": ref, "kind": kind, "label": rows[ref]["name"], "slug": rows[ref]["slug"]}
         source = self.sources[ref]
         return {"id": ref, "kind": "source", "type": plain(source.type), **({"url": source.url} if source.url else {}),
                 **({"label": source.title} if source.title else {})}

@@ -9,7 +9,7 @@ import pytest
 from radar.adapters.files.json_parser import parse_catalog
 from radar.domain.model.entities import Bounds
 from radar.domain.validation.context import ValidationContext
-from radar.domain.validation.rules.registry import profile_facets, registry_integrity
+from radar.domain.validation.rules.registry import registry_integrity
 from radar.domain.validation.runner import validate
 from radar.tests.fixtures.corpus import CORPUS, REGISTRY, SCHEMA
 
@@ -101,7 +101,9 @@ _PROFILE.sections, core=(), detail=(*_PROFILE.sections.core, *_PROFILE.sections.
                              "component_hub relation 'no_such_relation' is not in 'relation_types'"),
     "two_kinds_one_event": (registry_integrity, _term(lambda t: t.files_on, files_on=lambda f: f.files_on)[0],
                             "kinds; each event files one"),
-    "string_facet": (profile_facets, _spec(_PROFILE.facets[0].field, datatype="string"),
+    "string_facet": (registry_integrity, _spec(next(f.field for p in REGISTRY.profiles for f in p.facets
+                                                    if REGISTRY.spec_definitions[f.field].datatype == "boolean"),
+                                               datatype="string"),
                      "facets must be Term, Quantity or boolean"),
     "ai_use_twice": (registry_integrity, _ai(uses=(*REGISTRY.ai.uses, REGISTRY.ai.uses[-1])), "sets each AI use once"),
     "ai_use_without_model": (registry_integrity, _ai_use(model=None), "each use one of the models"),

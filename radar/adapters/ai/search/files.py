@@ -20,10 +20,6 @@ class BlobStoreIndexFiles:
         self._blobs = blobs
         self._cache: dict[str, bytes] = {}
 
-    @property
-    def pointer(self) -> str:
-        return CURRENT
-
     def put(self, content: bytes, suffix: str, mime: str) -> str:
         path = f"{ROOT}/blobs/{sha256_hex(content)}{suffix}"
         if not self._blobs.exists(path):
