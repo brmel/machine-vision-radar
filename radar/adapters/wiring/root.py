@@ -4,7 +4,7 @@ import os
 
 from radar import paths
 from radar.adapters.firestore.layout import catalog_of, record_of
-from radar.adapters.firestore.repository import StoreCatalogRepository, StoreChangeLog, StoreFeedReads
+from radar.adapters.firestore.repository import StoreChangeLog, StoreFeedReads
 from radar.adapters.web.admin.agents import AgentsAdmin
 from radar.adapters.web.admin.endpoint import AdminEndpoint
 from radar.adapters.web.admin.news import NewsAdmin
@@ -78,7 +78,7 @@ class Wiring(Models):
         schema, registry = self.model()
         docs = self.store()
         return Detector(StoreChangeLog(docs, schema), self.feed(), registry.feed,
-                        StoreFeedReads(docs, schema, StoreCatalogRepository(docs, schema)))
+                        StoreFeedReads(docs, schema, self.repository()))
 
     def feed(self, review: Review | None = None) -> Feed:
         schema, registry = self.model()

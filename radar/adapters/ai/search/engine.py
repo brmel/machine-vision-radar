@@ -8,7 +8,7 @@ from dataclasses import asdict
 from typing import Any, Mapping, Sequence
 
 from radar.adapters.ai.search import ranking
-from radar.adapters.ai.search.files import BlobStoreIndexFiles, json_bytes, sha256_hex
+from radar.adapters.ai.search.files import CURRENT, BlobStoreIndexFiles, json_bytes, sha256_hex
 from radar.adapters.ai.search.records import Labels, Record, embedding_text, fingerprint, record_of
 from radar.domain.model.entities import EmbedderModel, IndexManifest, IndexShard
 from radar.domain.model.registry import Registry
@@ -70,7 +70,7 @@ class ShardedSearch:
         path = self._files.current()
         if path is None:
             return set()
-        return {self._files.pointer, path, *(p for s in self.manifest.shards for p in (s.records, s.vectors))}
+        return {CURRENT, path, *(p for s in self.manifest.shards for p in (s.records, s.vectors))}
 
     def _read(self, paths: Sequence[str]) -> list[bytes]:
         with ThreadPoolExecutor(max_workers=READERS) as pool:

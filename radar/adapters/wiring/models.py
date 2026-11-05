@@ -41,16 +41,13 @@ from radar.domain.search.retriever import IndexRetriever
 M = TypeVar("M")
 
 class Models(Stores):
-    def _sharded(self) -> ShardedSearch:
+    def search_engine(self) -> ShardedSearch:
         registry = self.model()[1]
         return ShardedSearch(BlobStoreIndexFiles(self.blobs()), FastembedEmbedder(registry.search.model), registry,
                              self.repository())
 
-    def search_engine(self) -> SearchEngine:
-        return self._sharded()
-
     def index_in_use(self) -> set[str]:
-        return self._sharded().files()
+        return self.search_engine().files()
 
     def indexer(self) -> Indexer:
         return Indexer(self.search_engine(), self.repository(), FirestoreIndexRuns(self.store()),

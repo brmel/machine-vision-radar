@@ -19,6 +19,7 @@ from radar.domain.model.history.ids import ENTITY_ID, keyed
 from radar.domain.review.proposal import AppliedChange, Edit, Proposal
 from radar.domain.ports.store.blob_store import BlobStore
 from radar.domain.ports.store.docs import Docs, Fields, Increment, Put
+from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.ports.catalog.held_records import T
 from radar.domain.ports.store.records import LISTED
 from .docs import list_page
@@ -168,7 +169,7 @@ class StoreProposalQueue:
         return LogPage(entries=entries, next=after, total=total)
 
 class StoreFeedReads:
-    def __init__(self, docs: Docs, schema: ModelSchema, repository: StoreCatalogRepository) -> None:
+    def __init__(self, docs: Docs, schema: ModelSchema, repository: CatalogRepository) -> None:
         self._docs, self._schema, self._repository = docs, schema, repository
 
     def kind_of(self, entity_id: str) -> str:
