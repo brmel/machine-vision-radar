@@ -5,7 +5,7 @@ from functools import partial
 from typing import Any
 
 from radar.domain.ai.prompts import Prompt
-from radar.adapters.ai.prompted.reply import ask, read
+from radar.adapters.ai.prompted.reply import read
 from radar.domain.ports.ai.prompts import ModelRunner
 from radar.domain.ports.ai.image_judge import CandidateImage, ImageEvaluation, JudgedImage
 
@@ -23,8 +23,7 @@ class PromptedImageJudge:
         tokens_in, tokens_out = 0, 0
         for candidate in candidates:
             request = self._prompt.render(product=product_name, url=candidate.url)
-            reply = ask(self._runner, self._prompt, request, MAX_TOKENS,
-                                     (candidate.content, candidate.mime))
+            reply = self._runner.reply(self._prompt, request, MAX_TOKENS, (candidate.content, candidate.mime))
             tokens_in, tokens_out = tokens_in + reply.tokens_in, tokens_out + reply.tokens_out
             judged.append(
                 read(replace(reply, tokens_in=tokens_in, tokens_out=tokens_out), partial(_judged, candidate.url)))
