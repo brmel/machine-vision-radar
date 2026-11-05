@@ -835,11 +835,17 @@ class HubRef:
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class ModelRow:
-    """One model of a family, with its core specs."""
+    """One model of a family, with its core spec values; the model's own page cites them."""
     id: str
     slug: str
     name: str
-    specs: tuple[SpecCell, ...]
+    specs: tuple[ModelSpec, ...]
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ModelSpec:
+    """One core spec of a model row: its value, or none when no sourced claim gives it."""
+    key: str
+    value: ViewValue | None = None
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class VersionRow:

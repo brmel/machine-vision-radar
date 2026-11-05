@@ -33,9 +33,13 @@ def test_rows_are_the_profile_sections_in_order() -> None:
             assert set(row) - {"id", "source"} <= set(sections.offerings), v["slug"]
 
 def test_every_value_has_one_current_source_and_the_view_lists_only_those() -> None:
+    by_id = {v["id"]: v for v in FX.views}
     for v in FX.views:
         listed = {s["id"] for s in v["sources"]}
-        cells = [*v["core"], *v["detail"], *(c for m in v["models"] for c in m["specs"])]
+        cells = [*v["core"], *v["detail"]]
+        for m in v["models"]:
+            own = {c["key"]: c.get("value") for c in by_id[m["id"]]["core"]}
+            assert [c.get("value") for c in m["specs"]] == [own.get(c["key"]) for c in m["specs"]], m["id"]
         for c in cells:
             assert ("value" in c) == ("source" in c), (v["slug"], c["key"])
         cited = {c["source"] for c in cells if "source" in c}

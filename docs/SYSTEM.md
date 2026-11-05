@@ -46,7 +46,9 @@ snapshot (`radar store export`) stays in the maintainers' private data repo. Pag
   value of theirs in a field marked `unique`, before and after); a
   finding the change adds refuses it, and nothing is written. Then, for each changed entity, it appends one Change event
   (DATA_ARCHITECTURE.md §4), stores version n+1 and its snapshot, and rewrites the canonical doc and the public docs the
-  change reaches, at most 500 writes a batch; a failed batch puts back the batches before it. A changeset applied twice
+  change reaches, at most 500 writes a batch. A page is rebuilt from the records it shows: a family keeps the stored
+  rows of its unchanged models, as a category page keeps its unchanged cards, so an approval reads as much in a family
+  of 200 models as in one of 2; a failed batch puts back the batches before it. A changeset applied twice
   writes nothing. Every job (load, change, rollback, replay, backup, index rebuild or update) has one correlation id, on
   every log line and Change event. Every applied change then updates the search index ([SEARCH.md](SEARCH.md)); the
   deploy rewrites the public docs that differ from what the entities project (`radar store reproject`).

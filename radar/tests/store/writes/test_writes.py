@@ -9,6 +9,7 @@ import pytest
 
 from radar.adapters.firestore import layout, store
 from radar.adapters.firestore.repository import StoreChangeLog
+from radar.domain.model.history.ids import keyed
 from radar.domain.validation.context import InvalidChangeset
 from radar.tests.store import stores
 
@@ -89,6 +90,47 @@ def test_a_products_history_keeps_a_withdrawn_claim_across_later_writes() -> Non
     FX.apply(docs, files, "w-2", stores.put(changed, "Datasheet revision B", claim["source_refs"]))
     assert {v["entity"] for v in _json(docs, f"{layout.HISTORY}/{claim['subject']}")["versions"]} == {
         gone["id"], claim["id"]}
+    assert store.reproject(docs, FX.schema, FX.registry) == 0
+
+class _Counted:
+    def __init__(self, docs: Any) -> None:
+        self.docs, self.read = docs, 0
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.docs, name)
+
+    def get_many(self, paths: list[str]) -> dict[str, Any]:
+        found = self.docs.get_many(paths)
+        self.read += sum(not p.startswith(layout.PUBLIC) for p in found)
+        return found
+
+    def where(self, collection: str, field: str, values: Any, contains: bool = False) -> list[Any]:
+        found = self.docs.where(collection, field, values, contains)
+        self.read += 0 if collection.startswith(layout.PUBLIC) else len(found)
+        return found
+
+def test_a_models_approval_reads_as_many_records_in_a_family_of_200_as_in_a_family_of_2() -> None:
+    docs, files = FX.seeded()
+    model = next(p for p in FX.rows("products.jsonl") if p.get("parent"))
+    role = next(r for r in FX.rows("product_org_roles.jsonl") if r["product"] == model["id"])
+    name = next(n for n in FX.rows("names.jsonl") if n["subject"] == model["id"] and n["is_primary"])
+
+    def sibling(n: int) -> list[dict[str, Any]]:
+        pid = keyed("prd", f"sibling-{n}")
+        return [stores.put({**model, "id": pid, "slug": f"{model['slug']}-{n}"}, "New model", role["source_refs"]),
+                stores.put({**name, "id": keyed("nam", f"sibling-{n}"), "subject": pid, "value": f"Widget {n}"},
+                           "New model", []),
+                stores.put({**role, "id": keyed("por", f"sibling-{n}"), "product": pid}, "New model",
+                           role["source_refs"])]
+
+    def reads(n: int) -> int:
+        counted = _Counted(docs)
+        FX.writer(counted, files).apply(stores.changeset(*sibling(n)), f"sibling-{n}")
+        return counted.read
+
+    second = reads(2)
+    FX.apply(docs, files, "siblings", *(c for n in range(3, 200) for c in sibling(n)))
+    assert reads(200) == second
     assert store.reproject(docs, FX.schema, FX.registry) == 0
 
 def test_a_change_that_adds_an_error_or_a_new_slug_writes_nothing() -> None:

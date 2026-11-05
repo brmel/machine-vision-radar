@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Iterable, Mapping, Sequence
+from typing import Collection, Iterable, Mapping, Sequence
 
 from radar.adapters.files.json_parser import Checker
 from radar.adapters.storage.blobs import media_url
@@ -18,8 +18,8 @@ from radar.domain.review.feed.news import Cited, news
 from radar.adapters.storage.memory_change_log import MemoryChangeLog
 from radar.domain.model.history.projection import Projection, plain
 from radar.domain.ports.catalog.catalog import Catalog
-from radar.domain.model.entities import (Change, FeedBrief, FeedItem, OrgBrief, Organization, OrgRelation, Product,
-                                         ProductView, Source)
+from radar.domain.model.entities import (Change, FeedBrief, FeedItem, ModelRow, OrgBrief, Organization, OrgRelation,
+                                         Product, ProductView, Source)
 from radar.domain.model.registry import Registry
 from radar.domain.model.schema import ModelSchema
 from radar.domain.ports.store.docs import Docs, Fields
@@ -39,6 +39,9 @@ def _page_counts(registry: Record, pages: Writes) -> dict[str, int]:
 def _teaser(stored: Record, briefs: Sequence[FeedBrief] | None, checked: Checker) -> Sequence[FeedBrief]:
     return briefs if briefs is not None else [checked.parse(b, FeedBrief, b["slug"]) for b in stored.get("news", [])]
 
+def _kept(old: Mapping[str, ProductView], rebuilt: Collection[str]) -> dict[str, list[ModelRow]]:
+    return {p: [m for m in v.models if m.id not in rebuilt] for p, v in old.items()}
+
 def full(catalog: Catalog, registry: Registry, schema: ModelSchema, changes: Sequence[Change]) -> dict[str, Fields]:
     return public_docs(
         read_model.build(catalog, registry, schema, MemoryChangeLog(changes), Checker(schema), media_url))
@@ -57,10 +60,10 @@ class Projector:
         present = sorted(p for p in hood.products if p in records)
         changes = sorted(catalog.all(Change), key=lambda c: (c.entity, c.version))
         revised = listed(self.schema, changes)
-        builder, views = read_model.product_views(catalog, self.registry, self.schema, checked, media_url, revised,
-                                                  present)
         old = {p: checked.parse(doc_value(f), ProductView, p)
                for p, f in ((p, self.docs.get(f"{PRODUCTS}/{p}")) for p in sorted(hood.products)) if f}
+        builder, views = read_model.product_views(catalog, self.registry, self.schema, checked, media_url, revised,
+                                                  present, _kept(old, hood.products))
         out: Writes = {f"{PRODUCTS}/{p}": product_doc(views[p]) if p in views else None for p in hood.products}
         pages = self._listings(views, old, checked)
         out.update(pages)

@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from typing import Collection, Mapping, Sequence
 
 from radar.domain.read_model.derived.lineage import DisplayedStatus
 from radar.domain.read_model.derived.current_source import current_source
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.entities import (AltName, CategoryProfile, Claim, ComponentLink, Document, EventRow, HubRef,
-                                         Identifier, IdentifierRow, LifecycleEvent, MediaItem, ModelRow, Name,
-                                         Offering, OfferingRow, OrgBrief, PartialDate, Price, Product, ProductLink,
-                                         ProductSheet, ProductVersion, ProductView, Relation, RelationRow,
+                                         Identifier, IdentifierRow, LifecycleEvent, MediaItem, ModelRow, ModelSpec,
+                                         Name, Offering, OfferingRow, OrgBrief, PartialDate, Price, Product,
+                                         ProductLink, ProductSheet, ProductVersion, ProductView, Relation, RelationRow,
                                          RelationSide, Source, SpecCell, StatusView, TermRef, VersionRow)
 from radar.domain.model.registry import Registry
 from radar.domain.model.schema import ModelSchema
@@ -21,10 +22,10 @@ RowField = str | TermRef | PartialDate | Price
 
 class ProductViews:
     def __init__(self, catalog: Catalog, registry: Registry, schema: ModelSchema, exported: dict[str, Product],
-                 media_url: MediaUrl) -> None:
+                 media_url: MediaUrl, built: Collection[str], kept: Mapping[str, Sequence[ModelRow]] | None) -> None:
         self.catalog, self.registry, self.schema, self.terms, self.exported = (
             catalog, registry, schema, Terms(registry), exported)
-        self.media_url = media_url
+        self.media_url, self.built, self.kept = media_url, set(built), kept or {}
         self.hubs = {c.id: c.component_hub for c in registry.categories.values() if c.component_hub}
         used = [r for r in catalog.all(Relation) if r.from_entity in exported and r.to_entity in exported
                 and (hub := self.hubs.get(exported[r.to_entity].category)) is not None and r.type == hub.relation]
@@ -71,7 +72,7 @@ class ProductViews:
     def view(self, p: Product, names: dict[str, str], vendor: OrgBrief, history: bool) -> ProductView:
         profile = self.registry.profile(p.category)
         cited: dict[str, Source] = {}
-        models = self._models(p, names, profile, cited)
+        models = self._models(p, names, profile)
         core, detail = self._specs(p, profile, cited)
         return ProductView(
             id=p.id, slug=p.slug, name=names[p.id], kind=p.kind, version=p.version, history=history,
@@ -145,12 +146,11 @@ class ProductViews:
         return core, tuple(replace(cell, group=self.registry.group_of(groups, cell.key))
                            for cell in self.cells(p, detail, cited))
 
-    def _models(self, p: Product, names: dict[str, str], profile: CategoryProfile,
-                cited: dict[str, Source]) -> tuple[ModelRow, ...]:
-        models = sorted((m for m in self.exported.values() if m.parent == p.id),
-                        key=lambda m: (names[m.id].lower(), m.id))
-        return tuple(ModelRow(id=m.id, slug=m.slug, name=names[m.id], specs=self.cells(m, profile.sections.core, cited))
-                     for m in models)
+    def _models(self, p: Product, names: dict[str, str], profile: CategoryProfile) -> tuple[ModelRow, ...]:
+        built = (ModelRow(id=m.id, slug=m.slug, name=names[m.id], specs=tuple(
+            ModelSpec(key=c.key, value=c.value) for c in self.cells(m, profile.sections.core, {})))
+                 for m in self.exported.values() if m.parent == p.id and m.id in self.built)
+        return tuple(sorted((*self.kept.get(p.id, ()), *built), key=lambda r: (r.name.lower(), r.id)))
 
     def _events(self, p: Product) -> list[LifecycleEvent]:
         return sorted((e for e in self.catalog.all(LifecycleEvent) if e.product == p.id),
