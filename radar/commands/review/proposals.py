@@ -127,10 +127,9 @@ def run_retract(args: argparse.Namespace) -> int:
     return show(args, args.wiring.review().submit(Withdrawal(args.id, args.reason), _founder(args)))
 
 def run_media_add(args: argparse.Namespace) -> int:
-    content = Path(args.file).read_bytes()
     mime = args.mime or mimetypes.guess_type(args.file)[0] or "application/octet-stream"
-    ref = args.wiring.blobs().put(content, mime, False)
-    document = {**_read(args.document), "sha256": ref.sha256, "mime": mime, "bytes": len(content)}
+    stored = args.wiring.records().upload(Path(args.file).read_bytes(), mime)
+    document = {**_read(args.document), "sha256": stored.sha256, "mime": stored.mime, "bytes": stored.bytes}
     change = Change(PutEntity(document), args.reason, "human", args.actor, tuple(args.source or ()))
     return _file(args, FilesOn.CREATE, Changeset((change,)), str(document.get("id", "")))
 
