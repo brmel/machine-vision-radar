@@ -1,4 +1,4 @@
-import { type FC, useMemo, useState } from "react";
+import { type FC, useMemo } from "react";
 import type { CatalogRepository } from "../../../domain/ports/CatalogRepository.ts";
 import type { ProductView } from "../../../domain/views.ts";
 import { useRegistry, Breadcrumbs } from "../../../ui/index.ts";
@@ -6,7 +6,7 @@ import { browsePath } from "../../../domain/paths.ts";
 import { buildProductHeadMeta, productSeo } from "../../../shell/seo/product.ts";
 import { useRecordHead } from "../../../shell/seo/documentHead.ts";
 import { SITE_ORIGIN } from "../../../shell/seo/siteOrigin.ts";
-import { ProductTabs, type ProductDetailTab } from "./ProductTabs.tsx";
+import { ProductTabs } from "./ProductTabs.tsx";
 import { ProductHeader, type ProductHeaderProps } from "../header/ProductHeader.tsx";
 import { useI18n } from "../../../shell/i18n/index.tsx";
 import { useValueLabels } from "../../../shell/i18n/labels.ts";
@@ -26,7 +26,6 @@ export const ProductDetailView: FC<ProductDetailViewProps> = ({ repository, prod
   ...header }) => {
   const { t } = useI18n();
   const registry = useRegistry();
-  const [activeTab, setActiveTab] = useState<ProductDetailTab>("specs");
   const { value: product, isLoading, error } = useProduct(repository, productId, prerendered);
   const category = product ? registry.categories.find((c) => c.id === product.category) ?? null : null;
 
@@ -48,8 +47,7 @@ export const ProductDetailView: FC<ProductDetailViewProps> = ({ repository, prod
   return (
     <div className="space-y-3">
       <ProductHeader product={product} category={category} {...header} />
-      <ProductTabs product={product} activeTab={activeTab} onTabChange={setActiveTab}
-        onSelectProduct={header.onSelectProduct} />
+      <ProductTabs product={product} onSelectProduct={header.onSelectProduct} />
       <ReportError inbox={reports} subject={product.id} />
     </div>
   );
