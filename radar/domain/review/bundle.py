@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Callable, Sequence
 
-from radar.domain.model.history.changeset import EntityChange, PutEntity
+from radar.domain.model.history.changeset import EntityChange, PutEntity, as_record
 from radar.domain.model.entities import Risk
 from radar.domain.review.agents.drafts import References, naming
 from radar.domain.review.proposal import Proposal
@@ -14,10 +14,10 @@ def puts(proposal: Proposal) -> tuple[PutEntity, ...]:
                  if isinstance(c.action, PutEntity))
 
 def _names(proposal: Proposal, refs: References) -> set[str]:
-    return {ref for put in puts(proposal) for _, ref in naming(put.record, refs)}
+    return {ref for put in puts(proposal) for _, ref in naming(as_record(put.entity), refs)}
 
 def after(proposals: Sequence[Proposal], refs: References) -> dict[str, tuple[str, ...]]:
-    putting = {p.id: {put.record["id"] for put in puts(p)} for p in proposals}
+    putting = {p.id: {put.entity.id for put in puts(p)} for p in proposals}
     return {p.id: tuple(q.id for q in proposals if q.id != p.id and putting[q.id] & (_names(p, refs) - putting[p.id]))
             for p in proposals}
 

@@ -12,6 +12,7 @@ from radar import paths
 from radar.adapters.console import log
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.history.projection import plain
+from radar.domain.model.model import Model
 from radar.domain.model.registry import Registry
 from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.model.entities import ProposalStatus
@@ -58,19 +59,19 @@ def read_tools(engine: Callable[[], SearchEngine], repository: CatalogRepository
                                                          if k in a}}).found(sources(), registry),
     }
 
-def _draft(arguments: Mapping[str, Any]) -> Draft:
+def _draft(arguments: Mapping[str, Any], model: Model) -> Draft:
     try:
         raw = json.loads(arguments["changeset"])
     except ValueError as exc:
         raise ValueError(f"changeset is not JSON: {exc}") from exc
-    return draft_of({**arguments, "changeset": raw})
+    return draft_of({**arguments, "changeset": raw}, model)
 
 def _mine(arguments: Mapping[str, Any]) -> Query:
     return Query(ProposalStatus(arguments["status"]) if "status" in arguments else None)
 
-def proposal_tools(review: Proposing) -> dict[str, Tool]:
+def proposal_tools(review: Proposing, model: Model) -> dict[str, Tool]:
     submit, mine, status = PROPOSING
-    return {submit: lambda a, agent: plain(shown_view(review.submit(_draft(a), agent))),
+    return {submit: lambda a, agent: plain(shown_view(review.submit(_draft(a, model), agent))),
             mine: lambda a, agent: plain(page_view(review.queue(_mine(a), agent, a.get("cursor")))),
             status: lambda a, agent: plain(shown_view(review.proposal(a["id"], agent)))}
 

@@ -6,14 +6,16 @@ from pathlib import Path
 
 from radar.adapters.console import log, output
 from radar.domain.validation.verdict import InvalidChangeset
-from radar.domain.model.history.changeset import Changeset, parse_changeset
+from radar.domain.model.history.changeset import parse_changeset
 from radar.domain.review.requests import Founder, Rollback
 from radar.domain.model.history.projection import plain
 from radar.domain.review.views import shown_view
 from radar.adapters.console.parser import Commands
 
-def _apply(args: argparse.Namespace, changeset: Changeset, cid: str) -> int:
+def run_apply(args: argparse.Namespace) -> int:
+    cid = args.wiring.correlate("change")
     try:
+        changeset = parse_changeset(json.loads(Path(args.changeset).read_text(encoding="utf-8")), args.wiring.model())
         applied = args.wiring.writer().apply(changeset, cid)
     except InvalidChangeset as exc:
         for f in exc.findings:
@@ -25,10 +27,6 @@ def _apply(args: argparse.Namespace, changeset: Changeset, cid: str) -> int:
     output.format_output({"correlation_id": cid, "events": list(applied.events), "writes": applied.writes},
                          json_mode=args.json, text_formatter=lambda _: "\n".join(lines) or "no change: nothing written")
     return 0 if not applied.events or args.wiring.reindex(changeset.changes[0].actor, cid) else 1
-
-def run_apply(args: argparse.Namespace) -> int:
-    cid = args.wiring.correlate("change")
-    return _apply(args, parse_changeset(json.loads(Path(args.changeset).read_text(encoding="utf-8"))), cid)
 
 def run_rollback(args: argparse.Namespace) -> int:
     shown = args.wiring.review().submit(Rollback(args.id, args.to, args.reason),

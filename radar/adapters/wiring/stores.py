@@ -142,9 +142,8 @@ class Stores:
 
     def review(self) -> Review:
         model = self.model()
-        return Review(StoreProposalQueue(self.store(), model.registry.proposal_kinds()), self.writer(), self.versions(),
-                      lambda: self.catalog(tuple(HELD)), ProductIdentity.of(model.registry), model.schema,
-                      self.instant)
+        return Review(StoreProposalQueue(self.store(), model), self.writer(), self.versions(),
+                      lambda: self.catalog(tuple(HELD)), ProductIdentity.of(model.registry), model, self.instant)
 
     def identity(self) -> FirebaseIdentity:
         if self._real:

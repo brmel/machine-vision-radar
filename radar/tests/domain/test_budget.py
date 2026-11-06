@@ -13,7 +13,7 @@ from radar.domain.ai.budget import Use, caps_of, model_of
 from radar.domain.ai.meter import Capped, Meter
 from radar.domain.model.entities import AiModel
 from radar.domain.model.history.ids import keyed
-from radar.domain.model.history.changeset import Change, Changeset, PutEntity
+from radar.domain.model.history.changeset import Change, Changeset, put_of
 from radar.domain.ports.store.docs import Docs, Increment
 from radar.domain.ports.ai.usage_log import Ended, Outcome
 from radar.tests.store import stores
@@ -47,7 +47,7 @@ def _cap(docs: Docs, use: Use, month_cad: float, day_calls: int, cap_id: str = "
     record = {"id": cap_id or keyed("cap", use.value), "use": use.value, "month_cad": month_cad, "day_calls": day_calls,
               **({"model": model} if model else {})}
     StoreWriter(docs, MODEL, lambda: f"{DAY}T00:00:00Z", stores.blobs()).apply(
-        Changeset((Change(PutEntity(record), "the founder approves this use's spend", "human", "founder", ()),)),
+        Changeset((Change(put_of(record, MODEL), "the founder approves this use's spend", "human", "founder", ()),)),
         "cap-test")
 
 @pytest.mark.parametrize("use", USES)

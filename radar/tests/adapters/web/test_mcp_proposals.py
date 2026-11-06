@@ -40,8 +40,8 @@ def place() -> Place:
     docs, files = FX.seeded()
     now = ["2026-10-20T09:00:00Z"]
     tokens = FirestoreAgentTokens(docs)
-    return Place(docs, McpServer(proposal_tools(FX.review(docs, files)), tokens, lambda: now[0], Stores().correlate),
-                 tokens, now)
+    return Place(docs, McpServer(proposal_tools(FX.review(docs, files), FX.model), tokens, lambda: now[0],
+                                 Stores().correlate), tokens, now)
 
 def _draft(files_on: str, subject: str, *records: dict[str, Any], refs: list[str]) -> dict[str, Any]:
     changes = [{"op": "put", "entity": r, "reason": "From the maker's datasheet",

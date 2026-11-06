@@ -34,8 +34,8 @@ def _plan(groups: Sequence[SourceGroup], merged: dict[str, Any]) -> str:
                              f"{merged['proposals']} proposal(s){filed}", *merged["refusals"]])
 
 def run_dedupe(args: argparse.Namespace) -> int:
-    schema = args.wiring.model().schema
-    merge = SourceMerge.of(args.wiring.catalog(SourceMerge.kinds(schema)), schema)
+    model = args.wiring.model()
+    merge = SourceMerge.of(args.wiring.catalog(SourceMerge.kinds(model.schema)), model)
     bundle = args.wiring.correlate("dedupe") if args.file and merge.drafts else None
     receipts = args.wiring.review().file(Bundle(bundle, merge.drafts), Job(ACTOR, bundle)) if bundle else ()
     merged = {"groups": [asdict(g) for g in merge.groups], "proposals": len(merge.drafts), "bundle": bundle,

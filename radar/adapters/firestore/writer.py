@@ -12,8 +12,8 @@ from radar.domain.model.model import Model, ParseError
 from radar.domain.model.schema import FieldSpec, ModelSchema
 from radar.domain.ports.store.blob_store import BlobRef, BlobStore
 from radar.domain.model.entities import ActorKind
-from radar.domain.model.history.changeset import (Applied, Change, Changeset, EntityChange, PutEntity, Retract,
-                                                  without_version)
+from radar.domain.model.history.changeset import (CHANGESET, RECORD_PARSE, Applied, Change, Changeset, EntityChange,
+                                                  PutEntity, Retract, as_record, put_of, without_version)
 from radar.domain.validation.context import Part
 from radar.domain.validation.verdict import Finding, InvalidChangeset
 from radar.domain.ports.store.docs import BATCH, Delete, Docs, Fields, Put
@@ -23,7 +23,7 @@ from .projection.projector import Projector
 
 Clock = Callable[[], str]
 Writes = Mapping[str, Fields | None]
-CHANGESET, STORED_FILE, RECORD_PARSE = "changeset", "stored_file", "record_parse"
+STORED_FILE = "stored_file"
 
 def commit(docs: Docs, writes: Writes, create: Collection[str] = ()) -> int:
     paths = sorted(writes)
@@ -76,12 +76,12 @@ def _unparsed(model: Model, record: Record) -> Finding | None:
         return Finding(RECORD_PARSE, record["id"], f"does not parse: {exc}")
     return None
 
-def _let_go(record: Record, f: FieldSpec, entity: str) -> PutEntity | Retract:
+def _let_go(model: Model, record: Record, f: FieldSpec, entity: str) -> PutEntity | Retract:
     kept = [x for x in record[f.name] if x != entity] if f.type == "array" else []
     if kept:
-        return PutEntity({**record, f.name: kept})
+        return put_of({**record, f.name: kept}, model)
     if f.optional:
-        return PutEntity({k: v for k, v in record.items() if k != f.name})
+        return put_of({k: v for k, v in record.items() if k != f.name}, model)
     return Retract(record["id"])
 
 @dataclass(frozen=True, slots=True)
@@ -121,7 +121,7 @@ class StoreWriter:
         now, changed, events = self.clock(), {}, []
         for c in changeset.changes:
             before = stored.get(c.entity)
-            body = dict(c.action.record) if isinstance(c.action, PutEntity) else None
+            body = as_record(c.action.entity) if isinstance(c.action, PutEntity) else None
             if before is None and body is None:
                 raise InvalidChangeset([Finding(CHANGESET, c.entity, "no such record to retract")])
             if without_version(before) == (body or {}):
@@ -176,12 +176,13 @@ class StoreWriter:
         out: dict[str, Change] = {entity: Change(Retract(entity), reason, actor_kind, actor, ())}
         for f, named in self.graph.naming(entity):
             r = without_version(named)
-            out[r["id"]] = Change(_let_go(r, f, entity), reason, actor_kind, actor, tuple(r.get("source_refs", ())))
+            out[r["id"]] = Change(_let_go(self.model, r, f, entity), reason, actor_kind, actor,
+                                  tuple(r.get("source_refs", ())))
         return Changeset(tuple(out.values()))
 
     def preview(self, changeset: Changeset) -> tuple[EntityChange, ...]:
         stored = self._stored([c.entity for c in changeset.changes])
-        after = {c.entity: dict(c.action.record) if isinstance(c.action, PutEntity) else None
+        after = {c.entity: as_record(c.action.entity) if isinstance(c.action, PutEntity) else None
                  for c in changeset.changes}
         return tuple(EntityChange(i, without_version(stored.get(i)) or None, a) for i, a in after.items()
                      if without_version(stored.get(i)) != (a or {}))

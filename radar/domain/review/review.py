@@ -3,11 +3,11 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Callable, Sequence, assert_never
 
-from radar.domain.model.history.changeset import Change, Changeset, EntityChange, PutEntity, Retract
+from radar.domain.model.history.changeset import Change, Changeset, EntityChange, PutEntity, Retract, as_record, put_of
 from radar.domain.model.entities import ActorKind, FilesOn, LogEntryView, LogPage, ProposalAction, ProposalStatus
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.history.projection import every_page
-from radar.domain.model.schema import ModelSchema
+from radar.domain.model.model import Model
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.ports.catalog.catalog_writer import CatalogWriter
 from radar.domain.ports.history.version_store import VersionStore
@@ -32,13 +32,15 @@ def _by(changeset: Changeset, name: str, kind: ActorKind) -> Changeset:
 
 class Review:
     def __init__(self, queue: ProposalQueue, writer: CatalogWriter, versions: VersionStore, held: Callable[[], Catalog],
-                 identity: ProductIdentity, schema: ModelSchema, clock: Callable[[], str]) -> None:
-        self._queue, self._writer, self._versions, self._held, self._identity, self._schema, self._clock = (
-            queue, writer, versions, held, identity, schema, clock)
-        self._uncited = {t.name for t in schema.entities if t.provenance or t.name in OWNED}
-        self._provenance = {t.name for t in schema.entities if t.provenance}
-        self._on_approval = {t.name: tuple(f.name for f in t.fields if f.set_on_approval) for t in schema.entities}
-        self._refs = references(schema)
+                 identity: ProductIdentity, model: Model, clock: Callable[[], str]) -> None:
+        self._queue, self._writer, self._versions, self._held, self._identity, self._model, self._clock = (
+            queue, writer, versions, held, identity, model, clock)
+        self._schema = model.schema
+        self._uncited = {t.name for t in model.schema.entities if t.provenance or t.name in OWNED}
+        self._provenance = {t.name for t in model.schema.entities if t.provenance}
+        self._on_approval = {t.name: tuple(f.name for f in t.fields if f.set_on_approval)
+                             for t in model.schema.entities}
+        self._refs = references(model.schema)
 
     def submit(self, draft: Draft, by: Submitter) -> Shown:
         if not isinstance(draft, FILES[type(by)]):
@@ -146,8 +148,7 @@ class Review:
         if isinstance(by, Agent):
             mine = (p for page in every_page(lambda cursor: self.queue(Query(ProposalStatus.SUGGESTED), by, cursor))
                     for p in page.proposals)
-            kind_of = lambda i: self._schema.kind_of(i) or ""
-            draft = unproposed(merged(draft, self._held(), kind_of, self._identity), mine, kind_of, self._refs)
+            draft = unproposed(merged(draft, self._held(), self._model, self._identity), mine, self._model, self._refs)
         self._sourced(draft.changeset)
         return self._file(draft.files_on, draft.reason, draft.subject, draft.changeset, by, source_url=draft.source_url,
                           bundle=bundle)
@@ -184,7 +185,7 @@ class Review:
         state = self._versions.get(draft.entity, draft.to)
         if state is None:
             raise LookupError(f"{draft.entity} has no version {draft.to}")
-        return Change(PutEntity(state) if state else Retract(draft.entity),
+        return Change(put_of(state, self._model) if state else Retract(draft.entity),
                       f"Rollback to version {draft.to}: {draft.reason.strip()}", by.kind, by.name,
                       self._cited(draft.entity, draft.to))
 
@@ -228,10 +229,9 @@ class Review:
     def _dated(self, change: Change) -> Change:
         if not isinstance(change.action, PutEntity):
             return change
-        record = change.action.record
-        lacking = [f for f in self._on_approval.get(self._schema.kind_of(record["id"]) or "", ())
-                   if record.get(f) is None]
-        return (replace(change, action=PutEntity({**record, **{f: self._clock() for f in lacking}})) if lacking
+        entity, record = change.action.entity, as_record(change.action.entity)
+        lacking = [f for f in self._on_approval.get(self._schema.kind_of(entity.id) or "", ()) if record.get(f) is None]
+        return (replace(change, action=PutEntity(replace(entity, **{f: self._clock() for f in lacking}))) if lacking
                 else change)
 
     def _retracted(self, proposals: Sequence[Proposal], note: str, by: Founder) -> Outcome:
@@ -258,7 +258,7 @@ class Review:
         before = self._versions.get(applied.entity, applied.version - 1) if applied.version > 1 else None
         cited = (next((c.source_refs for c in proposal.changeset.changes if c.entity == applied.entity), ())
                  if proposal.changeset else ())
-        return Change(PutEntity(before) if before else Retract(applied.entity),
+        return Change(put_of(before, self._model) if before else Retract(applied.entity),
                       f"Retraction of {proposal.id}: {note.strip()}", by.kind, by.name, cited, proposal.id)
 
     def _changes_of(self, proposal: Proposal) -> tuple[EntityChange, ...]:

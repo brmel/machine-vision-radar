@@ -52,7 +52,7 @@ class Researcher:
         self._page_type = next(k for k, t in registry.vocabularies["source_types"].items() if t.research)
         self._terms, self._refs = terms(model), references(model.schema)
         self._specs, self._words = registry.spec_definitions, words(registry)
-        self._filing = Filing(review, model.schema, held, self._log)
+        self._filing = Filing(review, model, held, self._log)
         self._media = Media(fetcher, files, judge, self._filing, self._log, now)
         self._measure = Measure(runs, review, read, held, model)
 
@@ -152,9 +152,12 @@ class Researcher:
                                lambda i: self._held.held(i) is not None)
                 if stray := self._stray(draft, reading):
                     return self._log(run, Step.REJECTED, f"{draft.reason}: {stray}")
-                cited = self._filing.cited(draft, read.entity)
-                return (self._filing.filed(run, Step.FILED, draft, draft.reason, (read, *cited), by) if cited
-                        else self._log(run, Step.SKIPPED, f"{draft.reason}: the store holds it"))
+                cited, refused = self._filing.cited(draft, read.entity)
+                if refused:
+                    run = self._log(run, Step.REJECTED, f"{draft.reason}: {refused}")
+                if cited:
+                    return self._filing.filed(run, Step.FILED, draft, draft.reason, (read, *cited), by)
+                return run if refused else self._log(run, Step.SKIPPED, f"{draft.reason}: the store holds it")
 
     def _stray(self, draft: RecordsDraft, reading: Reading) -> str | None:
         given = {card.id for card in reading.known} | {reading.maker} | {r["id"] for r in draft.records}

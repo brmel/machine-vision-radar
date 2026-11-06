@@ -15,7 +15,6 @@ from radar.domain.ports.store.docs import Docs
 from radar.domain.read_model.history import Histories
 from radar.domain.read_model.products.values import Terms
 from radar.domain.review.requests import Founder
-from radar.domain.review.views import admin_model
 from radar.tests.store import stores
 
 FX = stores.fixture()
@@ -31,7 +30,7 @@ def _admin() -> tuple[AdminEndpoint, list[bool], Docs]:
                           lambda ids: catalog_of(FX.model, read_records(docs, FX.model.schema, ids).values()),
                           Terms(FX.model.registry).source_view)
     endpoint = AdminEndpoint(FX.review(docs, files), Tokens(), StoreRecords(docs, FX.model, files),
-                             histories, admin_model(FX.model),
+                             histories, FX.model,
                              lambda job: f"{job}-test", lambda actor, cid: reindexed.append(True) or True,
                              {"agents": AgentsAdmin(FirestoreAgentTokens(docs), lambda: "2026-10-20T09:00:00Z").route})
     return endpoint, reindexed, docs

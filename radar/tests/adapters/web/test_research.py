@@ -26,7 +26,7 @@ from radar.domain.model.entities import AiModel, FilesOn, Organization
 from radar.domain.ports.ai.image_judge import ImageJudge
 from radar.domain.ports.ai.research_agent import ResearchAgent
 from radar.domain.ports.review.research_runs import ResearchRun, Status, Step
-from radar.domain.model.history.changeset import Changeset, PutEntity, without_version
+from radar.domain.model.history.changeset import Changeset, PutEntity, as_record, without_version
 from radar.domain.ports.store.blob_store import BlobRef
 from radar.domain.ports.store.docs import Docs
 from radar.domain.ports.web.page_fetcher import Unfetchable
@@ -122,16 +122,16 @@ def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
     assert (view.media, view.datasheets) == (view.filed[2:4], view.filed[4:5]), (
         "the log counts two files staged and a datasheet read")
     changes = [p.changeset.changes for p in filed if p and p.changeset]
-    assert all(c[0].action.record["retrieved_at"] == NOW for c in changes), "each rests on what it read"
+    assert all(as_record(c[0].action.entity)["retrieved_at"] == NOW for c in changes), "each rests on what it read"
     assert changes[0][0].entity == "src_0000000004", "a page the store holds a Source for is cited by that Source"
     assert [c.entity for c in changes[1][1:]] == ["clm_0000000003"], (
         "a value the page states otherwise corrects the claim the store ranks first")
     assert all(c.actor == RESEARCHER and c.source_refs == (read.entity,)
-               and c.action.record.get("source_refs", [read.entity]) == [read.entity] for read, *rest in changes
-               for c in (read, *rest)), "every record cites the Source the proposal rests on"
-    assert sum("source_refs" in c.action.record for p in changes for c in p) == 6, "five claims and a role"
-    assert {c.action.record["spec_key"]: c.action.record["value"] for c in changes[-1]
-            if c.action.record.get("spec_key") in ("fixture_mount", "fixture_mass")} == {
+               and as_record(c.action.entity).get("source_refs", [read.entity]) == [read.entity]
+               for read, *rest in changes for c in (read, *rest)), "every record cites the Source the proposal rests on"
+    assert sum("source_refs" in as_record(c.action.entity) for p in changes for c in p) == 6, "five claims and a role"
+    assert {as_record(c.action.entity)["spec_key"]: as_record(c.action.entity)["value"] for c in changes[-1]
+            if as_record(c.action.entity).get("spec_key") in ("fixture_mount", "fixture_mass")} == {
         "fixture_mount": {"term": "socket_b"}, "fixture_mass": {"quantity": {"value": 140, "unit": "g"}}}, \
         "a term named by its label in a one-term set, and a unit by another spelling, are put by their ids"
 
@@ -201,12 +201,12 @@ def test_a_file_is_staged_privately_and_public_only_once_approved_under_rights_t
     queue, review, founder = FX.queue(docs), FX.review(docs, files), Founder("founder", "test")
     photo, sheet, stated = (queue.get(p) for p in (*run.said(Step.MEDIA), *run.said(Step.DATASHEET)))
     assert photo and sheet and stated and stated.changeset
-    source, *claims = (c.action.record for c in stated.changeset.changes)
+    source, *claims = (as_record(c.action.entity) for c in stated.changeset.changes)
     assert (source["url"], [(c["subject"], c["spec_key"], c["method"], c["source_refs"]) for c in claims]) == (
         sheet.source_url, [(stated.subject, "fixture_mount", source["type"], [source["id"]])])
 
     def readable(proposal: Proposal) -> bool:
-        document = next(c.action.record for c in (proposal.changeset.changes if proposal.changeset else ())
+        document = next(as_record(c.action.entity) for c in (proposal.changeset.changes if proposal.changeset else ())
                         if c.entity.startswith("doc_"))
         url = files.url(BlobRef(document["sha256"], document["mime"]), True)
         return {200: True, 403: False}[stores.status("GET", url)]
@@ -215,7 +215,7 @@ def test_a_file_is_staged_privately_and_public_only_once_approved_under_rights_t
     review.decide(Approval(Picked((photo.id,)), "The maker's photo"), founder).one()
     assert not readable(photo), "the maker's rights keep it private"
     public = next(k for k, t in REGISTRY.vocabularies["media_rights"].items() if t.public)
-    opened = Changeset(tuple(replace(c, action=PutEntity({**c.action.record, "rights": public}))
+    opened = Changeset(tuple(replace(c, action=PutEntity(replace(c.action.entity, rights=public)))
                              if c.entity.startswith("doc_") else c for c in sheet.changeset.changes))
     review.decide(Revision(sheet.id, opened, "The maker licenses its datasheets openly"), founder).one()
     assert not readable(sheet), "an edit is not an approval"
@@ -287,13 +287,13 @@ def test_a_product_run_proposes_the_best_photo_privately_and_what_the_page_state
     assert "/media/widget-two.svg" not in [path for path, _ in heard], "the page's SVG is never sent to the judge"
     prop, *stated = (FX.queue(docs[0]).get(p) for p in run.said(Step.FILED))
     assert stated[-1] and stated[-1].changeset and stated[-1].reason == "This is Widget Two's own page"
-    [own] = (c.action.record for c in stated[-1].changeset.changes if c.entity == "prd_0000000002")
+    [own] = (as_record(c.action.entity) for c in stated[-1].changeset.changes if c.entity == "prd_0000000002")
     held = next(p for p in FX.rows("products.jsonl") if p["id"] == "prd_0000000002")
     assert own == {**without_version(held), "website_url": f"{SITE}/products/widget-two"}, "its summary kept"
     assert "The page names Widget Two: the store holds it" in run.said(Step.SKIPPED), "a held record is not filed again"
     assert prop is not None and prop.subject == "prd_0000000002" and "Widget Two" in prop.reason
     assert prop.changeset is not None
-    doc = next(c.action.record for c in prop.changeset.changes if c.entity.startswith("doc_"))
+    doc = next(as_record(c.action.entity) for c in prop.changeset.changes if c.entity.startswith("doc_"))
     research = next(k for k, t in REGISTRY.vocabularies["media_rights"].items() if t.research)
     assert doc["rights"] == research, "a maker's photo is never labelled with a public right"
     assert all(c.entity != "prd_0000000002" for c in prop.changeset.changes), "nor made a thumbnail without one"

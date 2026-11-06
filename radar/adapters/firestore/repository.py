@@ -6,10 +6,10 @@ from typing import Any, Iterable, Mapping, Sequence
 
 from radar.adapters.files.json_parser import Checker
 from radar.adapters.files.model_json import DEFAULT_LANGUAGE
-from radar.domain.model.entities import (ActorKind, AdminRecord, CategoryPage, Change, Claim, Document, FilesOn,
-                                         HistoryView, IndexView, LogEntryView, LogPage, MarketView, Name, Organization,
-                                         Product, ProductCard, ProductView, ProposalStatus, RecordRow, RecordRows,
-                                         Source, StoredFile)
+from radar.domain.model.entities import (CLASSES, ActorKind, AdminRecord, CategoryPage, Change, Claim, Document,
+                                         Entity, FilesOn, HistoryView, IndexView, LogEntryView, LogPage, MarketView,
+                                         Name, Organization, Product, ProductCard, ProductView, ProposalStatus,
+                                         RecordRow, RecordRows, Source, StoredFile)
 from radar.domain.model.history.projection import Projection, json_text, later, page_of, paged, plain
 from radar.domain.model.model import Model
 from radar.domain.model.schema import ModelSchema
@@ -113,15 +113,15 @@ def proposal_doc(p: Proposal, kind: str) -> Fields:
     return {k: v for k, v in doc.items() if v is not None}
 
 class StoreProposalQueue:
-    def __init__(self, docs: Docs, kinds: Mapping[str, str]) -> None:
-        self._docs, self._kinds = docs, kinds
-        self._events = {kind: FilesOn(event) for event, kind in kinds.items()}
+    def __init__(self, docs: Docs, model: Model) -> None:
+        self._docs, self._model, self._kinds = docs, model, model.registry.proposal_kinds()
+        self._events = {kind: FilesOn(event) for event, kind in self._kinds.items()}
 
     def _proposal(self, f: Fields) -> Proposal:
         def applied(key: str) -> tuple[AppliedChange, ...]:
             return tuple(AppliedChange(a["change"], a["entity"], int(a["version"])) for a in f[key])
-        return Proposal(f["id"], self._events[f["kind"]], ProposalStatus(f["status"]),
-                        parse_changeset(json.loads(f["changeset"])) if "changeset" in f else None, f.get("subject"),
+        changeset = parse_changeset(json.loads(f["changeset"]), self._model) if "changeset" in f else None
+        return Proposal(f["id"], self._events[f["kind"]], ProposalStatus(f["status"]), changeset, f.get("subject"),
                         f["reason"], ActorKind(f["actor_kind"]), f["author"], f["created_at"], f["content_hash"],
                         f.get("message"), f.get("source_url"), int(f["reports"]), f.get("reviewer"), f.get("note"),
                         f.get("decided_at"), tuple(Edit(e["at"], e["actor"], e["note"]) for e in f["edits"]),
@@ -205,8 +205,9 @@ class StoreHeldRecords:
         return tuple(
             layout.catalog_of(self._model, scan(self._docs, self._schema, (Organization.__name__,))).all(Organization))
 
-    def held(self, record_id: str) -> Mapping[str, Any] | None:
-        return layout.held(self._docs, self._schema, record_id)
+    def held(self, record_id: str) -> Entity | None:
+        found = layout.held(self._docs, self._schema, record_id)
+        return self._model.parse(found, CLASSES[self._schema.kind_of(record_id) or ""]) if found else None
 
     def matching(self, kind: type[T], field: str, value: str) -> tuple[T, ...]:
         found = (record_of(f) for _, f in self._docs.where(self._schema.collection(kind.__name__), field, [value]))
