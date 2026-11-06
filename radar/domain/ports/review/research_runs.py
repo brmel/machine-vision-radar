@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from datetime import datetime, timedelta
 from typing import Literal, Protocol
 
-from radar.domain.model.entities import ResearchStatus as Status, ResearchStep as Step
+from radar.domain.model.entities import ResearchStatus as Status, ResearchStep as Step, RunScope
+
+STOPPED = "its process stopped"
 
 @dataclass(frozen=True, slots=True)
 class Line:
@@ -22,7 +25,7 @@ class Outcome:
 @dataclass(frozen=True, slots=True)
 class ResearchRun:
     id: str
-    scope: str
+    scope: RunScope
     actor: str
     started_at: str
     token: str
@@ -35,6 +38,12 @@ class ResearchRun:
 
     def logged(self, line: Line) -> ResearchRun:
         return replace(self, lines=(*self.lines, line))
+
+    def as_of(self, now: str, dead_after: float) -> ResearchRun:
+        said = self.lines[-1].at if self.lines else self.started_at
+        if self.outcome or datetime.fromisoformat(now) - datetime.fromisoformat(said) <= timedelta(seconds=dead_after):
+            return self
+        return replace(self.logged(Line(now, Step.ENDED, STOPPED)), outcome=Outcome(Status.FAILED, STOPPED, now))
 
 @dataclass(frozen=True, slots=True)
 class RunPage:

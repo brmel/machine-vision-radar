@@ -111,8 +111,9 @@ inEachLocale("agents", (locale) => {
     await page.getByRole("button", { name: T.adminResearchRunNow }).click();
 
     await expect(page).toHaveURL(/\/admin\/research\/runs\/research-[0-9a-f]{16}$/, { timeout: 60_000 });
-    await expect(page.getByRole("heading",
-      { level: 1, name: T.adminResearchRunTitle.replace("{scope}", maker?.slug ?? "") })).toBeVisible();
+    const scope = `${T.adminResearchMaker} · ${maker?.slug ?? ""}`;
+    await expect(page.getByRole("heading", { level: 1, name: T.adminResearchRunTitle.replace("{scope}", scope) }))
+      .toBeVisible();
     await expect(page.locator("article header")).toContainText(T.adminResearchDone);
     const started = page.locator("article header time").first();
     const at = (await started.getAttribute("datetime")) ?? "";
@@ -180,7 +181,8 @@ inEachLocale("agents", (locale) => {
     await page.getByLabel(T.adminResearchScope).selectOption("product");
     await page.getByLabel(T.adminResearchKey).fill(UNREAD);
     await page.getByRole("button", { name: T.adminResearchRunNow }).click();
-    await expect(page.getByRole("heading", { level: 1, name: T.adminResearchRunTitle.replace("{scope}", UNREAD) }))
+    const unread = `${T.adminResearchProduct} · ${UNREAD}`;
+    await expect(page.getByRole("heading", { level: 1, name: T.adminResearchRunTitle.replace("{scope}", unread) }))
       .toBeVisible({ timeout: 60_000 });
     await expect(page.locator("article header")).toContainText(T.adminResearchBlocked);
 

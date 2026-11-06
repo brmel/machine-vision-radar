@@ -1,7 +1,7 @@
 import { useState, type FC } from "react";
 import { Badge, Button, PageHeader, RowList, Section, formatInstant, formatNumber } from "../../../ui/index.ts";
 import { useI18n } from "../../../shell/i18n/index.tsx";
-import { RUN_STATUS, STEP, useAdmin } from "../model.ts";
+import { RUN_SCOPE, RUN_STATUS, STEP, useAdmin } from "../model.ts";
 import { AdminLink, Pager, pageRows, useProblem, useLoad } from "../useLoad.tsx";
 
 export const RunPage: FC<{ id: string }> = ({ id }) => {
@@ -17,7 +17,8 @@ export const RunPage: FC<{ id: string }> = ({ id }) => {
   const [said, tone] = RUN_STATUS[status];
   return (
     <article className="space-y-6">
-      <PageHeader title={t("adminResearchRunTitle", { scope })} actions={status === "running"
+      <PageHeader title={t("adminResearchRunTitle", { scope: `${t(RUN_SCOPE[scope.kind])} · ${scope.key}` })}
+        actions={status === "running"
         && <Button variant="outline" onClick={cancel}>{t("adminResearchCancel")}</Button>}>
         <p className="text-caption text-muted">
           <Badge tone={tone}>{t(said)}</Badge> · <time dateTime={started}>{formatInstant(started, locale)}</time>

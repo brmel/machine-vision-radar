@@ -10,10 +10,10 @@ from radar.domain.ports.ai.research_agent import Findings, Reading
 from radar.domain.ports.review.research_runs import Step
 from radar.domain.ports.web.reader import Link, Page
 from radar.domain.review.agents.drafts import words
-from radar.domain.review.agents.research.frontier import ProductScope
 from radar.domain.review.agents.research.tables import Tables, named_card
 from radar.tests.adapters.web.test_research import FX, _run
 from radar.tests.fixtures.fixture_category import recorded_page
+from radar.tests.fixtures.fixture_category import ProductScope
 
 PRODUCT = "prd_0000000002"
 ACCESSORIES = "accessories"

@@ -7,7 +7,8 @@ import pytest
 from radar.domain.model.entities import OrgRelation, Organization
 from radar.domain.model.history.changeset import as_record
 from radar.domain.ports.review.research_runs import Step
-from radar.domain.review.agents.research.frontier import CategoryScope, MakerScope, ProductScope, sites_of
+from radar.domain.review.agents.research.frontier import sites_of
+from radar.tests.fixtures.fixture_category import CategoryScope, MakerScope, ProductScope
 from radar.domain.review.agents.runs import run_view
 from radar.tests.adapters.web.test_research import FX, MAKER, REGISTRY, SITE, _run
 from radar.tests.fixtures.fixture_category import recorded_page

@@ -7,6 +7,7 @@ import type { AgentsAdmin } from "../../domain/ports/review/agents/AgentsAdmin.t
 import type { ResearchAdmin } from "../../domain/ports/review/agents/ResearchAdmin.ts";
 import type { AdminModel, AgentTokenView, AiCapRow, DecisionOutcome, EntityShape, FilesOn, LogEntryView, ProposalView,
   ResearchLine, ResearchRunView, Risk, TermRef } from "../../domain/views.ts";
+import type { RunScopeKind } from "../../domain/views.ts";
 import type { MessageKey } from "../../shell/i18n/messages.ts";
 import { kindOf as modelKindOf } from "../../domain/views.ts";
 import { localized } from "../../ui/index.ts";
@@ -42,6 +43,9 @@ export const ACTION: Readonly<Record<LogEntryView["action"], MessageKey>> = {
 };
 export const SCOPE: Readonly<Record<AgentTokenView["scope"], MessageKey>> = { read: "adminAgentsScopeRead",
   propose: "adminAgentsScopePropose" };
+export const RUN_SCOPE = { product: "adminResearchProduct", maker: "adminResearchMaker",
+  category: "adminResearchCategory" } as const satisfies Readonly<Record<RunScopeKind, MessageKey>>;
+
 export const RUN_STATUS = {
   running: ["adminResearchRunning", "info"], done: ["adminResearchDone", "positive"],
   partial: ["adminResearchPartial", "info"], blocked: ["adminResearchBlocked", "warning"],

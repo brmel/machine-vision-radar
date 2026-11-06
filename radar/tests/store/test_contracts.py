@@ -22,7 +22,6 @@ from radar.adapters.storage.memory_change_log import MemoryChangeLog
 from radar.domain.model.history.projection import Projection, every_page, plain
 from radar.domain.ports.history.version_store import VersionStore
 from radar.domain.model.entities import Change, FilesOn, LogEntryView, PatchOp, ProposalAction
-from radar.domain.ports.review.research_runs import ResearchRun
 from radar.domain.ports.store.blob_store import BlobRef
 from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.ports.review.proposal_queue import ProposalQueue, Query
@@ -278,8 +277,9 @@ def test_admin_lists_read_at_most_one_page_of_documents() -> None:
                  for t, _ in [issue(f"agt-{n}", Scope.READ, date(2026, 12, 31), Limits(), "2026-10-20T09:00:00Z")
                               for n in range(25)]]
                 + [Put(f"{RESEARCH}/res_{n:04d}",
-                       {**dataclasses.asdict(ResearchRun(f"res_{n:04d}", "acme", "founder", "2026-10-20T09:00:00Z",
-                                                         "agt", 1.0)), "outcome": "running", "lines": []})
+                       {"id": f"res_{n:04d}", "scope": {"kind": "maker", "key": "acme"}, "actor": "founder",
+                        "started_at": "2026-10-20T09:00:00Z", "token": "agt", "cad": 1.0, "outcome": "running",
+                        "lines": []})
                    for n in range(25)]
                 + [Put(f"documents/doc_{n:010d}",
                        {"id": f"doc_{n:010d}", "version": 1, "kind": "photo", "mime": "image/jpeg",

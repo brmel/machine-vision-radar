@@ -109,5 +109,5 @@ The server-only docs (`radar/adapters/firestore/ledgers/`), which no rule lets a
 | `metrics/{yyyy-mm-dd}` | the day's searches, empty searches, result clicks, answers, refusals, AI assistant visits |
 | `agent_tokens/{id}` | an outside agent's token ([MCP.md](MCP.md)) by its sha256, never the token |
 | `agent_usage/{id}-{yyyy-mm-dd}` | what that token used of its limits that day: requests per minute, proposals |
-| `research_runs/{id}` | a research run as its loop saved it, with its lines; the id is its correlation id |
+| `research_log/{newest first}-{id}` | a research run as its loop saved it, with its typed scope and lines, newest first; its id is its correlation id |
 | `research_cancels/{id}` | the founder's cancel of a run, kept apart so neither write overwrites the other |

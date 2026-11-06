@@ -5,15 +5,17 @@ from typing import Any
 
 from radar.adapters.console import log, output
 from radar.adapters.console.parser import Commands
+from radar.domain.model.entities import RunScope, RunScopeKind
 from radar.domain.model.history.projection import ROWS, plain
 from radar.domain.ports.review.research_runs import ResearchRun, Status
 from radar.domain.review.agents.research.run import PAGES, SECONDS
-from radar.domain.review.agents.research.frontier import FOLLOW, CategoryScope, MakerScope, ProductScope, RunScope
+from radar.domain.review.agents.research.frontier import FOLLOW
 from radar.domain.review.agents.runs import run_row, run_view, runs_view
 from radar.domain.review.requests import Founder
 
 def _line(row: dict[str, Any]) -> str:
-    return (f"{row['id']}  {row['status']:<9}  {row['scope']}  {row['pages']} pages, {row['filed']} filed, "
+    return (f"{row['id']}  {row['status']:<9}  {row['scope']['kind']} {row['scope']['key']}  "
+            f"{row['pages']} pages, {row['filed']} filed, "
             f"{row['rejected']} rejected, CAD {row['cad']:g}")
 
 def _shown(run: ResearchRun, args: argparse.Namespace) -> int:
@@ -23,8 +25,10 @@ def _shown(run: ResearchRun, args: argparse.Namespace) -> int:
 
 def _scope(args: argparse.Namespace) -> RunScope:
     if args.product:
-        return ProductScope(args.product)
-    return MakerScope(args.maker) if args.maker else CategoryScope(args.category)
+        return RunScope(kind=RunScopeKind.PRODUCT, key=args.product)
+    if args.maker:
+        return RunScope(kind=RunScopeKind.MAKER, key=args.maker)
+    return RunScope(kind=RunScopeKind.CATEGORY, key=args.category)
 
 def run_run(args: argparse.Namespace) -> int:
     research = args.wiring.researcher()

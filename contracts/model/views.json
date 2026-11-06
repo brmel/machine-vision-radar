@@ -1158,12 +1158,18 @@
     "fields": {"at": {"type": "string"}, "step": "ResearchStep", "detail": {"type": "string"}}
   },
   {
+    "id": "RunScope",
+    "kind": "record",
+    "description": "What a research run reads: its kind, and the product, maker or category it names by id or slug.",
+    "fields": {"kind": "RunScopeKind", "key": {"type": "string"}}
+  },
+  {
     "id": "ResearchRunView",
     "kind": "record",
     "description": "A research run as `radar research log` and the admin show it: its id is its correlation id, which every log line and proposal of the run carries; the pages it read, the proposals it filed (among them the files it staged and the datasheets it read) and why others were rejected, what its model calls cost, and each step.",
     "fields": {
       "id": {"type": "string"},
-      "scope": {"type": "string"},
+      "scope": "RunScope",
       "actor": {"type": "string"},
       "started_at": {"type": "string"},
       "ended_at": {"type": "string", "optional": true},
@@ -1184,7 +1190,7 @@
     "description": "A research run as its list shows it: how many pages it read, proposals it filed (its files and datasheets among them) and had rejected, and its cost; its page shows what they were.",
     "fields": {
       "id": {"type": "string"},
-      "scope": {"type": "string"},
+      "scope": "RunScope",
       "actor": {"type": "string"},
       "started_at": {"type": "string"},
       "ended_at": {"type": "string", "optional": true},

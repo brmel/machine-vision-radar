@@ -33,6 +33,9 @@ export type Scope = "read" | "propose";
 /** Where an agent token stands: active, expired past its date, or revoked by the founder. */
 export type Standing = "active" | "expired" | "revoked";
 
+/** What a research run reads: one product's pages, one maker's, or those of each maker in a category. */
+export type RunScopeKind = "product" | "maker" | "category";
+
 /** Where a research run stands: running; done, every page in reach read; partial, its page or time budget spent with pages left; blocked, no page in reach read; stopped by the founder, stopped by an AI cap, or failed. */
 export type ResearchStatus = "running" | "done" | "partial" | "blocked" | "cancelled" | "capped" | "failed";
 
@@ -995,10 +998,16 @@ export interface ResearchLine {
   readonly detail: string;
 }
 
+/** What a research run reads: its kind, and the product, maker or category it names by id or slug. */
+export interface RunScope {
+  readonly kind: RunScopeKind;
+  readonly key: string;
+}
+
 /** A research run as `radar research log` and the admin show it: its id is its correlation id, which every log line and proposal of the run carries; the pages it read, the proposals it filed (among them the files it staged and the datasheets it read) and why others were rejected, what its model calls cost, and each step. */
 export interface ResearchRunView {
   readonly id: string;
-  readonly scope: string;
+  readonly scope: RunScope;
   readonly actor: string;
   readonly started_at: string;
   readonly ended_at?: string;
@@ -1016,7 +1025,7 @@ export interface ResearchRunView {
 /** A research run as its list shows it: how many pages it read, proposals it filed (its files and datasheets among them) and had rejected, and its cost; its page shows what they were. */
 export interface ResearchRunRow {
   readonly id: string;
-  readonly scope: string;
+  readonly scope: RunScope;
   readonly actor: string;
   readonly started_at: string;
   readonly ended_at?: string;

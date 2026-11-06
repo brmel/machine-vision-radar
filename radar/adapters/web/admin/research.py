@@ -2,21 +2,18 @@ from __future__ import annotations
 
 from typing import Any, Callable, Mapping
 
+from radar.domain.model.entities import RunScope, RunScopeKind
 from radar.domain.model.history.projection import plain
 from radar.domain.ports.web.endpoint import Response
 from radar.domain.review.agents.research.run import Researcher
-from radar.domain.review.agents.research.frontier import CategoryScope, MakerScope, ProductScope, RunScope
 from radar.domain.review.agents.runs import run_view, runs_view
 from radar.domain.review.requests import Founder
 
-KINDS: Mapping[str, Callable[[str], RunScope]] = {"product": ProductScope, "maker": MakerScope,
-                                                  "category": CategoryScope}
-
 def _scope(body: Mapping[str, Any]) -> RunScope:
     kind, key = next(iter(body.items()), ("", ""))
-    if len(body) != 1 or kind not in KINDS or not isinstance(key, str) or not key.strip():
+    if len(body) != 1 or kind not in {k.value for k in RunScopeKind} or not isinstance(key, str) or not key.strip():
         raise ValueError("a run's scope is one of product, maker or category, with its id or slug")
-    return KINDS[kind](key.strip())
+    return RunScope(kind=RunScopeKind(kind), key=key.strip())
 
 class ResearchAdmin:
     def __init__(self, research: Callable[[], Researcher], correlate: Callable[[str], str]) -> None:
