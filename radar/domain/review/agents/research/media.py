@@ -13,7 +13,7 @@ from radar.domain.ports.review.research_runs import ResearchRun, Step
 from radar.domain.ports.web.reader import File, Link, Page, Reader, Unread
 from radar.domain.review.agents.files import Files, Staged
 from radar.domain.review.agents.research.filing import RESEARCHER, Filing, Log
-from radar.domain.review.agents.research.frontier import Reach
+from radar.domain.review.agents.research.frontier import Reach, SourceTypes
 from radar.domain.review.requests import Agent
 
 PHOTOS = 3
@@ -23,10 +23,10 @@ def _best_photo(evaluation: ImageEvaluation) -> str | None:
     return max(photos, key=lambda j: j.confidence).url if photos else None
 
 class Media:
-    def __init__(self, reader: Reader, files: Files, judge: Meter[ImageJudge], filing: Filing, log: Log,
-                 now: Callable[[], str]) -> None:
-        self._reader, self._files, self._judge, self._filing, self._log, self._now = (
-            reader, files, judge, filing, log, now)
+    def __init__(self, reader: Reader, files: Files, judge: Meter[ImageJudge], filing: Filing, types: SourceTypes,
+                 log: Log, now: Callable[[], str]) -> None:
+        self._reader, self._files, self._judge, self._filing, self._types, self._log, self._now = (
+            reader, files, judge, filing, types, log, now)
 
     def photo(self, run: ResearchRun, product: ProductCard, page: Page, read: Change, by: Agent,
               deadline: Instant) -> tuple[ResearchRun, str | None]:
@@ -78,12 +78,13 @@ class Media:
         staged = self._files.staged(file, draft.subject)
         document = Change(PutEntity(staged.document), draft.reason, "agent", RESEARCHER, read.source_refs)
         filed = self._filing.filed(run, Step.MEDIA, draft, draft.reason, (read, document), by, file.link.address)
-        return self._datasheet(filed, draft, staged, by)
+        return self._datasheet(filed, draft, staged, self._types.of(file.link, reach.own, staged.document.kind), by)
 
-    def _datasheet(self, run: ResearchRun, draft: FileDraft, staged: Staged, by: Agent) -> ResearchRun:
+    def _datasheet(self, run: ResearchRun, draft: FileDraft, staged: Staged, source_type: str,
+                   by: Agent) -> ResearchRun:
         address = staged.file.link.address
         try:
-            stated = self._files.stated(staged, self._now()[:10])
+            stated = self._files.stated(staged, source_type, self._now()[:10])
         except Capped as exc:
             return self._log(run, Step.REJECTED, f"{address}: {exc}")
         except Unparsed as exc:

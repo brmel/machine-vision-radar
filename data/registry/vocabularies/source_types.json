@@ -20,11 +20,22 @@
     "preference": 6
   },
   {"id": "distributor_listing", "label": {"en": "Distributor listing", "fr": "Fiche distributeur"}, "preference": 7},
-  {"id": "code_repository", "label": {"en": "Code repository", "fr": "Dépôt de code"}, "preference": 4},
-  {"id": "regulatory_filing", "label": {"en": "Regulatory filing", "fr": "Dépôt réglementaire"}, "preference": 6},
+  {
+    "id": "code_repository",
+    "label": {"en": "Code repository", "fr": "Dépôt de code"},
+    "hosts": ["github.com", "gitlab.com", "bitbucket.org"],
+    "preference": 4
+  },
+  {
+    "id": "regulatory_filing",
+    "label": {"en": "Regulatory filing", "fr": "Dépôt réglementaire"},
+    "hosts": ["sec.gov"],
+    "preference": 6
+  },
   {
     "id": "inherited_record_source",
     "label": {"en": "Unclassified source", "fr": "Source non classée"},
+    "third_party": true,
     "preference": 8
   }
 ]

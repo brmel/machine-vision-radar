@@ -5,8 +5,10 @@ from typing import Mapping
 import pytest
 
 from radar.domain.model.entities import OrgRelation, Organization
+from radar.domain.model.history.changeset import as_record
 from radar.domain.ports.review.research_runs import Step
 from radar.domain.review.agents.research.frontier import CategoryScope, MakerScope, ProductScope, sites_of
+from radar.domain.review.agents.runs import run_view
 from radar.tests.adapters.web.test_research import FX, MAKER, REGISTRY, SITE, _run
 from radar.tests.fixtures.fixture_category import recorded_page
 
@@ -28,7 +30,12 @@ def test_a_scope_is_a_product_a_maker_or_a_category_with_a_website() -> None:
         with pytest.raises(LookupError, match="no product|no organization|no category"):
             sites_of(scope, orgs, owning, FX.read)
 
-def test_a_maker_run_reads_its_sitemaps_first() -> None:
+def test_a_maker_run_reads_its_sitemaps_first_and_types_each_source_by_its_site() -> None:
+    types = REGISTRY.vocabularies["source_types"]
+    hosted, host = next((k, t.hosts[0]) for k, t in types.items() if t.hosts)
+    own = next(k for k, t in types.items() if t.research)
+    other = next(k for k, t in types.items() if t.third_party)
+    sheet, private = f"https://{host}/media/widget-two.pdf", "https://elsewhere.example.org/media/widget-two.pdf"
     pages = (f"{SITE}/products/widget-two", "https://elsewhere.example.org/products/widget-ten",
              "https://docs.example.com/products/widget-nine")
     mapped = "".join(f"<url><loc>{page}</loc></url>" for page in pages)
@@ -36,8 +43,21 @@ def test_a_maker_run_reads_its_sitemaps_first() -> None:
               "/sitemap.xml": (200, {"Content-Type": "application/xml"}, f"<urlset>{mapped}</urlset>".encode())}
 
     def serve(path: str, headers: Mapping[str, str]) -> tuple[int, Mapping[str, str], bytes]:
-        return served.get(path) or recorded_page(path, headers)
+        status, sent, body = served.get(path) or recorded_page(path, headers)
+        if headers["Host"].startswith("elsewhere."):
+            return status, sent, body.replace(b"socket_b", b"socket_a")
+        moved = {'"/media/widget-two.pdf"': f'"{sheet}"', f"{SITE}/media/widget-two.pdf": sheet,
+                 "http://169.254.169.254/latest/meta-data/": private}
+        for was, now in moved.items():
+            body = body.replace(was.encode(), now.encode())
+        return status, sent, body
 
-    run = _run(FX.seeded(), [], [], serve=serve)
+    docs = FX.seeded()
+    run = _run(docs, [], [], serve=serve)
     assert run.said(Step.READ) == (f"{SITE}/", pages[2], pages[0]), (
         "its home, then its sitemap's pages on its sites, its documentation subdomain first")
+    queue = FX.queue(docs[0])
+    typed = {r["url"]: r["type"] for p in run_view(run).filed if (proposal := queue.get(p)) and proposal.changeset
+             for r in map(as_record, (c.action.entity for c in proposal.changeset.changes if c.entity[:4] == "src_"))}
+    assert typed == {pages[0]: own, pages[2]: own, sheet: hosted, private: other}, (
+        "a page on the maker's sites is its own; a file off them is typed by its host, else as a third party's")

@@ -21,7 +21,7 @@ from radar.domain.ports.web.reader import Page, Reader, Unread
 from radar.domain.review.agents.drafts import corrected, minted, naming, references, resolved, terms, words
 from radar.domain.review.agents.files import Files
 from radar.domain.review.agents.research.filing import RESEARCHER, Filing
-from radar.domain.review.agents.research.frontier import Frontier, Reach, RunScope, sites_of
+from radar.domain.review.agents.research.frontier import Frontier, Reach, RunScope, SourceTypes, sites_of
 from radar.domain.review.agents.research.media import Media
 from radar.domain.review.agents.runs import Measure
 from radar.domain.review.agents.tokens import Limits, Scope, issue
@@ -44,11 +44,11 @@ class Researcher:
             meter, reader, runs, tokens, read, held, now)
         registry = model.registry
         self._owning = registry.marked("org_relation_types", lambda t: t.owns)
-        self._page_type = next(k for k, t in registry.vocabularies["source_types"].items() if t.research)
         self._terms, self._refs = terms(model), references(model.schema)
         self._specs, self._words = registry.spec_definitions, words(registry)
         self._filing = Filing(review, model, held, self._log)
-        self._media = Media(reader, files, judge, self._filing, self._log, now)
+        self._types = SourceTypes(registry.vocabularies["source_types"])
+        self._media = Media(reader, files, judge, self._filing, self._types, self._log, now)
         self._measure = Measure(runs, review, read, held, model)
 
     def start(self, scope: RunScope, by: Founder | Job) -> str:
@@ -114,7 +114,7 @@ class Researcher:
         if isinstance(page, Unread):
             return self._skipped(run, page), None
         run = self._log(run, Step.READ, page.link.address)
-        read = self._filing.read(page, self._page_type)
+        read = self._filing.read(page, self._types.of(page.link, reach.own))
         if reach.home and reach.site.target_product:
             run, capped = self._media.photo(run, reach.site.products[0], page, read, by, deadline)
             if capped:

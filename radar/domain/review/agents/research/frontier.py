@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Mapping, Sequence
 
-from radar.domain.model.entities import IndexView, Instant, OrgRelation, Organization, ProductCard
+from radar.domain.model.entities import IndexView, Instant, OrgRelation, Organization, ProductCard, Term
 from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.ports.web.reader import Link, Page, Reader, Unread
 
@@ -89,6 +89,17 @@ def sites_of(scope: RunScope, orgs: Sequence[Organization], owning: Sequence[Org
         case CategoryScope(key):
             index = read.index()
             return _maker_sites(_category_makers(key, orgs, index), orgs, owning, index, key, key)
+
+class SourceTypes:
+    def __init__(self, types: Mapping[str, Term]) -> None:
+        self._own = next(k for k, t in types.items() if t.research)
+        self._hosts = tuple((host, k) for k, t in types.items() for host in t.hosts or ())
+        self._third_party = next(k for k, t in types.items() if t.third_party)
+
+    def of(self, link: Link, own: frozenset[str], kind: str | None = None) -> str:
+        if link.within(own):
+            return kind or self._own
+        return next((k for host, k in self._hosts if link.within((host,))), self._third_party)
 
 class Frontier:
     def __init__(self, reader: Reader, sites: tuple[Site, ...]) -> None:

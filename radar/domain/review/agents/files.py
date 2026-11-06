@@ -35,11 +35,11 @@ class Files:
                                bytes=len(file.content), sha256=ref.sha256, subjects=(product,), rights=self._rights,
                                source_url=file.link.address, fetched_at=file.retrieved_at))
 
-    def stated(self, staged: Staged, day: str) -> Stated | None:
+    def stated(self, staged: Staged, source_type: str, day: str) -> Stated | None:
         kind, file = staged.document.kind, staged.file
         if not self._kinds[kind].research:
             return None
-        source = Source(id=keyed("src", file.link.address), version=1, type=kind, url=file.link.address,
+        source = Source(id=keyed("src", file.link.address), version=1, type=source_type, url=file.link.address,
                         retrieved_at=file.retrieved_at)
         product = staged.document.subjects[0]
         extraction, cad = self._meter.call(day,
