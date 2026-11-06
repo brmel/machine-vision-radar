@@ -99,7 +99,7 @@ inEachLocale("Search", (locale) => {
     await box(page).press("Enter");
     await expect.poll(() => sent.length).toBeGreaterThan(2);
     expect(sent.filter((body) => typeof body === "object" && body !== null && "from" in body))
-      .toEqual([{ event: "search", from: assistant }]);
+      .toEqual([{ event: "page_view", from: assistant }]);
     await expect.poll(async () => (await metrics())[counter] ?? 0).toBe((before[counter] ?? 0) + 1);
   });
 });
