@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { escape, index, specLabel, view } from "../sample.ts";
+import { escape, index, productViews, specLabel, view } from "../sample.ts";
 import { MESSAGES, inEachLocale } from "../../messages.ts";
 
 const values = (id: string): Map<string, string> => {
@@ -23,6 +23,8 @@ function pick(): { ids: string[]; key: string } {
   throw new Error("no two products that differ on a core quantity spec and agree on another");
 }
 const { ids, key } = pick();
+const family = productViews.find((p) => p.models.length > 1);
+if (!family) throw new Error("no family with two models in the fixture");
 
 async function rows(page: Page): Promise<{ label: string; equal: boolean }[]> {
   return page.locator("tbody tr").filter({ has: page.locator('th[scope="row"]') }).evaluateAll((trs) =>
@@ -70,6 +72,25 @@ inEachLocale("Compare", (locale) => {
     await page.reload();
     await expect(page.getByRole("checkbox", { name: t.onlyDifferencesToggle })).toBeChecked();
     expect((await rows(page)).map((r) => r.label)).toEqual(differing);
+  });
+
+  test("a family's models compared at the family's own address, linked from its page", async ({ page }) => {
+    await page.goto(`/product/${family.slug}`);
+    await page.getByRole("link", { name: t.compareFamilyAction }).click();
+    await expect(page).toHaveURL(`/compare/${family.slug}`);
+    const title = t.compareFamilyTitle.replace("{name}", family.name);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
+    await expect(page.locator("thead th")).toHaveCount(family.models.length + 1);
+    for (const model of family.models)
+      await expect(page.getByRole("columnheader", { name: new RegExp(escape(model.name)) })).toBeVisible();
+    await expect(page.getByRole("button", { name: t.removeFromCompare })).toHaveCount(0);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", new RegExp(`/compare/${family.slug}$`));
+
+    await page.goto(`/compare/${family.slug}`);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
+    await expect(page.locator("thead th")).toHaveCount(family.models.length + 1);
+    await page.getByRole("checkbox", { name: t.onlyDifferencesToggle }).check();
+    await expect(page).toHaveURL(`/compare/${family.slug}?diff=1`);
   });
 
   test("on a phone, two products read side by side with nothing cut or scrolled", async ({ page }) => {

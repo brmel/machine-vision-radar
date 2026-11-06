@@ -1,6 +1,6 @@
 import { localized } from "../../ui/specs/specFormat.ts";
-import { categoryPath, hubPath, productPath } from "../../domain/paths.ts";
-import type { CategoryEntry, ProductCard } from "../../domain/views.ts";
+import { categoryPath, familyComparePath, hubPath, productPath } from "../../domain/paths.ts";
+import type { CategoryEntry, ProductCard, ProductView } from "../../domain/views.ts";
 import { DEFAULT_LANGUAGE } from "../../domain/languages.ts";
 import { DEFAULT_MESSAGES as messages } from "../i18n/messages.ts";
 import { breadcrumbList, formatMetaDescription, pageTitle, type PageHeadMeta } from "./seo.ts";
@@ -33,6 +33,18 @@ export function componentHub(product: { readonly slug: string; readonly name: st
     path: hubPath(category.component_hub ?? "", product.slug), name: product.name, lead: usersLead(total, product.name),
     trail: [...TRAIL, { name: localized(category.label, DEFAULT_LANGUAGE.code), path: categoryPath(category.id) }],
     items: listed(cards), total,
+  };
+}
+
+export function familyCompare(family: ProductView, category: CategoryEntry): HubInput {
+  const fill = (text: string): string => text.replace("{name}", family.name).replace("{vendor}", family.vendor.name)
+    .replace("{count}", String(family.models.length));
+  return {
+    path: familyComparePath(family.slug), name: fill(messages.compareFamilyTitle),
+    lead: fill(messages.compareFamilyLead),
+    trail: [...TRAIL, { name: localized(category.label, DEFAULT_LANGUAGE.code), path: categoryPath(category.id) },
+      { name: family.name, path: productPath(family.slug) }],
+    items: family.models.map((m) => ({ name: m.name, path: productPath(m.slug) })), total: family.models.length,
   };
 }
 

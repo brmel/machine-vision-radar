@@ -20,7 +20,8 @@ snapshot (`radar store export`) stays in the maintainers' private data repo. Pag
   with no saved choice, its reads made first, in passes. It writes every product (its view embedded as JSON,
   `#mvr-product`) and its history, vendor, article and static route; each category's hub (`/category/<id>`, with its
   first listing page) and component's hub (`/<path>/<slug>`, the products that use it, at the path its category's
-  `component_hub` names); /news's first page and its feed of the latest 50 articles (`/news/feed.atom`,
+  `component_hub` names); each family of two or more models compared (`/compare/<slug>`, its models side by side,
+  linked from the family's page; a reader's own comparison stays at `/compare?ids=` and is not prerendered); /news's first page and its feed of the latest 50 articles (`/news/feed.atom`,
   `/news/feed.json` in JSON Feed 1.1), and by the same step a feed per category (`/category/<id>/feed.atom`, `.json`,
   the articles citing its products) and per maker (`/vendor/<slug>/feed.atom`, `.json`, the articles citing it), each
   linked from its page's head; the home, the 404, `robots.txt` and the sitemap (§3). The browser's state

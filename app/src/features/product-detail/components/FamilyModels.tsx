@@ -1,14 +1,14 @@
 import { useState, type FC } from "react";
 import type { ProductView } from "../../../domain/views.ts";
-import { productPath } from "../../../domain/paths.ts";
+import { familyComparePath, productPath } from "../../../domain/paths.ts";
 import { AppLink, CELL, Section, Table, formatSpecValueText, specRowLabel, useRegistry } from "../../../ui/index.ts";
 import { useI18n } from "../../../shell/i18n/index.tsx";
 import { useValueLabels } from "../../../shell/i18n/labels.ts";
 
 const FIRST_MODELS = 20;
 
-export const FamilyModels: FC<{ product: ProductView; onSelectProduct: (slug: string) => void }> = ({ product,
-  onSelectProduct }) => {
+export const FamilyModels: FC<{ product: ProductView; onSelectProduct: (slug: string) => void;
+  onCompareFamily: (slug: string) => void }> = ({ product, onSelectProduct, onCompareFamily }) => {
   const { t, locale } = useI18n();
   const { spec_definitions: specDefs } = useRegistry();
   const labels = useValueLabels();
@@ -16,6 +16,10 @@ export const FamilyModels: FC<{ product: ProductView; onSelectProduct: (slug: st
   const shown = open ? product.models : product.models.slice(0, FIRST_MODELS);
   return (
     <Section title={t("familyModelsTitle")} className="models">
+      {product.models.length > 1 && (
+        <AppLink href={familyComparePath(product.slug)} onOpen={() => onCompareFamily(product.slug)}
+          className="inline-block mb-2 text-caption font-medium underline">{t("compareFamilyAction")}</AppLink>
+      )}
       <Table columns={[{ head: t("familyModelsTitle") },
         ...product.core.map((c) => ({ head: specRowLabel(c.key, specDefs, locale) }))]}>
         {shown.map((m) => (

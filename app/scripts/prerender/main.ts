@@ -4,7 +4,7 @@ import { BRAND_CONFIG } from "../../src/ui/theme/brand.ts";
 import { buildHomeHeadMeta, buildStaticHeadMeta, buildVendorHeadMeta } from "../../src/shell/seo/seo.ts";
 import { buildHubHeadMeta, categoryHub } from "../../src/shell/seo/hubs.ts";
 import { STATIC_ROUTES, routeFromPath } from "../../src/shell/routing/router.ts";
-import { categoryPath, historyPath, productPath, vendorPath } from "../../src/domain/paths.ts";
+import { categoryPath, familyComparePath, historyPath, productPath, vendorPath } from "../../src/domain/paths.ts";
 import type { CategoryEntry } from "../../src/domain/views.ts";
 import { renderNotFoundHead } from "../head.ts";
 import { Sitemap, robots } from "../sitemap.ts";
@@ -58,9 +58,11 @@ function categorySitemap(sitemap: Sitemap, { category, products }: Listed, hubs:
       dateHubs(hubs, product, product.modified);
     }
     if (product.history && product.indexable) sitemap.add({ path: historyPath(product.slug) });
+    if (product.compared && product.indexable)
+      sitemap.add({ path: familyComparePath(product.slug), lastmod: product.modified });
   }
   sitemap.add({ path: categoryPath(category.id), lastmod: dates.sort().at(-1) });
-  return products.reduce((n, p) => n + (p.history ? 2 : 1) + (p.hub ? 1 : 0), 1);
+  return products.reduce((n, p) => n + (p.history ? 2 : 1) + (p.hub ? 1 : 0) + (p.compared ? 1 : 0), 1);
 }
 
 async function vendorPages(site: Site, sitemap: Sitemap): Promise<number> {

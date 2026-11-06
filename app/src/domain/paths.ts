@@ -7,6 +7,7 @@ export const categoryPath = (categoryId: string): string => `/category/${encodeU
 export const hubPath = (path: string, productSlug: string): string => `/${path}/${encodeURIComponent(productSlug)}`;
 export const NEWS_PATH = "/news";
 export const articlePath = (slug: string): string => `${NEWS_PATH}/${encodeURIComponent(slug)}`;
+export const familyComparePath = (slug: string): string => `/compare/${encodeURIComponent(slug)}`;
 export const feedPath = (home: string, format: "atom" | "json"): string => `${home}/feed.${format}`;
 
 export const pageCount = (total: number, size: number): number => Math.max(1, Math.ceil(total / size));

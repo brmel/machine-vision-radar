@@ -42,6 +42,7 @@ type Ports = { start: Start; repository?: CatalogRepository };
 function useHeadSync(route: ReturnType<typeof useRoute>["route"], t: ReturnType<typeof useI18n>["t"]) {
   useEffect(() => {
     if (["category", "hub", "product-detail", "vendor-detail", "news", "article"].includes(route.name)) return;
+    if (route.name === "compare" && route.family) return;
     if (route.name === "not-found") return syncNotFoundHead(t("notFoundTitle"));
     if (route.name === "admin") return syncNotFoundHead(t("navAdmin"));
     const path = pathFromRoute(route);
@@ -64,7 +65,7 @@ const RadarApp: FC<Ports> = ({ start, repository: injectedReader }) => {
     if (route.name === "admin") return;
     answers.count("page_view").catch((err: unknown) => logger.warn("a page view was not counted", {}, err));
   }, [route, answers]);
-  const compare = useComparedIds(route.name === "compare", start.compared);
+  const compare = useComparedIds(route.name === "compare" && !route.family, start.compared);
   useHeadSync(route, t);
 
   const { value: loaded, error: loadError } = useRead(async () => {

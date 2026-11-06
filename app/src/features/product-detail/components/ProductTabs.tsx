@@ -12,6 +12,7 @@ import { ProductMedia } from "./ProductMedia.tsx";
 interface ProductTabsProps {
   product: ProductView;
   onSelectProduct: (slug: string) => void;
+  onCompareFamily: (slug: string) => void;
 }
 
 type Cells = ProductView["core"];
@@ -24,7 +25,7 @@ function byGroup(cells: Cells): { group?: string; cells: Cells }[] {
   }, []);
 }
 
-export const ProductTabs: FC<ProductTabsProps> = ({ product, onSelectProduct }) => {
+export const ProductTabs: FC<ProductTabsProps> = ({ product, onSelectProduct, onCompareFamily }) => {
   const [activeTab, setActiveTab] = useState<"specs" | "sources">("specs");
   const { t, locale, plural } = useI18n();
   const { spec_definitions: specDefs, spec_groups: groups } = useRegistry();
@@ -64,7 +65,8 @@ export const ProductTabs: FC<ProductTabsProps> = ({ product, onSelectProduct }) 
                 {localized(product.summary, locale)}</p>
             </Section>
           )}
-          {product.models.length > 0 && <FamilyModels product={product} onSelectProduct={onSelectProduct} />}
+          {product.models.length > 0 && <FamilyModels product={product} onSelectProduct={onSelectProduct}
+            onCompareFamily={onCompareFamily} />}
           <ProductLifecycle product={product} />
           <ProductMedia media={product.media} />
         </div>
