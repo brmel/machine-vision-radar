@@ -11,7 +11,7 @@ from radar.domain.model.catalog import MemoryCatalog
 from radar.domain.model.model import Model
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.history.projection import plain
-from radar.domain.read_model.listings import Tally, index_card
+from radar.domain.read_model.listings import Tally, index_card, registry_view
 from radar.domain.read_model.read_model import ReadModel
 from radar.domain.model.schema import ModelSchema
 from radar.domain.ports.store.docs import Docs, Fields
