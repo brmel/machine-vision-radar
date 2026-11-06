@@ -17,8 +17,8 @@ from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.ports.catalog.held_records import HeldRecords
 from radar.domain.ports.review.agent_tokens import AgentTokens
 from radar.domain.ports.review.proposing import Proposing
-from radar.domain.ports.review.research_runs import (Ending, Line, Outcome, ResearchRun, ResearchRunLog, RunPage,
-                                                     Status, Step)
+from radar.domain.ports.review.research_runs import (LABELS, Ending, Line, Outcome, ResearchRun, ResearchRunLog,
+                                                     RunPage, Status, Step)
 from radar.domain.ports.web.crawl_records import CrawlRecords
 from radar.domain.ports.web.reader import Page, Reader, Unread
 from radar.domain.review.agents.drafts import corrected, minted, naming, references, resolved, terms, words
@@ -173,25 +173,27 @@ class Researcher:
         return run, capped
 
     def _tabled(self, run: ResearchRun, reach: Reach, page: Page, read: Change, by: Agent,
-                deadline: Instant) -> ResearchRun | None:
+                deadline: Instant) -> tuple[ResearchRun, bool]:
         card = named_card(page, reach.site.products) if self._method(read) in self._methods else None
         table = self._tables.read(page, card) if card else None
-        if not card or not table or len(table.claims) < ENOUGH:
-            return None
+        if not card or not table:
+            return run, False
         address = page.link.address
+        if table.unmatched:
+            run = self._log(run, Step.UNMATCHED, f"{address}: {LABELS.join(table.unmatched)}")
+        if len(table.claims) < ENOUGH:
+            return run, False
         records = tuple({"id": f"clm_{card.id}_{key}", "subject": card.id, "spec_key": key, "value": value}
                         for key, value in table.claims)
         draft = RecordsDraft("update", f"The maker's table on {address} states {len(records)} of its values", card.id,
                              records)
-        run = self._filed(run, draft, reach, page, read, by, deadline)
-        if table.unmatched:
-            run = self._log(run, Step.SKIPPED, f"{address}: labels no spec names: {', '.join(table.unmatched)}")
-        return run
+        return self._filed(run, draft, reach, page, read, by, deadline), True
 
     def _research(self, run: ResearchRun, reach: Reach, page: Page, read: Change, by: Agent,
                   deadline: Instant) -> tuple[ResearchRun, str | None, tuple[str, ...]]:
-        if (tabled := self._tabled(run, reach, page, read, by, deadline)) is not None:
-            return tabled, None, ()
+        run, tabled = self._tabled(run, reach, page, read, by, deadline)
+        if tabled:
+            return run, None, ()
         reading = Reading(page, reach.site.org, reach.site.products, self._terms)
         try:
             findings, cad = self._meter.call(self._now()[:10], lambda agent: agent.research(reading))

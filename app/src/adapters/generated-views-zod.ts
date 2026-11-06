@@ -31,7 +31,7 @@ export const RunScopeKindSchema: z.ZodType<M.RunScopeKind> = z.enum(["product", 
 
 export const ResearchStatusSchema: z.ZodType<M.ResearchStatus> = z.enum(["running", "done", "partial", "blocked", "cancelled", "capped", "failed"]);
 
-export const ResearchStepSchema: z.ZodType<M.ResearchStep> = z.enum(["read", "skipped", "filed", "media", "datasheet", "rejected", "ended"]);
+export const ResearchStepSchema: z.ZodType<M.ResearchStep> = z.enum(["read", "skipped", "unmatched", "filed", "media", "datasheet", "rejected", "ended"]);
 
 export const LocalizedTextSchema: z.ZodType<M.LocalizedText> = z.object({ en: z.string().refine((s) => s.trim().length >= 1, "must not be empty") }).catchall(z.string().refine((s) => s.trim().length >= 1, "must not be empty"));
 
@@ -941,6 +941,7 @@ export const ResearchMeasuresSchema: z.ZodType<M.ResearchMeasures> = z.strictObj
   runs: z.number().int(),
   pages: z.number().int(),
   skipped: z.record(z.string(), z.number().int()),
+  labels: z.record(z.string(), z.number().int()),
   filed: z.number().int(),
   refused: z.record(z.string(), z.number().int()),
   values: z.number().int(),

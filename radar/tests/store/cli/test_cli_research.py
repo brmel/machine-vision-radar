@@ -29,7 +29,7 @@ def test_research_from_the_cli_and_the_admin(monkeypatch: pytest.MonkeyPatch, tm
             and FX.json(where, "research", "log", run["id"]) == run)
     refused = {detail.split(": ", 1)[1]: 1 for detail in run["rejected"]}
     measured = {"since": run["started_at"], "runs": 1, "pages": 3, "filed": 7, "refused": refused, "values": 5,
-                "filter_values": 3, "cad": run["cad"],
+                "filter_values": 3, "cad": run["cad"], "labels": {},
                 "skipped": {"169.254.169.254 is not a public address": 1, "the store holds it": 1,
 "robots.txt disallows it": 1, "not public: it asks for a sign-in": 1, "not a page: HTTP 200, application/pdf": 1,
 "it redirects off its site, to https://elsewhere.example.org/": 1}}

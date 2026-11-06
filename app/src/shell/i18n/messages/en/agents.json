@@ -58,6 +58,7 @@
   "adminResearchLog": "Log",
   "adminResearchStepRead": "Read",
   "adminResearchStepSkipped": "Skipped",
+  "adminResearchStepUnmatched": "Labels no spec names",
   "adminResearchStepFiled": "Filed",
   "adminResearchStepMedia": "File staged",
   "adminResearchStepDatasheet": "Datasheet read",

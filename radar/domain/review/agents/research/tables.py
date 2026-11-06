@@ -18,6 +18,7 @@ FIGURE = re.compile(rf"({NUMBER})(?:\s*(?:to|–|-)\s*({NUMBER}))?\s*([^\d\s,;()
 TWO_DIMENSIONS = re.compile(r"\d\s*[x×*/]\s*\d")
 LEADING_FIGURE = re.compile(rf"^(?:{NUMBER}(?:\s*(?:to|–|-)\s*{NUMBER})?)")
 BETWEEN_TERMS = re.compile(r"[,;]|(?<!\d)/|/(?!\d)")
+LABEL_MOST = 60
 NOT_WORD = re.compile(r"[^\w.]+")
 ANSWERS = {"yes": True, "no": False}
 Value = dict[str, object]
@@ -96,7 +97,7 @@ class Tables:
         for label, cell in _rows(page.text):
             key = labels.get(spelled(label))
             if key is None:
-                unmatched.append(label)
+                unmatched += [label] if len(label) <= LABEL_MOST else []
                 continue
             spec = self._registry.spec_definitions[key]
             value = _value(label, cell, spec, self._words[key])

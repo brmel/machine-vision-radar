@@ -52,7 +52,7 @@ def test_a_page_s_table_files_its_values_with_no_model_call_and_keeps_the_labels
     filed = _filed(docs, run)
     assert set(filed) == {"fixture_mass", "fixture_reach"}, "a bound files nothing, and the store holds its finish"
     assert filed["fixture_mass"].quantity.value == 93 and filed["fixture_reach"].quantity.value == 125
-    assert any("labels no spec names: Colour of the box" in s for s in run.said(Step.SKIPPED))
+    assert any("Colour of the box" in s for s in run.said(Step.UNMATCHED))
 
 def test_schema_org_properties_are_read_as_a_table() -> None:
     docs = FX.seeded()

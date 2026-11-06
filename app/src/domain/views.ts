@@ -39,8 +39,8 @@ export type RunScopeKind = "product" | "maker" | "category";
 /** Where a research run stands: running; done, every page in reach read; partial, its page or time budget spent with pages left; blocked, no page in reach read; stopped by the founder, stopped by an AI cap, or failed. */
 export type ResearchStatus = "running" | "done" | "partial" | "blocked" | "cancelled" | "capped" | "failed";
 
-/** One step of a research run: a page or file read or skipped, a proposal filed, rejected, or run ended. */
-export type ResearchStep = "read" | "skipped" | "filed" | "media" | "datasheet" | "rejected" | "ended";
+/** One step of a research run: a page or file read or skipped, a table's labels no spec names, a proposal filed, rejected, or run ended. */
+export type ResearchStep = "read" | "skipped" | "unmatched" | "filed" | "media" | "datasheet" | "rejected" | "ended";
 
 /** BCP-47 language tag to text; en is required and is the fallback. */
 export type LocalizedText = Readonly<Record<string, string>> & { readonly en: string };
@@ -1066,6 +1066,7 @@ export interface ResearchMeasures {
   readonly runs: number;
   readonly pages: number;
   readonly skipped: Readonly<Record<string, number>>;
+  readonly labels: Readonly<Record<string, number>>;
   readonly filed: number;
   readonly refused: Readonly<Record<string, number>>;
   readonly values: number;
