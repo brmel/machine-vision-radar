@@ -33,6 +33,7 @@ HOMONYMS: dict[str, tuple[str, ...]] = {
     "end_of_support": ("app/src/features/product-detail/components/ProductLifecycle.tsx",),
     "family": ("app/src/features/product-detail/header/ProductLinks.tsx",),
     "form": ("radar/adapters/web/pages.py",),
+    "image": ("radar/adapters/web/pages.py",),
     "model": ("app/src/adapters/review/HttpAdminApi.ts", "app/src/features/admin/search/settings/KnobsTable.tsx",
               "app/src/features/admin/search/settings/UseForm.tsx", "app/src/shell/admin/AdminView.tsx",
               "radar/adapters/ai/meta/runner.py", "radar/adapters/ai/search/fastembed_embedder.py",

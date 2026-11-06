@@ -235,6 +235,19 @@ def test_the_time_budget_holds_between_the_files_of_one_page(docs: tuple[Docs, A
         f"{SITE}/products/widget-two", 0, (Status.PARTIAL, "its 40 s are spent")), "stopped with pages left in reach"
     assert run.said(Step.SKIPPED), "the page's files past the budget are skipped, not fetched"
 
+def test_the_judge_sees_the_photo_named_after_the_product_before_the_page_s_other_images(
+        docs: tuple[Docs, Any]) -> None:
+    def gallery(path: str, headers: Mapping[str, str]) -> tuple[int, Mapping[str, str], bytes]:
+        status, head, body = recorded_page(path, headers)
+        return status, head, body.replace(b"</body>", b'<img src="/a.png"><img src="/b.png"><img src="/c.png">'
+                                          b'<img src="/media/Widget-Two_L.jpg"></body>') if (
+            path == "/products/widget-two") else body
+
+    heard: Heard = []
+    _run(docs, heard, [], scope=ProductScope("prd_0000000002"), serve=gallery)
+    fetched = [path for path, _ in heard]
+    assert "/media/Widget-Two_L.jpg" in fetched and "/c.png" not in fetched
+
 def test_a_crawl_delay_longer_than_the_run_has_left_is_refused_not_waited(docs: tuple[Docs, Any]) -> None:
     def slow(path: str, headers: Mapping[str, str]) -> tuple[int, Mapping[str, str], bytes]:
         return ((200, {"Content-Type": "text/plain"}, b"User-agent: *\nCrawl-delay: 600\n") if path == "/robots.txt"
