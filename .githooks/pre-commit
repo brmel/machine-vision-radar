@@ -3,6 +3,8 @@ set -eo pipefail
 
 # Git runs hooks from the repo's top level; the commands below run from the code's folder
 cd "$(dirname "$0")/.."
+# A linked worktree's hook runs with an absolute GIT_DIR, under which git reads app/ as its own root: rediscover.
+unset GIT_DIR
 
 bash app/scripts/gates/require.sh node
 
