@@ -9,13 +9,13 @@ from radar.domain.model.entities import ActorKind, FilesOn, LogEntryView, LogPag
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.history.projection import every_page
 from radar.domain.model.model import Model
-from radar.domain.ports.catalog.catalog import Catalog
+from radar.domain.ports.catalog.catalog import Catalogs
 from radar.domain.ports.catalog.catalog_store import CatalogStore, Contended
 from radar.domain.ports.history.version_store import VersionStore
 from radar.domain.ports.review.proposal_queue import ProposalQueue, Query, QueuePage
 from radar.domain.read_model.derived.identity import ProductIdentity
 from radar.domain.review.agents.drafts import references, without
-from radar.domain.review.agents.duplicates import Proposed, merged, unproposed
+from radar.domain.review.agents.duplicates import HELD, Proposed, SourceMerge, merged, unproposed
 from radar.domain.review.agents.tokens import Refused
 from radar.domain.review.bundle import RANK, after, ordered, risk
 from radar.domain.review.proposal import (AlreadyProposed, AppliedChange, Filed, Held, Member, Outcome, Proposal,
@@ -37,10 +37,10 @@ def _unrefused(planned: plan.Plan | plan.Refused) -> plan.Plan:
     return planned
 
 class Review:
-    def __init__(self, queue: ProposalQueue, store: CatalogStore, versions: VersionStore, held: Callable[[], Catalog],
+    def __init__(self, queue: ProposalQueue, store: CatalogStore, versions: VersionStore, catalogs: Catalogs,
                  identity: ProductIdentity, model: Model, clock: Callable[[], str], now: Callable[[], str]) -> None:
-        self._queue, self._store, self._versions, self._held, self._identity, self._model, self._clock = (
-            queue, store, versions, held, identity, model, clock)
+        self._queue, self._store, self._versions, self._catalogs, self._identity, self._model, self._clock = (
+            queue, store, versions, catalogs, identity, model, clock)
         self._now = now
         self._schema = model.schema
         self._uncited = {t.name for t in model.schema.entities if t.provenance or t.name in OWNED}
@@ -48,6 +48,9 @@ class Review:
         self._on_approval = {t.name: tuple(f.name for f in t.fields if f.set_on_approval)
                              for t in model.schema.entities}
         self._refs = references(model.schema)
+
+    def source_merge(self) -> SourceMerge:
+        return SourceMerge.of(self._catalogs.reading(SourceMerge.kinds(self._schema)), self._model)
 
     def submit(self, draft: Draft, by: Submitter) -> Shown:
         if not isinstance(draft, FILES[type(by)]):
@@ -176,7 +179,8 @@ class Review:
         if isinstance(by, Agent):
             mine = (p for page in every_page(lambda cursor: self.queue(Query(ProposalStatus.SUGGESTED), by, cursor))
                     for p in page.proposals)
-            draft = unproposed(merged(draft, self._held(), self._model, self._identity), mine, self._model, self._refs)
+            held = self._catalogs.reading(tuple(HELD))
+            draft = unproposed(merged(draft, held, self._model, self._identity), mine, self._model, self._refs)
         self._sourced(draft.changeset)
         return self._file(draft.files_on, draft.reason, draft.subject, draft.changeset, by, source_url=draft.source_url,
                           bundle=bundle)

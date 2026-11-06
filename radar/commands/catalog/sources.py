@@ -3,13 +3,13 @@ from __future__ import annotations
 import argparse
 from dataclasses import asdict
 from datetime import date
-from typing import Any, Sequence
+from typing import Any
 
 from radar.adapters.console import output
 from radar.adapters.console.parser import Commands
-from radar.domain.review.agents.duplicates import SourceGroup, SourceMerge
 from radar.domain.review.proposal import Filed
 from radar.domain.review.requests import Bundle, Job
+from radar.domain.review.review import SourceMerge
 from radar.domain.search.sources import KINDS, SourceQuery
 
 ACTOR = "radar source dedupe"
@@ -26,7 +26,8 @@ def run(args: argparse.Namespace) -> int:
     return output.format_output(query.found(args.wiring.catalog(KINDS), args.wiring.model().registry),
                                 json_mode=args.json, text_formatter=_lines)
 
-def _plan(groups: Sequence[SourceGroup], merged: dict[str, Any]) -> str:
+def _plan(merge: SourceMerge, merged: dict[str, Any]) -> str:
+    groups = merge.groups
     rows = [f"{g.url}\n  keep {g.kept}; merge {', '.join(g.extras)}; repoint {len(g.repoint)} record(s)"
             for g in groups]
     filed = f"; filed into bundle {merged['bundle']}: {', '.join(merged['filed'])}" if merged["bundle"] else ""
@@ -34,14 +35,14 @@ def _plan(groups: Sequence[SourceGroup], merged: dict[str, Any]) -> str:
                              f"{merged['proposals']} proposal(s){filed}", *merged["refusals"]])
 
 def run_dedupe(args: argparse.Namespace) -> int:
-    model = args.wiring.model()
-    merge = SourceMerge.of(args.wiring.catalog(SourceMerge.kinds(model.schema)), model)
+    review = args.wiring.review()
+    merge = review.source_merge()
     bundle = args.wiring.correlate("dedupe") if args.file and merge.drafts else None
-    receipts = args.wiring.review().file(Bundle(bundle, merge.drafts), Job(ACTOR, bundle)) if bundle else ()
+    receipts = review.file(Bundle(bundle, merge.drafts), Job(ACTOR, bundle)) if bundle else ()
     merged = {"groups": [asdict(g) for g in merge.groups], "proposals": len(merge.drafts), "bundle": bundle,
               "filed": [r.proposal.id for r in receipts if isinstance(r, Filed)],
               "refusals": [refusal for r in receipts for refusal in r.refusals]}
-    return output.format_output(merged, json_mode=args.json, text_formatter=lambda m: _plan(merge.groups, m))
+    return output.format_output(merged, json_mode=args.json, text_formatter=lambda m: _plan(merge, m))
 
 def register(commands: Commands) -> None:
     p = commands.verb("source", "search",

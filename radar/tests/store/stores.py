@@ -40,7 +40,6 @@ from radar.domain.model.entities import Change, Document
 from radar.domain.model.history.projection import plain
 from radar.domain.model.model import Model
 from radar.domain.read_model.derived.identity import ProductIdentity
-from radar.domain.review.agents.duplicates import HELD
 from radar.domain.review.review import Review
 from radar.tests.fixtures.fixture_category import FilesCatalogRepository, built
 
@@ -172,8 +171,8 @@ class Fixture:
 
     def review(self, docs: Docs, files: Any) -> Review:
         ticks = iter(f"2026-10-18T13:{n // 60:02d}:{n % 60:02d}Z" for n in range(3600))
-        held = lambda: layout.catalog_of(self.model, store.scan(docs, self.model.schema, tuple(HELD)))
-        return Review(self.queue(docs), self.catalog_store(docs, files), self.versions(docs), held,
+        return Review(self.queue(docs), self.catalog_store(docs, files), self.versions(docs),
+                      store.StoreCatalogs(docs, self.model),
                       ProductIdentity.of(self.model.registry), self.model, lambda: next(ticks), lambda: NOW)
 
     def apply(self, docs: Docs, files: Any, cid: str, *changes: dict[str, Any]) -> tuple[Change, ...]:
