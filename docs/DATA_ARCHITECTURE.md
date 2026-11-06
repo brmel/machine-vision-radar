@@ -157,7 +157,7 @@ shows.
   take it through `spec_groups`. An AI agent that builds or runs a vision application belongs to its role's category,
   with `agentic` among its methods and its configuration style, and `model_context_protocol` among its APIs when it
   speaks MCP.
-- **New tech enters as a tag**, and becomes a category or profile only when its products need a spec shape no profile
+- **New tech enters as a vocabulary term**, and becomes a category or profile only when its products need a spec shape no profile
   can express.
 
 ### 5.4 The anti-overfit rule
@@ -166,8 +166,8 @@ Categories are pipeline roles; technologies are vocabulary terms and specs. Ever
 things: illuminate → acquire → transport → process → decide → act. Roles change on decade timescales; sensing
 principles, AI paradigms and interfaces change yearly and live one level down. `imaging.cameras.3d` is one category,
 and stereo, structured light, ToF, triangulation or lidar are values of its `principle` spec; an event-based camera is
-an area-scan camera with the `event_based` tag. The test for a proposed category: "Will this still be a distinct
-product kind in 20 years?" If not, it is a term or a tag. History is first-class: discontinued products keep their
+an area-scan camera whose `sensor_technology` is `event_based`. The test for a proposed category: "Will this still be a distinct
+product kind in 20 years?" If not, it is a term or a spec. History is first-class: discontinued products keep their
 records, and vocabularies keep older terms (analog, FireWire, USB2) so a 2005 camera records as faithfully as a
 current one.
 
@@ -187,12 +187,12 @@ broadcast capture unless marketed for machine vision. **Boundaries:**
 - A turnkey cell that bundles a robot is `systems.vision_systems`; what it bundles is its `system_components`.
 - `compute.edge_ai` needs AI acceleration or explicit vision interfaces; controllers with trigger, lighting or machine
   I/O are `compute.vision_controllers`.
-- Pushbroom hyperspectral → `imaging.cameras.line_scan` + `hyperspectral`; snapshot hyperspectral →
-  `imaging.cameras.area_scan` + `hyperspectral`; point and benchtop instruments → `imaging.spectrometers`.
+- Pushbroom hyperspectral → `imaging.cameras.line_scan` with its `spectral_acquisition`; snapshot hyperspectral →
+  `imaging.cameras.area_scan` with its `spectral_acquisition`; point and benchtop instruments → `imaging.spectrometers`.
 - What a maker sells beside its lights and lenses: cables, fixtures and adapters → `accessories`; plates, films, filters
   and mirrors that shape light → `optics.optical_components`; each takes the `environment` group when its page states
   a size or a temperature. A light made for a plant-research or microscope bench, not a vision system, is out of scope.
-- A scientific camera is an area-scan camera; "smart" needs on-device processing and is a tag.
+- A scientific camera is an area-scan camera; "smart" needs on-device processing, which `onboard_processing` states.
 - A vendor with services only gets an organization record and no products.
 
 ## 6. Validation
