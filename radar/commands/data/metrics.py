@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import argparse
 import datetime
-from collections import Counter
 
 from radar.adapters.console import log, output
 from radar.domain.model.entities import MarketView
-from radar.domain.search.eval import Kpis, weekly
+from radar.domain.search.eval import Traffic
 from radar.adapters.console.parser import Commands
 
 def run(args: argparse.Namespace) -> int:
@@ -16,13 +15,9 @@ def run(args: argparse.Namespace) -> int:
         last = datetime.date.fromisoformat(args.to) if args.to else args.wiring.today()
     except ValueError:
         return log.error(f"--to wants a date as YYYY-MM-DD, got '{args.to}'", code=2)
-    days = [(last - datetime.timedelta(days=n)).isoformat() for n in range(args.days)][::-1]
-    ledger = args.wiring.ask_ledger()
-    totals: Counter[str] = Counter()
-    for day in days:
-        totals.update(ledger.counted(day))
-    rates = Kpis.of(totals).rates()
-    result = {"from": days[0], "to": days[-1], "counts": dict(sorted(totals.items())), "kpis": rates}
+    period = Traffic(args.wiring.ask_ledger()).days(last, args.days)
+    result = {"from": period.first.isoformat(), "to": period.last.isoformat(), "counts": period.counts,
+              "kpis": period.kpis}
     return output.format_output(result, json_mode=args.json, text_formatter=lambda r: "\n".join(
         [f"{r['from']} to {r['to']}", *(f"  {k}: {v}" for k, v in r["counts"].items()),
          *(f"  {k}: {v}" for k, v in r["kpis"].items())]))
@@ -30,7 +25,7 @@ def run(args: argparse.Namespace) -> int:
 def run_weekly(args: argparse.Namespace) -> int:
     if args.weeks < 1:
         return log.error(f"--weeks wants a number of weeks from 1, got {args.weeks}", code=2)
-    view = weekly(args.wiring.ask_ledger().counted, args.wiring.today(), args.weeks)
+    view = Traffic(args.wiring.ask_ledger()).weeks(args.wiring.today(), args.weeks)
     return output.format_output(view, json_mode=args.json, text_formatter=lambda v: "\n".join(
         f"{w.week} to {w.to}: " + ", ".join(f"{k} {c}" for k, c in w.counts.items()) for w in v.weeks))
 

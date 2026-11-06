@@ -21,7 +21,7 @@ from radar.domain.review.requests import Enactment, Founder
 from radar.domain.review.review import Review
 from radar.domain.model.history.projection import plain
 from radar.domain.review.views import proposal_view
-from radar.domain.search.eval import weekly
+from radar.domain.search.eval import Traffic
 from radar.domain.search.hits import hits_json
 from radar.domain.search.indexing import Indexer
 
@@ -75,7 +75,7 @@ class SearchAdmin:
                 hits = self._engine().search(SearchRequest(text(query, "q"), HITS, query.get("semantic") == "true"))
                 return Response(200, {"hits": hits_json(hits, self._registry)})
             case ("GET", "weekly"):
-                return Response(200, plain(weekly(self._ledger.counted, date.fromisoformat(self._today()), WEEKS)))
+                return Response(200, plain(Traffic(self._ledger).weeks(date.fromisoformat(self._today()), WEEKS)))
         return None
 
     def _ai_route(self, method: str, parts: tuple[str, ...], query: Mapping[str, str], body: Body,

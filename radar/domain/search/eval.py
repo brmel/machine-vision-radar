@@ -6,6 +6,7 @@ from datetime import date, timedelta
 from typing import Callable, Mapping, Sequence
 
 from radar.domain.model.entities import EvalQuery, WeekCounts, WeeklyCounts
+from radar.domain.ports.search.ask_ledger import AskLedger
 from radar.domain.ports.search.search_engine import Hit
 
 @dataclass(frozen=True, slots=True)
@@ -63,15 +64,29 @@ def evaluate(queries: Sequence[EvalQuery], search: Callable[[str, int], Sequence
         outcomes.append(Outcome(q, _rank(q, hits), tuple(h.card.id for h in hits)))
     return Score(tuple(outcomes))
 
-def weekly(counted: Callable[[str], Mapping[str, int]], last: date, weeks: int) -> WeeklyCounts:
-    out = []
-    for n in range(weeks):
-        monday = last - timedelta(days=last.weekday(), weeks=n)
-        days = [d for d in (monday + timedelta(days=i) for i in range(7)) if d <= last]
+@dataclass(frozen=True, slots=True)
+class Period:
+    first: date
+    last: date
+    counts: dict[str, int]
+    kpis: dict[str, float | None]
+
+@dataclass(frozen=True, slots=True)
+class Traffic:
+    ledger: AskLedger
+
+    def _period(self, first: date, last: date) -> Period:
         totals: Counter[str] = Counter()
-        for d in days:
-            totals.update(counted(d.isoformat()))
-        rates = {k: v for k, v in Kpis.of(totals).rates().items() if v is not None}
-        out.append(WeekCounts(week=monday.isoformat(), to=days[-1].isoformat(), counts=dict(sorted(totals.items())),
-                              kpis=rates))
-    return WeeklyCounts(weeks=tuple(out))
+        for n in range((last - first).days + 1):
+            totals.update(self.ledger.counted((first + timedelta(days=n)).isoformat()))
+        return Period(first, last, dict(sorted(totals.items())), Kpis.of(totals).rates())
+
+    def days(self, last: date, days: int) -> Period:
+        return self._period(last - timedelta(days=days - 1), last)
+
+    def weeks(self, last: date, weeks: int) -> WeeklyCounts:
+        mondays = (last - timedelta(days=last.weekday(), weeks=n) for n in range(weeks))
+        periods = (self._period(monday, min(monday + timedelta(days=6), last)) for monday in mondays)
+        return WeeklyCounts(weeks=tuple(
+            WeekCounts(week=p.first.isoformat(), to=p.last.isoformat(), counts=p.counts,
+                       kpis={k: v for k, v in p.kpis.items() if v is not None}) for p in periods))

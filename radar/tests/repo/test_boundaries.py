@@ -23,7 +23,6 @@ UNTYPED: dict[str, dict[str, int]] = {
         "radar/domain/ports/store/docs.py": 5,
         "radar/domain/ports/web/endpoint.py": 1,
         "radar/domain/read_model/derived/identity.py": 2,
-        "radar/domain/read_model/derived/market.py": 1,
         "radar/domain/read_model/derived/provenance.py": 1,
         "radar/domain/read_model/facets.py": 6,
         "radar/domain/read_model/history.py": 2,
