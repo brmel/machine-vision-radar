@@ -1,16 +1,19 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from typing import TYPE_CHECKING, Any, Collection, Iterable, Mapping, Sequence
 
 from radar.domain.ports.catalog.catalog import Catalog
-from radar.domain.model.entities import (FeedItem, FeedPageView, ModelRow, Organization, OrgRelation, Product,
-                                         ProductView, Source)
+from radar.domain.model.entities import (FeedItem, FeedPageView, MarketView, ModelRow, Organization, OrgRelation,
+                                         Product, ProductView, Source)
 from radar.domain.model.history.projection import Projection, plain
 from radar.domain.model.registry import Registry
 from radar.domain.ports.catalog.views import Check, MediaUrl
 from radar.domain.ports.history.change_log import ChangeLog
+from radar.domain.read_model.derived.coverage import Coverage
 from radar.domain.read_model.derived.market import market
+from radar.domain.read_model.derived.provenance import Provenance
 from radar.domain.read_model.derived.ownership import OwnershipHistory
 from .history import listed, product_history
 from .listings import Tally, index, index_card, listing_card, paginate
@@ -34,7 +37,7 @@ class ReadModel:
     tally: Tally
     news: dict[str, View]
     feed: FeedPageView
-    market: View
+    market: MarketView
 
     @property
     def registry(self) -> View:
@@ -62,6 +65,16 @@ def thin(catalog: Catalog, model: Model, checked: Check, media_url: MediaUrl) ->
                              [p.id for p in catalog.all(Product) if p.id in names and p.id in makers])
     return [pid for pid, view in views.items() if not view.indexable]
 
+@dataclass(frozen=True, slots=True)
+class Quality:
+    provenance: tuple[Provenance, ...]
+    names: dict[str, str]
+    coverage: Coverage
+
+def quality(catalog: Catalog, model: Model, checked: Check, media_url: MediaUrl, today: date) -> Quality:
+    return Quality(tuple(Provenance.of(catalog, model.registry, today)), identities(catalog, model.registry)[0],
+                   Coverage.of(catalog, model.registry, thin(catalog, model, checked, media_url)))
+
 def _pages(registry: Registry, views: dict[str, ProductView], checked: Check) -> dict[str, list[View]]:
     by_category: dict[str, list[View]] = {}
     for v in views.values():
@@ -85,10 +98,11 @@ def build(catalog: Catalog, model: Model, log: ChangeLog, checked: Check, media_
                   {s.id: builder.terms.source_view(s) for s in catalog.all(Source)})
     articles, feed = news(catalog.all(FeedItem), cited, registry, checked)
     briefs = [brief(o) for o in orgs]
-    idx = checked(plain(index(registry, [index_card(v) for v in views.values()], briefs,
-                              {c: len(p) for c, p in pages.items()}, tally, feed.items)), "IndexView", "index")
-    counted = checked(market(idx["products"], plain(briefs), list(catalog.all(OrgRelation)), registry), "MarketView",
-                      "market")
+    indexed = index(registry, [index_card(v) for v in views.values()], briefs, {c: len(p) for c, p in pages.items()},
+                    tally, feed.items)
+    idx = checked(plain(indexed), "IndexView", "index")
+    counted = market(indexed.products, briefs, list(catalog.all(OrgRelation)), registry)
+    checked(plain(counted), "MarketView", "market")
     built = ReadModel(idx, views, pages, organizations, histories, tally, articles, feed, counted)
     checked(built.registry, "RegistryView", "registry")
     return built

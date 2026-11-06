@@ -19,7 +19,7 @@ from radar.adapters.storage.memory_change_log import MemoryChangeLog
 from radar.domain.model.history.projection import Projection, plain
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.entities import (Change, FeedBrief, FeedItem, ModelRow, OrgBrief, Organization, OrgRelation,
-                                         Product, ProductView, Source)
+                                         Product, ProductCard, ProductView, Source)
 from radar.domain.model.model import Model
 from radar.domain.ports.store.docs import Docs, Fields
 from ..layout import (FACETS, HISTORY, INDEX, NEWS, ORGANIZATIONS, PAGES, PRODUCTS, Record, catalog_of, chunks, doc,
@@ -148,11 +148,12 @@ class Projector:
                        if after is not None})
         return sorted(briefs.values(), key=lambda b: b["slug"])
 
-    def _market(self, cards: list[Record], orgs: list[Record], changed: Changed, checked: Check) -> Writes:
+    def _market(self, cards: Sequence[ProductCard], briefs: Sequence[OrgBrief], changed: Changed,
+                checked: Check) -> Writes:
         ids = {f["id"] for _, f in self.docs.list(self.relations)} | of_kind(self.relation, changed.keys())
         relations = catalog_of(self.model, self._after(self.relation, ids, changed)).all(OrgRelation)
-        return {f"{INDEX}/market": doc(checked(market(cards, orgs, list(relations), self.registry), "MarketView",
-                                               "market"))}
+        counted = market(cards, briefs, list(relations), self.registry)
+        return {f"{INDEX}/market": doc(checked(plain(counted), "MarketView", "market"))}
 
     def _index(self, views: Mapping[str, ProductView], old: Mapping[str, ProductView], orgs: list[Record],
                pages: Writes, changed: Changed, checked: Checker, news_briefs: Sequence[FeedBrief] | None) -> Writes:
@@ -165,7 +166,8 @@ class Projector:
         tally = Tally.parse(json.loads(reg["tally"])) - sum((Tally.of(v) for v in old.values()), Tally()) + sum(
             (Tally.of(v) for v in views.values()), Tally())
         briefs = [checked.parse(b, OrgBrief, b["id"]) for b in orgs]
-        idx = checked(plain(index(self.registry, cards, briefs, _page_counts(stored, pages), tally,
-                                  _teaser(stored, news_briefs, checked))), "IndexView", "index")
-        return {**index_docs(idx, tally), **self._market(idx["products"], orgs, changed, checked),
+        indexed = index(self.registry, cards, briefs, _page_counts(stored, pages), tally,
+                        _teaser(stored, news_briefs, checked))
+        idx = checked(plain(indexed), "IndexView", "index")
+        return {**index_docs(idx, tally), **self._market(indexed.products, briefs, changed, checked),
                 **{f"{INDEX}/cards-{n}": None for n in range(len(chunks(idx["products"])) + 1, reg["cards"] + 1)}}

@@ -24,24 +24,29 @@ class Coverage:
             thin=tuple(sorted(thin)),
         )
 
-    def report(self) -> dict[str, object]:
-        listed = {"no_category": self.no_category, "untagged": self.untagged, "thin": self.thin}
-        return {"products": self.products,
-                **{name: {"count": len(ids), "ids": list(ids)} for name, ids in listed.items()}}
+@dataclass(frozen=True, slots=True)
+class SpecShare:
+    key: str
+    products: int
+    share: float
 
-def _shares(members: list[Product], keys: tuple[str, ...], claimed: dict[str, set[str]]) -> list[dict[str, object]]:
+@dataclass(frozen=True, slots=True)
+class CategoryCoverage:
+    category: str
+    products: int
+    missing_required: int
+    specs: tuple[SpecShare, ...]
+
+def _shares(members: list[Product], keys: tuple[str, ...], claimed: dict[str, set[str]]) -> tuple[SpecShare, ...]:
     counts = [(k, sum(1 for p in members if k in claimed.get(p.id, ()))) for k in keys]
-    return [{"key": k, "products": n, "share": round(n / len(members), 3)}
-            for k, n in sorted(counts, key=lambda kn: (-kn[1], kn[0]))]
+    return tuple(SpecShare(k, n, round(n / len(members), 3)) for k, n in sorted(counts, key=lambda kn: (-kn[1], kn[0])))
 
-def _category(cid: str, members: list[Product], registry: Registry,
-              claimed: dict[str, set[str]]) -> dict[str, object]:
+def _category(cid: str, members: list[Product], registry: Registry, claimed: dict[str, set[str]]) -> CategoryCoverage:
     sections = registry.profile(cid).sections
-    return {"category": cid, "products": len(members),
-            "missing_required": sum(1 for p in members if registry.unstated(p, claimed.get(p.id, ()))),
-            "specs": _shares(members, (*sections.core, *sections.detail), claimed)}
+    return CategoryCoverage(cid, len(members), sum(1 for p in members if registry.unstated(p, claimed.get(p.id, ()))),
+                            _shares(members, (*sections.core, *sections.detail), claimed))
 
-def spec_shares(catalog: Catalog, registry: Registry, category: str | None = None) -> list[dict[str, object]]:
+def spec_shares(catalog: Catalog, registry: Registry, category: str | None = None) -> tuple[CategoryCoverage, ...]:
     products = [p for p in catalog.all(Product) if category in (None, p.category)]
     claimed: dict[str, set[str]] = {}
     for c in catalog.all(Claim):
@@ -49,4 +54,4 @@ def spec_shares(catalog: Catalog, registry: Registry, category: str | None = Non
     by_category: dict[str, list[Product]] = {}
     for p in products:
         by_category.setdefault(p.category, []).append(p)
-    return [_category(cid, members, registry, claimed) for cid, members in sorted(by_category.items())]
+    return tuple(_category(cid, members, registry, claimed) for cid, members in sorted(by_category.items()))

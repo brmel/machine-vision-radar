@@ -7,12 +7,15 @@ from radar.adapters.console import log, output
 from radar.adapters.console.parser import Commands
 from radar.domain.read_model import read_model
 from radar.domain.read_model.derived.coverage import Coverage, spec_shares
-from radar.domain.read_model.derived.provenance import Provenance
 from radar.domain.model.entities import FilesOn
 from radar.domain.review.requests import Job, Withdrawal
-from radar.domain.read_model.derived.identity import identities
 
 ACTOR = "radar quality report"
+
+def _coverage(coverage: Coverage) -> dict[str, object]:
+    listed = {"no_category": coverage.no_category, "untagged": coverage.untagged, "thin": coverage.thin}
+    return {"products": coverage.products,
+            **{name: {"count": len(ids), "ids": list(ids)} for name, ids in listed.items()}}
 
 def _text(payload: dict[str, Any], coverage: Coverage, filing: bool) -> str:
     lines = [f"Provenance: {payload['products']} products, {payload['weak']} weak" + (
@@ -25,21 +28,19 @@ def _text(payload: dict[str, Any], coverage: Coverage, filing: bool) -> str:
 
 def run(args: argparse.Namespace) -> int:
     model = args.wiring.model()
-    cat, registry = args.wiring.catalog(), model.registry
-    found = Provenance.of(cat, registry, args.wiring.today())
-    weak = sorted((f for f in found if f.weak), key=lambda f: f.product)
-    names = identities(cat, registry)[0]
-    coverage = Coverage.of(cat, registry, read_model.thin(cat, model, *args.wiring.views()))
+    found = read_model.quality(args.wiring.catalog(), model, *args.wiring.views(), args.wiring.today())
+    weak = [f for f in found.provenance if f.weak]
     filed: list[str] = []
     if args.file:
         review, job = args.wiring.review(), Job(ACTOR, args.wiring.correlate("quality"))
         filed = [review.submit(Withdrawal(f.product, f"Weak provenance: {'; '.join(f.weak)}", FilesOn.QUALITY),
                                job).proposal.id for f in weak]
-    shown = (weak if args.weak_only else sorted(found, key=lambda f: (not f.weak, f.product)))[:args.limit]
-    payload = {"products": len(found), "weak": len(weak),
-               "records": [{**f.report(), "name": names.get(f.product, "")} for f in shown],
-               "coverage": coverage.report(), "filed": filed}
-    return output.format_output(payload, json_mode=args.json, text_formatter=lambda p: _text(p, coverage, args.file))
+    shown = (weak if args.weak_only else sorted(found.provenance, key=lambda f: (not f.weak, f.product)))[:args.limit]
+    payload = {"products": len(found.provenance), "weak": len(weak),
+               "records": [{**f.report(), "name": found.names.get(f.product, "")} for f in shown],
+               "coverage": _coverage(found.coverage), "filed": filed}
+    return output.format_output(payload, json_mode=args.json,
+                                text_formatter=lambda p: _text(p, found.coverage, args.file))
 
 def run_coverage(args: argparse.Namespace) -> int:
     registry = args.wiring.model().registry
@@ -47,8 +48,8 @@ def run_coverage(args: argparse.Namespace) -> int:
         return log.error(f"no category '{args.category}'", fix="radar category list", code=2)
     shares = spec_shares(args.wiring.catalog(), registry, args.category)
     return output.format_output({"categories": shares}, json_mode=args.json, text_formatter=lambda p: "\n".join(
-        f"{c['category']} ({c['products']} products, {c['missing_required']} missing a required spec)\n" + "\n".join(
-            f"  {s['share']:>6.1%}  {s['key']}" for s in c["specs"]) for c in p["categories"]))
+        f"{c.category} ({c.products} products, {c.missing_required} missing a required spec)\n" + "\n".join(
+            f"  {s.share:>6.1%}  {s.key}" for s in c.specs) for c in p["categories"]))
 
 def register(commands: Commands) -> None:
     c = commands.verb("quality", "coverage",
