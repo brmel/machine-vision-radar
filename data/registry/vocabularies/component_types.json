@@ -8,5 +8,7 @@
   {"id": "polarizer", "label": {"en": "Polarizer", "fr": "Polariseur"}},
   {"id": "prism", "label": {"en": "Prism", "fr": "Prisme"}},
   {"id": "waveplate", "label": {"en": "Waveplate", "fr": "Lame à retard de phase"}},
-  {"id": "window", "label": {"en": "Window", "fr": "Fenêtre optique"}}
+  {"id": "window", "label": {"en": "Window", "fr": "Fenêtre optique"}},
+  {"id": "light_control_film", "label": {"en": "Light control film", "fr": "Film de contrôle de la lumière"}},
+  {"id": "condenser", "label": {"en": "Condenser lens", "fr": "Lentille condenseur"}}
 ]

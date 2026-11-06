@@ -2,12 +2,12 @@
   "category_id": "accessories",
   "sections": {
     "core": ["accessory_type"],
-    "detail": [],
+    "detail": ["cable_length"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
-  "groups": [],
-  "facets": [{"field": "accessory_type"}],
+  "groups": ["environment"],
+  "facets": [{"field": "accessory_type"}, {"field": "cable_length"}],
   "required": ["accessory_type"],
   "axis_dependent_keys": []
 }

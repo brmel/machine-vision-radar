@@ -6,7 +6,7 @@
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
-  "groups": [],
+  "groups": ["environment"],
   "facets": [{"field": "component_type"}, {"field": "coating"}, {"field": "spectral_range"}],
   "required": ["component_type"],
   "axis_dependent_keys": []

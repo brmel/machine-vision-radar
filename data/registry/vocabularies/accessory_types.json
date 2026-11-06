@@ -3,5 +3,11 @@
   {"id": "enclosure", "label": {"en": "Enclosure", "fr": "Boîtier de protection"}},
   {"id": "io_card", "label": {"en": "Io card", "fr": "Carte d'E/S"}},
   {"id": "mount", "label": {"en": "Mount", "fr": "Support mécanique"}},
-  {"id": "test_equipment", "label": {"en": "Test equipment", "fr": "Équipement de test"}}
+  {"id": "test_equipment", "label": {"en": "Test equipment", "fr": "Équipement de test"}},
+  {"id": "adapter", "label": {"en": "Adapter", "fr": "Adaptateur"}},
+  {"id": "power_supply", "label": {"en": "Power supply", "fr": "Alimentation"}},
+  {
+    "id": "optical_pattern",
+    "label": {"en": "Calibration or projection pattern", "fr": "Mire de calibration ou de projection"}
+  }
 ]

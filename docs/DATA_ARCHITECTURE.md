@@ -189,6 +189,9 @@ broadcast capture unless marketed for machine vision. **Boundaries:**
   I/O are `compute.vision_controllers`.
 - Pushbroom hyperspectral → `imaging.cameras.line_scan` + `hyperspectral`; snapshot hyperspectral →
   `imaging.cameras.area_scan` + `hyperspectral`; point and benchtop instruments → `imaging.spectrometers`.
+- What a maker sells beside its lights and lenses: cables, fixtures and adapters → `accessories`; plates, films, filters
+  and mirrors that shape light → `optics.optical_components`; each takes the `environment` group when its page states
+  a size or a temperature. A light made for a plant-research or microscope bench, not a vision system, is out of scope.
 - A scientific camera is an area-scan camera; "smart" needs on-device processing and is a tag.
 - A vendor with services only gets an organization record and no products.
 
