@@ -168,13 +168,13 @@ inEachLocale("Smoke", (locale) => {
     expect(body.index === null || typeof body.index === "string").toBe(true);
   });
 
-  test("a search runs on the function, with no error", async ({ page, request }) => {
+  test("a search runs on the function, with no error, a cold start allowed", async ({ page, request }) => {
     test.skip(GATE, "the hosting emulator runs no function; search.spec checks /api/find in the gate");
     const errors = consoleErrors(page, /status of 404/);
     await page.goto(await aPage(request, "product"));
     const name = (await page.getByRole("heading", { level: 1 }).textContent()) ?? "";
     await page.goto(`/browse?q=${encodeURIComponent(name)}`);
-    await expect(page.getByRole("main").getByRole("article").first()).toBeVisible();
+    await expect(page.getByRole("main").getByRole("article").first()).toBeVisible({ timeout: 30_000 });
     await page.waitForLoadState("networkidle");
     await expect(page.getByText(MESSAGES[locale].searchErrorTitle)).toHaveCount(0);
     expect(errors).toEqual([]);

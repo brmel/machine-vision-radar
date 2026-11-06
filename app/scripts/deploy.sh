@@ -46,6 +46,9 @@ timed 300 "the function's packages" uv pip install --quiet --python "$FUNCTIONS/
 timed 600 "firebase deploy" npx --no-install firebase deploy \
   --only firestore:rules,firestore:indexes,storage,functions \
   --project "$PROJECT" --force
+# A fresh revision answers its first request cold, past what the smoke waits: warm it here, not in the smoke.
+timed 180 "the function's first answer" bash -c \
+  'until curl -fsS "$0/api/health" >/dev/null 2>&1; do sleep 5; done' "https://$PROJECT.web.app"
 
 # A short-lived token for the steps that read the project's store, in the environment: never on a command line
 # another process could read.
