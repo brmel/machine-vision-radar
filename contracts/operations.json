@@ -306,6 +306,14 @@
       "output": {"type": "object", "required": ["locale", "url", "text"]}
     },
     {
+      "id": "feed.post",
+      "summary": "the digest post to share by hand, from the articles published since a date",
+      "cli": "feed post",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["since", "count", "items", "text"]}
+    },
+    {
       "id": "ai-caps.get",
       "summary": "each AI use's model, prompt and caps against its spend and calls, and the models a use may run",
       "cli": "ai-caps get",

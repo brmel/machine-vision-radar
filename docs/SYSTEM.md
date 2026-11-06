@@ -138,8 +138,10 @@ streamed, never inlined. The media-rights policy and takedowns: [LEGAL.md](LEGAL
 
 ## 3. SEO & GEO
 
-- **Read model:** the store's public docs (§1). Every view is checked against `contracts/model/views.json`, whose TS
-  types and zod schemas `radar model generate` writes, and holds only what the CategoryProfile exposes. The fixture
+- **Read model:** the store's public docs (§1). `read_model.build` returns the view dataclasses `radar model generate`
+  writes from `contracts/model/views.json` (with the TS types and the zod schemas the site's adapters parse every doc
+  with), and `plain()` turns them into documents only at the store adapter; a view holds only what the CategoryProfile
+  exposes. The fixture
   builder (`radar/tests/fixtures/fixture_category.py`) writes the same views as files for the tests.
 - **Sitemap:** written from the same stream as the pages, so they cannot diverge: `sitemap.xml` indexes
   `sitemap-<n>.xml` files of at most 50,000 URLs. A product's `lastmod` is its latest Change that is not an `import` (a

@@ -3,10 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Iterable, Mapping
 
-from radar.domain.model.entities import FeedBrief, FeedItem, FeedPageView, SourceView, TermRef
-from radar.domain.model.history.projection import plain
+from radar.domain.model.entities import (FeedBrief, FeedCite, FeedItem, FeedItemView, FeedPageView, FeedSentenceView,
+                                         SourceView, TermRef)
 from radar.domain.model.registry import Registry
-from radar.domain.ports.catalog.views import Check
 
 Row = dict[str, Any]
 KINDS = "feed_item_kinds"
@@ -17,36 +16,36 @@ class Cited:
     organizations: Mapping[str, Row]
     sources: Mapping[str, SourceView]
 
-    def cite(self, ref: str) -> Row:
-        for kind, rows in (("product", self.products), ("organization", self.organizations)):
-            if ref in rows:
-                return {"id": ref, "kind": kind, "label": rows[ref]["name"], "slug": rows[ref]["slug"]}
+    def cite(self, ref: str) -> FeedCite:
+        if ref in self.products:
+            return FeedCite(id=ref, kind="product", label=self.products[ref]["name"], slug=self.products[ref]["slug"])
+        if ref in self.organizations:
+            row = self.organizations[ref]
+            return FeedCite(id=ref, kind="organization", label=row["name"], slug=row["slug"])
         source = self.sources[ref]
-        return {"id": ref, "kind": "source", "type": plain(source.type), **({"url": source.url} if source.url else {}),
-                **({"label": source.title} if source.title else {})}
+        return FeedCite(id=ref, kind="source", type=source.type, url=source.url, label=source.title)
 
 def published(items: Iterable[FeedItem]) -> list[FeedItem]:
     return sorted((i for i in items if i.published_at), key=lambda i: (i.published_at or "", i.id), reverse=True)
 
-def _item_view(item: FeedItem, cited: Cited, registry: Registry) -> Row:
+def _item_view(item: FeedItem, cited: Cited, registry: Registry) -> FeedItemView:
     kind = registry.vocabularies[KINDS][item.kind]
-    return {"slug": item.slug, "kind": {"id": item.kind, "label": dict(kind.label)}, "authorship": item.authorship,
-            "byline": dict(item.byline), "title": dict(item.title), "summary": dict(item.summary),
-            "published_at": item.published_at, **({"revised_at": item.revised_at} if item.revised_at else {}),
-            "body": [{"text": dict(s.text), "cites": [cited.cite(c) for c in s.cites]} for s in item.body],
-            **({"event_date": plain(item.event_date), "event_source": plain(cited.sources[item.event_source])}
-               if item.event_date and item.event_source else {})}
+    dated = bool(item.event_date and item.event_source)
+    return FeedItemView(slug=item.slug, kind=TermRef(id=item.kind, label=dict(kind.label)), authorship=item.authorship,
+                        byline=dict(item.byline), title=dict(item.title), summary=dict(item.summary),
+                        body=tuple(FeedSentenceView(text=dict(s.text), cites=tuple(cited.cite(c) for c in s.cites))
+                                   for s in item.body),
+                        published_at=item.published_at or "", revised_at=item.revised_at or None,
+                        event_date=item.event_date if dated else None,
+                        event_source=cited.sources[item.event_source] if dated and item.event_source else None)
 
-def _brief(view: Row, cited: Cited) -> FeedBrief:
-    refs = [c["id"] for s in view["body"] for c in s["cites"] if c["kind"] != "source"]
+def _brief(view: FeedItemView, cited: Cited) -> FeedBrief:
+    refs = [c.id for s in view.body for c in s.cites if c.kind != "source"]
     subjects = tuple(dict.fromkeys(refs))
     categories = tuple(dict.fromkeys(cited.products[r]["category"] for r in subjects if r in cited.products))
-    return FeedBrief(slug=view["slug"], title=view["title"], summary=view["summary"], kind=TermRef(**view["kind"]),
-                     published_at=view["published_at"], subjects=subjects, categories=categories)
+    return FeedBrief(slug=view.slug, title=view.title, summary=view.summary, kind=view.kind,
+                     published_at=view.published_at, subjects=subjects, categories=categories)
 
-def news(items: Iterable[FeedItem], cited: Cited, registry: Registry,
-         checked: Check) -> tuple[dict[str, Row], FeedPageView]:
-    views = {i.slug: checked(_item_view(i, cited, registry), "FeedItemView", i.slug) for i in published(items)}
-    feed = FeedPageView(items=tuple(_brief(v, cited) for v in views.values()), total=len(views))
-    checked(plain(feed), "FeedPageView", "news")
-    return views, feed
+def news(items: Iterable[FeedItem], cited: Cited, registry: Registry) -> tuple[dict[str, FeedItemView], FeedPageView]:
+    views = {i.slug: _item_view(i, cited, registry) for i in published(items)}
+    return views, FeedPageView(items=tuple(_brief(v, cited) for v in views.values()), total=len(views))

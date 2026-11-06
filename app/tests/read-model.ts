@@ -6,6 +6,7 @@ import { READ_MODEL } from "./fixture.ts";
 
 export function servedReader(): FilesCatalogRepository {
   vi.stubGlobal("fetch", async (url: string) => {
+    if (url === "/api/count") return new Response(null, { status: 204 });
     try {
       return new Response(readFileSync(join(READ_MODEL, decodeURIComponent(url.replace(/^\/read-model\//, "")))),
         { status: 200 });

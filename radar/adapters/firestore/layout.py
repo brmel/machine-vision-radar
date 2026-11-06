@@ -11,7 +11,7 @@ from radar.domain.model.catalog import MemoryCatalog
 from radar.domain.model.model import Model
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.history.projection import plain
-from radar.domain.read_model.listings import Tally, index_card
+from radar.domain.read_model.listings import Tally, index_card, registry_view
 from radar.domain.read_model.read_model import ReadModel
 from radar.domain.model.schema import ModelSchema
 from radar.domain.ports.store.docs import Docs, Fields
@@ -106,16 +106,15 @@ def product_doc(view: entities.ProductView) -> Fields:
 def chunks(items: list[Any]) -> list[list[Any]]:
     return [items[n:n + CHUNK] for n in range(0, len(items), CHUNK)] or [[]]
 
-def listing_docs(category: str, pages: list[dict[str, Any]]) -> dict[str, Fields]:
-    return {f"{FACETS}/{category}": doc(pages[0]["facets"], pages=len(pages)),
-            **{f"{FACETS}/{category}/{PAGES}/{page['page']}": doc({k: v for k, v in page.items() if k != "facets"})
+def listing_docs(category: str, pages: list[entities.CategoryPage]) -> dict[str, Fields]:
+    return {f"{FACETS}/{category}": doc(pages[0].facets, pages=len(pages)),
+            **{f"{FACETS}/{category}/{PAGES}/{page.page}": doc({k: v for k, v in plain(page).items() if k != "facets"})
                for page in pages}}
 
-def index_docs(index: dict[str, Any], tally: Tally) -> dict[str, Fields]:
-    cards = chunks(index["products"])
-    registry = {k: v for k, v in index.items() if k not in ("products", "organizations")}
-    return {f"{INDEX}/registry": doc(registry, cards=len(cards), tally=as_json(tally.plain())),
-            f"{INDEX}/organizations": doc(index["organizations"]),
+def index_docs(index: entities.IndexView, tally: Tally) -> dict[str, Fields]:
+    cards = chunks(list(index.products))
+    return {f"{INDEX}/registry": doc(registry_view(index), cards=len(cards), tally=as_json(tally.plain())),
+            f"{INDEX}/organizations": doc(index.organizations),
             **{f"{INDEX}/cards-{n}": doc(chunk) for n, chunk in enumerate(cards, 1)}}
 
 def public_docs(rm: ReadModel) -> dict[str, Fields]:
@@ -129,5 +128,5 @@ def public_docs(rm: ReadModel) -> dict[str, Fields]:
     out[f"{INDEX}/market"] = doc(rm.market)
     return out
 
-def news_docs(articles: dict[str, Any], feed: entities.FeedPageView) -> dict[str, Fields]:
+def news_docs(articles: Mapping[str, entities.FeedItemView], feed: entities.FeedPageView) -> dict[str, Fields]:
     return {f"{INDEX}/news": doc(feed), **{f"{NEWS}/{slug}": doc(v) for slug, v in articles.items()}}

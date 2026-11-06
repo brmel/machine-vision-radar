@@ -12,7 +12,7 @@ export class HttpAskApi implements AskApi {
   }
 
   async count(event: SearchEvent): Promise<void> {
-    const from = this.referred ? document.referrer : "";
+    const from = this.referred && !document.referrer.startsWith(window.location.origin) ? document.referrer : "";
     this.referred = false;
     await postJson("count", { event, ...(from ? { from } : {}) });
   }

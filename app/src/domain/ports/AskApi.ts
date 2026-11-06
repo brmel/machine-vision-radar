@@ -1,6 +1,6 @@
 import type { AskAnswer } from "../views.ts";
 
-export type SearchEvent = "search" | "zero_result" | "result_click";
+export type SearchEvent = "search" | "zero_result" | "result_click" | "page_view";
 
 export interface AskApi {
   ask(question: string, locale: string): Promise<AskAnswer>;

@@ -104,6 +104,11 @@ def index(registry: Registry, cards: Sequence[ProductCard], orgs: Sequence[OrgBr
         search=registry.search, news=tuple(news[:registry.feed.teaser]), organizations=tuple(orgs),
         products=tuple(sorted(cards, key=lambda c: c.slug)))
 
+def registry_view(index: IndexView) -> RegistryView:
+    return RegistryView(data_as_of=index.data_as_of, counts=index.counts, pipeline_stages=index.pipeline_stages,
+                        domains=index.domains, categories=index.categories, spec_definitions=index.spec_definitions,
+                        spec_groups=index.spec_groups, tags=index.tags, search=index.search, news=index.news)
+
 def republished(registry: Registry, stored: RegistryView) -> RegistryView:
     fresh = index(registry, (), (), {}, Tally(), ())
     counted = Counter({c.id: c.products for c in stored.categories})

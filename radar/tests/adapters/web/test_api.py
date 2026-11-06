@@ -164,9 +164,12 @@ def test_counters_are_added_server_side_with_nothing_of_the_asker(endpoint: AskE
     assert count({"event": "search", "from": "https://chatgpt.com/c/abc"}) == 204
     assert count({"event": "zero_result", "from": "https://www.perplexity.ai/search?q=x"}) == 204
     assert count({"event": "result_click", "from": "https://example.com/"}) == 204
+    assert count({"event": "page_view", "from": "https://www.linkedin.com/feed/update/1?x=y"}) == 204
+    assert count({"event": "page_view"}) == 204
     assert count({"event": "anything"}) == 400
-    assert (ledger.get(f"{METRICS}/{DAY}") or {}) == {"search": 1, "zero_result": 1, "result_click": 1,
-                                                      "from_chatgpt": 1, "from_perplexity": 1}
+    assert (ledger.get(f"{METRICS}/{DAY}") or {}) == {"search": 1, "zero_result": 1, "result_click": 1, "page_view": 2,
+                                                      "from_chatgpt": 1, "from_perplexity": 1, "ref_example_com": 1,
+                                                      "ref_linkedin_com": 1}
 
 def test_every_log_line_of_an_ask_carries_its_correlation_id(endpoint: AskEndpoint,
                                                              capsys: pytest.CaptureFixture[str]) -> None:

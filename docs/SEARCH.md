@@ -44,7 +44,7 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   nothing, cites an id outside the evidence, or states a number the evidence (or the question) does not hold rejects the
   output, with that reason, and the asker gets the `not_enough_evidence` refusal.
 - **The AI uses** (their ports: AGENTS.md rule 15) are answers, web research with its image judge (on research's model
-  and caps), datasheet extraction and news drafts, each on its prompt (`ask`, `research`, `image_judge`, `datasheet`,
+  and caps, each candidate's call counted), datasheet extraction and news drafts, each on its prompt (`ask`, `research`, `image_judge`, `datasheet`,
   `draft`) and its registry model, run through the `ModelRunner` port (`radar/domain/ports/ai/prompts.py`). A model's
   `provider` picks its runner (`radar/adapters/wiring/models.py`). `meta` runs on the Meta Model API
   (`radar/adapters/ai/meta/runner.py`): its OpenAI-compatible chat completions, the prompt's instruction as the system
@@ -86,8 +86,9 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   above and how it changes: a use's model and caps there, through the queue; the embedding model by a rebuild; prices,
   prompts and search.json's knobs by a registry change and a deploy.
 - **The ask endpoint** (`radar/adapters/web/api.py`), on the function behind `/api/**` (SYSTEM.md §1): `POST /api/ask`,
-  which the Ask page (`/search`) calls, and `POST /api/count`, which adds the day's anonymous counters; no query text,
-  address or id is stored. Its `Quota` meters each ask under the caps and serves a repeated question from `ask_cache` at
+  which the Ask page (`/search`) calls, and `POST /api/count`, which adds the day's anonymous counters (page views,
+  searches, clicks, answers and refusals, and from a visit's first count the referring site's name or an AI
+  assistant's); no page, query text, address or id is stored. Its `Quota` meters each ask under the caps and serves a repeated question from `ask_cache` at
   no cost, though it still counts for the day and the client; a change of Ask's model leaves the cache as it is. A
   client is the address Hosting appends to `X-Forwarded-For`, never what the client wrote there.
 

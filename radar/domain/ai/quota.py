@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import urllib.parse
 
 from radar.domain.ai.answerer import Answerer, Asked, refusal
@@ -15,8 +16,10 @@ ASSISTANTS = {"chatgpt.com": "chatgpt", "chat.openai.com": "chatgpt", "perplexit
               "copilot.microsoft.com": "copilot"}
 
 def counters(event: str, referrer: str) -> dict[str, int]:
-    assistant = ASSISTANTS.get(urllib.parse.urlsplit(referrer).hostname or "")
-    return {event: 1, **({f"from_{assistant}": 1} if assistant else {})}
+    host = (urllib.parse.urlsplit(referrer).hostname or "").lower()
+    assistant = ASSISTANTS.get(host)
+    site = re.sub(r"[^a-z0-9-]", "_", host.removeprefix("www."))[:60]
+    return {event: 1, **({f"from_{assistant}": 1} if assistant else {f"ref_{site}": 1} if site else {})}
 
 def _client(day: str, address: str) -> str:
     return "c" + hashlib.sha256(f"{day} {address}".encode()).hexdigest()[:16]

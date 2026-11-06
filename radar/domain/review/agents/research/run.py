@@ -6,7 +6,7 @@ from typing import Callable
 
 from radar.domain.ai.meter import Capped, Meter
 from radar.domain.model.history.changeset import Change
-from radar.domain.model.entities import Instant, OrgRelation, ResearchMeasures
+from radar.domain.model.entities import Instant, OrgRelation, ResearchMeasures, Standing
 from radar.domain.model.model import Model
 from radar.domain.ports.ai.image_judge import ImageJudge
 from radar.domain.ports.ai.research_agent import FileDraft, ProposalDraft, Reading, RecordsDraft, ResearchAgent
@@ -24,7 +24,7 @@ from radar.domain.review.agents.research.filing import RESEARCHER, Filing
 from radar.domain.review.agents.research.frontier import Frontier, Reach, RunScope, SourceTypes, sites_of
 from radar.domain.review.agents.research.media import Media
 from radar.domain.review.agents.runs import Measure
-from radar.domain.review.agents.tokens import Limits, Scope, issue
+from radar.domain.review.agents.tokens import AgentToken, Limits, Scope, Throttled, issue
 from radar.domain.review.requests import Agent, Founder, Job
 
 PAGES, SECONDS = 8, 40.0
@@ -46,7 +46,7 @@ class Researcher:
         self._owning = registry.marked("org_relation_types", lambda t: t.owns)
         self._terms, self._refs = terms(model), references(model.schema)
         self._specs, self._words = registry.spec_definitions, words(registry)
-        self._filing = Filing(review, model, held, self._log)
+        self._filing = Filing(review, model, held, self._log, tokens, now)
         self._types = SourceTypes(registry.vocabularies["source_types"])
         self._media = Media(reader, files, judge, self._filing, self._types, self._log, now)
         self._measure = Measure(runs, review, read, held, model)
@@ -55,8 +55,7 @@ class Researcher:
         owning = tuple(r for t in sorted(self._owning) for r in self._held.matching(OrgRelation, "type", t))
         sites = sites_of(scope, self._held.organizations(), owning, self._read)
         now = self._now()
-        token, _ = issue(RESEARCHER, Scope.PROPOSE, date.fromisoformat(now[:10]) + timedelta(days=1), Limits(), now)
-        self._tokens.issue(token)
+        token = self._day_token(now)
         run = ResearchRun(by.correlation_id, scope.key, by.name, now, token.id)
         self._runs.save(run)
         try:
@@ -64,9 +63,16 @@ class Researcher:
         except Exception as exc:
             self._end(self._runs.get(run.id), Status.FAILED, f"{type(exc).__name__}: {exc}")
             raise
-        finally:
-            self._tokens.revoke(token.id, self._now())
         return run.id
+
+    def _day_token(self, now: str) -> AgentToken:
+        today = date.fromisoformat(now[:10])
+        for held in self._tokens.page()[0]:
+            if held.name == RESEARCHER and held.standing(today) is Standing.ACTIVE:
+                return held
+        token, _ = issue(RESEARCHER, Scope.PROPOSE, today + timedelta(days=1), Limits(), now)
+        self._tokens.issue(token)
+        return token
 
     def status(self, run: str) -> ResearchRun:
         return self._runs.get(run)
@@ -93,7 +99,10 @@ class Researcher:
                 case Unread():
                     run = self._skipped(run, reach)
                 case Reach():
-                    run, capped = self._visit(run, frontier, reach, by, deadline)
+                    try:
+                        run, capped = self._visit(run, frontier, reach, by, deadline)
+                    except Throttled as exc:
+                        return self._end(self._runs.get(run.id), Status.CAPPED, f"the research token is {exc}")
                     if capped:
                         return self._end(run, Status.CAPPED, capped)
         return self._end(run, *_read_through(run))
