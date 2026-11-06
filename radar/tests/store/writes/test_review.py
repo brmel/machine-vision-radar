@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from datetime import date
 from typing import Any
 
@@ -7,8 +8,10 @@ import pytest
 
 from radar.adapters.firestore import layout, store
 from radar.domain.model.history.changeset import Retract, parse_changeset
+from radar.domain.model.history.plan import Plan, Stamp
 from radar.domain.model.entities import FilesOn, ProposalStatus, Risk
 from radar.domain.ports.review.proposal_queue import Query
+from radar.domain.ports.catalog.catalog_store import Contended
 from radar.domain.ports.store.docs import Put
 from radar.domain.review.agents.tokens import Limits, Refused, Scope, issue
 from radar.domain.review.proposal import AlreadyProposed, Filed, ProposalError
@@ -226,3 +229,34 @@ def test_approving_a_bundle_applies_each_on_its_own_and_holds_only_what_needs_a_
     assert again.done == () and [(h.proposal.id, h.waits_on) for h in again.held] == [(d.proposal.id, (a.id,))]
     assert {m.proposal.id: m.risk for m in review.bundle(run.correlation_id, FOUNDER) if m.risk is None} == {
         a.id: None, b.id: None, c.id: None, r.id: None}
+
+def test_two_approvals_on_one_family_both_reach_its_public_doc_the_second_on_the_first_s_version() -> None:
+    where = stores.place()
+    docs, other, files = stores.fresh_at(where[0]), stores.fresh_at(where[0]), stores.blobs()
+    FX.load(docs, files)
+    review, store = FX.review(docs, files), FX.catalog_store(other, files)
+    reaches = [c for c in FX.rows("claims.jsonl") if c["spec_key"] == "fixture_reach"]
+    small, large = (next(c for c in reaches if c["subject"] == model) for model in ("prd_0000000003", "prd_0000000004"))
+
+    def revised(claim: dict[str, Any], value: float) -> dict[str, Any]:
+        changed = copy.deepcopy(claim)
+        changed["value"]["quantity"]["value"] = value
+        return changed
+    draft = _changes(FilesOn.UPDATE, "Revision C", small["subject"], (revised(small, 0.2), small["source_refs"]))
+    filed = review.submit(draft, SCOUT)
+    approval = Approval(Picked((filed.proposal.id,)), "Revision C")
+    changeset = parse_changeset({"changes": [stores.put(revised(large, 260.0), "Revision C", large["source_refs"])]},
+                                FX.model)
+    with store.transaction():
+        held = store.around(changeset)
+        planned = FX.model.change(held, changeset, Stamp(stores.NOW, "elsewhere"))
+        with pytest.raises(Contended):
+            review.decide(approval, FOUNDER)
+        assert isinstance(planned, Plan) and store.write(held, planned)
+    assert FX.stored(docs, small["id"])["value"] == small["value"], "nothing of the refused approval was written"
+    [approved] = review.decide(approval, FOUNDER).done
+    family = layout.doc_value(docs.get(f"{layout.PRODUCTS}/prd_0000000001"))
+    reach = {m["id"]: next(s["value"]["quantity"]["value"] for s in m["specs"] if s["key"] == "fixture_reach")
+             for m in family["models"]}
+    assert reach == {"prd_0000000003": 200.0, "prd_0000000004": 260.0} and approved.applied, "0.2 m shown in mm"
+    assert [v.version for v in FX.versions(docs).history(large["id"]).versions] == [2, 1]

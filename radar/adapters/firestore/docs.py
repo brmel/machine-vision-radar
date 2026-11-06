@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import http.client
 import json
 import select
@@ -10,6 +11,7 @@ from typing import Any, Callable, Collection, Iterator, Mapping, Sequence
 
 from radar.adapters.console import log
 from radar.domain.model.history.projection import ROWS
+from radar.domain.ports.catalog.catalog_store import Contended
 from radar.domain.ports.store.docs import BATCH, Docs, Fields, Increment, Put, Write
 
 def list_page(docs: Docs, collection: str, cursor: str | None, where: Mapping[str, Any] | None = None) -> tuple[
@@ -110,6 +112,8 @@ class FirestoreDocs:
                 return json.loads(payload or b"null")
             if status == 404 and method == "GET":
                 return None
+            if status == 409:
+                raise Contended(f"Firestore {method} {path}: another write landed first: {payload[:300]!r}")
             if status in (429, 503) and wait is not None:
                 log.warn(f"Firestore {method} {path}: HTTP {status}, retried in {wait} s")
                 self._pause(wait)
@@ -122,31 +126,43 @@ class FirestoreDocs:
     def _row(self, doc: dict[str, Any]) -> tuple[str, Fields]:
         return doc["name"].split("/documents/", 1)[1], {k: decode(v) for k, v in doc.get("fields", {}).items()}
 
-    def _run(self, query: dict[str, Any]) -> list[dict[str, Any]]:
-        return [r["document"] for r in self._call("POST", f"{self._root}:runQuery", {"structuredQuery": query})
+    def _run(self, query: dict[str, Any], parent: str = "") -> list[dict[str, Any]]:
+        under = self._name(parent) if parent else self._root
+        return [r["document"] for r in self._call("POST", f"{under}:runQuery", self._within({"structuredQuery": query}))
                 if "document" in r]
 
+    def _open(self) -> str | None:
+        return getattr(self._held, "transaction", None)
+
+    def _within(self, body: dict[str, Any]) -> dict[str, Any]:
+        return {**body, "transaction": self._open()} if self._open() else body
+
+    @contextlib.contextmanager
+    def transaction(self) -> Iterator[None]:
+        if self._open():
+            raise RuntimeError("a transaction is already open on this thread")
+        self._held.transaction = self._call("POST", f"{self._root}:beginTransaction", {})["transaction"]
+        try:
+            yield
+        finally:
+            if left := self._open():
+                self._held.transaction = None
+                self._call("POST", f"{self._root}:rollback", {"transaction": left})
+
     def get(self, path: str) -> Fields | None:
-        doc = self._call("GET", self._name(path))
-        return self._row(doc)[1] if doc else None
+        return self.get_many([path]).get(path)
 
     def get_many(self, paths: Sequence[str]) -> dict[str, Fields]:
         out: dict[str, Fields] = {}
         for start in range(0, len(paths), PAGE):
             found = self._call("POST", f"{self._root}:batchGet",
-                               {"documents": [self._name(p) for p in paths[start:start + PAGE]]})
+                               self._within({"documents": [self._name(p) for p in paths[start:start + PAGE]]}))
             out.update(self._row(item["found"]) for item in found if "found" in item)
         return out
 
     def list(self, collection: str) -> Iterator[tuple[str, Fields]]:
-        token = ""
-        while True:
-            page = self._call("GET", f"{self._name(collection)}?pageSize={PAGE}"
-                              + (f"&pageToken={token}" if token else "")) or {}
-            yield from map(self._row, page.get("documents", []))
-            token = page.get("nextPageToken", "")
-            if not token:
-                return
+        parent, _, name = collection.rpartition("/")
+        return self._ordered({"collectionId": name}, ["__name__"], None, parent)
 
     def where(self, collection: str, field: str, values: Collection[Any],
               contains: bool = False) -> list[tuple[str, Fields]]:
@@ -157,14 +173,14 @@ class FirestoreDocs:
                 "value": encode(wanted[start:start + ANY])}}})))
         return list(found.items())
 
-    def _ordered(self, source: dict[str, Any], fields: list[str],
-                 start: list[Any] | None) -> Iterator[tuple[str, Fields]]:
+    def _ordered(self, source: dict[str, Any], fields: list[str], start: list[Any] | None,
+                 parent: str = "") -> Iterator[tuple[str, Fields]]:
         while True:
             query: dict[str, Any] = {"from": [source], "orderBy": [{"field": {"fieldPath": f}} for f in fields],
                                      "limit": PAGE}
             if start:
                 query["startAt"] = {"values": start, "before": False}
-            rows = self._run(query)
+            rows = self._run(query, parent)
             yield from map(self._row, rows)
             if len(rows) < PAGE:
                 return
@@ -182,8 +198,8 @@ class FirestoreDocs:
         clause = _filter(where)
         query: dict[str, Any] = {"from": [{"collectionId": collection}], **({"where": clause} if clause else {})}
         rows = self._call("POST", f"{self._root}:runAggregationQuery",
-                          {"structuredAggregationQuery": {"structuredQuery": query,
-                                                          "aggregations": [{"alias": "n", "count": {}}]}})
+                          self._within({"structuredAggregationQuery": {
+                              "structuredQuery": query, "aggregations": [{"alias": "n", "count": {}}]}}))
         return int(rows[0]["result"]["aggregateFields"]["n"]["integerValue"])
 
     def page(self, collection: str, cursor: str | None = None, limit: int = 20,
@@ -205,8 +221,9 @@ class FirestoreDocs:
             raise PermissionError(f"{self._root} is read-only here: a write to a project needs --yes")
         if len(writes) > BATCH:
             raise ValueError(f"a batch holds at most {BATCH} writes, not {len(writes)}")
-        body = [_write(self._name(w.path), w) for w in writes]
-        self._call("POST", f"{self._root}:commit", {"writes": body})
+        body = self._within({"writes": [_write(self._name(w.path), w) for w in writes]})
+        self._held.transaction = None
+        self._call("POST", f"{self._root}:commit", body)
 
     def collections(self) -> list[str]:
         ids, token = [], ""

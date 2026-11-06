@@ -54,8 +54,10 @@ snapshot (`radar store export`) stays in the maintainers' private data repo. Pag
   (DATA_ARCHITECTURE.md §4), stores version n+1 and its snapshot, and rewrites the canonical doc and the public docs the
   change reaches, at most 500 writes a batch. A page is rebuilt from the records it shows: a family keeps the stored
   rows of its unchanged models, as a category page keeps its unchanged cards, so an approval reads as much in a family
-  of 200 models as in one of 2; a failed batch puts back the batches before it. A changeset applied twice
-  writes nothing. Every job (load, change, rollback, replay, backup, index rebuild or update) has one correlation id, on
+  of 200 models as in one of 2; a failed batch puts back the batches before it. The read, the plan and the first batch
+  are one Firestore transaction: a write that lands in between (two approvals on one family, 2026-11-05) aborts it,
+  and the approval runs once more on the new state; only a change past 500 writes commits its later batches outside
+  it. A changeset applied twice writes nothing. Every job (load, change, rollback, replay, backup, index rebuild or update) has one correlation id, on
   every log line and Change event. Every applied change then updates the search index ([SEARCH.md](SEARCH.md)); the
   deploy rewrites the public docs that differ from what the entities project (`radar store reproject`).
 - **Review** (`radar/domain/review/review.py`) is the one entry to the review queue; the CLI, the admin API, the MCP

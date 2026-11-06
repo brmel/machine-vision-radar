@@ -10,6 +10,7 @@ import pytest
 from radar.adapters.firestore import layout, store
 from radar.adapters.firestore.repository import StoreChangeLog
 from radar.domain.model.history.ids import keyed
+from radar.domain.ports.catalog.catalog_store import Contended
 from radar.domain.validation.verdict import InvalidChangeset
 from radar.tests.store import stores
 
@@ -183,7 +184,7 @@ def test_two_writers_racing_to_one_version_leave_one() -> None:
         if commit == 1:
             FX.apply(docs, files, "first", change(301.0))
 
-    with pytest.raises((ValueError, OSError)):
+    with pytest.raises(Contended):
         FX.apply(stores.Hooked(docs, race), files, "second", change(302.0))
     log = StoreChangeLog(docs, FX.model)
     assert [(c.version, c.correlation_id) for c in log.for_entity(claim["id"]).changes][1:] == [(2, "first")]

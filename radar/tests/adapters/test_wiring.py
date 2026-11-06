@@ -47,8 +47,8 @@ def sent(monkeypatch: pytest.MonkeyPatch) -> list[urllib.request.Request]:
 
 def test_the_project_is_read_with_the_token(sent: list[urllib.request.Request]) -> None:
     Wiring(PROJECT).store().get("products/prd_1")
-    assert sent[0].full_url == (f"https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents/"
-                                "products/prd_1")
+    assert sent[0].full_url == (f"https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents"
+                                ":batchGet")
     assert sent[0].get_header("Authorization") == "Bearer token-1"
 
 def test_a_report_on_the_project_is_attested_by_app_check_with_the_token(sent: list[urllib.request.Request]) -> None:
@@ -84,7 +84,7 @@ def test_a_model_opens_on_the_project_only_with_yes(sent: list[urllib.request.Re
     assert sent == []
     with pytest.raises(NoStore, match="--yes"):
         ask.call("2026-10-30", lambda model: model)
-    assert sent and [r.full_url for r in sent if r.get_method() != "GET"] == []
+    assert sent and [r.full_url for r in sent if r.full_url.endswith(":commit")] == []
 
 def test_muse_spark_on_the_meta_model_api_needs_its_key_before_anything_is_sent(
         sent: list[urllib.request.Request], monkeypatch: pytest.MonkeyPatch) -> None:
