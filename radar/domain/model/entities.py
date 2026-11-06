@@ -693,7 +693,7 @@ class CategoryEntry:
     domain: str
     pipeline: tuple[str, ...]
     glyph: str
-    sections: SectionKeys
+    core: tuple[str, ...]
     products: int
     pages: int
     component_hub: str | None = None

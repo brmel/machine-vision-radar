@@ -50,7 +50,7 @@ export const ProductCard: FC<ProductCardProps> = ({ product, valueLabels, link, 
         <div className="text-caption text-muted leading-5">
           {product.status && <StatusBadge status={product.status} locale={valueLabels.locale} className="mr-2" />}
           {showCategory && <span className="inline-block mr-3">{localized(category.label, valueLabels.locale)}</span>}
-          <Facts layout="inline" facts={keySpecRows(product.specs, category.sections.core, specs, valueLabels)} />
+          <Facts layout="inline" facts={keySpecRows(product.specs, category.core, specs, valueLabels)} />
         </div>
       </div>
       {compare && (

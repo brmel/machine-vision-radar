@@ -111,7 +111,7 @@ export const CategoryEntrySchema: z.ZodType<M.CategoryEntry> = z.strictObject({
   domain: z.string(),
   pipeline: z.array(z.string()),
   glyph: z.string(),
-  sections: z.lazy(() => SectionKeysSchema),
+  core: z.array(z.string()),
   products: z.number().int(),
   pages: z.number().int(),
   component_hub: z.string().optional(),

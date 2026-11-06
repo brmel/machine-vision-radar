@@ -133,7 +133,7 @@ export interface CategoryEntry {
   readonly domain: string;
   readonly pipeline: readonly string[];
   readonly glyph: string;
-  readonly sections: SectionKeys;
+  readonly core: readonly string[];
   readonly products: number;
   readonly pages: number;
   readonly component_hub?: string;

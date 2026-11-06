@@ -15,9 +15,9 @@ const kept = {
   min: ends.filter(([, high]) => high >= bound).length,
   max: ends.filter(([low]) => low <= bound).length,
 };
-const numeric = category.sections.core.findIndex((key) => cardsOf(category.id)
+const numeric = category.core.findIndex((key) => cardsOf(category.id)
   .some((c) => c.specs[key] && ("quantity" in c.specs[key] || "range" in c.specs[key])));
-const columnKey = category.sections.core[numeric];
+const columnKey = category.core[numeric];
 
 async function columnNumbers(page: Page): Promise<(number | null)[]> {
   const cells = await page.getByRole("table").locator(`tbody tr > :nth-child(${numeric + 3})`).allInnerTexts();
@@ -65,7 +65,7 @@ inEachLocale("Browse filters", (locale) => {
       .toHaveAttribute("href", `/vendor/${card.vendor}`);
     await expect(row.getByRole("heading").getByRole("link")).toHaveAttribute("href", `/product/${card.slug}`);
     await expect(row.getByText(categoryName, { exact: true })).toBeVisible();
-    const core = category.sections.core.filter((key) => key in card.specs && key in index.spec_definitions).slice(0, 3);
+    const core = category.core.filter((key) => key in card.specs && key in index.spec_definitions).slice(0, 3);
     await expect(row.locator("dt")).toHaveText(core.map((key) => label(index.spec_definitions[key].label, locale)));
     await expect(row.getByRole("button", { name: t.compareAction, exact: true })).toBeVisible();
 

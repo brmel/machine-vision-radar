@@ -19,7 +19,7 @@ export const ResultsTable: FC<ResultsTableProps> = ({ products, hub, column, onS
   const { spec_definitions: specs } = useRegistry();
   const { t, locale } = useI18n();
   const valueLabels = useValueLabels();
-  const columns = hub.sections.core;
+  const columns = hub.core;
   const sortOf = (key: string): "ascending" | "descending"
     | "none" => (column?.key === key ? (column.desc ? "descending" : "ascending") : "none");
   const Arrow = column?.desc ? ArrowDown : ArrowUp;

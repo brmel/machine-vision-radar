@@ -38,9 +38,7 @@ def test_the_index_carries_the_new_category_domain_and_stage(out: Path) -> None:
         DOMAIN["id"], [STAGE["id"]], CATEGORY["glyph"])
     assert DOMAIN in index["domains"] and index["pipeline_stages"][-1] == STAGE
     groups = {g["id"]: g for g in REGISTRY["spec_groups.json"]}
-    taken = [k for g in PROFILE["groups"] for k in groups[g]["specs"]]
-    assert category["sections"] == {"core": PROFILE["sections"]["core"],
-                                    "detail": [*PROFILE["sections"]["detail"], *taken]} and taken
+    assert category["core"] == PROFILE["sections"]["core"]
     assert all(index["spec_groups"][g] == groups[g]["label"] for g in PROFILE["groups"])
     assert category["products"] == len(DATA["products.jsonl"])
     for spec in SPECS:
