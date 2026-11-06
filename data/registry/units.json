@@ -12,6 +12,7 @@
   {"id": "tops", "symbol": "TOPS", "dimension": "compute_rate", "ucum": "10*12{op}/s", "factor": 1000000000000},
   {"id": "s", "symbol": "s", "dimension": "time", "ucum": "s", "factor": 1},
   {"id": "us", "symbol": "µs", "dimension": "time", "ucum": "us", "factor": 1e-06},
+  {"id": "ms", "symbol": "ms", "dimension": "time", "ucum": "ms", "factor": 0.001},
   {"id": "mp", "symbol": "MP", "dimension": "pixel_count", "ucum": "10*6{px}", "factor": 1000000},
   {"id": "px", "symbol": "px", "dimension": "pixel_count", "ucum": "{px}", "factor": 1},
   {"id": "byte", "symbol": "B", "dimension": "digital_information", "ucum": "By", "factor": 1},

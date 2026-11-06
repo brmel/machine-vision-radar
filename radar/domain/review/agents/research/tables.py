@@ -14,6 +14,8 @@ BOUND = re.compile(r"[<>≤≥]|\bup to\b|\btbd\b|^see\b|\bmin(?:imum)?\b", re.I
 FOOTNOTE = re.compile(r"\(\d+\)|\*\d+")
 UNIT_CELL = re.compile(r"\(([^()]+)\)")
 FIGURE = re.compile(rf"({NUMBER})(?:\s*(?:to|–|-)\s*({NUMBER}))?\s*([^\d\s,;()]+)?")
+RELATIVE = re.compile(r"%\s*r\.?h\.?", re.I)
+BETWEEN_TERMS = re.compile(r"[,;]|(?<!\d)/|/(?!\d)")
 ANSWERS = {"yes": True, "no": False}
 Value = dict[str, object]
 
@@ -25,18 +27,19 @@ class Table:
 def _rows(text: str) -> list[tuple[str, str]]:
     rows = []
     for line in text.splitlines():
-        cells = [c.strip() for c in line.split(" | ") if not FOOTNOTE.fullmatch(c.strip())]
+        cells = [c.strip() for c in line.split("|") if c.strip() and not FOOTNOTE.fullmatch(c.strip())]
         if len(cells) == 2:
-            rows.append((cells[0], cells[1]))
+            rows.append((FOOTNOTE.sub("", cells[0]).strip(), cells[1]))
         elif len(cells) == 3 and (unit := UNIT_CELL.fullmatch(cells[1])):
-            rows.append((cells[0], f"{cells[2]} {unit.group(1)}"))
+            rows.append((FOOTNOTE.sub("", cells[0]).strip(), f"{cells[2]} {unit.group(1)}"))
     return rows
 
 def _number(text: str) -> float:
     return float(text.replace(",", ""))
 
 def _quantity(cell: str, spec: SpecDefinition, said: Mapping[str, str]) -> Value | None:
-    found = [m for m in FIGURE.finditer(FOOTNOTE.sub(" ", cell)) if m.group(3) and spelled(m.group(3)) in said]
+    plain = RELATIVE.sub("%", FOOTNOTE.sub(" ", cell))
+    found = [m for m in FIGURE.finditer(plain) if m.group(3) and spelled(m.group(3)) in said]
     if len(found) != 1:
         return None
     low, high, unit = found[0].groups()
@@ -48,12 +51,14 @@ def _within(spec: SpecDefinition, own_unit: bool, low: float, high: float) -> bo
     return not (own_unit and spec.bounds) or spec.bounds.min <= low <= high <= spec.bounds.max
 
 def _terms(cell: str, spec: SpecDefinition, said: Mapping[str, str]) -> Value | None:
-    named = list(dict.fromkeys(said[w] for w in map(spelled, re.split(r"[,;/]", cell)) if w in said))
+    whole = said.get(spelled(cell))
+    parts = map(spelled, BETWEEN_TERMS.split(cell))
+    named = [whole] if whole else list(dict.fromkeys(said[w] for w in parts if w in said))
     if spec.datatype == "term_set":
         return {"terms": named} if named else None
     return {"term": named[0]} if len(named) == 1 else None
 
-def _value(cell: str, spec: SpecDefinition, said: Mapping[str, str]) -> Value | None:
+def _value(label: str, cell: str, spec: SpecDefinition, said: Mapping[str, str]) -> Value | None:
     if BOUND.search(cell):
         return None
     match spec.datatype:
@@ -64,7 +69,7 @@ def _value(cell: str, spec: SpecDefinition, said: Mapping[str, str]) -> Value | 
         case "boolean":
             return {"boolean": ANSWERS[cell.casefold()]} if cell.casefold() in ANSWERS else None
         case _:
-            return {"string": cell} if len(cell) <= 60 else None
+            return {"string": cell} if len(cell) <= 60 and spelled(label) not in spelled(cell) else None
 
 class Tables:
     def __init__(self, registry: Registry, words: Words) -> None:
@@ -86,7 +91,7 @@ class Tables:
             if key is None:
                 unmatched.append(label)
                 continue
-            value = _value(cell, self._registry.spec_definitions[key], self._words[key])
+            value = _value(label, cell, self._registry.spec_definitions[key], self._words[key])
             if value is not None and key not in claims:
                 claims[key] = value
         return Table(tuple(claims.items()), tuple(dict.fromkeys(unmatched)))

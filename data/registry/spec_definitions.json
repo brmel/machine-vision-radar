@@ -94,7 +94,7 @@
     "better": "lower",
     "label": {"en": "Body height", "fr": "Hauteur du boîtier"},
     "description": {"en": "Outer height of the device's body across its optical axis, without lens, connectors or mounts.", "fr": "Hauteur extérieure du boîtier perpendiculairement à l'axe optique, sans objectif, connecteurs ni fixations."},
-    "aliases": ["housing height", "camera height", "hauteur du boîtier"],
+    "aliases": ["housing height", "camera height", "hauteur du boîtier", "height"],
     "bounds": {"min": 0.1, "max": 5000},
     "precision": 1
   },
@@ -118,7 +118,7 @@
     "better": "lower",
     "label": {"en": "Body width", "fr": "Largeur du boîtier"},
     "description": {"en": "Outer width of the device's body across its optical axis, without lens, connectors or mounts.", "fr": "Largeur extérieure du boîtier perpendiculairement à l'axe optique, sans objectif, connecteurs ni fixations."},
-    "aliases": ["housing width", "camera width", "largeur du boîtier"],
+    "aliases": ["housing width", "camera width", "largeur du boîtier", "width"],
     "bounds": {"min": 0.1, "max": 5000},
     "precision": 1
   },
@@ -129,7 +129,7 @@
     "unit": "mm",
     "label": {"en": "Cable length", "fr": "Longueur du câble"},
     "description": {"en": "Length of the cable, connector to connector.", "fr": "Longueur du câble, d'un connecteur à l'autre."},
-    "aliases": ["length of cable", "longueur de câble", "Kabellänge"],
+    "aliases": ["length of cable", "longueur de câble", "Kabellänge", "cable"],
     "bounds": {"min": 1, "max": 200000},
     "precision": 1
   },
@@ -370,7 +370,7 @@
     "unit": "mm",
     "label": {"en": "Focal length", "fr": "Distance focale"},
     "description": {"en": "Effective focal length of the lens; for a zoom lens, from its shortest to its longest focal length.", "fr": "Distance focale effective de l'objectif ; pour un zoom, de la plus courte à la plus longue."},
-    "aliases": ["EFL", "effective focal length", "focal", "focale", "longueur focale", "focale effective", "Brennweite"],
+    "aliases": ["EFL", "effective focal length", "focal", "focale", "longueur focale", "focale effective", "Brennweite", "focal point"],
     "bounds": {"min": 0.3, "max": 5000},
     "precision": 2
   },
@@ -566,7 +566,7 @@
     "vocabulary": "lens_mounts",
     "label": {"en": "Lens mount", "fr": "Monture d'objectif"},
     "description": {"en": "Mechanical interface between lens and camera body, such as C-mount, CS-mount, S-mount or F-mount, which also sets the flange distance.", "fr": "Interface mécanique entre objectif et boîtier, par exemple monture C, CS, S ou F, qui fixe aussi le tirage mécanique."},
-    "aliases": ["mount", "mount type", "optical interface", "lens interface", "monture", "type de monture", "fixation d'objectif", "Objektivanschluss", "Objektivgewinde", "Bajonett"]
+    "aliases": ["mount", "mount type", "optical interface", "lens interface", "monture", "type de monture", "fixation d'objectif", "Objektivanschluss", "Objektivgewinde", "Bajonett", "camera mount"]
   },
   {
     "id": "light_type",
@@ -662,7 +662,7 @@
     "vocabulary": "sensor_formats",
     "label": {"en": "Maximum sensor format", "fr": "Format de capteur maximal"},
     "description": {"en": "Largest sensor format the lens image circle covers without vignetting, such as 2/3-inch, 1.1-inch or full frame.", "fr": "Plus grand format de capteur couvert par le cercle image de l'objectif sans vignetage, par exemple 2/3 de pouce, 1,1 pouce ou plein format."},
-    "aliases": ["sensor format", "max sensor size", "image format", "optical format", "max image format", "format de capteur", "format d'image", "format optique", "Sensorformat", "Bildformat", "maximale Sensorgröße"]
+    "aliases": ["sensor format", "max sensor size", "image format", "optical format", "max image format", "format de capteur", "format d'image", "format optique", "Sensorformat", "Bildformat", "maximale Sensorgröße", "maximum applicable image sensor size", "compatible image sensor size"]
   },
   {
     "id": "measurement_rate",
@@ -719,9 +719,29 @@
     "unit": "deg_c",
     "label": {"en": "Operating temperature", "fr": "Température de fonctionnement"},
     "description": {"en": "Ambient temperature range in which the device is specified to operate; not the temperature it measures, nor its storage range.", "fr": "Plage de température ambiante dans laquelle l'appareil est spécifié pour fonctionner ; ni la température qu'il mesure, ni sa plage de stockage."},
-    "aliases": ["operating temp", "ambient temperature", "working temperature", "ambient operating temperature", "température d'utilisation", "température ambiante", "plage de température de fonctionnement", "Betriebstemperatur", "Umgebungstemperatur", "Arbeitstemperatur"],
+    "aliases": ["operating temp", "ambient temperature", "working temperature", "ambient operating temperature", "température d'utilisation", "température ambiante", "plage de température de fonctionnement", "Betriebstemperatur", "Umgebungstemperatur", "Arbeitstemperatur", "operating temperature and humidity", "ambient temperature/humidity range"],
     "bounds": {"min": -100, "max": 200},
     "precision": 0
+  },
+  {
+    "id": "storage_temperature",
+    "datatype": "quantity",
+    "dimension": "temperature",
+    "unit": "deg_c",
+    "label": {"en": "Storage temperature", "fr": "Température de stockage"},
+    "description": {"en": "Temperature range in which the device may be stored unpowered, without loss of its specification.", "fr": "Plage de température dans laquelle l'appareil peut être stocké hors tension sans perdre ses spécifications."},
+    "aliases": ["storage temp", "storage temperature and humidity", "température de stockage", "Lagertemperatur"],
+    "bounds": {"min": -100, "max": 200}
+  },
+  {
+    "id": "operating_humidity",
+    "datatype": "quantity",
+    "dimension": "ratio_dimensionless",
+    "unit": "percent",
+    "label": {"en": "Operating humidity", "fr": "Humidité de fonctionnement"},
+    "description": {"en": "Relative humidity range in which the device is specified to operate, usually without condensation.", "fr": "Plage d'humidité relative dans laquelle l'appareil est spécifié pour fonctionner, généralement sans condensation."},
+    "aliases": ["relative humidity", "operating relative humidity", "humidité relative", "Betriebsluftfeuchtigkeit"],
+    "bounds": {"min": 0, "max": 100}
   },
   {
     "id": "os",
@@ -803,7 +823,7 @@
     "better": "lower",
     "label": {"en": "Power consumption", "fr": "Consommation électrique"},
     "description": {"en": "Electrical power the device draws in operation, typical or maximum as the source states it.", "fr": "Puissance électrique absorbée par l'appareil en fonctionnement, typique ou maximale selon la source."},
-    "aliases": ["power draw", "power dissipation", "puissance consommée", "puissance absorbée", "consommation", "Leistungsaufnahme", "Stromverbrauch", "Leistungsbedarf", "power consumption", "power requirements", "camera power requirements"],
+    "aliases": ["power draw", "power dissipation", "puissance consommée", "puissance absorbée", "consommation", "Leistungsaufnahme", "Stromverbrauch", "Leistungsbedarf", "power consumption", "power requirements", "camera power requirements", "max power consumption", "power consumption (continuous)"],
     "bounds": {"min": 0.0001, "max": 20000},
     "precision": 3
   },
@@ -982,7 +1002,7 @@
     "unit": "v",
     "label": {"en": "Supply voltage", "fr": "Tension d'alimentation"},
     "description": {"en": "The DC or AC voltage range the device is powered from.", "fr": "La plage de tension continue ou alternative qui alimente l'appareil."},
-    "aliases": ["power supply", "input voltage", "operating voltage", "tension d'entrée", "Versorgungsspannung", "Betriebsspannung"],
+    "aliases": ["power supply", "input voltage", "operating voltage", "tension d'entrée", "Versorgungsspannung", "Betriebsspannung", "power voltage"],
     "bounds": {"min": 0.5, "max": 1000},
     "precision": 1
   },
@@ -1135,7 +1155,7 @@
     "unit": "mm",
     "label": {"en": "Working distance", "fr": "Distance de travail"},
     "description": {"en": "Distance from the front of the lens to the object in focus; for a focusable lens, the range from its minimum object distance.", "fr": "Distance entre l'avant de l'objectif et l'objet net ; pour un objectif à mise au point réglable, la plage depuis sa distance minimale."},
-    "aliases": ["WD", "object distance", "MOD", "minimum object distance", "distance objet", "distance minimale de mise au point", "Arbeitsabstand", "Objektabstand", "Mindestobjektabstand"],
+    "aliases": ["WD", "object distance", "MOD", "minimum object distance", "distance objet", "distance minimale de mise au point", "Arbeitsabstand", "Objektabstand", "Mindestobjektabstand", "minimum WD"],
     "bounds": {"min": 0.01, "max": 100000},
     "precision": 1
   },
