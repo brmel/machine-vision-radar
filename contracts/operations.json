@@ -179,7 +179,7 @@
     },
     {
       "id": "change.apply",
-      "summary": "apply a changeset through the CatalogWriter",
+      "summary": "apply a changeset: the Model checks it, the CatalogStore writes it",
       "cli": "change apply",
       "admin": null,
       "mcp": null,

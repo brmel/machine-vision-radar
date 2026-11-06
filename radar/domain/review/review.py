@@ -3,13 +3,14 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Callable, Sequence, assert_never
 
+from radar.domain.model.history import plan
 from radar.domain.model.history.changeset import Change, Changeset, EntityChange, PutEntity, Retract, as_record, put_of
 from radar.domain.model.entities import ActorKind, FilesOn, LogEntryView, LogPage, ProposalAction, ProposalStatus
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.history.projection import every_page
 from radar.domain.model.model import Model
 from radar.domain.ports.catalog.catalog import Catalog
-from radar.domain.ports.catalog.catalog_writer import CatalogWriter
+from radar.domain.ports.catalog.catalog_store import CatalogStore
 from radar.domain.ports.history.version_store import VersionStore
 from radar.domain.ports.review.proposal_queue import ProposalQueue, Query, QueuePage
 from radar.domain.read_model.derived.identity import ProductIdentity
@@ -30,11 +31,17 @@ FILES = {Founder: (Changes, Withdrawal, Rollback), Agent: (Changes,), Job: (Chan
 def _by(changeset: Changeset, name: str, kind: ActorKind) -> Changeset:
     return Changeset(tuple(replace(c, actor=name, actor_kind=kind) for c in changeset.changes))
 
+def _unrefused(planned: plan.Plan | plan.Refused) -> plan.Plan:
+    if isinstance(planned, plan.Refused):
+        raise InvalidChangeset(planned.findings)
+    return planned
+
 class Review:
-    def __init__(self, queue: ProposalQueue, writer: CatalogWriter, versions: VersionStore, held: Callable[[], Catalog],
-                 identity: ProductIdentity, model: Model, clock: Callable[[], str]) -> None:
-        self._queue, self._writer, self._versions, self._held, self._identity, self._model, self._clock = (
-            queue, writer, versions, held, identity, model, clock)
+    def __init__(self, queue: ProposalQueue, store: CatalogStore, versions: VersionStore, held: Callable[[], Catalog],
+                 identity: ProductIdentity, model: Model, clock: Callable[[], str], now: Callable[[], str]) -> None:
+        self._queue, self._store, self._versions, self._held, self._identity, self._model, self._clock = (
+            queue, store, versions, held, identity, model, clock)
+        self._now = now
         self._schema = model.schema
         self._uncited = {t.name for t in model.schema.entities if t.provenance or t.name in OWNED}
         self._provenance = {t.name for t in model.schema.entities if t.provenance}
@@ -49,8 +56,9 @@ class Review:
             case Changes():
                 return self._changes(draft, by, None)
             case Withdrawal(entity, reason, files_on):
+                gone = Changeset((Change(Retract(entity), reason.strip()),))
                 return self._file(files_on, reason, entity,
-                                  self._writer.withdrawal(entity, reason.strip(), by.kind, by.name), by)
+                                  self._model.withdrawal(self._store.around(gone), entity, reason.strip()), by)
             case Rollback(entity, to, reason):
                 rolled = Changeset((self._rolled_back(draft, by),))
                 return self._file(FilesOn.ROLLBACK, f"Roll {entity} back to version {to}: {reason.strip()}", entity,
@@ -75,7 +83,7 @@ class Review:
             case Revision(proposal, changeset, note):
                 self._sourced(changeset)
                 stamped = _by(changeset, by.name, by.kind)
-                self._writer.check(stamped)
+                self._checked(stamped)
                 edited = self._get(proposal).edited(stamped, by.name, note, self._clock())
                 return Outcome((self._queue.record(edited, self._entry(ProposalAction.EDIT, edited, by, note)),))
             case Enactment(draft):
@@ -89,7 +97,7 @@ class Review:
 
     def bundle(self, bundle: str, by: Founder) -> tuple[Member, ...]:
         proposals = self._bundled(bundle)
-        risks = {p.id: risk([c for c in self._writer.preview(p.changeset)
+        risks = {p.id: risk([c for c in self._planned(p.changeset, "check")[1].changes
                              if self._schema.kind_of(c.entity) not in self._provenance])
                  for p in proposals if p.status == ProposalStatus.SUGGESTED and p.changeset}
         waits = after(proposals, self._refs)
@@ -137,6 +145,19 @@ class Review:
         return LogEntryView(at=self._clock(), action=action, proposal=proposal.id, actor=by.name, actor_kind=by.kind,
                             note=note, changes=tuple(a.change for a in changes), correlation_id=by.correlation_id)
 
+    def _planned(self, changeset: Changeset, correlation_id: str) -> tuple[plan.Held, plan.Plan | plan.Refused]:
+        held = self._store.around(changeset)
+        return held, self._model.change(held, changeset, plan.Stamp(self._now(), correlation_id))
+
+    def _checked(self, changeset: Changeset) -> tuple[EntityChange, ...]:
+        return _unrefused(self._planned(changeset, "check")[1]).changes
+
+    def _applied(self, changeset: Changeset, by: Founder) -> tuple[AppliedChange, ...]:
+        held, planned = self._planned(changeset, by.correlation_id)
+        written = _unrefused(planned)
+        self._store.write(held, written)
+        return tuple(AppliedChange(e.id, e.entity, e.version) for e in written.events)
+
     def _sourced(self, changeset: Changeset) -> None:
         uncited = [n for n, c in enumerate(changeset.changes) if not c.source_refs
                    and self._schema.kind_of(c.entity) not in self._uncited]
@@ -158,7 +179,7 @@ class Review:
         if not reason.strip():
             raise ProposalError("a proposal needs a reason")
         stamped = _by(changeset, by.name, by.kind) if changeset else None
-        changes = self._writer.check(stamped) if stamped else ()
+        changes = self._checked(stamped) if stamped else ()
         digest = content_hash(by.name, subject, message, source_url, stamped)
         proposal = Proposal(keyed("prp", digest), files_on, ProposalStatus.SUGGESTED, stamped, subject, reason.strip(),
                             by.kind, by.name, self._clock(), digest, message, source_url,
@@ -222,9 +243,7 @@ class Review:
     def _approve(self, proposal: Proposal, note: str, by: Founder) -> Proposal:
         changes = proposal.changeset.changes if proposal.changeset else ()
         stamped = Changeset(tuple(replace(self._dated(c), proposal=proposal.id) for c in changes))
-        made = tuple(AppliedChange(e["id"], e["entity"], e["version"])
-                     for e in self._writer.apply(stamped, by.correlation_id).events)
-        return self._decided(proposal, ProposalAction.APPROVE, note, by, made)
+        return self._decided(proposal, ProposalAction.APPROVE, note, by, self._applied(stamped, by))
 
     def _dated(self, change: Change) -> Change:
         if not isinstance(change.action, PutEntity):
@@ -241,8 +260,7 @@ class Review:
         for p in reversed(ordered(proposals, after(proposals, self._refs), lambda q: (q.created_at, q.id))):
             try:
                 undo = Changeset(tuple(self._undo(p, a, note, by) for a in p.applied))
-                made = tuple(AppliedChange(e["id"], e["entity"], e["version"])
-                             for e in self._writer.apply(undo, by.correlation_id).events) if undo.changes else ()
+                made = self._applied(undo, by) if undo.changes else ()
                 done.append(self._decided(p, ProposalAction.RETRACT, note, by, made))
             except InvalidChangeset as exc:
                 refused.append(Refusal(p, exc.findings))
@@ -263,7 +281,7 @@ class Review:
 
     def _changes_of(self, proposal: Proposal) -> tuple[EntityChange, ...]:
         if proposal.status == ProposalStatus.SUGGESTED:
-            return self._writer.check(proposal.changeset) if proposal.changeset else ()
+            return self._checked(proposal.changeset) if proposal.changeset else ()
         return tuple(EntityChange(a.entity, self._versions.get(a.entity, a.version - 1) or None,
                                   self._versions.get(a.entity, a.version) or None)
                      for a in proposal.applied)

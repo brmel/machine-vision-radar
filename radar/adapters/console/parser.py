@@ -14,7 +14,7 @@ NOUNS = {
     "category": "the category hubs and their products",
     "hub": "component hubs: the products that use a component",
     "proposal": "the review queue: proposed changes the founder approves, edits, rejects or retracts",
-    "change": "changesets, applied through the CatalogWriter",
+    "change": "changesets, checked by the Model and written to the CatalogStore",
     "media": "media files through the BlobStore, by sha256; propose one added, changed or withdrawn",
     "source": "the catalog's Sources and media Documents, found to cite one rather than propose it again",
     "index": "the search index in the store's bucket",

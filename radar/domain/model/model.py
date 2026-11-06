@@ -7,10 +7,12 @@ from types import MappingProxyType
 from typing import Mapping, TypeVar
 
 from ..ports.catalog.catalog import Catalog
-from ..validation.context import KeptFile, Scope, ValidationContext
+from ..validation.context import KeptFile, Part, Scope, ValidationContext
 from ..validation.runner import check
-from ..validation.verdict import Verdict
-from .entities import CLASSES
+from ..validation.verdict import Finding, Verdict
+from .entities import CLASSES, Change as Event
+from .history.changeset import RECORD_PARSE, Changeset
+from .history.plan import Held, Plan, Refused, Stamp, added, drafted, withdrawal
 from .registry import Registry
 from .schema import FieldSpec, Json, ModelSchema, TypeSpec, variant_class
 
@@ -134,3 +136,27 @@ class Model:
     def check(self, catalog: Catalog, scope: Scope, today: date,
               kept_files: Mapping[str, KeptFile] | None = None) -> Verdict:
         return check(ValidationContext(catalog, self.registry, self.schema, today, scope, kept_files))
+
+    def change(self, held: Held, changeset: Changeset, stamp: Stamp) -> Plan | Refused:
+        draft = drafted(self.schema, held, changeset, stamp)
+        if isinstance(draft, Refused):
+            return draft
+        if not draft.changed:
+            return Plan({}, ())
+        if held.unparsed:
+            return draft.refused(held.unparsed)
+        where = self.schema.collection(Event.__name__)
+        try:
+            events = tuple(self.parse(e, Event, f"{where}[{e['id']}]") for e in draft.events)
+            after = draft.after(held, events)
+            today = date.fromisoformat(stamp.recorded_at[:10])
+            found = [self.check(c, Part(), today).errors for c in (held.catalog, after)]
+        except (ParseError, KeyError) as exc:
+            return draft.refused([Finding(RECORD_PARSE, "", f"the neighborhood does not check: {exc}")])
+        if errors := added(held.catalog, after, found):
+            return draft.refused(errors)
+        missing = draft.unkept(held.kept)
+        return draft.refused([missing]) if missing else Plan(draft.changed, events)
+
+    def withdrawal(self, held: Held, entity: str, reason: str) -> Changeset:
+        return withdrawal(self, held, entity, reason)

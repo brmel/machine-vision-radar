@@ -10,6 +10,7 @@ from typing import Any, Collection, Iterator, Sequence
 
 from radar.adapters.firestore.ledgers import COLLECTIONS
 from radar.adapters.storage.blobs import MEDIA, StorageBlobStore
+from radar.domain.model.history.plan import change_id, event
 from radar.domain.model.history.projection import states
 from radar.domain.model.entities import Change
 from radar.domain.model.model import Model
@@ -19,7 +20,7 @@ from . import layout
 from radar.domain.ports.store.docs import BATCH, Docs, Fields, Put
 from .layout import CHANGES, SUBCOLLECTIONS, Record, canonical, canonical_doc, catalog_of, changes_prefix, record_of
 from .projection.projector import full
-from .writer import change_id, commit, counted, event, snapshots
+from .writer import commit, snapshots
 
 IMPORT_ACTOR, IMPORT_REASON = "radar store load", "Loaded from a catalog folder into the store"
 MANIFEST = "manifest.json"
@@ -71,9 +72,7 @@ def replay(source: Docs, target: Docs, model: Model) -> int:
     events = sorted((f for _, f in source.list(CHANGES)), key=lambda e: (e["entity"], e["version"]))
     parsed = catalog_of(model, events)
     histories = [[parsed.get(e["id"]) for e in evs] for _, evs in groupby(events, key=itemgetter("entity"))]
-    versioned = counted(model.schema)
-    records = [{**state, **({"version": evs[-1].version} if model.schema.kind_of(evs[-1].entity) in versioned else {})}
-               for evs in histories if (state := states(evs)[-1])]
+    records = [{**state, "version": evs[-1].version} for evs in histories if (state := states(evs)[-1])]
     return commit(target, projected(model, records, events))
 
 def reproject(docs: Docs, model: Model) -> int:

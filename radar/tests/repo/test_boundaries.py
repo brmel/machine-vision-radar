@@ -13,7 +13,7 @@ STUDIO = DEV / "app" / "studio"
 ANY, REFLECTION, JSON_TEXT, AS_CAST = "Any", "getattr or hasattr", "JSON text", "as cast"
 UNTYPED: dict[str, dict[str, int]] = {
     ANY: {
-        "radar/domain/model/history/changeset.py": 5,
+        "radar/domain/model/history/changeset.py": 4,
         "radar/domain/model/history/projection.py": 12,
         "radar/domain/ports/ai/research_agent.py": 1,
         "radar/domain/ports/catalog/held_records.py": 1,
@@ -107,7 +107,7 @@ def test_past_the_wiring_the_search_engine_is_reached_by_its_port_only() -> None
                  for m in engine_imports(p.read_text(encoding="utf-8"))]
     assert not offenders, f"the search engine's modules imported past the wiring: {offenders}"
 
-DOMAIN_SERVICES = {"Drafter", "IndexRetriever", "Model", "Projection", "Review"}
+DOMAIN_SERVICES = {"Drafter", "IndexRetriever", "MemoryCatalog", "Model", "Projection", "Review"}
 COMMANDS_ON_ADAPTERS = {"radar/commands/store/store.py", "radar/build/codegen/__init__.py"}
 
 def _classes(path: Path) -> Iterator[ast.ClassDef]:
@@ -208,7 +208,7 @@ def test_the_review_queue_is_the_only_way_in() -> None:
     writers = _calling(r"(?<!def )\bcommit\(")
     assert writers and all(w.startswith(DOC_WRITER) for w in writers), (
         f"documents written outside {DOC_WRITER}: {sorted(writers)}")
-    assert _calling(r"\.apply\(") == {"radar/domain/review/review.py", "radar/commands/store/change.py"}
+    assert _calling(r"store\.write\(") == {"radar/domain/review/review.py", "radar/commands/store/change.py"}
     assert _calling(r"\.decide\(") == {"radar/commands/review/proposals.py", "radar/commands/review/caps.py",
                                        "radar/adapters/web/admin/endpoint.py", "radar/adapters/web/admin/search.py",
                                        "radar/domain/review/feed/editor.py"}
@@ -216,7 +216,7 @@ def test_the_review_queue_is_the_only_way_in() -> None:
     assert _calling(r"blobs\.publish\(") == {"radar/adapters/firestore/writer.py"}, (
         "a file turns public by its rights only")
 
-FOUNDER_ONLY = {"CatalogWriter", "decide", "commit"}
+FOUNDER_ONLY = {"CatalogStore", "decide", "commit"}
 
 def _founder_only(path: Path) -> set[str]:
     tree = ast.parse(path.read_text(encoding="utf-8"))
@@ -231,7 +231,7 @@ def _agent_facing() -> list[Path]:
 
 def test_agent_facing_code_cannot_reach_the_catalog_writer_a_decision_or_a_document_write() -> None:
     assert set().union(*map(_founder_only, _reach(RADAR / "adapters" / "web" / "admin" / "endpoint.py"))) == {
-        "CatalogWriter", "decide"}
+        "CatalogStore", "decide"}
     assert set().union(*map(_founder_only, _reach(RADAR / "adapters" / "wiring" / "stores.py"))) == FOUNDER_ONLY
     offenders = sorted(f"{start.relative_to(DEV)} reaches {path.relative_to(DEV)}: {sorted(names)}"
                        for start in _agent_facing() for path in _reach(start) if (names := _founder_only(path)))

@@ -6,7 +6,7 @@ from typing import Any, TypeVar
 
 from radar.domain.ai.eval import DatasheetCase
 from radar.domain.model import entities
-from radar.adapters.storage.memory_catalog import MemoryCatalog
+from radar.domain.model.catalog import MemoryCatalog
 from radar.domain.ports.ai.datasheet_extractor import Datasheet
 from radar.domain.model.model import Model, ParseError
 
@@ -28,7 +28,7 @@ def parse_catalog(raw: Any, model: Model) -> MemoryCatalog:
     unknown = sorted(set(raw) - set(collections))
     if unknown:
         raise ParseError(f"unknown top-level key(s) {unknown}; expected some of {sorted(collections)}")
-    out: list[object] = []
+    out: list[entities.Entity] = []
     for name, items in raw.items():
         if not isinstance(items, list):
             raise ParseError(f"{name}: expected an array")

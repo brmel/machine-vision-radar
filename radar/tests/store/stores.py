@@ -25,13 +25,17 @@ from radar.adapters.firestore import layout, store
 from radar.adapters.firestore.docs import FirestoreDocs
 from radar.adapters.firestore.repository import StoreChangeLog, StoreProposalQueue, StoreVersionStore
 from radar.domain.model.history.changeset import Changeset, parse_changeset
+from radar.domain.model.catalog import MemoryCatalog
+from radar.domain.model.history.plan import Held, Plan, Refused, Stamp, change_id, event
+from radar.domain.ports.catalog.catalog_store import CatalogStore
+from radar.domain.validation.verdict import InvalidChangeset
 from radar.domain.ports.store.docs import Docs, Fields, Write
-from radar.adapters.firestore.writer import StoreWriter
+from radar.adapters.firestore.writer import FirestoreCatalogStore
 from radar.adapters.ai.search.engine import ShardedSearch
 from radar.adapters.ai.search.fastembed_embedder import FastembedEmbedder
 from radar.adapters.ai.search.files import BlobStoreIndexFiles
 from radar.adapters.storage.blobs import StorageBlobStore
-from radar.domain.model.entities import Document
+from radar.domain.model.entities import Change, Document
 from radar.domain.model.history.projection import plain
 from radar.domain.model.model import Model
 from radar.domain.read_model.derived.identity import ProductIdentity
@@ -147,8 +151,17 @@ class Fixture:
         changed["value"]["range"]["max"] += add
         return claim, changed
 
-    def writer(self, docs: Docs, files: Any) -> StoreWriter:
-        return StoreWriter(docs, self.model, lambda: NOW, files)
+    def catalog_store(self, docs: Docs, files: Any) -> FirestoreCatalogStore:
+        return FirestoreCatalogStore(docs, self.model, files)
+
+    def memory(self) -> MemoryCatalogStore:
+        prefix = self.model.schema.types[Change.__name__].prefix
+        recorded = {r["entity"] for r in self.records if r["id"].startswith(f"{prefix}_")}
+        imports = [event(r["id"], 1, None, r, change_id=change_id(prefix, r["id"], 1), recorded_at=NOW,
+                         actor_kind="import", actor="memory", reason="Loaded", source_refs=r.get("source_refs", []),
+                         correlation_id="load-test")
+                   for r in self.records if not r["id"].startswith(f"{prefix}_") and r["id"] not in recorded]
+        return MemoryCatalogStore(layout.catalog_of(self.model, [*self.records, *imports]), frozenset(self.media))
 
     def versions(self, docs: Docs) -> StoreVersionStore:
         return StoreVersionStore(docs, StoreChangeLog(docs, self.model))
@@ -159,11 +172,11 @@ class Fixture:
     def review(self, docs: Docs, files: Any) -> Review:
         ticks = iter(f"2026-10-18T13:{n // 60:02d}:{n % 60:02d}Z" for n in range(3600))
         held = lambda: layout.catalog_of(self.model, store.scan(docs, self.model.schema, tuple(HELD)))
-        return Review(self.queue(docs), self.writer(docs, files), self.versions(docs), held,
-                      ProductIdentity.of(self.model.registry), self.model, lambda: next(ticks))
+        return Review(self.queue(docs), self.catalog_store(docs, files), self.versions(docs), held,
+                      ProductIdentity.of(self.model.registry), self.model, lambda: next(ticks), lambda: NOW)
 
-    def apply(self, docs: Docs, files: Any, cid: str, *changes: dict[str, Any]) -> None:
-        self.writer(docs, files).apply(changeset(*changes), cid)
+    def apply(self, docs: Docs, files: Any, cid: str, *changes: dict[str, Any]) -> tuple[Change, ...]:
+        return applied(self.model, self.catalog_store(docs, files), changeset(*changes), cid)
 
     def stored(self, docs: Docs, entity_id: str) -> dict[str, Any]:
         return layout.record_of(docs.get(layout.canonical(self.model.schema, entity_id)))
@@ -220,12 +233,35 @@ def retract(entity_id: str, reason: str, refs: list[str]) -> dict[str, Any]:
 def changeset(*changes: dict[str, Any]) -> Changeset:
     return parse_changeset({"changes": list(changes)}, fixture().model)
 
+def applied(model: Model, catalog: CatalogStore, changes: Changeset, cid: str, at: str = NOW) -> tuple[Change, ...]:
+    held = catalog.around(changes)
+    planned = model.change(held, changes, Stamp(at, cid))
+    if isinstance(planned, Refused):
+        raise InvalidChangeset(planned.findings)
+    catalog.write(held, planned)
+    return planned.events
+
 def file(tmp_path: Path, name: str, body: Any) -> str:
     (tmp_path / name).write_text(json.dumps(body), encoding="utf-8")
     return str(tmp_path / name)
 
 def changes_file(tmp_path: Path, name: str, *changes: dict[str, Any]) -> str:
     return file(tmp_path, name, {"changes": list(changes)})
+
+class MemoryCatalogStore:
+    def __init__(self, catalog: MemoryCatalog, kept: frozenset[str]) -> None:
+        self.catalog, self.kept = catalog, kept
+
+    def around(self, changeset: Changeset) -> Held:
+        last: dict[str, int] = {}
+        for e in self.catalog.all(Change):
+            last[e.entity] = max(last.get(e.entity, 0), e.version)
+        return Held(self.catalog, last, self.kept, ())
+
+    def write(self, held: Held, plan: Plan) -> int:
+        after = {**{i: a for i, (_, a) in plan.changed.items()}, **{e.id: e for e in plan.events}}
+        self.catalog = self.catalog.changed(after)
+        return len(after)
 
 class Hooked:
     def __init__(self, docs: Docs, hook: Callable[[int], None]) -> None:

@@ -96,7 +96,7 @@ class ReferenceGraph:
                 if kind in f.refs
                 for _, r in self.docs.where(e.collection or "", f.name, [entity_id], contains=f.type == "array")]
 
-    def neighborhood(self, changed: Changed) -> Neighborhood:
+    def neighborhood(self, changed: Changed, cited: Collection[str]) -> Neighborhood:
         reach = _Reach(self, changed)
         records = [r for pair in changed.values() for r in pair if r is not None]
         reach.load(changed)
@@ -105,7 +105,7 @@ class ReferenceGraph:
         reach.refer(self._listed(products) - products)
         reach.refer(of_kind(self.version, reach.found))
         for _ in range(2):
-            reach.load(reach.outbound_of([*reach.found.values(), *records]))
+            reach.load(reach.outbound_of([*reach.found.values(), *records]) | set(cited))
         self._names(reach)
         self._holders(reach, records)
         return Neighborhood(reach.found, frozenset(products), frozenset(organizations))

@@ -9,7 +9,7 @@ commands: [CLI.md](CLI.md).
 Firestore holds every entity, Change event and public read doc, and Cloud Storage for Firebase every media file, both
 behind domain ports; the repo holds only fictional fixtures and `data/` (the registry, prompts and banned words); the store's
 snapshot (`radar store export`) stays in the maintainers' private data repo. Pages read only through the `CatalogRepository` port, the CLI through
-`CatalogRepository`, `CatalogWriter`, `ChangeLog`, `VersionStore` and `BlobStore`, each one file in
+`CatalogRepository`, `CatalogStore`, `ChangeLog`, `VersionStore` and `BlobStore`, each one file in
 `radar/domain/ports/`. Operations: Firebase Hosting, Firestore, Storage and admin auth.
 
 - **Read path:** static and prerendered, real URLs, no hash routing, no SSR server. `app/scripts/prerender/` streams the
@@ -42,10 +42,11 @@ snapshot (`radar store export`) stays in the maintainers' private data repo. Pag
   fails the report, and the next one starts App Check afresh. On a `demo-` project, which has no App Check emulator,
   every report attests. Enforcement stays off for Firestore, Storage and Auth: public reads need no token.
 - **Write path:** a **Changeset** is the only write, applied when the founder approves a **proposal** (`radar proposal
-  approve`, or `/admin`) or applies one (`radar change apply`). The `CatalogWriter` validates it against its
-  neighborhood only (the records it touches, those that refer to them and those they refer to, and those holding a
-  value of theirs in a field marked `unique`, before and after); a
-  finding the change adds refuses it, and nothing is written. Then, for each changed entity, it appends one Change event
+  approve`, or `/admin`) or applies one (`radar change apply`). The `CatalogStore` reads what it touches (`around`),
+  and `Model.change` checks it against that neighborhood only (the records it touches, those that refer to them and
+  those they refer to, and those holding a value of theirs in a field marked `unique`, before and after); a finding the
+  change adds refuses it, and nothing is written. Otherwise its `Plan`, written by the `CatalogStore`, appends one Change
+  event for each changed entity
   (DATA_ARCHITECTURE.md §4), stores version n+1 and its snapshot, and rewrites the canonical doc and the public docs the
   change reaches, at most 500 writes a batch. A page is rebuilt from the records it shows: a family keeps the stored
   rows of its unchanged models, as a category page keeps its unchanged cards, so an approval reads as much in a family
@@ -128,8 +129,8 @@ without a file; rule `unique` refuses two Documents for one file.
 **Rights.** `rights` is a `media_rights` term; a file is public only under a term the registry marks `public` (`own`,
 `open_licence`). A public file's page link is its Storage download URL (the object carries `public` metadata, which
 `storage.rules` lets anyone read); any other file stays private and its page links the Document's `source_url`. A file a
-research run finds is stored private and proposed under the term marked `research` (`vendor`): only the CatalogWriter,
-applying an approved proposal, makes a file public, and only under public rights. Video and large PDFs are linked or
+research run finds is stored private and proposed under the term marked `research` (`vendor`): only the CatalogStore,
+writing an approved proposal, makes a file public, and only under public rights. Video and large PDFs are linked or
 streamed, never inlined. The media-rights policy and takedowns: [LEGAL.md](LEGAL.md).
 
 ## 3. SEO & GEO

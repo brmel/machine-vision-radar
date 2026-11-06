@@ -14,17 +14,18 @@ from radar.adapters.firestore.layout import INDEX, catalog_of, doc_value, read_r
 from radar.adapters.firestore.store import scan
 from radar.adapters.firestore.repository import (StoreCatalogRepository, StoreChangeLog, StoreHeldRecords,
                                                  StoreProposalQueue, StoreRecords, StoreVersionStore)
-from radar.adapters.firestore.writer import StoreWriter
+from radar.adapters.firestore.writer import FirestoreCatalogStore
 from radar.adapters.files import json_parser, json_store
 from radar.adapters.files.model_json import load_model
 from radar.adapters.storage.blobs import StorageBlobStore, bucket, media_url
-from radar.adapters.storage.memory_catalog import MemoryCatalog
+from radar.domain.model.catalog import MemoryCatalog
 from radar.adapters.firestore.ledgers.agents import FirestoreAgentTokens, FirestoreResearchRuns
 from radar.adapters.web.admin.identity import FirebaseIdentity
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.entities import EvalQuery, RegistryView
 from radar.domain.model.model import Model, ParseError
 from radar.domain.ports.catalog.catalog_repository import CatalogRepository
+from radar.domain.ports.catalog.catalog_store import CatalogStore
 from radar.domain.ports.catalog.held_records import HeldRecords
 from radar.domain.ports.catalog.views import Check, MediaUrl
 from radar.domain.ports.store.records import Records
@@ -137,13 +138,14 @@ class Stores:
         self._model = self._model or load_model()
         return self._model
 
-    def writer(self) -> StoreWriter:
-        return StoreWriter(self.store(), self.model(), self.now, self.blobs())
+    def catalog_store(self) -> CatalogStore:
+        return FirestoreCatalogStore(self.store(), self.model(), self.blobs())
 
     def review(self) -> Review:
         model = self.model()
-        return Review(StoreProposalQueue(self.store(), model), self.writer(), self.versions(),
-                      lambda: self.catalog(tuple(HELD)), ProductIdentity.of(model.registry), model, self.instant)
+        return Review(StoreProposalQueue(self.store(), model), self.catalog_store(), self.versions(),
+                      lambda: self.catalog(tuple(HELD)), ProductIdentity.of(model.registry), model, self.instant,
+                      self.now)
 
     def identity(self) -> FirebaseIdentity:
         if self._real:

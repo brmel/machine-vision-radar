@@ -125,7 +125,7 @@ def test_a_models_approval_reads_as_many_records_in_a_family_of_200_as_in_a_fami
 
     def reads(n: int) -> int:
         counted = _Counted(docs)
-        FX.writer(counted, files).apply(stores.changeset(*sibling(n)), f"sibling-{n}")
+        stores.applied(FX.model, FX.catalog_store(counted, files), stores.changeset(*sibling(n)), f"sibling-{n}")
         return counted.read
 
     second = reads(2)
