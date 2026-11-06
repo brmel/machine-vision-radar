@@ -3,12 +3,12 @@ from __future__ import annotations
 import json
 import math
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Mapping, Sequence
 
 from radar.domain.model.entities import (CategoryEntry, CategoryPage, FeedBrief, IndexCounts, IndexView, OrgBrief,
-                                         ProductCard, ProductView, SectionKeys, SpecCell, SpecLabel, TermEntry, TermRef,
-                                         ViewValue)
+                                         ProductCard, ProductView, RegistryView, SectionKeys, SpecCell, SpecLabel,
+                                         TermEntry, TermRef, ViewValue)
 from radar.domain.model.history.projection import plain
 from radar.domain.model.registry import Registry
 from .facets import compute_category_facets
@@ -104,6 +104,14 @@ def index(registry: Registry, cards: Sequence[ProductCard], orgs: Sequence[OrgBr
         tags=tuple(TermRef(id=t.id, label=dict(t.label)) for t in registry.vocabularies["tags"].values()),
         search=registry.search, news=tuple(news[:registry.feed.teaser]), organizations=tuple(orgs),
         products=tuple(sorted(cards, key=lambda c: c.slug)))
+
+def republished(registry: Registry, stored: RegistryView) -> RegistryView:
+    fresh = index(registry, (), (), {}, Tally(), ())
+    counted = Counter({c.id: c.products for c in stored.categories})
+    return replace(stored, pipeline_stages=fresh.pipeline_stages, domains=fresh.domains,
+                   categories=_category_entries(registry, counted, {c.id: c.pages for c in stored.categories}),
+                   spec_definitions=fresh.spec_definitions, spec_groups=fresh.spec_groups, tags=fresh.tags,
+                   search=fresh.search)
 
 def comparison(index: IndexView, views: list[ProductView]) -> dict[str, Any]:
     return {"products": [{"id": p.id, "name": p.name, "vendor": p.vendor.slug, "category": p.category} for p in views],

@@ -10,7 +10,7 @@ from pathlib import Path
 from radar import paths
 from radar.adapters.console import log
 from radar.adapters.firestore.docs import FirestoreDocs
-from radar.adapters.firestore.layout import catalog_of, read_records
+from radar.adapters.firestore.layout import INDEX, catalog_of, doc_value, read_records
 from radar.adapters.firestore.store import scan
 from radar.adapters.firestore.repository import (StoreCatalogRepository, StoreChangeLog, StoreHeldRecords,
                                                  StoreProposalQueue, StoreRecords, StoreVersionStore)
@@ -22,7 +22,7 @@ from radar.adapters.storage.memory_catalog import MemoryCatalog
 from radar.adapters.firestore.ledgers.agents import FirestoreAgentTokens, FirestoreResearchRuns
 from radar.adapters.web.admin.identity import FirebaseIdentity
 from radar.domain.ports.catalog.catalog import Catalog
-from radar.domain.model.entities import EvalQuery
+from radar.domain.model.entities import EvalQuery, RegistryView
 from radar.domain.model.model import Model, ParseError
 from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.ports.catalog.held_records import HeldRecords
@@ -34,6 +34,7 @@ from radar.domain.ports.review.research_runs import ResearchRunLog
 from radar.domain.ports.store.docs import Docs
 from radar.domain.ai.eval import DatasheetCase
 from radar.domain.read_model.history import Histories
+from radar.domain.read_model.listings import republished
 from radar.domain.read_model.products.values import Terms
 from radar.domain.read_model.derived.identity import ProductIdentity
 from radar.domain.review.agents.duplicates import HELD
@@ -56,6 +57,9 @@ def _service_account_token() -> str:
         return str(json.loads(res.read())["access_token"])
 
 class NoStore(Exception):
+    ...
+
+class RegistryDrift(Exception):
     ...
 
 class Stores:
@@ -113,6 +117,18 @@ class Stores:
             return StorageBlobStore(STORAGE, bucket(), self._token(), writable=self._yes)
         self._demo()
         return StorageBlobStore(f"http://{self._host('FIREBASE_STORAGE_EMULATOR_HOST')}", bucket())
+
+    def match_registry(self) -> None:
+        model, stored = self.model(), doc_value(self.store().get(f"{INDEX}/registry"))
+        if stored is None:
+            return
+        try:
+            view: RegistryView | None = model.parse(stored, RegistryView, INDEX)
+        except ParseError:
+            view = None
+        if view is None or republished(model.registry, view) != view:
+            raise RegistryDrift(f"the registry here differs from the one the store's site serves ({INDEX}/registry): "
+                                "nothing written")
 
     def repository(self) -> CatalogRepository:
         return StoreCatalogRepository(self.store(), self.model())

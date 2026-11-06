@@ -53,7 +53,7 @@ class Commands:
         }
 
     def verb(self, noun: str, name: str, help: str, func: Callable[[argparse.Namespace], int],
-             **defaults: Any) -> argparse.ArgumentParser:
+             publishes: bool = False, **defaults: Any) -> argparse.ArgumentParser:
         p = self._verbs[noun].add_parser(name, help=help, description=help, parents=[_JSON])
-        p.set_defaults(func=func, **defaults)
+        p.set_defaults(func=func, publishes=publishes, **defaults)
         return p

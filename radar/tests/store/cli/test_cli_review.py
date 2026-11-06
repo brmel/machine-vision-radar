@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import dataclasses
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -63,6 +65,31 @@ def test_the_ai_caps_from_the_cli() -> None:
     spent = cost(FX.model.registry.ai, other, call["tokens_in"], call["tokens_out"])
     assert (call["model"], call["cad"]) == (other.id, round(spent, 8))
     assert call["tokens_in"] and ask()["cad_month"] == round(spent, 6)
+
+def _drifted(out: Path) -> stores.Fixture:
+    shutil.copytree(FX.out / "registry", out / "registry")
+    for entry in FX.out.iterdir():
+        if entry.name != "registry":
+            (out / entry.name).symlink_to(entry)
+    groups_file = out / "registry" / "spec_groups.json"
+    groups = json.loads(groups_file.read_text(encoding="utf-8"))
+    groups[0]["label"]["en"] += ", renamed"
+    groups_file.write_text(json.dumps(groups), encoding="utf-8")
+    return dataclasses.replace(FX, out=out)
+
+def test_a_write_under_a_registry_the_site_does_not_serve_is_refused_until_reprojected(tmp_path: Path) -> None:
+    place, drifted = FX.loaded(), _drifted(tmp_path / "drifted")
+    _, changed = FX.revised_claim(40)
+    edit = FX.json(place, "product", "edit",
+                   stores.changes_file(tmp_path, "edit.json", stores.put(changed, "Revision B")), "--reason",
+                   "Revision B")
+    before = stores.everything(stores.fresh_at(place[0]))
+    refused = stores.cli(drifted, place, "--yes", "proposal", "approve", edit["id"], "--note", "Checked", check=False)
+    assert refused.returncode == 1 and "run from the deployed commit, or deploy first" in refused.stderr
+    assert stores.everything(stores.fresh_at(place[0])) == before
+    assert drifted.json(place, "--yes", "store", "reproject")["written"]
+    assert [p["id"] for p in drifted.json(place, "--yes", "proposal", "approve", edit["id"], "--note",
+                                          "Checked")["done"]] == [edit["id"]]
 
 def test_the_review_queue_from_the_cli(tmp_path: Path) -> None:
     place = FX.loaded()
