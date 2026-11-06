@@ -70,6 +70,14 @@ Rules:
 - A record refers only to the maker, to a card's id, or to a record of the same proposal by the id it has there; a
   product no card names is proposed with its Product record, in that product's proposal.
 - Never invent an id of a record a card holds, a term, a value, a date or a unit the page does not state.
+- What the page does not state of this product is not filed. Never read a value or a status off a part number, a product's
+  name, its family or its sibling products, and a page existing says nothing of a product's status.
+- A figure stated as a bound ("up to", "<", ">") is left out, and so are two figures for one spec in a cell, per mode or per
+  period. A standard's version is stated only when the page names it, and a protocol only when its physical interface is on
+  the page.
+- A product's category comes from how the maker's own page groups it: its breadcrumb or its section. A cable, a bracket, an
+  adapter or a filter is its own product, never in the category of what it attaches to. A product the maker sells for
+  anything but a vision system is not proposed.
 - `media` is the address of an image or datasheet file of a card's product, the proposal's `subject`, that the page
   links to, one of its links as given, with `records` an empty list `[]`; null otherwise, and for a file of any other
   product or of an accessory.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import http.client
 import ipaddress
+import json
 import socket
 import time
 from datetime import datetime
@@ -69,10 +70,20 @@ def _resolved(host: str, port: int) -> list[ipaddress.IPv4Address | ipaddress.IP
     except OSError as exc:
         raise _Unreadable(f"no address: {exc}") from exc
 
+def _properties(block: str) -> list[str]:
+    try:
+        data = json.loads(block)
+    except ValueError:
+        return []
+    listed = data.get("additionalProperty") if isinstance(data, dict) else None
+    return [f"{str(p['name']).split('｜')[-1].strip()} | {p['value']}" for p in listed or ()
+            if isinstance(p, dict) and "name" in p and "value" in p]
+
 class _Html(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self.title, self.lines, self.links, self.images, self._in, self._line = "", [], [], [], [""], []
+        self._linked: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attributes = dict(attrs)
@@ -82,6 +93,8 @@ class _Html(HTMLParser):
             self.images.append(image)
         elif tag == "meta" and attributes.get("property") == "og:image" and (image := attributes.get("content")):
             self.images.insert(0, image)
+        elif tag == "script" and attributes.get("type") == "application/ld+json":
+            self._linked.append("")
         self._opened(tag)
 
     def _opened(self, tag: str) -> None:
@@ -98,7 +111,9 @@ class _Html(HTMLParser):
             pass
 
     def handle_data(self, data: str) -> None:
-        if self._in[-1] == "title":
+        if self._in[-1] == "script" and self._linked:
+            self._linked[-1] += data
+        elif self._in[-1] == "title":
             self.title += "" if "svg" in self._in else data.strip()
         elif not set(self._in) & set(SKIPPED):
             self._line.append(data)
@@ -106,6 +121,7 @@ class _Html(HTMLParser):
     def close(self) -> None:
         super().close()
         self._ended()
+        self.lines += [line for block in self._linked for line in _properties(block)]
 
     def _ended(self) -> None:
         if line := " ".join("".join(self._line).split()):

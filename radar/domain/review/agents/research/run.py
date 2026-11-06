@@ -5,7 +5,7 @@ from datetime import date, datetime, timedelta
 from typing import Callable
 
 from radar.domain.ai.meter import Capped, Meter
-from radar.domain.model.history.changeset import Change
+from radar.domain.model.history.changeset import Change, as_record
 from radar.domain.model.entities import Instant, OrgRelation, ResearchMeasures, Standing
 from radar.domain.model.model import Model
 from radar.domain.ports.ai.image_judge import ImageJudge
@@ -23,11 +23,12 @@ from radar.domain.review.agents.files import Files
 from radar.domain.review.agents.research.filing import RESEARCHER, Filing
 from radar.domain.review.agents.research.frontier import Frontier, Reach, RunScope, SourceTypes, sites_of
 from radar.domain.review.agents.research.media import Media
+from radar.domain.review.agents.research.tables import Tables, named_card
 from radar.domain.review.agents.runs import Measure
 from radar.domain.review.agents.tokens import AgentToken, Limits, Scope, Throttled, issue
 from radar.domain.review.requests import Agent, Founder, Job
 
-PAGES, SECONDS = 8, 40.0
+PAGES, SECONDS, ENOUGH = 8, 40.0, 3
 
 def _deadline(now: Instant) -> Instant:
     return (datetime.fromisoformat(now) + timedelta(seconds=SECONDS)).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -49,6 +50,8 @@ class Researcher:
         self._filing = Filing(review, model, held, self._log, tokens, now)
         self._types = SourceTypes(registry.vocabularies["source_types"])
         self._media = Media(reader, files, judge, self._filing, self._types, self._log, now)
+        self._tables = Tables(registry, self._words)
+        self._methods = registry.vocabularies["claim_methods"]
         self._measure = Measure(runs, review, read, held, model)
 
     def start(self, scope: RunScope, by: Founder | Job) -> str:
@@ -132,8 +135,27 @@ class Researcher:
         frontier.read(reach, page, follow)
         return run, capped
 
+    def _tabled(self, run: ResearchRun, reach: Reach, page: Page, read: Change, by: Agent,
+                deadline: Instant) -> ResearchRun | None:
+        method = str(as_record(read.action.entity)["type"])
+        card = named_card(page, reach.site.products) if method in self._methods else None
+        table = self._tables.read(page, card) if card else None
+        if not card or not table or len(table.claims) < ENOUGH:
+            return None
+        address = page.link.address
+        records = tuple({"id": f"clm_{n}", "subject": card.id, "spec_key": key, "value": value, "method": method,
+                         "recorded_at": page.retrieved_at, "rank": 1} for n, (key, value) in enumerate(table.claims))
+        draft = RecordsDraft("update", f"The maker's table on {address} states {len(records)} of its values", card.id,
+                             records)
+        run = self._filed(run, draft, reach, page, read, by, deadline)
+        if table.unmatched:
+            run = self._log(run, Step.SKIPPED, f"{address}: labels no spec names: {', '.join(table.unmatched)}")
+        return run
+
     def _research(self, run: ResearchRun, reach: Reach, page: Page, read: Change, by: Agent,
                   deadline: Instant) -> tuple[ResearchRun, str | None, tuple[str, ...]]:
+        if (tabled := self._tabled(run, reach, page, read, by, deadline)) is not None:
+            return tabled, None, ()
         reading = Reading(page, reach.site.org, reach.site.products, self._terms)
         try:
             findings, cad = self._meter.call(self._now()[:10], lambda agent: agent.research(reading))
