@@ -83,7 +83,7 @@ inEachLocale("A category added only to the registry", (locale) => {
     await expect(media.locator('a[href*="blobs"]')).toHaveCount(0);
     await expect(page.getByRole("navigation", { name: t.breadcrumbLabel })).toContainText(domain.label[locale]);
     await expect(row(page, reachRow).first()).toContainText("–");
-    const modelLinks = page.locator("section.models").getByRole("link");
+    const modelLinks = page.locator("section.models table").getByRole("link");
     await expect(modelLinks).toHaveText(models.map((m) => nameOf(m.id)).sort());
     await expect(page.locator("section.models")).toContainText(t.unknownValue);
     await modelLinks.first().click();
