@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import json
 from dataclasses import replace
 from typing import Any, Callable, Iterator, Mapping
@@ -17,6 +18,7 @@ SET_BY_RUN = ("version", "source_refs")
 PROVENANCE = ("source_refs", "recorded_at", "method", "fetched_at")
 References = Mapping[str, list[tuple[str, str]]]
 Words = Mapping[str, Mapping[str, str]]
+FRACTION = re.compile(r"(?<=\d)/(?=\d)")
 
 def terms(model: Model) -> Terms:
     return {kind.__name__: {f.name + ("" if f.optional else "*"): tuple(model.registry.items(v))
@@ -60,7 +62,7 @@ def corrected(draft: RecordsDraft, first: Callable[[Mapping[str, Any]], str | No
     return replace(draft, records=tuple(swapped(dict(r), ids) for r in draft.records)) if ids else draft
 
 def spelled(word: str) -> str:
-    return "".join(ch for ch in word.casefold() if ch.isalnum())
+    return "".join(ch for ch in FRACTION.sub("÷", word.casefold()) if ch.isalnum() or ch in "÷%")
 
 def _spellings(spec: SpecDefinition, registry: Registry) -> Iterator[tuple[str, str]]:
     for unit in registry.units.values():
