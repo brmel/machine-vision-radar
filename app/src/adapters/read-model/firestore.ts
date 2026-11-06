@@ -38,6 +38,19 @@ type Fields = Record<string, { stringValue?: string; integerValue?: string }>;
 const viewIn = <T>(fields: Fields, schema: z.ZodType<T>): T =>
   schema.parse(JSON.parse(fields.json?.stringValue ?? "null"));
 
+const ATTEMPTS = 3;
+
+async function fetched(url: string, init?: RequestInit): Promise<Response> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fetch(url, init);
+    } catch (err) {
+      if (attempt === ATTEMPTS) throw err;
+      await new Promise((wake) => setTimeout(wake, 200 * attempt));
+    }
+  }
+}
+
 export class FirestoreCatalogRepository implements CatalogRepository {
   private readonly docs: string;
   private readonly site?: Pick<CatalogRepository, "registry" | "organizations">;
@@ -50,7 +63,7 @@ export class FirestoreCatalogRepository implements CatalogRepository {
 
   private fields(path: string): Promise<Fields | null> {
     return this.recent.get(path, async () => {
-      const res = await fetch(`${this.docs}/${path}`);
+      const res = await fetched(`${this.docs}/${path}`);
       if (res.status === 404) return null;
       if (!res.ok) throw new Error(`Firestore: ${path} answered HTTP ${res.status}`);
       return Doc.parse(await res.json()).fields;
@@ -84,7 +97,7 @@ export class FirestoreCatalogRepository implements CatalogRepository {
   }
 
   private async post(verb: string, body: unknown, what: string): Promise<unknown> {
-    const res = await fetch(`${this.docs}:${verb}`,
+    const res = await fetched(`${this.docs}:${verb}`,
       { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     if (!res.ok) throw new Error(`Firestore: ${what} answered HTTP ${res.status}`);
     return res.json();
