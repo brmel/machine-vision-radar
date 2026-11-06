@@ -6,7 +6,7 @@ import pytest
 
 from radar import paths
 from radar.tests.fixtures.corpus import MODEL
-from radar.adapters.firestore.writer import StoreWriter
+from radar.adapters.firestore.writer import FirestoreCatalogStore
 from radar.domain.validation.verdict import InvalidChangeset
 from radar.adapters.firestore.ledgers.ai import CALLS, FirestoreBudget, FirestoreUsageLog, usage_collection
 from radar.domain.ai.budget import Use, caps_of, model_of
@@ -46,9 +46,9 @@ def _outcomes(docs: Docs) -> list[str]:
 def _cap(docs: Docs, use: Use, month_cad: float, day_calls: int, cap_id: str = "", model: str | None = None) -> None:
     record = {"id": cap_id or keyed("cap", use.value), "use": use.value, "month_cad": month_cad, "day_calls": day_calls,
               **({"model": model} if model else {})}
-    StoreWriter(docs, MODEL, lambda: f"{DAY}T00:00:00Z", stores.blobs()).apply(
-        Changeset((Change(put_of(record, MODEL), "the founder approves this use's spend", "human", "founder", ()),)),
-        "cap-test")
+    stores.applied(MODEL, FirestoreCatalogStore(docs, MODEL, stores.blobs()),
+                   Changeset((Change(put_of(record, MODEL), "the founder approves this use's spend", "human", "founder",
+                                     ()),)), "cap-test", f"{DAY}T00:00:00Z")
 
 @pytest.mark.parametrize("use", USES)
 def test_a_call_past_its_use_s_day_cap_is_refused_before_the_model_is_asked(use: Use) -> None:

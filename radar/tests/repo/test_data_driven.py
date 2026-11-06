@@ -53,7 +53,7 @@ HOMONYMS: dict[str, tuple[str, ...]] = {
 }
 
 ALLOWLIST: dict[str, str] = {
-    "radar/domain/model/versions.py": "each version scheme is an ordering of its own, which the in-memory catalog "
+    "radar/domain/model/catalog.py": "each version scheme is an ordering of its own, which the in-memory catalog "
                                       "applies with no registry; "
                                       "registry_integrity holds the vocabulary to the schemes it orders",
     "radar/domain/read_model/products/views.py": "a model's page links its parent as its family",

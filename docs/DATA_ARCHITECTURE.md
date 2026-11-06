@@ -3,7 +3,7 @@
 The catalog's data: entities, value types, invariants and how the model changes. The executable definition is
 `contracts/model/` and the data's `data/registry/`; [contracts/AGENTS.md](../contracts/AGENTS.md) maps them
 and the files `radar model generate` writes from them. The validator (`radar/domain/validation/`) enforces the invariants on every
-write (the `CatalogWriter`), on the store (`radar store validate`) and on a catalog folder (`radar model validate`).
+write (`Model.change`), on the store (`radar store validate`) and on a catalog folder (`radar model validate`).
 The store, the read model and the read and write paths: [SYSTEM.md](SYSTEM.md); search and every AI use:
 [SEARCH.md](SEARCH.md).
 
@@ -17,10 +17,16 @@ wiring loads it once and every caller takes it.
   for the store (`store validate`) and a folder `model validate` reads, else `Part()`: a write's neighborhood, a
   catalog `store load` seeds, a catalog file or the registry alone.
 - `parse_changeset(raw, model)` (`radar/domain/model/history/changeset.py`): a changeset's JSON into a `Changeset`
-  whose `PutEntity` holds a parsed entity, its version left for the writer to number; a record that does not parse is
+  whose `PutEntity` holds a parsed entity, its version left for `Model.change` to number; a record that does not parse is
   a `record_parse` finding. The domain hands changes on as entities, and `as_record` turns one back into a record only
   to be stored, compared or shown.
-- A refused write raises `InvalidChangeset`, which holds findings only.
+- `Model.change(held, changeset, stamp)`: a `Plan` (each changed entity before and after, numbered, and its Change
+  events) or a `Refused` (findings, and the changes refused). `held` is what the `CatalogStore` port
+  (`radar/domain/ports/catalog/catalog_store.py`) reads `around` the changeset: the stored records and their
+  neighborhood as a `Catalog`, each new id's last version and the stored files it names; its `write(held, plan)` stores
+  the plan. A neighborhood that does not parse or check is a finding. `Model.withdrawal(held, id, reason)` is the
+  changeset that withdraws a record and lets go of every reference to it.
+- Review and the CLI raise a refusal as `InvalidChangeset`, which holds findings only.
 
 ## 1. Principles
 
@@ -201,7 +207,7 @@ runs: an unknown or missing field, a wrong type, a bad id, an enum value outside
   component hub has a path of its own, free of the site's routes, and a known relation; in a vocabulary no two terms
   share a label or alias, and a description (in every language) or a relation side one term gives, every term gives;
   `proposal_kinds` files each event once; ai.json sets each AI use once, each on one of its models but all uses together
-  on none; version schemes match the orderings in `radar/domain/model/versions.py`.
+  on none; version schemes match the orderings in `radar/domain/model/catalog.py`.
 - **vocabularies:** every registry-bound field of a record holds an id of that registry.
 - **no_filler_text:** no placeholder or marketing filler in a text field: the `placeholders` and `anywhere` patterns of
   `data/no_filler.json`, which the site's slop guard also reads.

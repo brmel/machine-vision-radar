@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Iterable
 
-from radar.adapters.storage.memory_catalog import MemoryCatalog
+from radar.domain.model.catalog import MemoryCatalog
 from radar.domain.model.entities import CLASSES
 from radar.domain.model.model import Model
 from radar.domain.model.schema import ModelSchema

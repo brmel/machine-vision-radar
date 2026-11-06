@@ -48,11 +48,6 @@ class Changeset:
         return found
 
 @dataclass(frozen=True, slots=True)
-class Applied:
-    events: tuple[Any, ...]
-    writes: int
-
-@dataclass(frozen=True, slots=True)
 class EntityChange:
     entity: str
     before: Mapping[str, Any] | None

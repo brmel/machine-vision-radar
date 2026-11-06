@@ -14,6 +14,8 @@ from radar.adapters.firestore.ledgers.agents import FirestoreAgentTokens, Firest
 from radar.domain.ports.store.docs import Docs, Fields, Put
 from radar.adapters.firestore.repository import (StoreCatalogRepository, StoreChangeLog, StoreRecords,
                                                  StoreVersionStore, proposal_doc)
+from radar.domain.model.history.plan import Plan, Stamp
+from radar.domain.ports.catalog.catalog_store import CatalogStore
 from radar.domain.validation.verdict import InvalidChangeset
 from radar.domain.ports.history.change_log import ChangeLog, ChangePage
 from radar.adapters.storage.memory_change_log import MemoryChangeLog
@@ -163,7 +165,7 @@ def test_a_rename_reads_referrers_per_reference_field_not_per_product() -> None:
     docs, files = FX.seeded()
     counted, org = CountingDocs(docs), FX.rows("organizations.jsonl")[0]
     renamed = stores.put({**org, "name": "Halden Imaging"}, "Renamed", [FX.rows("sources.jsonl")[0]["id"]])
-    FX.writer(counted, files).check(stores.changeset(renamed))
+    FX.catalog_store(counted, files).around(stores.changeset(renamed))
     fields = sum(1 for e in FX.model.schema.entities if e.collection for _ in FX.model.schema.reference_paths(e.name))
     assert counted.queries <= 3 * fields, (counted.queries, fields)
 
@@ -194,21 +196,25 @@ def test_blob_store() -> None:
     with pytest.raises(ValueError, match="hashes to"):
         b"".join(blob_store.get(ref))
 
-def test_catalog_writer() -> None:
-    writer = FX.writer(*FX.seeded())
+@pytest.fixture(params=("memory", "emulator"))
+def catalog_store(request: pytest.FixtureRequest) -> CatalogStore:
+    return FX.memory() if request.param == "memory" else FX.catalog_store(*FX.seeded())
+
+def test_catalog_store(catalog_store: CatalogStore) -> None:
     _, changed = FX.revised_claim(10.0)
-    applied = writer.apply(stores.changeset(stores.put(changed, "Datasheet revision B")), "change-1")
-    [event] = applied.events
-    assert set(event) == {"id", "entity", "version", "recorded_at", "actor_kind", "actor", "reason", "patch",
-                          "source_refs", "correlation_id"}
-    assert ((event["version"], event["correlation_id"], event["actor_kind"]) == (2, "change-1", "human")
-            and applied.writes > 3)
-    assert writer.apply(stores.changeset(stores.put(changed, "Datasheet revision B")), "change-2").writes == 0
-    before = writer.docs.get_many([p for c in writer.docs.collections() for p, _ in writer.docs.list(c)])
+    revised = stores.changeset(stores.put(changed, "Datasheet revision B"))
+    [event] = stores.applied(FX.model, catalog_store, revised, "change-1")
+    assert set(plain(event)) == {"id", "entity", "version", "recorded_at", "actor_kind", "actor", "reason", "patch",
+                                 "source_refs", "correlation_id"}
+    assert (event.version, event.correlation_id, event.actor_kind) == (2, "change-1", "human")
+    held = catalog_store.around(revised)
+    assert plain(held.catalog.get(changed["id"]))["value"] == changed["value"]
+    unchanged = FX.model.change(held, revised, Stamp(stores.NOW, "change-2"))
+    assert unchanged == Plan({}, ()) and catalog_store.write(held, unchanged) == 0
+    uncited = stores.put({**changed, "source_refs": ["src_zzzzzzzzzz"]}, "Datasheet revision C", changed["source_refs"])
     with pytest.raises(InvalidChangeset):
-        writer.apply(stores.changeset(stores.put({**changed, "source_refs": ["src_zzzzzzzzzz"]}, "Datasheet revision C",
-                                                 changed["source_refs"])), "change-3")
-    assert writer.docs.get_many(list(before)) == before
+        stores.applied(FX.model, catalog_store, stores.changeset(uncited), "change-3")
+    assert catalog_store.around(revised).catalog.get(changed["id"]) == held.catalog.get(changed["id"])
 
 def _proposal(n: int, author: str, files_on: FilesOn, at: str) -> Proposal:
     digest = content_hash(author, f"prd_{n:010d}", f"report {n}", None, None)

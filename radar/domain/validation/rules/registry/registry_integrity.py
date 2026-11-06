@@ -4,7 +4,7 @@ import re
 from typing import Iterator
 
 from radar.domain.ai.budget import Use
-from radar.domain.model import versions
+from radar.domain.model.catalog import SCHEMES
 from radar.domain.model.entities import CategoryProfile, FilesOn, LocalizedText, SpecDefinition
 from radar.domain.validation.context import ValidationContext
 from radar.domain.validation.verdict import Finding, Findings
@@ -111,8 +111,8 @@ def _bindings(ctx: ValidationContext) -> Iterator[tuple[str, str]]:
     for name in sorted(set(reg.vocabularies) - bound):
         yield name, "vocabulary is not used by any field or spec"
     schemes = set(reg.vocabularies.get("version_schemes", {}))
-    if schemes != versions.SCHEMES:
-        yield "version_schemes", f"terms {sorted(schemes)} must equal the orderable schemes {sorted(versions.SCHEMES)}"
+    if schemes != SCHEMES:
+        yield "version_schemes", f"terms {sorted(schemes)} must equal the orderable schemes {sorted(SCHEMES)}"
 
 def _references(ctx: ValidationContext) -> Iterator[tuple[str, str]]:
     reg = ctx.registry

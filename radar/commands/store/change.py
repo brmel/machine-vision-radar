@@ -3,10 +3,12 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from typing import Sequence
 
 from radar.adapters.console import log, output
-from radar.domain.validation.verdict import InvalidChangeset
+from radar.domain.validation.verdict import Finding, InvalidChangeset
 from radar.domain.model.history.changeset import parse_changeset
+from radar.domain.model.history.plan import Refused, Stamp
 from radar.domain.review.requests import Founder, Rollback
 from radar.domain.model.history.projection import plain
 from radar.domain.review.views import shown_view
@@ -14,19 +16,27 @@ from radar.adapters.console.parser import Commands
 
 def run_apply(args: argparse.Namespace) -> int:
     cid = args.wiring.correlate("change")
+    model, store = args.wiring.model(), args.wiring.catalog_store()
     try:
-        changeset = parse_changeset(json.loads(Path(args.changeset).read_text(encoding="utf-8")), args.wiring.model())
-        applied = args.wiring.writer().apply(changeset, cid)
+        changeset = parse_changeset(json.loads(Path(args.changeset).read_text(encoding="utf-8")), model)
     except InvalidChangeset as exc:
-        for f in exc.findings:
-            log.error(str(f))
-        return log.error("the changeset is refused: nothing written")
-    log.info(f"change: {len(applied.events)} event(s), {applied.writes} doc(s) written")
-    lines = [f"{e['entity']} v{e['version']}: {op['op']} {op['path']}" + (f" = {op['value']}" if "value" in op else "")
-             for e in applied.events for op in e["patch"]]
-    output.format_output({"correlation_id": cid, "events": list(applied.events), "writes": applied.writes},
+        return _refused(exc.findings)
+    held = store.around(changeset)
+    planned = model.change(held, changeset, Stamp(args.wiring.now(), cid))
+    if isinstance(planned, Refused):
+        return _refused(planned.findings)
+    writes, events = store.write(held, planned), [plain(e) for e in planned.events]
+    log.info(f"change: {len(events)} event(s), {writes} doc(s) written")
+    lines = [f"{e.entity} v{e.version}: {op.op} {op.path}" + (f" = {op.value}" if op.value is not None else "")
+             for e in planned.events for op in e.patch]
+    output.format_output({"correlation_id": cid, "events": events, "writes": writes},
                          json_mode=args.json, text_formatter=lambda _: "\n".join(lines) or "no change: nothing written")
-    return 0 if not applied.events or args.wiring.reindex(changeset.changes[0].actor, cid) else 1
+    return 0 if not events or args.wiring.reindex(changeset.changes[0].actor, cid) else 1
+
+def _refused(findings: Sequence[Finding]) -> int:
+    for f in findings:
+        log.error(str(f))
+    return log.error("the changeset is refused: nothing written")
 
 def run_rollback(args: argparse.Namespace) -> int:
     shown = args.wiring.review().submit(Rollback(args.id, args.to, args.reason),

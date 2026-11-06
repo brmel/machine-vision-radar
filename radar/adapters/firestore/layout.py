@@ -7,6 +7,7 @@ from typing import Any, Iterable
 from radar.adapters.files.json_parser import parse_catalog
 from radar.adapters.storage.blobs import media_path
 from radar.domain.model import entities
+from radar.domain.model.catalog import MemoryCatalog
 from radar.domain.model.model import Model
 from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.history.projection import plain
@@ -62,7 +63,7 @@ def record_of(fields: Fields) -> Record:
 def read_records(docs: Docs, schema: ModelSchema, ids: Iterable[str]) -> dict[str, Record]:
     return {f["id"]: record_of(f) for f in docs.get_many([canonical(schema, i) for i in ids]).values()}
 
-def catalog_of(model: Model, records: Iterable[Record]) -> Catalog:
+def catalog_of(model: Model, records: Iterable[Record]) -> MemoryCatalog:
     grouped: dict[str, list[Record]] = {}
     for r in sorted(records, key=lambda r: r["id"]):
         kind = model.schema.kind_of(r["id"])

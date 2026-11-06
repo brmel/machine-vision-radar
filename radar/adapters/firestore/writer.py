@@ -1,29 +1,23 @@
 from __future__ import annotations
 
 import json
-from collections import Counter
 from dataclasses import dataclass
-from datetime import date
-from typing import Any, Callable, Collection, Mapping, Sequence
+from typing import Any, Collection, Iterable, Mapping
 
-from radar.domain.model.history.ids import keyed
+from radar.domain.model.catalog import MemoryCatalog
+from radar.domain.model.entities import CLASSES, Entity
+from radar.domain.model.history.changeset import RECORD_PARSE, Changeset, PutEntity, as_record, without_version
+from radar.domain.model.history.plan import Held, Plan
 from radar.domain.model.history.projection import plain
 from radar.domain.model.model import Model, ParseError
-from radar.domain.model.schema import FieldSpec, ModelSchema
 from radar.domain.ports.store.blob_store import BlobRef, BlobStore
-from radar.domain.model.entities import ActorKind
-from radar.domain.model.history.changeset import (CHANGESET, RECORD_PARSE, Applied, Change, Changeset, EntityChange,
-                                                  PutEntity, Retract, as_record, put_of, without_version)
-from radar.domain.validation.context import Part
-from radar.domain.validation.verdict import Finding, InvalidChangeset
 from radar.domain.ports.store.docs import BATCH, Delete, Docs, Fields, Put
-from .layout import CHANGES, Record, canonical, canonical_doc, catalog_of, changes_prefix, read_records, version
+from radar.domain.validation.verdict import Finding
+from .layout import CHANGES, Record, canonical, canonical_doc, read_records, version
 from .projection.neighborhood import Changed, Neighborhood, ReferenceGraph
 from .projection.projector import Projector
 
-Clock = Callable[[], str]
 Writes = Mapping[str, Fields | None]
-STORED_FILE = "stored_file"
 
 def commit(docs: Docs, writes: Writes, create: Collection[str] = ()) -> int:
     paths = sorted(writes)
@@ -41,181 +35,92 @@ def commit(docs: Docs, writes: Writes, create: Collection[str] = ()) -> int:
         raise
     return len(ops)
 
-def patch(before: Mapping[str, Any], after: Mapping[str, Any]) -> list[Record]:
-    text = lambda v: json.dumps(v, ensure_ascii=False)
-    ops = [{"op": "add" if k not in before else "replace", "path": k, "value": text(v)} for k, v in after.items()
-           if before.get(k) != v]
-    return ops + [{"op": "remove", "path": k} for k in before if k not in after]
-
-def _next(before: Record | None, last: int) -> int:
-    return (before or {}).get("version", last) + 1
-
-def change_id(prefix: str, entity: str, n: int) -> str:
-    return keyed(prefix, f"{entity}:{n}")
-
-def counted(schema: ModelSchema) -> set[str]:
-    return {e.name for e in schema.entities if e.collection != CHANGES
-            and any(f.name == "version" and f.type == "integer" for f in e.fields)}
-
-def event(entity: str, n: int, before: Mapping[str, Any] | None, after: Mapping[str, Any] | None, *, change_id: str,
-          recorded_at: str, actor_kind: str, actor: str, reason: str, source_refs: Sequence[str], correlation_id: str,
-          proposal: str | None = None) -> Record:
-    return {"id": change_id, "entity": entity, "version": n, "recorded_at": recorded_at, "actor_kind": actor_kind,
-            "actor": actor, "reason": reason, "patch": patch(without_version(before), without_version(after)),
-            "source_refs": list(source_refs), "correlation_id": correlation_id,
-            **({"proposal": proposal} if proposal else {})}
-
 def snapshots(entity: str, n: int, after: Mapping[str, Any] | None) -> dict[str, Fields]:
     return {version(entity, n): {"json": json.dumps(without_version(after), ensure_ascii=False, separators=(",", ":"),
                                                     sort_keys=True)}}
 
-def _unparsed(model: Model, record: Record) -> Finding | None:
-    try:
-        catalog_of(model, [record])
-    except (ParseError, KeyError) as exc:
-        return Finding(RECORD_PARSE, record["id"], f"does not parse: {exc}")
-    return None
+def _parsed(model: Model, records: Iterable[Record]) -> tuple[list[Entity], tuple[Finding, ...]]:
+    entities, unparsed = [], []
+    for r in sorted(records, key=lambda r: r["id"]):
+        kind = model.schema.kind_of(r["id"]) or ""
+        try:
+            entities.append(model.parse(r, CLASSES[kind], f"{model.schema.collection(kind)}[{r['id']}]"))
+        except (ParseError, KeyError) as exc:
+            unparsed.append(Finding(RECORD_PARSE, r["id"], f"does not parse: {exc}"))
+    return entities, tuple(unparsed)
 
-def _let_go(model: Model, record: Record, f: FieldSpec, entity: str) -> PutEntity | Retract:
-    kept = [x for x in record[f.name] if x != entity] if f.type == "array" else []
-    if kept:
-        return put_of({**record, f.name: kept}, model)
-    if f.optional:
-        return put_of({k: v for k, v in record.items() if k != f.name}, model)
-    return Retract(record["id"])
+def _changing(changeset: Changeset, stored: Mapping[str, Record]) -> dict[str, tuple[Record | None, Record | None]]:
+    changing: dict[str, tuple[Record | None, Record | None]] = {}
+    for c in changeset.changes:
+        after = as_record(c.action.entity) if isinstance(c.action, PutEntity) else None
+        if without_version(stored.get(c.entity)) != (after or {}):
+            changing[c.entity] = (stored.get(c.entity), after)
+    return changing
 
 @dataclass(frozen=True, slots=True)
-class Planned:
-    changed: dict[str, tuple[Record | None, Record | None]]
-    events: list[Record]
+class StoreHeld(Held):
+    hood: Neighborhood
 
-    def changes(self) -> tuple[EntityChange, ...]:
-        return tuple(EntityChange(i, without_version(b) or None, without_version(a) or None)
-                     for i, (b, a) in self.changed.items())
-
-class StoreWriter:
-    def __init__(self, docs: Docs, model: Model, clock: Clock, blobs: BlobStore) -> None:
-        self.docs, self.model, self.schema, self.clock, self.blobs = docs, model, model.schema, clock, blobs
+class FirestoreCatalogStore:
+    def __init__(self, docs: Docs, model: Model, blobs: BlobStore) -> None:
+        self.docs, self.model, self.schema, self.blobs = docs, model, model.schema, blobs
         self.graph, self.projector = ReferenceGraph(docs, model.schema), Projector(docs, model)
-        self.changes, self.counted = changes_prefix(model.schema), counted(model.schema)
         self.public = model.registry.marked("media_rights", lambda t: t.public)
 
-    def _last(self, changeset: Changeset, stored: Mapping[str, Record]) -> dict[str, int]:
+    def _last(self, ids: list[str]) -> dict[str, int]:
         last: dict[str, int] = {}
-        for _, f in self.docs.where(CHANGES, "entity", [c.entity for c in changeset.changes if c.entity not in stored]):
+        for _, f in self.docs.where(CHANGES, "entity", ids):
             last[f["entity"]] = max(last.get(f["entity"], 0), f["version"])
         return last
 
-    def _stored(self, ids: list[str]) -> dict[str, Record]:
-        counts = Counter(ids)
-        if twice := [i for i in ids if counts[i] > 1 or i.startswith(f"{self.changes}_")]:
-            raise InvalidChangeset([Finding(CHANGESET, twice[0],
-                                            "a changeset changes each entity once, and never a Change event")])
-        if unknown := [i for i in ids if not self.schema.kind_of(i)]:
-            raise InvalidChangeset([Finding(CHANGESET, unknown[0], "names no entity kind")])
-        return read_records(self.docs, self.schema, ids)
+    def _kept(self, changed: Changed) -> frozenset[str]:
+        return frozenset(a["sha256"] for _, a in changed.values() if a and "sha256" in a and "rights" in a
+                         and self.blobs.has(BlobRef(a["sha256"], a["mime"])))
 
-    def plan(self, changeset: Changeset, correlation_id: str) -> Planned:
-        stored = self._stored([c.entity for c in changeset.changes])
-        last = self._last(changeset, stored)
-        now, changed, events = self.clock(), {}, []
-        for c in changeset.changes:
-            before = stored.get(c.entity)
-            body = as_record(c.action.entity) if isinstance(c.action, PutEntity) else None
-            if before is None and body is None:
-                raise InvalidChangeset([Finding(CHANGESET, c.entity, "no such record to retract")])
-            if without_version(before) == (body or {}):
-                continue
-            n = _next(before, last.get(c.entity, 0))
-            versioned = body is not None and self.schema.kind_of(c.entity) in self.counted
-            changed[c.entity] = (before, {**body, "version": n} if versioned else body)
-            events.append(event(c.entity, n, before, body, change_id=change_id(self.changes, c.entity, n),
-                                recorded_at=now, actor_kind=c.actor_kind, actor=c.actor, reason=c.reason,
-                                source_refs=c.source_refs, correlation_id=correlation_id, proposal=c.proposal))
-        return Planned(changed, events)
+    def around(self, changeset: Changeset) -> StoreHeld:
+        ids = [c.entity for c in changeset.changes if self.schema.kind_of(c.entity)]
+        stored = read_records(self.docs, self.schema, ids)
+        changing = _changing(changeset, stored)
+        cited = {r for c in changeset.changes if c.entity in changing for r in c.source_refs}
+        hood = self.graph.neighborhood(changing, cited) if changing else Neighborhood({}, frozenset(), frozenset())
+        entities, unparsed = _parsed(self.model, {**stored, **hood.records}.values())
+        return StoreHeld(MemoryCatalog(entities), self._last([i for i in ids if i not in stored]),
+                         self._kept(changing), unparsed, hood)
 
     def _visibility(self, changed: Changed) -> list[tuple[BlobRef, bool]]:
         out = []
         for before, after in changed.values():
             if after is None or "sha256" not in after or "rights" not in after:
                 continue
-            ref, public = BlobRef(after["sha256"], after["mime"]), after["rights"] in self.public
-            if not self.blobs.has(ref):
-                raise InvalidChangeset([Finding(STORED_FILE, after["id"],
-                                                f"no stored file {ref.sha256}; add it first (radar media add)")])
+            public = after["rights"] in self.public
             if before is None or (before.get("rights") in self.public) != public:
-                out.append((ref, public))
+                out.append((BlobRef(after["sha256"], after["mime"]), public))
         return out
 
-    def _errors(self, hood: Neighborhood, changed: Changed, today: date) -> list[tuple[Finding, ...]]:
-        try:
-            return [self.model.check(catalog_of(self.model, records.values()), Part(), today).errors
-                    for records in (hood.records, hood.after(changed))]
-        except (ParseError, KeyError) as exc:
-            stored = [f for r in hood.records.values() if r and (f := _unparsed(self.model, r))]
-            unchecked = Finding(RECORD_PARSE, "", f"the neighborhood does not check: {exc}")
-            raise InvalidChangeset(stored or [unchecked]) from exc
-
-    def _validate(self, hood: Neighborhood, changed: Changed, today: date) -> None:
-        if unparsed := [f for _, after in changed.values() if after and (f := _unparsed(self.model, after))]:
-            raise InvalidChangeset(unparsed)
-        results = self._errors(hood, changed, today)
-        records = hood.records.keys() | changed.keys()
-        added = sorted((f for f in set(results[1]) - set(results[0]) if f.entity_id in records),
-                       key=lambda f: (f.entity_id, f.rule, f.message))
-        if added:
-            raise InvalidChangeset(added)
-
-    def _checked(self, planned: Planned) -> tuple[Changed, Neighborhood]:
-        changed: Changed = {**planned.changed, **{e["id"]: (None, e) for e in planned.events}}
-        hood = self.graph.neighborhood(changed)
-        self._validate(hood, changed, date.fromisoformat(planned.events[0]["recorded_at"][:10]))
-        return changed, hood
-
-    def withdrawal(self, entity: str, reason: str, actor_kind: ActorKind, actor: str) -> Changeset:
-        out: dict[str, Change] = {entity: Change(Retract(entity), reason, actor_kind, actor, ())}
-        for f, named in self.graph.naming(entity):
-            r = without_version(named)
-            out[r["id"]] = Change(_let_go(self.model, r, f, entity), reason, actor_kind, actor,
-                                  tuple(r.get("source_refs", ())))
-        return Changeset(tuple(out.values()))
-
-    def preview(self, changeset: Changeset) -> tuple[EntityChange, ...]:
-        stored = self._stored([c.entity for c in changeset.changes])
-        after = {c.entity: as_record(c.action.entity) if isinstance(c.action, PutEntity) else None
-                 for c in changeset.changes}
-        return tuple(EntityChange(i, without_version(stored.get(i)) or None, a) for i, a in after.items()
-                     if without_version(stored.get(i)) != (a or {}))
-
-    def check(self, changeset: Changeset) -> tuple[EntityChange, ...]:
-        planned = self.plan(changeset, "check")
-        if planned.changed:
-            self._checked(planned)
-            self._visibility(planned.changed)
-        return planned.changes()
-
-    def apply(self, changeset: Changeset, correlation_id: str) -> Applied:
-        planned = self.plan(changeset, correlation_id)
-        if not planned.changed:
-            return Applied((), 0)
-        changed, hood = self._checked(planned)
-        visibility = self._visibility(planned.changed)
+    def write(self, held: StoreHeld, plan: Plan) -> int:
+        if not plan.changed:
+            return 0
+        changed: Changed = {i: (plain(b), plain(a)) for i, (b, a) in plan.changed.items()}
+        events = {e.id: plain(e) for e in plan.events}
+        everything: Changed = {**changed, **{i: (None, e) for i, e in events.items()}}
         writes: dict[str, Fields | None] = {canonical(self.schema, i): canonical_doc(a) if a is not None else None
-                                            for i, (_, a) in changed.items()}
-        for e in planned.events:
-            writes.update(snapshots(e["entity"], e["version"], planned.changed[e["entity"]][1]))
-        writes.update(self.projector.writes(hood, changed))
+                                            for i, (_, a) in everything.items()}
+        for e in plan.events:
+            writes.update(snapshots(e.entity, e.version, changed[e.entity][1]))
+        writes.update(self.projector.writes(held.hood, everything))
+        written = self._commit(writes, {canonical(self.schema, i) for i in events}, self._visibility(changed))
+        self._remove_withdrawn(changed)
+        return written
+
+    def _commit(self, writes: Writes, create: Collection[str], visibility: list[tuple[BlobRef, bool]]) -> int:
         for ref, public in visibility:
             self.blobs.publish(ref, public)
         try:
-            written = commit(self.docs, writes, {canonical(self.schema, e["id"]) for e in planned.events})
+            return commit(self.docs, writes, create)
         except Exception:
             for ref, public in visibility:
                 self.blobs.publish(ref, not public)
             raise
-        self._remove_withdrawn(planned.changed)
-        parsed = catalog_of(self.model, planned.events)
-        return Applied(tuple(plain(parsed.get(e["id"])) for e in planned.events), written)
 
     def _remove_withdrawn(self, changed: Changed) -> None:
         for before, after in changed.values():
