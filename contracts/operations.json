@@ -530,6 +530,14 @@
       "output": {"type": "object", "required": ["entities"]}
     },
     {
+      "id": "model.migrate",
+      "summary": "derive a migration plan's changeset over the whole store and file it through review",
+      "cli": "model migrate",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["correlation_id", "changes", "counts", "proposals"]}
+    },
+    {
       "id": "site.export",
       "summary": "write the site's agent files",
       "cli": "site export",
