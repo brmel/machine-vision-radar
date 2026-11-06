@@ -9,7 +9,7 @@ from radar.adapters.web.admin.endpoint import AdminEndpoint
 from radar.adapters.web.admin.news import NewsAdmin
 from radar.adapters.web.admin.research import ResearchAdmin
 from radar.adapters.web.admin.search import SearchAdmin
-from radar.adapters.web.api import Api, AskEndpoint, FindEndpoint, ReportEndpoint
+from radar.adapters.web.api import Api, AskEndpoint, FindEndpoint, HealthEndpoint, ReportEndpoint
 from radar.adapters.web.app_check import AppCheck, Unchecked
 from radar.adapters.web.mcp import McpServer, proposal_tools, read_tools
 from radar.adapters.web.pages import PoliteReader
@@ -29,11 +29,11 @@ from radar.domain.search.sources import KINDS
 
 class Wiring(Models):
     def api(self) -> Api:
-        engine, ledger = self.search_engine(), self.ask_ledger()
-        quota = Quota(ledger, self.ask_meter(engine), engine, os.environ.get("K_REVISION", ""))
+        engine, ledger, release = self.search_engine(), self.ask_ledger(), os.environ.get("K_REVISION", "")
+        quota = Quota(ledger, self.ask_meter(engine), engine, release)
         return Api(AskEndpoint(quota, ledger, correlate=self.correlate), self.admin_endpoint(), self.mcp(),
                    ReportEndpoint(self.review(), self.attestation(), self.correlate),
-                   FindEndpoint(engine, self.correlate))
+                   FindEndpoint(engine, self.correlate), HealthEndpoint(engine, release, paths.deployed_build()))
 
     def attestation(self) -> Attestation:
         if self._real:

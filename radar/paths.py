@@ -25,6 +25,10 @@ def firebase_project() -> str:
         raise ValueError("Missing projects.default in .firebaserc")
     return project
 
+def deployed_build() -> str | None:
+    marker = DEV / "build"
+    return marker.read_text(encoding="utf-8").strip() if marker.exists() else None
+
 def site_origin() -> str:
     env_url = os.environ.get("MVR_SITE_URL", "").strip().rstrip("/")
     return env_url or f"https://{firebase_project()}.web.app"

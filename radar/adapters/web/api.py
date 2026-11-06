@@ -143,12 +143,29 @@ class ReportEndpoint:
         log.info("report: filed", proposal=filed.id, reports=filed.reports)
         return Response(201, {"report": "filed"}) if filed.reports == 1 else Response(200, {"report": "counted"})
 
-class Api:
-    def __init__(self, ask: Endpoint, admin: Endpoint, mcp: Endpoint, report: Endpoint, find: Endpoint) -> None:
-        self._ask, self._admin, self._mcp, self._report, self._find = ask, admin, mcp, report, find
+class HealthEndpoint:
+    def __init__(self, engine: SearchEngine, release: str, build: str | None) -> None:
+        self._engine, self._release, self._build = engine, release, build
 
     def respond(self, request: Request) -> Response:
-        exact = {"/api/mcp": self._mcp, "/api/report": self._report, "/api/find": self._find}.get(request.path)
+        if request.method != "GET":
+            return Response(405, {"error": "GET"})
+        try:
+            index: str | None = self._engine.last_indexed().version
+        except NoIndex:
+            index = None
+        return Response(200, {"release": self._release, "commit": self._build, "index": index},
+                        {"cache-control": "no-store"})
+
+class Api:
+    def __init__(self, ask: Endpoint, admin: Endpoint, mcp: Endpoint, report: Endpoint, find: Endpoint,
+                 health: Endpoint) -> None:
+        self._ask, self._admin, self._mcp, self._report, self._find = ask, admin, mcp, report, find
+        self._health = health
+
+    def respond(self, request: Request) -> Response:
+        exact = {"/api/mcp": self._mcp, "/api/report": self._report, "/api/find": self._find,
+                 "/api/health": self._health}.get(request.path)
         return (exact or (self._admin if request.path.startswith("/api/admin/") else self._ask)).respond(request)
 
 class Served:
