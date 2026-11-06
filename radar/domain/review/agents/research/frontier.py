@@ -1,14 +1,36 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Mapping, Sequence
+import hashlib
+import re
+from dataclasses import dataclass, replace
+from datetime import datetime, timedelta
+from typing import Callable, Mapping, Sequence
 
-from radar.domain.model.entities import (IndexView, Instant, OrgRelation, Organization, ProductCard, RunScope,
-                                         RunScopeKind, Term)
+from radar.domain.model.entities import (FrontierView, IndexView, Instant, OrgRelation, Organization, ProductCard,
+                                         RunScope, RunScopeKind, Term)
 from radar.domain.ports.catalog.catalog_repository import CatalogRepository
+from radar.domain.ports.web.crawl_records import CrawlRecord, CrawlRecords, CrawlStatus, PageKind
 from radar.domain.ports.web.reader import Link, Page, Reader, Unread
 
-FOLLOW = 5
+FOLLOW, VIEWED = 5, 20
+READ_AGAIN, RETRY = timedelta(days=30), timedelta(days=7)
+PRODUCT_PAGE = re.compile(r"/(products?|produits?|produkte?|models?|catalog|catalogue|shop)(/|$)", re.I)
+LANGUAGE_COPY = re.compile(r"^(https?://[^/]+)/([a-z]{2})(?:[-_][a-z]{2})?(/.*)$", re.I)
+
+def _later(now: Instant, by: timedelta) -> Instant:
+    return (datetime.fromisoformat(now) + by).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+def _hashed(page: Page) -> str:
+    return hashlib.sha256(page.text.encode()).hexdigest()
+
+def one_copy(links: Sequence[Link], language: str) -> tuple[Link, ...]:
+    kept: dict[str, Link] = {}
+    for link in links:
+        copy = LANGUAGE_COPY.match(link.address)
+        page = f"{copy.group(1)}{copy.group(3)}" if copy else link.address
+        if page not in kept or not copy or copy.group(2).casefold() == language:
+            kept[page] = link
+    return tuple(kept.values())
 
 @dataclass(frozen=True, slots=True)
 class Site:
@@ -90,8 +112,10 @@ class SourceTypes:
         return next((k for host, k in self._hosts if link.within((host,))), self._third_party)
 
 class Frontier:
-    def __init__(self, reader: Reader, sites: tuple[Site, ...]) -> None:
-        self._reader = reader
+    def __init__(self, reader: Reader, sites: tuple[Site, ...], crawl: CrawlRecords, language: str,
+                 now: Callable[[], Instant]) -> None:
+        self._reader, self._crawl, self._language, self._now = reader, crawl, language, now
+        self._held: dict[str, dict[str, CrawlRecord]] = {}
         self._reach: list[Reach | Unread] = [self._home(s) for s in sites]
         self._seen: set[str] = set()
         self._mapped: set[str] = set()
@@ -115,15 +139,77 @@ class Frontier:
         if reach.site.one_product or reach.link.site in self._mapped:
             return None
         self._mapped.add(reach.link.site)
+        held = self._records(reach.site.org)
+        if not any(r.site == reach.link.site for r in held.values()) and (unread := self.seed(reach, by)):
+            return unread
+        self._reach += [Reach(reach.site, Link(r.address, r.site), reach.own) for r in self._due(reach, held)]
+        return None
+
+    def _due(self, reach: Reach, held: Mapping[str, CrawlRecord]) -> list[CrawlRecord]:
+        now = self._now()
+        due = (r for r in held.values() if r.next_due <= now and r.address != reach.link.address)
+        return sorted(due, key=lambda r: (r.kind is not PageKind.PRODUCT, r.site == reach.link.site, r.next_due))
+
+    def seed(self, reach: Reach, by: Instant) -> Unread | None:
         seeds = self._reader.sitemap(reach.link, by)
         if isinstance(seeds, Unread):
             return seeds
-        self._reach += sorted((Reach(reach.site, s, reach.own) for s in seeds if s.within(reach.own)),
-                              key=lambda seed: seed.link.site == reach.link.site)
+        held = self._records(reach.site.org)
+        fresh = [self._record(s, reach.site.org) for s in one_copy(seeds, self._language)
+                 if s.within(reach.own) and s.address not in held]
+        self._crawl.save(fresh)
+        held.update({r.address: r for r in fresh})
         return None
+
+    def _records(self, org: str) -> dict[str, CrawlRecord]:
+        return self._held.setdefault(org, {r.address: r for r in self._crawl.listed(org)})
+
+    def _record(self, link: Link, org: str) -> CrawlRecord:
+        kind = PageKind.PRODUCT if PRODUCT_PAGE.search(link.address) else PageKind.OTHER
+        return CrawlRecord(link.address, link.site, org, kind, CrawlStatus.DUE, self._now())
+
+    def unchanged(self, reach: Reach, page: Page) -> bool:
+        if reach.site.one_product:
+            return False
+        held = self._records(reach.site.org).get(page.link.address)
+        return bool(held and held.content_hash == _hashed(page))
+
+    def unread(self, reach: Reach, unread: Unread) -> None:
+        if not reach.site.one_product:
+            self._saved(reach, replace(self._of(reach), status=CrawlStatus.UNREAD, reason=unread.reason,
+                                       fetched_at=self._now(), next_due=_later(self._now(), RETRY)))
+
+    def _of(self, reach: Reach) -> CrawlRecord:
+        return (self._records(reach.site.org).get(reach.link.address)
+                or self._record(reach.link, reach.site.org))
+
+    def _saved(self, reach: Reach, record: CrawlRecord) -> None:
+        self._records(reach.site.org)[record.address] = record
+        self._crawl.save((record,))
 
     def read(self, reach: Reach, page: Page, follow: tuple[str, ...]) -> None:
         self._seen.add(page.link.address)
+        kept = self._followed(reach, page, follow)
+        self._reach += [Reach(reach.site, link, reach.own) for link in kept]
+        if not reach.site.one_product:
+            self._remember(reach, page, kept)
+
+    def _followed(self, reach: Reach, page: Page, follow: tuple[str, ...]) -> list[Link]:
         held = {link.address: link for link in page.links}
         named = [held[a] for a in dict.fromkeys(follow) if a in held and a not in self._seen]
-        self._reach += [Reach(reach.site, link, reach.own) for link in named if link.within(reach.own)][:FOLLOW]
+        return [link for link in named if link.within(reach.own)][:FOLLOW]
+
+    def _remember(self, reach: Reach, page: Page, kept: list[Link]) -> None:
+        known = self._records(reach.site.org)
+        self._crawl.save([self._record(link, reach.site.org) for link in kept if link.address not in known])
+        self._saved(reach, replace(self._of(reach), status=CrawlStatus.READ, reason=None, fetched_at=self._now(),
+                                   content_hash=_hashed(page), next_due=_later(self._now(), READ_AGAIN)))
+
+    def view(self, org: str) -> FrontierView:
+        held = self._records(org).values()
+        now = self._now()
+        due = sorted((r for r in held if r.next_due <= now), key=lambda r: (r.kind is not PageKind.PRODUCT, r.next_due))
+        return FrontierView(org=org, total=len(held), due=len(due),
+                            read=sum(r.status is CrawlStatus.READ for r in held),
+                            unread=sum(r.status is CrawlStatus.UNREAD for r in held),
+                            next=tuple(r.address for r in due[:VIEWED]))

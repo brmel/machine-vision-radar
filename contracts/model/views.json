@@ -1158,6 +1158,19 @@
     "fields": {"at": {"type": "string"}, "step": "ResearchStep", "detail": {"type": "string"}}
   },
   {
+    "id": "FrontierView",
+    "kind": "record",
+    "description": "What a research run knows of a maker's pages: how many it holds, how many are due, read and unread, and the next ones it reads.",
+    "fields": {
+      "org": {"type": "string"},
+      "total": {"type": "integer"},
+      "due": {"type": "integer"},
+      "read": {"type": "integer"},
+      "unread": {"type": "integer"},
+      "next": {"type": "array", "items": "string"}
+    }
+  },
+  {
     "id": "RunScope",
     "kind": "record",
     "description": "What a research run reads: its kind, and the product, maker or category it names by id or slug.",

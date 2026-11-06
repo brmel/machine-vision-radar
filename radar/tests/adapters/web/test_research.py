@@ -13,7 +13,8 @@ from radar.adapters.ai.scripted import ScriptedDatasheetExtractor, ScriptedImage
 from radar.adapters.console import log
 from radar.adapters.files.prompts import FilesPromptRegistry
 from radar.adapters.firestore.repository import StoreCatalogRepository, StoreHeldRecords
-from radar.adapters.firestore.ledgers.agents import FirestoreAgentTokens, FirestoreResearchRuns
+from radar.adapters.firestore.ledgers.agents import (FirestoreAgentTokens, FirestoreCrawlRecords,
+                                                     FirestoreResearchRuns)
 from radar.adapters.firestore.ledgers.ai import CALLS, FirestoreBudget, FirestoreUsageLog
 from radar.adapters.web.pages import PoliteReader
 from radar.adapters.wiring.stores import Stores
@@ -73,7 +74,7 @@ def _run(seeded: tuple[Docs, Any], heard: Heard, waits: list[float], on_get: Cal
                                 Files(files, meter(Use.DATASHEET, lambda chosen: ScriptedDatasheetExtractor()),
                                       REGISTRY.vocabularies), FX.review(docs, files), FirestoreResearchRuns(docs),
                                 FirestoreAgentTokens(docs), StoreCatalogRepository(docs, FX.model),
-                                StoreHeldRecords(docs, FX.model), FX.model, now)
+                                StoreHeldRecords(docs, FX.model), FirestoreCrawlRecords(docs), FX.model, now)
         return researcher.status(researcher.start(scope, Founder("founder", Stores().correlate("research"))))
 
 def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
@@ -229,7 +230,7 @@ def test_the_research_cap_stops_a_run(docs: tuple[Docs, Any]) -> None:
     assert run.said(Step.FILED) == ()
 
 def test_the_time_budget_holds_between_the_files_of_one_page(docs: tuple[Docs, Any]) -> None:
-    ticks = (f"2026-10-18T12:{n // 60:02d}:{n % 60:02d}Z" for n in range(0, 3600, 9))
+    ticks = (f"2026-10-18T12:{n // 60:02d}:{n % 60:02d}Z" for n in range(0, 3600, 3))
     run = _run(docs, [], [], now=lambda: next(ticks))
     outcome = run.outcome and (run.outcome.status, run.outcome.reason)
     assert (run.said(Step.READ)[-1], len(run_view(run).filed), outcome) == (
