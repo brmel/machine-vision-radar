@@ -71,8 +71,8 @@
   {
     "id": "ResearchStep",
     "kind": "enum",
-    "values": ["read", "skipped", "filed", "media", "datasheet", "rejected", "ended"],
-    "description": "One step of a research run: a page or file read or skipped, a proposal filed, rejected, or run ended."
+    "values": ["read", "skipped", "unmatched", "filed", "media", "datasheet", "rejected", "ended"],
+    "description": "One step of a research run: a page or file read or skipped, a table's labels no spec names, a proposal filed, rejected, or run ended."
   },
   {
     "id": "LocalizedText",

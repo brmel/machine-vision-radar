@@ -58,6 +58,7 @@
   "adminResearchLog": "Journal",
   "adminResearchStepRead": "Lue",
   "adminResearchStepSkipped": "Ignorée",
+  "adminResearchStepUnmatched": "Libellés sans spécification",
   "adminResearchStepFiled": "Déposée",
   "adminResearchStepMedia": "Fichier déposé",
   "adminResearchStepDatasheet": "Fiche technique lue",

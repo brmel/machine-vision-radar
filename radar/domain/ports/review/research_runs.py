@@ -7,6 +7,7 @@ from typing import Literal, Protocol
 from radar.domain.model.entities import ResearchStatus as Status, ResearchStep as Step, RunScope
 
 STOPPED = "its process stopped"
+LABELS = "; "
 
 @dataclass(frozen=True, slots=True)
 class Line:

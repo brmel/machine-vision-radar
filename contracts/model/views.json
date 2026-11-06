@@ -1243,6 +1243,7 @@
       "runs": {"type": "integer"},
       "pages": {"type": "integer"},
       "skipped": {"type": "map", "items": "integer"},
+      "labels": {"type": "map", "items": "integer", "description": "A table's labels no spec names, by how many pages state them: the evidence for a new spec."},
       "filed": {"type": "integer"},
       "refused": {"type": "map", "items": "integer"},
       "values": {"type": "integer"},

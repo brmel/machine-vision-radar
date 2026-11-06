@@ -790,7 +790,7 @@
       "mcp": null,
       "output": {
         "type": "object",
-        "required": ["since", "runs", "pages", "skipped", "filed", "refused", "values", "filter_values", "statuses", "published", "cells", "cad"]
+        "required": ["since", "runs", "pages", "skipped", "labels", "filed", "refused", "values", "filter_values", "statuses", "published", "cells", "cad"]
       }
     },
     {

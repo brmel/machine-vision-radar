@@ -77,6 +77,9 @@ def _measured(m: dict[str, Any]) -> str:
     for step in ("skipped", "refused"):
         if m[step]:
             lines += [f"{step}:", *(f"  {n:>3}  {why}" for why, n in m[step].items())]
+    if m["labels"]:
+        top = list(m["labels"].items())[:20]
+        lines += ["labels no spec names, by pages:", *(f"  {n:>3}  {label}" for label, n in top)]
     return "\n".join([*lines, "profile cells filled, at the start and now:",
                       *(f"  {c['before']:>5} {c['now']:>5} of {c['cells']:>5}  {cid}"
                         for cid, c in m["cells"].items())])

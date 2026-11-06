@@ -53,7 +53,8 @@ export const RUN_STATUS = {
   failed: ["adminResearchFailed", "warning"],
 } as const satisfies Readonly<Record<ResearchRunView["status"], readonly [MessageKey, string]>>;
 export const STEP: Readonly<Record<ResearchLine["step"], MessageKey>> = {
-  read: "adminResearchStepRead", skipped: "adminResearchStepSkipped", filed: "adminResearchStepFiled",
+  read: "adminResearchStepRead", skipped: "adminResearchStepSkipped", unmatched: "adminResearchStepUnmatched",
+  filed: "adminResearchStepFiled",
   media: "adminResearchStepMedia", datasheet: "adminResearchStepDatasheet", rejected: "adminResearchStepRejected",
   ended: "adminResearchStepEnded",
 };

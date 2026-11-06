@@ -99,9 +99,10 @@ class ResearchStatus(str, Enum):
     FAILED = "failed"
 
 class ResearchStep(str, Enum):
-    """One step of a research run: a page or file read or skipped, a proposal filed, rejected, or run ended."""
+    """One step of a research run: a page or file read or skipped, a table's labels no spec names, a proposal filed, rejected, or run ended."""
     READ = "read"
     SKIPPED = "skipped"
+    UNMATCHED = "unmatched"
     FILED = "filed"
     MEDIA = "media"
     DATASHEET = "datasheet"
@@ -1683,6 +1684,7 @@ class ResearchMeasures:
     runs: int
     pages: int
     skipped: Mapping[str, int]
+    labels: Mapping[str, int]
     filed: int
     refused: Mapping[str, int]
     values: int

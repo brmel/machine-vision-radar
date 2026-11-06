@@ -13,7 +13,7 @@ from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.ports.catalog.held_records import HeldRecords
 from radar.domain.ports.review.proposal_queue import Query
 from radar.domain.ports.review.proposing import Proposing
-from radar.domain.ports.review.research_runs import ResearchRun, ResearchRunLog, RunPage, Status, Step
+from radar.domain.ports.review.research_runs import LABELS, ResearchRun, ResearchRunLog, RunPage, Status, Step
 from radar.domain.review.bundle import puts
 from radar.domain.review.proposal import Proposal
 from radar.domain.review.requests import Founder
@@ -57,6 +57,11 @@ class _Value:
     status: ProposalStatus
     is_filter: bool
 
+def _labels(runs: Sequence[ResearchRun]) -> Mapping[str, int]:
+    said = (label for run in runs for line in run.said(Step.UNMATCHED)
+            for label in line.split(": ", 1)[1].split(LABELS))
+    return MappingProxyType(dict(Counter(said).most_common()))
+
 class Measure:
     def __init__(self, runs: ResearchRunLog, review: Proposing, read: CatalogRepository, held: HeldRecords,
                  model: Model) -> None:
@@ -71,7 +76,8 @@ class Measure:
         filed = [proposal for run in runs for proposal in run.said(Step.FILED, Step.MEDIA, Step.DATASHEET)]
         values = [value for proposal in self._bundled(runs, by) for value in self._values(proposal, categories)]
         return ResearchMeasures(since=instant, runs=len(runs), pages=sum(len(run.said(Step.READ)) for run in runs),
-                                skipped=_whys(runs, Step.SKIPPED), filed=len(filed), refused=_whys(runs, Step.REJECTED),
+                                skipped=_whys(runs, Step.SKIPPED), labels=_labels(runs), filed=len(filed),
+                                refused=_whys(runs, Step.REJECTED),
                                 values=len(values), filter_values=sum(v.is_filter for v in values),
                                 statuses=MappingProxyType(dict(Counter(v.status.value for v in values))),
                                 published=self._published(values), cells=self._cells(instant, categories),
