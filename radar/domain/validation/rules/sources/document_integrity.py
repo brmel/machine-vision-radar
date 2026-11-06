@@ -5,7 +5,6 @@ import re
 from radar.domain.model.entities import Document
 from radar.domain.validation.context import ValidationContext
 from radar.domain.validation.verdict import Finding, Findings
-from radar.domain.validation.walk import repeated
 
 NAME = "document_integrity"
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -36,8 +35,6 @@ def _file_problems(ctx: ValidationContext, doc: Document) -> list[str]:
 
 def check(ctx: ValidationContext) -> Findings:
     docs = list(ctx.catalog.all(Document))
-    for sha, n in repeated(d.sha256 for d in docs):
-        yield Finding(NAME, sha[:12], f"{n} documents for one file (sha256 {sha[:12]}…); keep one")
     for doc in docs:
         if not SHA256.match(doc.sha256):
             yield Finding(NAME, doc.id, f"invalid sha256 '{doc.sha256}'")

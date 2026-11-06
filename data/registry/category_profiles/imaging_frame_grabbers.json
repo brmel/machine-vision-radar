@@ -15,6 +15,6 @@
     {"field": "form_factor"},
     {"field": "onboard_processing"}
   ],
-  "required_at_publish": ["interfaces"],
+  "required": ["interfaces"],
   "axis_dependent_keys": ["form_factor"]
 }

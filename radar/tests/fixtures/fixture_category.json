@@ -61,7 +61,7 @@
           "field": "fixture_mount"
         }
       ],
-      "required_at_publish": ["fixture_finish"],
+      "required": ["fixture_finish"],
       "axis_dependent_keys": []
     },
     "vocabularies/fixture_mounts.json": [

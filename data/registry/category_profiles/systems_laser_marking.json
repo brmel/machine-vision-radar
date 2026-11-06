@@ -15,6 +15,6 @@
     {"field": "wavelength"},
     {"field": "marking_field"}
   ],
-  "required_at_publish": ["laser_type"],
+  "required": ["laser_type"],
   "axis_dependent_keys": []
 }

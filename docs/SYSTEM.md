@@ -122,8 +122,8 @@ adapter's own, by path; no port names a path.
 Every file has exactly one Document (DATA_ARCHITECTURE.md §3.1); `sha256` is the 64-character lowercase hex digest.
 Every Source that cites the file points to that Document through `Source.document`. `radar store load` hashes each file
 it is given (rule `document_integrity`) and fails on a sha256, bytes or mime mismatch, a mime the `kind` does not allow,
-`width`/`height` outside images and videos or `duration` outside videos, two Documents for one file, a file without a
-Document, or a Document without a file.
+`width`/`height` outside images and videos or `duration` outside videos, a file without a Document, or a Document
+without a file; rule `unique` refuses two Documents for one file.
 
 **Rights.** `rights` is a `media_rights` term; a file is public only under a term the registry marks `public` (`own`,
 `open_licence`). A public file's page link is its Storage download URL (the object carries `public` metadata, which

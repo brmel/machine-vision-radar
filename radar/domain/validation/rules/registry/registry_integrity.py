@@ -76,7 +76,7 @@ def _profiles(ctx: ValidationContext) -> Iterator[tuple[str, str]]:
             yield cid, "more than one profile"
         seen.add(cid)
         keyed = {**{s: getattr(p.sections, s) for s in allowed},
-                 "required_at_publish": p.required_at_publish, "axis_dependent_keys": p.axis_dependent_keys}
+                 "required": p.required, "axis_dependent_keys": p.axis_dependent_keys}
         for section, keys in keyed.items():
             for key in sorted(set(keys) - allowed.get(section, specs)):
                 yield cid, f"{section}: '{key}' is not a valid key here"

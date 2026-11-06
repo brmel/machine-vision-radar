@@ -83,7 +83,7 @@ class ProductViews:
             detail=detail, versions=self._versions(p, profile, cited), offerings=self._offerings(p, profile, cited),
             lifecycle=self._lifecycle(p, cited), relations=self._relations(p, names),
             components=self._components(p, names), hub=self._hub(p), media=self.media(p),
-            indexable=set(profile.required_at_publish) <= {c.key for c in (*core, *detail) if c.value is not None},
+            indexable=not self.registry.unstated(p, {c.key for c in (*core, *detail) if c.value is not None}),
             sources=tuple(self.terms.source_view(cited[k]) for k in sorted(cited)))
 
     def _family(self, p: Product, names: dict[str, str]) -> ProductLink | None:

@@ -15,6 +15,6 @@
     {"field": "deployment"},
     {"field": "interfaces"}
   ],
-  "required_at_publish": ["tops"],
+  "required": ["tops"],
   "axis_dependent_keys": ["form_factor"]
 }

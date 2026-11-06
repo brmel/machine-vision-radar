@@ -47,13 +47,13 @@ def run_coverage(args: argparse.Namespace) -> int:
         return log.error(f"no category '{args.category}'", fix="radar category list", code=2)
     shares = spec_shares(args.wiring.catalog(), registry, args.category)
     return output.format_output({"categories": shares}, json_mode=args.json, text_formatter=lambda p: "\n".join(
-        f"{c['category']} ({c['products']} products)\n" + "\n".join(
+        f"{c['category']} ({c['products']} products, {c['missing_required']} missing a required spec)\n" + "\n".join(
             f"  {s['share']:>6.1%}  {s['key']}" for s in c["specs"]) for c in p["categories"]))
 
 def register(commands: Commands) -> None:
     c = commands.verb("quality", "coverage",
-                      help="per category, each profile spec's share of products publishing a value of it, the most "
-                           "published first", func=run_coverage)
+                      help="per category, how many products miss a required spec, and each profile spec's share of "
+                           "products publishing a value of it, the most published first", func=run_coverage)
     c.add_argument("--category", help="one category's id (default: every category with products)")
     p = commands.verb("quality", "report",
                       help="each product's provenance from its sources and dates, the weak ones first, and the "

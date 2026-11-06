@@ -18,6 +18,6 @@
     {"field": "iris_type"},
     {"field": "working_distance"}
   ],
-  "required_at_publish": ["lens_mount"],
+  "required": ["lens_mount"],
   "axis_dependent_keys": ["focal_length"]
 }

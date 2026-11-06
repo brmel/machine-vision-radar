@@ -90,8 +90,9 @@ BREAKS: dict[str, tuple[Any, Callable[[dict], None]]] = {
     "future_actual_event": (dates, _set(lambda r: r["lifecycle_events"][1], "state", "actual")),
     "duplicate_identifier": (entity_ids,
                              lambda r: r["identifiers"].append({**r["identifiers"][0], "id": "idn_0000000002"})),
-    "duplicate_product_slug": (entity_ids, _set(lambda r: r["products"][1], "slug", "vexa-optics__vx")),
-    "duplicate_organization_slug": (entity_ids, _set(lambda r: r["organizations"][1], "slug", "vexa-optics")),
+    "duplicate_product_slug": (unique, _set(lambda r: r["products"][1], "slug", "vexa-optics__vx")),
+    "duplicate_organization_slug": (unique, _set(lambda r: r["organizations"][1], "slug", "vexa-optics")),
+    "one_file_twice": (unique, lambda r: r["documents"].append({**r["documents"][0], "id": "doc_0000000009"})),
     "country_unassigned": (countries, _set(lambda r: r["organizations"][0], "country", "XX")),
     "planned_without_announcement": (dates,
                                      _set(lambda r: r["lifecycle_events"][1], "source_refs", ["src_0000000002"])),
@@ -178,17 +179,25 @@ def test_rule_fails_and_passes_when_removed(name: str) -> None:
     assert errors and all(e.startswith(f"{rule.NAME}:") for e in errors), errors
     assert _errors(ctx, [r for r in RULES if r is not rule.check]) == []
 
-def test_one_url_is_one_sources_its_new_version_included_and_a_whole_catalogs_pair_only_warns() -> None:
+def test_one_url_is_one_source_its_new_version_included_in_a_part_or_the_whole() -> None:
     raw = copy.deepcopy(CORPUS)
     held = raw["sources"][1]
     raw["sources"][1] = {**held, "version": 2, "retrieved_at": "2026-10-01T09:00:00Z"}
     assert _errors(_ctx(raw), [unique.check]) == []
     raw["sources"].append({**held, "id": "src_0000000009"})
     ctx = _ctx(raw)
-    assert _errors(ctx, [unique.check]) == [
-        f"unique: src_0000000009: Source.url '{held['url']}' is held by {held['id']} and src_0000000009"]
-    whole = check(dataclasses.replace(ctx, scope=Whole()), [unique.check])
-    assert whole.ok and [w.entity_id for w in whole.warnings] == ["src_0000000009"]
+    pair = [f"unique: {held['id']}: Source.url '{held['url']}' is also held by src_0000000009",
+            f"unique: src_0000000009: Source.url '{held['url']}' is also held by {held['id']}"]
+    assert _errors(ctx, [unique.check]) == _errors(dataclasses.replace(ctx, scope=Whole()), [unique.check]) == pair
+
+def test_a_change_that_replaces_a_permanent_field_is_refused() -> None:
+    raw = copy.deepcopy(CORPUS)
+    product = next(p for p in raw["products"] if p["id"] == "prd_0000000004")
+    product.update(slug=f"{product['slug']}-renamed", version=4)
+    raw["changes"].append({**raw["changes"][3], "id": "chg_0000000005", "version": 4, "patch": [
+        {"op": "replace", "path": "slug", "value": f'"{product["slug"]}"'}]})
+    assert _errors(_ctx(raw)) == [f"permanent: prd_0000000004: Product.slug never changes once set; version 4 sets it "
+                                  f'to "{product["slug"]}"']
 
 def test_planned_event_past_its_date_is_flagged() -> None:
     raw = copy.deepcopy(CORPUS)

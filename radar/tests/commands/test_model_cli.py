@@ -63,13 +63,18 @@ def test_missing_and_invalid_files(tmp_path: Path) -> None:
     r = _cli("model", "validate", str(tmp_path / "bad.json"))
     assert r.returncode == 1 and "invalid JSON" in r.stderr
 
-def test_only_a_catalog_folder_warns_on_its_empty_categories(tmp_path: Path) -> None:
-    for collection, rows in CORPUS.items():
+def test_only_a_catalog_folder_warns_on_its_empty_categories_and_products_missing_a_required_spec(
+        tmp_path: Path) -> None:
+    stated = {**CORPUS["claims"][0], "id": "clm_00000000zz", "spec_key": "interfaces", "value": {"terms": ["gige"]}}
+    for collection, rows in {**CORPUS, "claims": [*CORPUS["claims"], stated]}.items():
         (tmp_path / f"{collection}.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
     folder, file, alone = (json.loads(_cli("model", "validate", *path, "--json").stdout)
                            for path in ([str(tmp_path)], [str(FIXTURE)], []))
     empty = set(REGISTRY.categories) - {p["category"] for p in CORPUS["products"]}
-    assert (folder["ok"] and file["ok"] and {w["entity_id"] for w in folder["warnings"]} == empty
+    missing = {p["id"]: f"states no interfaces, required in {p['category']}" for p in CORPUS["products"]
+               if p["id"] != stated["subject"]}
+    assert (folder["ok"] and file["ok"] and {w["entity_id"] for w in folder["warnings"]} == empty | missing.keys()
+            and {w["entity_id"]: w["message"] for w in folder["warnings"] if w["rule"] == "claim_profile"} == missing
             and file["warnings"] == alone["warnings"] == [])
 
 def _vrange(**kw: Any) -> VersionRange:

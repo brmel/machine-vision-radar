@@ -16,6 +16,6 @@
     {"field": "ip_rating"},
     {"field": "laser_class"}
   ],
-  "required_at_publish": ["principle", "measuring_range"],
+  "required": ["principle", "measuring_range"],
   "axis_dependent_keys": ["measuring_range"]
 }

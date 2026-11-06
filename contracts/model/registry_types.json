@@ -117,14 +117,14 @@
   {
     "id": "CategoryProfile",
     "kind": "record",
-    "description": "Presentation contract of one category: its own specs, the spec groups it takes, its filters and what a page must publish.",
+    "description": "Presentation contract of one category: its own specs, the spec groups it takes, its filters and the specs a product must state.",
     "registry_file": "category_profiles/",
     "fields": {
       "category_id": {"type": "TermId", "vocabulary": "categories"},
       "sections": {"type": "ProfileSections"},
       "groups": {"type": "array", "items": "TermId", "vocabulary": "spec_groups"},
       "facets": {"type": "array", "items": "Facet"},
-      "required_at_publish": {"type": "array", "items": "string"},
+      "required": {"type": "array", "items": "string"},
       "axis_dependent_keys": {"type": "array", "items": "string"}
     }
   }

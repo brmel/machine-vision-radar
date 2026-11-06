@@ -29,6 +29,7 @@ class FieldSpec:
     future_allowed: bool = False
     set_on_approval: bool = False
     unique: bool = False
+    permanent: bool = False
     description: str | None = None
     label: Mapping[str, str] | None = None
     default: Json = None

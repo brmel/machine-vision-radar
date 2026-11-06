@@ -20,7 +20,7 @@ def _against(profile: CategoryProfile | None, claims: list[Claim]) -> tuple[tupl
     if profile is None:
         return (), 0
     keys = {c.spec_key for c in claims}
-    return (tuple(k for k in profile.required_at_publish if k not in keys),
+    return (tuple(k for k in profile.required if k not in keys),
             sum(1 for c in claims if c.spec_key in profile.sections.core))
 
 def _gaps(claims: list[Claim]) -> tuple[str, ...]:
