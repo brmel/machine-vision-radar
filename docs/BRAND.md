@@ -72,7 +72,8 @@ for it.
 Announce shipped things only, never a roadmap as a promise: no "coming soon". A post describes what the live URL does
 today, with one number or screenshot. LinkedIn is the channel. Public claims state only what the measured KPIs support
 ("compiled from public sources, every source cited", never "every one verified"). Posts are drafted for the founder
-in their GitHub issue and posted by hand from the brand's accounts; nothing posts on its own.
+in their GitHub issue and posted by hand from the brand's accounts; nothing posts on its own. `radar feed post --since
+<date>` drafts the digest of what was published since a date, with each article's address.
 
 Every new user-facing surface (route, post, demo) gets a brand check before it ships: the name, the tagline, the
 voice, the role colors.

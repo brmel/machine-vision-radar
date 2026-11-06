@@ -53,11 +53,36 @@ def _slug_of(title: str, taken: set[str]) -> str:
     base = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:60].strip("-") or "article"
     return next(s for s in (base, *(f"{base}-{n}" for n in range(2, len(taken) + 3))) if s not in taken)
 
+def _said(text: Mapping[str, str], locale: str) -> str:
+    return text.get(locale) or next(iter(text.values()), "")
+
 def share_view(item: FeedItem, locale: str, origin: str) -> dict[str, str]:
     url = f"{origin.rstrip('/')}/news/{item.slug}"
-    title = item.title.get(locale) or next(iter(item.title.values()), "")
-    summary = item.summary.get(locale) or next(iter(item.summary.values()), "")
-    return {"locale": locale, "url": url, "text": "\n".join([title, summary, url])}
+    return {"locale": locale, "url": url,
+            "text": "\n".join([_said(item.title, locale), _said(item.summary, locale), url])}
+
+@dataclass(frozen=True, slots=True)
+class PostItem:
+    slug: str
+    title: str
+    published_at: str
+    url: str
+
+@dataclass(frozen=True, slots=True)
+class PostDraft:
+    since: str
+    count: int
+    items: tuple[PostItem, ...]
+    text: str
+
+def post_view(items: Sequence[FeedItem], since: str, notes: Sequence[str], locale: str, origin: str) -> PostDraft:
+    base = origin.rstrip("/")
+    picked = tuple(PostItem(slug=i.slug, title=_said(i.title, locale), published_at=i.published_at or "",
+                            url=f"{base}/news/{i.slug}")
+                   for i in published(items) if (i.published_at or "") >= since)
+    hook = notes[0] if notes else f"{len(picked)} articles published since {since}."
+    lines = [hook, *notes[1:], *(f"{p.title} — {p.url}" for p in picked[:5]), f"{base}/news"]
+    return PostDraft(since=since, count=len(picked), items=picked, text="\n".join(lines))
 
 def _row(item: FeedItem, proposal: Proposal | None = None) -> FeedDeskRow:
     return FeedDeskRow(id=item.id, slug=item.slug, kind=item.kind, authorship=item.authorship, position=item.position,

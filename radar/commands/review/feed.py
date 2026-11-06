@@ -7,7 +7,7 @@ from pathlib import Path
 from radar import paths
 from radar.adapters.console import output
 from radar.domain.model.history.projection import ROWS, plain
-from radar.domain.review.feed.editor import article_of, share_view
+from radar.domain.review.feed.editor import article_of, post_view, share_view
 from radar.domain.review.proposal import Proposal
 from radar.domain.review.requests import Founder, Job
 from radar.domain.review.views import proposals_view
@@ -54,6 +54,12 @@ def _list(args: argparse.Namespace) -> int:
                                 text_formatter=lambda v: output.paged(plain(v), [
 *(f"draft {r.position:>3}  {r.slug}  {r.title[code]}" for r in v.drafts),
 *(f"{r.published_at}  {r.slug}  {r.title[code]}" for r in v.published)]))
+
+def _post(args: argparse.Namespace) -> int:
+    notes = Path(args.notes).read_text(encoding="utf-8").splitlines() if args.notes else []
+    draft = post_view(args.wiring.feed().items(), args.since, [n for n in notes if n.strip()],
+                      args.locale or args.wiring.model().registry.default_language.code, paths.site_origin())
+    return output.format_output(plain(draft), json_mode=args.json, text_formatter=lambda v: v["text"])
 
 def _show(args: argparse.Namespace) -> int:
     return output.format_output(args.wiring.feed().row(args.id), json_mode=True)
@@ -112,6 +118,12 @@ def register(commands: Commands) -> None:
     retract = _acted(commands.verb("feed", "retract", func=_retract,
                                    help="withdraw a published article: its approval is retracted, its history kept"))
     retract.add_argument("id", help="the article's id or slug")
+    post = commands.verb("feed", "post", func=_post,
+                         help="the digest post to share by hand: the notes' lines, then the articles published since "
+                              "a date, newest first, with their addresses")
+    post.add_argument("--since", required=True, help="the date (YYYY-MM-DD) the digest starts at")
+    post.add_argument("--notes", help="a text file whose lines open the post (a merged PR's ticked criteria)")
+    post.add_argument("--locale", help="the language of the titles (default: the registry's)")
     share = commands.verb("feed", "share-text", func=_share,
                           help="the post to copy to share a published article by hand: title, summary and address")
     share.add_argument("id", help="the article's id or slug")

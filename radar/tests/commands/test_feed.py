@@ -49,6 +49,13 @@ def test_articles_are_drafted_reordered_published_revised_and_retracted(tmp_path
     assert listed["drafts"] == [] and [p["id"] for p in listed["published"][:2]] == [first, second]
     assert _public(place) == ["first-words", "second-words", *before]
 
+    posted = FX.json(place, "feed", "post", "--since", "2000-01-01")
+    assert posted["count"] >= 2 and [i["slug"] for i in posted["items"][:2]] == ["first-words", "second-words"]
+    assert (posted["text"].splitlines()[0] == f"{posted['count']} articles published since 2000-01-01."
+            and posted["items"][0]["url"].endswith("/news/first-words") and posted["text"].endswith("/news"))
+    (tmp_path / "notes.txt").write_text("Shipped: the family table\n\n", encoding="utf-8")
+    noted = FX.json(place, "feed", "post", "--since", "2999-01-01", "--notes", str(tmp_path / "notes.txt"))
+    assert noted["count"] == 0 and noted["text"].splitlines()[0] == "Shipped: the family table"
     shared = FX.json(place, "feed", "share-text", "first-words", "--locale", "fr")
     assert (shared["url"].endswith("/news/first-words")
             and shared["text"].splitlines() == ["First words (fr)", "A test article.", shared["url"]])
