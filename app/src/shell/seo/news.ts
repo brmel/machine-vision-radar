@@ -11,7 +11,7 @@ export function buildNewsHeadMeta(items: readonly FeedBrief[], total: number, or
   const listed =
     items.map((item) => ({ name: localized(item.title, DEFAULT_LANGUAGE.code), path: articlePath(item.slug) }));
   return buildHubHeadMeta({ path: NEWS_PATH, name: messages.newsTitle, lead: messages.newsDescription,
-    trail: [{ name: messages.navHome, path: "/" }], items: listed, total }, origin);
+    trail: [{ name: messages.navHome, path: "/" }], items: listed, total, feeds: NEWS_PATH }, origin);
 }
 
 export function buildArticleHeadMeta(view: FeedItemView, origin: string, locale: string): PageHeadMeta {

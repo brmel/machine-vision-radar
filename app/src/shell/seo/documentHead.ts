@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { BRAND_CONFIG } from "../../ui/theme/brand.ts";
-import { type PageHeadMeta, headMetaTags, serializeJsonLd } from "./seo.ts";
+import { type PageHeadMeta, feedLinks, headMetaTags, serializeJsonLd } from "./seo.ts";
 
 function headElement(tag: "meta" | "link" | "script", name: string, value: string): HTMLElement {
   const found = document.head.querySelector<HTMLElement>(`${tag}[${name}="${value}"]`);
@@ -18,12 +18,24 @@ export function setCanonical(url: string): void {
   headElement("link", "rel", "canonical").setAttribute("href", url);
 }
 
+function setFeeds(meta: PageHeadMeta): void {
+  document.head.querySelectorAll('link[rel="alternate"]').forEach((link) => link.remove());
+  for (const [type, href] of feedLinks(meta)) {
+    const link = document.createElement("link");
+    link.rel = "alternate";
+    link.type = type;
+    link.href = href;
+    document.head.appendChild(link);
+  }
+}
+
 export function syncDocumentHead(meta: PageHeadMeta): void {
   document.title = meta.title;
   if (meta.noindex) upsertMeta("name", "robots", "noindex");
   else document.querySelector('meta[name="robots"]')?.remove();
 
   setCanonical(meta.canonicalUrl);
+  setFeeds(meta);
   for (const [attr, key, content] of headMetaTags(meta)) upsertMeta(attr, key, content);
   headElement("script", "type", "application/ld+json").textContent = serializeJsonLd(meta.jsonLd);
 }
@@ -31,7 +43,7 @@ export function syncDocumentHead(meta: PageHeadMeta): void {
 export function syncNotFoundHead(title: string): void {
   document.title = `${title} · ${BRAND_CONFIG.wordmark}`;
   upsertMeta("name", "robots", "noindex");
-  document.querySelector('link[rel="canonical"]')?.remove();
+  document.querySelectorAll('link[rel="canonical"], link[rel="alternate"]').forEach((link) => link.remove());
   document.head.querySelector('script[type="application/ld+json"]')?.remove();
 }
 

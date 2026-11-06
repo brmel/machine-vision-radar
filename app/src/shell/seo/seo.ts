@@ -1,6 +1,6 @@
 import { BRAND_CONFIG, type Profile } from "../../ui/theme/brand.ts";
 import { LANGUAGES } from "../../domain/languages.ts";
-import { vendorPath } from "../../domain/paths.ts";
+import { feedPath, vendorPath } from "../../domain/paths.ts";
 import type { OrganizationView } from "../../domain/views.ts";
 
 export interface PageHeadMeta {
@@ -11,6 +11,7 @@ export interface PageHeadMeta {
   jsonLd: object;
   noindex?: boolean;
   image?: string;
+  feeds?: string;
 }
 
 const CARD_PATH = "/og-card.png";
@@ -34,6 +35,13 @@ export function headMetaTags(meta: PageHeadMeta): readonly HeadMetaTag[] {
     ["name", "twitter:image", image],
   ];
 }
+
+export const FEED_TYPES = { atom: "application/atom+xml", json: "application/feed+json" } as const;
+
+export const feedLinks = (meta: PageHeadMeta): readonly (readonly [string, string])[] => (meta.feeds
+  ? (["atom", "json"] as const)
+    .map((f) => [FEED_TYPES[f], new URL(feedPath(meta.feeds ?? "", f), meta.canonicalUrl).href])
+  : []);
 
 export function brandOrganization(origin: string, profiles: readonly Profile[]) {
   const sameAs = profiles.filter((p) => p.url).map((p) => p.url);
@@ -115,6 +123,7 @@ export function buildVendorHeadMeta(vendor: Pick<OrganizationView, "slug" | "nam
     canonicalUrl: url,
     description: formatMetaDescription(vendor.summary || `${vendor.name} on ${BRAND_CONFIG.wordmark}.`),
     ogType: "website",
+    feeds: vendorPath(vendor.slug),
     jsonLd: { "@context": "https://schema.org", "@type": "Organization", name: vendor.name, url,
       ...(vendor.website ? { sameAs: vendor.website } : {}),
       ...(vendor.summary ? { description: vendor.summary } : {}) },

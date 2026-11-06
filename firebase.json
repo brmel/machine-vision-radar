@@ -83,7 +83,7 @@
         ]
       },
       {
-        "source": "/news/feed.atom",
+        "source": "**/feed.atom",
         "headers": [
           {
             "key": "Content-Type",
@@ -96,7 +96,7 @@
         ]
       },
       {
-        "source": "/news/feed.json",
+        "source": "**/feed.json",
         "headers": [
           {
             "key": "Content-Type",

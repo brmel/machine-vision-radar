@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { BRAND_CONFIG } from "../src/ui/theme/brand.ts";
-import { type PageHeadMeta, headMetaTags, serializeJsonLd } from "../src/shell/seo/seo.ts";
+import { type PageHeadMeta, feedLinks, headMetaTags, serializeJsonLd } from "../src/shell/seo/seo.ts";
 import type { CatalogRepository } from "../src/domain/ports/CatalogRepository.ts";
 import { FilesCatalogRepository } from "../src/adapters/read-model/files.ts";
 import { FirestoreCatalogRepository } from "../src/adapters/read-model/firestore.ts";
@@ -46,7 +46,7 @@ export const escapeHtml = (str: string): string => str.replace(/[&<>"']/g, (c) =
 
 const stripped = (template: string, title: string, metas: RegExp): string =>
   template.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
-    .replace(/<link\s+rel="canonical"[^>]*>/gi, "").replace(metas, "");
+    .replace(/<link\s+rel="(canonical|alternate)"[^>]*>/gi, "").replace(metas, "");
 
 const withTags = (html: string, tags: readonly string[]): string =>
   html.replace("</head>", `  ${tags.join("\n  ")}\n</head>`);
@@ -56,6 +56,7 @@ export function renderHead(template: string, head: PageHeadMeta): string {
     /<meta\s+(property|name)="(og:[^"]+|twitter:[^"]+|description|robots)"[^>]*>/gi), [
     ...(head.noindex ? [`<meta name="robots" content="noindex" />`] : []),
     `<link rel="canonical" href="${escapeHtml(head.canonicalUrl)}" />`,
+    ...feedLinks(head).map(([type, href]) => `<link rel="alternate" type="${type}" href="${escapeHtml(href)}" />`),
     ...headMetaTags(head).map(([attr, key, content]) => `<meta ${attr}="${key}" content="${escapeHtml(content)}" />`),
     `<script type="application/ld+json">${serializeJsonLd(head.jsonLd)}</script>`,
   ]);

@@ -85,6 +85,9 @@ inEachLocale("News", (locale) => {
     await recent.getByRole("link", { name: label(about[0].title, locale) }).click();
     await expect(page).toHaveURL(new RegExp(`/news/${about[0].slug}$`));
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(label(about[0].title, locale));
+    const feed = await (await page.request.get(`/vendor/${vendor.slug}/feed.json`)).json();
+    expect(feed.items.map((i: { url: string }) => new URL(i.url).pathname))
+      .toEqual(news.items.filter((i) => i.subjects.includes(vendor.id)).map((i) => `/news/${i.slug}`));
   });
 
   test(`the home shows the latest ${teaser} articles from the registry`, async ({ page }) => {

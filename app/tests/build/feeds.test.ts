@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { FilesCatalogRepository } from "../../src/adapters/read-model/files.ts";
-import type { FeedItemView, FeedPageView } from "../../src/domain/views.ts";
+import type { FeedItemView, FeedPageView, IndexView } from "../../src/domain/views.ts";
 import { feedDescription, prerenderNews } from "../../scripts/prerender/news.ts";
 import { DEFAULT_MESSAGES } from "../../src/shell/i18n/messages.ts";
 import { Sitemap } from "../../scripts/sitemap.ts";
@@ -92,6 +92,25 @@ describe("the news's pages and feeds", () => {
     expect(entries[0]).toContain("<title>Widgets &lt;&amp;&gt; &quot;gauges&quot;</title>");
     expect(entries[0]).toContain(`<updated>${REVISED}</updated>`);
     expect(head).toContain(`<updated>${REVISED}</updated>`);
+
+    const paths = (text: string | undefined): string[] =>
+      JSON.parse(text ?? "").items.map((i: { url: string }) => new URL(i.url).pathname);
+    const category = page.items.find((b) => b.categories.length > 0)?.categories[0] ?? "";
+    expect(category, "an article cites a product, so a category has news").not.toBe("");
+    expect(paths(written.get(`category/${category}/feed.json`)))
+      .toEqual(page.items.filter((b) => b.categories.includes(category)).map((b) => `/news/${b.slug}`));
+    expect(JSON.parse(written.get(`category/${category}/feed.json`) ?? "").feed_url)
+      .toBe(`${ORIGIN}/category/${category}/feed.json`);
+    // Justification (typed boundary): the fixture's index, checked against contracts/model/views.json when exported.
+    const { organizations } = read(dir, "index.json") as IndexView;
+    const cited = organizations.find((o) => page.items.some((b) => b.subjects.includes(o.id)));
+    expect(cited, "an article cites an organization").toBeDefined();
+    for (const org of organizations) {
+      expect(paths(written.get(`vendor/${org.slug}/feed.json`)))
+        .toEqual(page.items.filter((b) => b.subjects.includes(org.id)).map((b) => `/news/${b.slug}`));
+      expect(written.get(`vendor/${org.slug}/feed.atom`))
+        .toContain(`<link rel="self" type="application/atom+xml" href="${ORIGIN}/vendor/${org.slug}/feed.atom"/>`);
+    }
   }, 60_000);
 
   it("gives the role addresses that are set in the feeds' description", () => {
