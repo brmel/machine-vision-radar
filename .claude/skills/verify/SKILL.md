@@ -5,14 +5,14 @@ description: Use before a commit, a cleanup commit or a push, or when a gate fai
 
 # verify
 
-The gates are AGENTS.md's (Gates); `app/scripts/gates/check.sh` names every step. Never commit red; never weaken a
-gate.
+The gates are AGENTS.md's (Gates): `npm run verify` is the fast loop (about 15 s, `app/scripts/gates/verify.sh`), and
+`app/scripts/gates/check.sh` names every step of the full gate. Never commit red; never weaken a gate.
 
 ## One test fast
 
 Python: `radar/AGENTS.md`, One test fast. TypeScript and Playwright: `app/AGENTS.md`, One test fast.
 
-Done when the test you touched and the pre-commit hook's checks pass.
+Done when the test you touched and `npm run verify` pass.
 
 ## The red check
 

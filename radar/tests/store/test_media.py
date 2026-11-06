@@ -4,8 +4,6 @@ import hashlib
 import urllib.parse
 from pathlib import Path
 
-import pytest
-
 from radar.adapters.files import json_store
 from radar.adapters.firestore import layout, store
 from radar.domain.ports.store.docs import Put

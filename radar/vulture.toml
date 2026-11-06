@@ -1,4 +1,4 @@
-# The gate's unused-code scan of radar/ (app/scripts/gates/check.sh). What it leaves out is reached by name from
+# The gate's unused-code scan of radar/ (app/scripts/gates/verify.sh). What it leaves out is reached by name from
 # outside the scan.
 [tool.vulture]
 min_confidence = 60
