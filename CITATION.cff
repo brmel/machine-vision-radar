@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use the code or cite the catalog, cite it as below."
+title: "Machine Vision Radar"
+type: software
+authors:
+  - name: "Machine Vision Radar"
+    website: "https://mvradar.web.app"
+repository-code: "https://github.com/brmel/machine-vision-radar"
+url: "https://mvradar.web.app"
+license: Apache-2.0
+version: "0.1.0"
+date-released: "2026-11-05"
+abstract: "A sourced, structured catalog of machine-vision products and makers in one vocabulary, with the industry's news written from its records and an Ask that answers an inspection task from the catalog. Code Apache-2.0; the catalog CC BY-NC 4.0."

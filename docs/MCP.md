@@ -9,6 +9,8 @@ publishes.
 - **HTTP:** `POST https://<site>/api/mcp` (live: `https://mvradar.web.app/api/mcp`), the streamable HTTP transport,
   stateless: one JSON-RPC 2.0 message a request, one `application/json` body an answer, a notification 202 and no
   body. No session and no stream: any method but `POST` answers 405.
+- **Up?** `GET https://<site>/api/health` answers 200 with the release, the deployed commit and the search index's
+  version; a directory's check or an agent's retry reads it, never the MCP route.
 - **stdio,** on the founder's machine: `MVR_AGENT_TOKEN=mvr_… python -m radar mcp serve`, one message a line in and
   one answer a line out, on the emulators' store, or the project's with `--project <id> --yes` ([CLI.md](CLI.md)).
 

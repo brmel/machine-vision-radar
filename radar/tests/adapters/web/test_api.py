@@ -13,7 +13,7 @@ from radar import paths
 from radar.adapters.console import log
 from radar.adapters.firestore.docs import FirestoreDocs
 from radar.domain.ports.store.docs import Increment
-from radar.adapters.web.api import AskEndpoint, ReportEndpoint, Served
+from radar.adapters.web.api import AskEndpoint, HealthEndpoint, ReportEndpoint, Served
 from radar.adapters.web.app_check import AppCheck
 from radar.domain.model.entities import FilesOn
 from radar.domain.ports.review.proposal_queue import Query
@@ -204,6 +204,16 @@ def test_the_cloud_function_runs_in_us_central1_scaled_to_zero_and_serves_the_en
                                                      "X-Forwarded-For": f"203.0.113.7, {HOSTING}"}))
     assert (deployed["region"], deployed["min_instances"]) == ("us-central1", 0)
     assert (status, mime, headers, body["refused"]) == (200, "application/json", {}, False) and body["citations"]
+
+def test_health_answers_the_release_the_commit_and_the_index_version_to_a_get(
+        place: tuple[str, str], monkeypatch: pytest.MonkeyPatch) -> None:
+    FX.wire(place, monkeypatch)
+    engine = Wiring().search_engine()
+    health = HealthEndpoint(engine, "api-00007", "abc1234")
+    assert health.respond(Request("POST", "/api/health", b"{}", {}, "127.0.0.1")).status == 405
+    response = health.respond(Request("GET", "/api/health", b"", {}, "127.0.0.1"))
+    assert (response.status, response.headers) == (200, {"cache-control": "no-store"})
+    assert response.body == {"release": "api-00007", "commit": "abc1234", "index": engine.last_indexed().version}
 
 def test_radar_metrics_sums_the_days_counters_and_reads_the_kpis() -> None:
     where = stores.place()

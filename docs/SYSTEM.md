@@ -32,7 +32,8 @@ snapshot (`radar store export`) stays in the maintainers' private data repo. Pag
   `public_news/{slug}`). A vendor, category or component hub page costs 1 more for its recent articles; a product page
   reads none, and the home's latest come with the registry. Browse without a category, a vendor page and a component hub
   each run one paged query on `public_products` for one page of cards, and one `count()`.
-- **The function:** one Cloud Function behind `/api` (`radar/adapters/web/`) serves the ask endpoint and the
+- **The function:** one Cloud Function behind `/api` (`radar/adapters/web/`) serves `GET /api/health` (its release,
+  the deployed commit and the search index's version, never cached), the ask endpoint and the
   catalogue's search ([SEARCH.md](SEARCH.md)), the admin API (`/api/admin/*`, an ID token with the admin claim on every
   request), the MCP server (`/api/mcp`, [MCP.md](MCP.md)) and a reader's error report (`POST /api/report {subject,
   message, source_url?}`). A report carries a limited-use App Check token (reCAPTCHA Enterprise, loaded when the form opens),

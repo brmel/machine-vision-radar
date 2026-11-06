@@ -158,6 +158,16 @@ inEachLocale("Smoke", (locale) => {
     expect(errors).toEqual([]);
   });
 
+  test("the function says what is deployed at /api/health", async ({ request }) => {
+    test.skip(GATE, "the hosting emulator runs no function");
+    const response = await request.get("/api/health");
+    expect(response.status()).toBe(200);
+    expect(response.headers()["cache-control"]).toBe("no-store");
+    const body = await response.json();
+    expect(typeof body.release).toBe("string");
+    expect(body.index === null || typeof body.index === "string").toBe(true);
+  });
+
   test("a search runs on the function, with no error", async ({ page, request }) => {
     test.skip(GATE, "the hosting emulator runs no function; search.spec checks /api/find in the gate");
     const errors = consoleErrors(page, /status of 404/);

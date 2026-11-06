@@ -60,7 +60,7 @@ def test_no_banned_folder_names() -> None:
 
 TOP_LEVEL = {"app", "radar", "contracts", "data", "docs", ".claude", ".github", ".githooks", ".firebaserc",
              ".gitignore", ".nvmrc", "AGENTS.md", "CLAUDE.md", "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "LICENSE",
-             "README.md", "SECURITY.md", "firebase.json", "package.json"}
+             "README.md", "SECURITY.md", "CITATION.cff", "firebase.json", "package.json"}
 
 def test_the_root_holds_only_the_code_folders_and_the_files_tools_require() -> None:
     tracked = subprocess.run(["git", "ls-files", "-co", "--exclude-standard"], cwd=DEV,

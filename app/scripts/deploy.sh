@@ -39,6 +39,7 @@ rsync -a --delete --exclude venv --exclude tests --exclude __pycache__ \
   "$REPO_ROOT/radar" "$REPO_ROOT/contracts" "$REPO_ROOT/data" "$REPO_ROOT/.firebaserc" "$FUNCTIONS/"
 { cat "$REPO_ROOT/radar/requirements.txt"; echo "firebase-functions>=0.6.0"; } > "$FUNCTIONS/requirements.txt"
 cp "$REPO_ROOT/radar/adapters/web/function.py" "$FUNCTIONS/main.py"
+git -C "$REPO_ROOT" rev-parse --short HEAD > "$FUNCTIONS/build"
 [[ -d "$FUNCTIONS/venv" ]] || timed 120 "the function's venv" uv venv --quiet --python 3.12 "$FUNCTIONS/venv"
 timed 300 "the function's packages" uv pip install --quiet --python "$FUNCTIONS/venv/bin/python" \
   -r "$FUNCTIONS/requirements.txt"

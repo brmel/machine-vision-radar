@@ -1,5 +1,9 @@
 # Machine Vision Radar
 
+[![Code: Apache-2.0](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
+[![Catalog: CC BY-NC 4.0](https://img.shields.io/badge/catalog-CC%20BY--NC%204.0-lightgrey)](docs/LEGAL.md)
+[![Cite](https://img.shields.io/badge/cite-CITATION.cff-lightgrey)](CITATION.cff)
+
 **All machine vision knowledge, in one place.**
 
 Machine vision engineers choose cameras, lenses, lighting, frame grabbers, code readers and software from hundreds of
@@ -8,8 +12,8 @@ notice. Machine Vision Radar turns that scattered knowledge into one sourced, se
 three parts:
 
 - **The catalog.** Every product and every maker, in one vocabulary, with each published value citing the page or
-  datasheet it came from. Today: 950 products from 433 vendors in 22 categories, browsed by category, filtered on
-  their specs and compared side by side.
+  datasheet it came from, browsed by category, filtered on their specs and compared side by side; the counts by
+  category and maker are on [the market page](https://mvradar.web.app/market).
 - **The news.** What the industry launches and changes, written from the records the catalog holds, every sentence
   citing the products, makers and sources it rests on.
 - **Application solving.** Describe an inspection task in plain words ("read small barcodes on bottles moving at
@@ -34,12 +38,9 @@ AI works on both sides of the catalog, and a person stays in charge of what it p
   the same review ([docs/MCP.md](docs/MCP.md)).
 
 Every AI use renders a versioned prompt from `data/prompts/` and runs it through one `ModelRunner` port, metered
-against per-use caps before each call and logged after it with its tokens and cost. This build adds **Muse Spark**,
-through the Meta Model API (`radar/adapters/ai/meta/runner.py`), and points every use at it in
-`data/registry/ai.json`; a model's `provider` entry picks its runner, so Muse Spark and Gemini (through Google ADK)
-are each one registry line away ([docs/SEARCH.md](docs/SEARCH.md)). With no API key, **Muse Glimmer**, Meta's
-open-weight model distilled from Muse Spark, runs on the same runner from a local Ollama server
-(`ollama run muse-glimmer`). The live site still runs Gemini: it switches to Muse Spark once its Meta key is set.
+against per-use caps before each call and logged after it with its tokens and cost. A model's `provider` entry in
+`data/registry/ai.json` picks its runner, Google ADK on Vertex AI or the Meta Model API (which also reaches a local
+Ollama server), so a model change is one registry line ([docs/SEARCH.md](docs/SEARCH.md)).
 
 Code: Apache-2.0. Catalog: CC BY-NC 4.0. The catalog lives in Firestore and Cloud Storage behind the app and is served
 through the site, the API and MCP; this repo holds the code and the registry it is driven by, not the data.
@@ -116,8 +117,8 @@ cd app && npm run emulators                # Firestore and Storage emulators, fo
    the review desk opens.
 
 The AI uses run on the model `data/registry/ai.json` (or a use's `ai-caps` record) names for each, metered against
-its caps: Muse Spark needs a Meta Model API key as `MODEL_API_KEY` in the environment; a Gemini model runs on Vertex AI
-with your Google Cloud credentials.
+its caps: a Meta model needs its API key as `MODEL_API_KEY` in the environment; a Gemini model runs on Vertex AI with
+your Google Cloud credentials.
 
 ## Contributing
 
