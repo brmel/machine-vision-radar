@@ -32,7 +32,8 @@ snapshot (`radar store export`) stays in the maintainers' private data repo. Pag
   navigation to it does, so a change approved after the build shows: a product **1** (`public_products/{id}`, or a query
   on its `slug`), a vendor **1** (`public_organizations/{slug}`), a category page **2** (`public_facets/{category}` and
   one listing page), /news, /market and an article **1** each (`public_index/news`, `public_index/market`,
-  `public_news/{slug}`). A vendor, category or component hub page costs 1 more for its recent articles; a product page
+  `public_news/{slug}`), a family's compare page **2** (the family by its slug, then its models in one batch). A vendor,
+  category or component hub page costs 1 more for its recent articles; a product page
   reads none, and the home's latest come with the registry. Browse without a category, a vendor page and a component hub
   each run one paged query on `public_products` for one page of cards, and one `count()`.
 - **The function:** one Cloud Function behind `/api` (`radar/adapters/web/`) serves `GET /api/health` (its release,

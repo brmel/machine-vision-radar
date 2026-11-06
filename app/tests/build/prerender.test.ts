@@ -110,7 +110,11 @@ describe("prerender", () => {
       .categories.reduce((n: number, c: { pages: number }) => n + c.pages, 0);
     const organizations = JSON.parse(readFileSync(join(fromFiles, "read-model", "organizations.json"), "utf-8")).length;
     expect(requests.filter((r) => /\/(public_products|public_organizations)\//.test(r))).toEqual([]);
-    expect(requests.filter((r) => r.endsWith(":batchGet"))).toHaveLength(pages + Math.ceil(organizations / 100));
+    const views = join(dir, "dist", "public", "products");
+    const families = readdirSync(views)
+      .filter((f) => JSON.parse(readFileSync(join(views, f), "utf-8")).models.length > 1).length;
+    expect(requests.filter((r) => r.endsWith(":batchGet")))
+      .toHaveLength(pages + Math.ceil(organizations / 100) + families);
     const written = (out: string) => readdirSync(out, { recursive: true, withFileTypes: true })
       .filter((e) => e.isFile())
       .map((e) => relative(out, join(e.parentPath, e.name))).filter((f) => !f.startsWith("read-model")).sort();
