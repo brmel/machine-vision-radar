@@ -27,7 +27,7 @@ class ImageEvaluation:
     tokens_out: int
 
     def ended(self) -> Ended:
-        return Ended(Outcome.ANSWERED, self.tokens_in, self.tokens_out)
+        return Ended(Outcome.ANSWERED, self.tokens_in, self.tokens_out, calls=len(self.judged))
 
 class ImageJudge(Protocol):
     def judge(self, product_name: str, candidates: tuple[CandidateImage, ...]) -> ImageEvaluation:

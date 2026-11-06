@@ -44,7 +44,7 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   nothing, cites an id outside the evidence, or states a number the evidence (or the question) does not hold rejects the
   output, with that reason, and the asker gets the `not_enough_evidence` refusal.
 - **The AI uses** (their ports: AGENTS.md rule 15) are answers, web research with its image judge (on research's model
-  and caps), datasheet extraction and news drafts, each on its prompt (`ask`, `research`, `image_judge`, `datasheet`,
+  and caps, each candidate's call counted), datasheet extraction and news drafts, each on its prompt (`ask`, `research`, `image_judge`, `datasheet`,
   `draft`) and its registry model, run through the `ModelRunner` port (`radar/domain/ports/ai/prompts.py`). A model's
   `provider` picks its runner (`radar/adapters/wiring/models.py`). `meta` runs on the Meta Model API
   (`radar/adapters/ai/meta/runner.py`): its OpenAI-compatible chat completions, the prompt's instruction as the system

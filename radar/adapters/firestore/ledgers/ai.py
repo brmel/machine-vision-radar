@@ -39,9 +39,9 @@ class FirestoreBudget:
         return Usage(int(today.get("calls", 0)), int(today.get("clients", {}).get(client, 0)) if client else 0,
                      float(month.get("cad", 0.0)))
 
-    def charge(self, use: Use, day: str, cad: float, client: str | None = None) -> None:
+    def charge(self, use: Use, day: str, cad: float, client: str | None = None, calls: int = 1) -> None:
         self._docs.commit([Increment(f"{usage_collection(use)}/{day}",
-                                     {"calls": 1, **({f"clients.{client}": 1} if client else {})}),
+                                     {"calls": calls, **({f"clients.{client}": calls} if client else {})}),
                            Increment(f"{usage_collection(use)}/{day[:7]}", {"cad": float(cad)})])
 
 class FirestoreUsageLog:

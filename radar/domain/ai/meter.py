@@ -34,7 +34,8 @@ class Meter(Generic[M]):
     def _record(self, started: float, model: AiModel, ended: Ended) -> float:
         cad = cost(self._ai, model, ended.tokens_in, ended.tokens_out)
         self._usage.record(ModelCall(self._use, self._prompt, model.id, ended.tokens_in, ended.tokens_out, cad,
-                                     round((self._clock() - started) * 1000), ended.outcome, ended.reason))
+                                     round((self._clock() - started) * 1000), ended.outcome, ended.reason,
+                                     ended.calls))
         return cad
 
     def _capped(self, caps: Mapping[Use, Cap], day: str, client: str | None) -> str | None:
@@ -60,5 +61,5 @@ class Meter(Generic[M]):
             raise
         ended = called.ended()
         cad = self._record(started, model, ended) if ended else 0.0
-        self._budget.charge(self._use, day, cad, client)
+        self._budget.charge(self._use, day, cad, client, ended.calls if ended else 1)
         return called, cad

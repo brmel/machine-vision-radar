@@ -13,7 +13,7 @@ class Budget(Protocol):
     def usage(self, use: Use, day: str, client: str | None = None) -> Usage:
         ...
 
-    def charge(self, use: Use, day: str, cad: float, client: str | None = None) -> None:
+    def charge(self, use: Use, day: str, cad: float, client: str | None = None, calls: int = 1) -> None:
         ...
 
 class Outcome(str, Enum):
@@ -28,6 +28,7 @@ class Ended:
     tokens_in: int
     tokens_out: int
     reason: str | None = None
+    calls: int = 1
 
 class Unparsed(ValueError):
     def __init__(self, reason: str, tokens_in: int, tokens_out: int, cad: float = 0.0) -> None:
@@ -45,6 +46,7 @@ class ModelCall:
     latency_ms: int
     outcome: Outcome
     reason: str | None = None
+    calls: int = 1
 
 class UsageLog(Protocol):
     def record(self, call: ModelCall) -> None:
