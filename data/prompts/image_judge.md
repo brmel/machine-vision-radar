@@ -23,7 +23,7 @@ You judge whether an image is a suitable product thumbnail for a catalog of mach
 - `other_product`: a photo depicting a different product or accessory, not the product named.
 - `unrelated`: any other image (placeholder, icon, text snippet).
 
-A photo of the product beats a logo, a banner, a diagram or another product. Provide confidence (0.0 to 1.0) and a brief reason.
+Provide confidence (0.0 to 1.0) and a brief reason.
 
 ## Message
 

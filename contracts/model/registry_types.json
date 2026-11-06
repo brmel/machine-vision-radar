@@ -20,7 +20,8 @@
       "symbol": {"type": "string"},
       "dimension": {"type": "TermId", "vocabulary": "dimensions"},
       "ucum": {"type": "string", "description": "the unit's code in the Unified Code for Units of Measure, case-sensitive"},
-      "factor": {"type": "number"}
+      "factor": {"type": "number"},
+      "aliases": {"type": "array", "items": "string", "optional": true, "description": "other ways a page writes it"}
     }
   },
   {

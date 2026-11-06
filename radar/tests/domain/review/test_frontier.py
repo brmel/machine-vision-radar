@@ -25,7 +25,8 @@ def test_a_scope_is_a_product_a_maker_or_a_category_with_a_website() -> None:
     assert {s.org for s in sites_of(CategoryScope(category), orgs, owning, FX.read)} == {
         o.id for o in orgs if o.website and any(p.vendor == o.slug and p.category == category for p in index.products)}
     [p_site] = sites_of(ProductScope("prd_0000000002"), orgs, owning, FX.read)
-    assert (p_site.target_product, p_site.org, p_site.sites[1:]) == ("prd_0000000002", MAKER["id"], site.sites)
+    assert (p_site.one_product, p_site.products[0].id, p_site.org, p_site.sites[1:]) == (
+        True, "prd_0000000002", MAKER["id"], site.sites)
     for scope in (ProductScope(MAKER["slug"]), MakerScope("prd_0000000002"), CategoryScope(MAKER["slug"])):
         with pytest.raises(LookupError, match="no product|no organization|no category"):
             sites_of(scope, orgs, owning, FX.read)

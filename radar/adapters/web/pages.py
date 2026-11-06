@@ -133,7 +133,8 @@ class _Html(HTMLParser):
         super().close()
         self._ended()
         schemas = [_schema(block) for block in self._linked]
-        self.lines += [line for schema in schemas for line in _properties(schema.get("additionalProperty"))]
+        properties = [line for schema in schemas for line in _properties(schema.get("additionalProperty"))]
+        self.lines = [*properties, *self.lines]
         named = [image for schema in schemas if isinstance(image := schema.get("image"), str)]
         self.images = [*named, *self.images, *self._shared]
 
@@ -229,7 +230,7 @@ class PoliteReader:
             if status not in REDIRECTS or not moved:
                 return status, kind, body, parts
             target = _address(moved, urlunsplit(parts))
-            if target.hostname != parts.hostname:
+            if _link(target).site != _link(parts).site:
                 raise _Unreadable(f"it redirects off its site, to {urlunsplit(target)}")
             parts = target
         raise _Unreadable(f"more than {HOPS} redirects")

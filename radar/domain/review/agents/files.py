@@ -35,7 +35,7 @@ class Files:
                                bytes=len(file.content), sha256=ref.sha256, subjects=(product,), rights=self._rights,
                                source_url=file.link.address, fetched_at=file.retrieved_at))
 
-    def stated(self, staged: Staged, source_type: str, day: str) -> Stated | None:
+    def stated(self, staged: Staged, name: str, source_type: str, day: str) -> Stated | None:
         kind, file = staged.document.kind, staged.file
         if not self._kinds[kind].research:
             return None
@@ -44,7 +44,7 @@ class Files:
         product = staged.document.subjects[0]
         extraction, cad = self._meter.call(day,
                                            lambda extractor: extractor.extract(
-                                               Datasheet(product, file.content, file.mime, source)))
+                                               Datasheet(name, file.content, file.mime, source)))
         claims = tuple(Claim(id=keyed("clm", f"{product} {v.spec_key} {source.id}"), version=1, subject=product,
                              spec_key=v.spec_key, value=v.value, method=kind, recorded_at=source.retrieved_at, rank=1,
                              source_refs=(source.id,))

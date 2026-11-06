@@ -11,7 +11,7 @@ from radar.domain.ports.review.research_runs import Step
 from radar.domain.ports.web.reader import Link, Page
 from radar.domain.review.agents.drafts import words
 from radar.domain.review.agents.research.frontier import ProductScope
-from radar.domain.review.agents.research.tables import Tables
+from radar.domain.review.agents.research.tables import Tables, named_card
 from radar.tests.adapters.web.test_research import FX, _run
 from radar.tests.fixtures.fixture_category import recorded_page
 
@@ -93,7 +93,23 @@ def test_rows_as_makers_write_them() -> None:
                      "body_height": {"quantity": {"value": 10.0, "unit": "mm"}}}
     assert _maker_rows("optics.lighting", "Relative humidity | 35 to 85 %RH (No condensation)") == {
         "operating_humidity": {"range": {"min": 35.0, "max": 85.0, "unit": "percent"}}}
-    camera = _maker_rows("imaging.cameras.area_scan", "Sensor model | | IMX265", "Exposure time | 12 μs to 10 ms")
-    assert camera == {"sensor_model": {"string": "IMX265"}}, "two figures in two units state no one value"
+    assert _maker_rows("optics.lighting", "Operating relative humidity | (%) | 20-85, non condensing") == {
+        "operating_humidity": {"range": {"min": 20.0, "max": 85.0, "unit": "percent"}}}
+    camera = _maker_rows("imaging.cameras.area_scan", "Sensor model | | IMX265", "Exposure time | 12 μs to 10 ms",
+                         "Frame rate | 9.5 fps", "Pixel size | 2 x 3 µm", "Weight | 90 g", "Weight | 95 g")
+    assert camera == {"sensor_model": {"string": "IMX265"}, "frame_rate": {"quantity": {"value": 9.5, "unit": "hz"}}}, (
+        "two figures, two dimensions and two rows that disagree state no one value")
     assert not _maker_rows("imaging.cameras.area_scan", "Image sensor | CMOS image sensor"), "a phrase, no part number"
     assert not _maker_rows(ACCESSORIES, "Length | 3 m"), "a cable's or a body's: the word alone does not say"
+
+def test_a_page_names_a_card_by_whole_words() -> None:
+    def card(name: str) -> ProductCard:
+        return ProductCard(id=f"prd_{name}", slug=name, name=name, kind="model", vendor="m", vendor_name="M",
+                           category="optics.lenses", specs={})
+
+    def page(title: str) -> Page:
+        return Page(Link("https://maker.example/p", "maker.example"), title, "", (), (), "")
+
+    assert named_card(page("A1000 datasheet"), (card("A100"),)) is None
+    assert named_card(page("Surface inspection"), (card("ace"),)) is None
+    assert named_card(page("LDL2-434X30(A)｜CCS INC."), (card("LDL2-434X30(A)"),)) == card("LDL2-434X30(A)")

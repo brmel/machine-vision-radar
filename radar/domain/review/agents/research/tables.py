@@ -10,12 +10,15 @@ from radar.domain.ports.web.reader import Page
 from radar.domain.review.agents.drafts import Words, spelled
 
 NUMBER = r"[-+]?\d[\d,]*(?:\.\d+)?"
-BOUND = re.compile(r"[<>≤≥]|\bup to\b|\btbd\b|^see\b|\bmin(?:imum)?\b", re.I)
+BOUND = re.compile(r"[<>≤≥]|\bup to\b|\btbd\b|^see\b|\bmin(?:imum)?\b|\b(?:less|more|greater) than\b"
+                   r"|\bat (?:least|most)\b|\bor (?:less|lower|more|higher)\b", re.I)
 FOOTNOTE = re.compile(r"\(\d+\)|\*\d+")
 UNIT_CELL = re.compile(r"\(([^()]+)\)")
 FIGURE = re.compile(rf"({NUMBER})(?:\s*(?:to|–|-)\s*({NUMBER}))?\s*([^\d\s,;()]+)?")
-RELATIVE = re.compile(r"%\s*r\.?h\.?", re.I)
+TWO_DIMENSIONS = re.compile(r"\d\s*[x×*/]\s*\d")
+LEADING_FIGURE = re.compile(rf"^(?:{NUMBER}(?:\s*(?:to|–|-)\s*{NUMBER})?)")
 BETWEEN_TERMS = re.compile(r"[,;]|(?<!\d)/|/(?!\d)")
+NOT_WORD = re.compile(r"[^\w.]+")
 ANSWERS = {"yes": True, "no": False}
 Value = dict[str, object]
 
@@ -31,24 +34,28 @@ def _rows(text: str) -> list[tuple[str, str]]:
         if len(cells) == 2:
             rows.append((FOOTNOTE.sub("", cells[0]).strip(), cells[1]))
         elif len(cells) == 3 and (unit := UNIT_CELL.fullmatch(cells[1])):
-            rows.append((FOOTNOTE.sub("", cells[0]).strip(), f"{cells[2]} {unit.group(1)}"))
+            value = LEADING_FIGURE.sub(lambda m: f"{m.group(0)} {unit.group(1)}", cells[2], count=1)
+            rows.append((FOOTNOTE.sub("", cells[0]).strip(), value))
     return rows
 
 def _number(text: str) -> float:
     return float(text.replace(",", ""))
 
-def _quantity(cell: str, spec: SpecDefinition, said: Mapping[str, str]) -> Value | None:
-    plain = RELATIVE.sub("%", FOOTNOTE.sub(" ", cell))
-    found = [m for m in FIGURE.finditer(plain) if m.group(3) and spelled(m.group(3)) in said]
-    if len(found) != 1:
+def _quantity(cell: str, said: Mapping[str, str]) -> Value | None:
+    found = [m for m in FIGURE.finditer(FOOTNOTE.sub(" ", cell)) if m.group(3) and spelled(m.group(3)) in said]
+    if len(found) != 1 or TWO_DIMENSIONS.search(cell):
         return None
     low, high, unit = found[0].groups()
-    value: Value = ({"range": {"min": _number(low), "max": _number(high), "unit": said[spelled(unit)]}} if high
-                    else {"quantity": {"value": _number(low), "unit": said[spelled(unit)]}})
-    return value if _within(spec, unit == spec.unit, _number(low), _number(high or low)) else None
+    return ({"range": {"min": _number(low), "max": _number(high), "unit": said[spelled(unit)]}} if high
+            else {"quantity": {"value": _number(low), "unit": said[spelled(unit)]}})
 
-def _within(spec: SpecDefinition, own_unit: bool, low: float, high: float) -> bool:
-    return not (own_unit and spec.bounds) or spec.bounds.min <= low <= high <= spec.bounds.max
+def _bounded(value: Value, spec: SpecDefinition, registry: Registry) -> bool:
+    measure = value.get("quantity") or value.get("range")
+    if not isinstance(measure, dict) or not spec.bounds or not spec.unit:
+        return True
+    ends = (measure["value"],) if "value" in measure else (measure["min"], measure["max"])
+    converted = (registry.converted(end, measure["unit"], spec.unit) for end in ends)
+    return all(spec.bounds.min <= end <= spec.bounds.max for end in converted)
 
 def _terms(cell: str, spec: SpecDefinition, said: Mapping[str, str]) -> Value | None:
     whole = said.get(spelled(cell))
@@ -63,7 +70,7 @@ def _value(label: str, cell: str, spec: SpecDefinition, said: Mapping[str, str])
         return None
     match spec.datatype:
         case "quantity":
-            return _quantity(cell, spec, said)
+            return _quantity(cell, said)
         case "term" | "term_set":
             return _terms(cell, spec, said)
         case "boolean":
@@ -85,18 +92,23 @@ class Tables:
         return labels
 
     def read(self, page: Page, card: ProductCard) -> Table:
-        labels, claims, unmatched = self._labels(card.category), {}, []
+        labels, stated, unmatched = self._labels(card.category), {}, []
         for label, cell in _rows(page.text):
             key = labels.get(spelled(label))
             if key is None:
                 unmatched.append(label)
                 continue
-            value = _value(label, cell, self._registry.spec_definitions[key], self._words[key])
-            if value is not None and key not in claims:
-                claims[key] = value
-        return Table(tuple(claims.items()), tuple(dict.fromkeys(unmatched)))
+            spec = self._registry.spec_definitions[key]
+            value = _value(label, cell, spec, self._words[key])
+            if value is not None and _bounded(value, spec, self._registry):
+                stated.setdefault(key, []).append(value)
+        return Table(tuple((k, v[0]) for k, v in stated.items() if all(o == v[0] for o in v)),
+                     tuple(dict.fromkeys(unmatched)))
+
+def _words_of(text: str) -> str:
+    return f" {NOT_WORD.sub(' ', text.casefold()).strip()} "
 
 def named_card(page: Page, cards: tuple[ProductCard, ...]) -> ProductCard | None:
-    title = spelled(page.title)
-    named = sorted((c for c in cards if spelled(c.name) in title), key=lambda c: len(c.name), reverse=True)
+    title = _words_of(page.title)
+    named = sorted((c for c in cards if _words_of(c.name) in title), key=lambda c: len(c.name), reverse=True)
     return named[0] if named and (len(named) == 1 or len(named[0].name) > len(named[1].name)) else None
