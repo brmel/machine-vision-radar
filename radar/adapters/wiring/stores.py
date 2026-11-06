@@ -11,7 +11,7 @@ from radar import paths
 from radar.adapters.console import log
 from radar.adapters.firestore.docs import FirestoreDocs
 from radar.adapters.firestore.layout import INDEX, catalog_of, doc_value, read_records
-from radar.adapters.firestore.store import scan
+from radar.adapters.firestore.store import StoreCatalogs
 from radar.adapters.firestore.repository import (StoreCatalogRepository, StoreChangeLog, StoreHeldRecords,
                                                  StoreProposalQueue, StoreRecords, StoreVersionStore)
 from radar.adapters.firestore.writer import FirestoreCatalogStore
@@ -38,7 +38,6 @@ from radar.domain.read_model.history import Histories
 from radar.domain.read_model.listings import republished
 from radar.domain.read_model.products.values import Terms
 from radar.domain.read_model.derived.identity import ProductIdentity
-from radar.domain.review.agents.duplicates import HELD
 from radar.domain.review.review import Review
 from radar.domain.validation.context import Part, Scope, Whole
 
@@ -144,7 +143,7 @@ class Stores:
     def review(self) -> Review:
         model = self.model()
         return Review(StoreProposalQueue(self.store(), model), self.catalog_store(), self.versions(),
-                      lambda: self.catalog(tuple(HELD)), ProductIdentity.of(model.registry), model, self.instant,
+                      StoreCatalogs(self.store(), model), ProductIdentity.of(model.registry), model, self.instant,
                       self.now)
 
     def identity(self) -> FirebaseIdentity:
@@ -171,7 +170,7 @@ class Stores:
                          Terms(model.registry).source_view)
 
     def catalog(self, kinds: tuple[str, ...] = ()) -> Catalog:
-        return catalog_of(self.model(), scan(self.store(), self.model().schema, kinds))
+        return StoreCatalogs(self.store(), self.model()).reading(kinds)
 
     def catalog_at(self, path: str | None) -> tuple[Catalog, Scope]:
         if not path:

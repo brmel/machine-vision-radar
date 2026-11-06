@@ -6,6 +6,10 @@ from radar.domain.model.entities import Claim, ProductVersion, VersionRange
 
 T = TypeVar("T")
 
+class Catalogs(Protocol):
+    def reading(self, kinds: tuple[str, ...]) -> Catalog:
+        ...
+
 class Catalog(Protocol):
     def all(self, kind: type[T]) -> Sequence[T]:
         ...

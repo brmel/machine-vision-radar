@@ -14,6 +14,7 @@ from radar.domain.model.history.plan import change_id, event
 from radar.domain.model.history.projection import states
 from radar.domain.model.entities import Change
 from radar.domain.model.model import Model
+from radar.domain.ports.catalog.catalog import Catalog
 from radar.domain.model.schema import ModelSchema
 from radar.domain.ports.store.blob_store import BlobStore
 from . import layout
@@ -146,3 +147,10 @@ def differences(a: Docs, b: Docs, collections: Sequence[str]) -> list[str]:
         left, right = dict(walk(a, c)), dict(walk(b, c))
         out += sorted(p for p in left.keys() | right.keys() if left.get(p) != right.get(p))
     return out
+
+class StoreCatalogs:
+    def __init__(self, docs: Docs, model: Model) -> None:
+        self._docs, self._model = docs, model
+
+    def reading(self, kinds: tuple[str, ...]) -> Catalog:
+        return catalog_of(self._model, scan(self._docs, self._model.schema, kinds))
