@@ -26,7 +26,8 @@ the AI uses, `docs/SEARCH.md`.
 - Every command takes `--json`, in the shape `contracts/operations.json` gives it; every noun, verb, argument and flag
   has accurate help, which is its documentation (`test_cli_contract`).
 - One logger, `adapters/console/log.py`, on `contracts/logging.json`; nothing else prints (`test_logging`).
-- Dependencies: `radar/requirements.txt`; `fastembed` and `google-adk` are imported only where used.
+- Dependencies: `radar/requirements.txt` is the function's runtime, `requirements-dev.txt` the tests and gates;
+  `fastembed` and `google-adk` are imported only where used.
 
 ## One test fast
 
