@@ -239,7 +239,6 @@
               "website_url": {"type": "string"},
               "vendor": {"$ref": "#/$defs/OrgBrief"},
               "status": {"$ref": "#/$defs/StatusView"},
-              "tags": {"type": "array", "items": {"$ref": "#/$defs/TermRef"}},
               "identifiers": {
                 "type": "array",
                 "items": {"$ref": "#/$defs/IdentifierRow"},
@@ -273,7 +272,7 @@
               "indexable": {"type": "boolean", "description": "It publishes every spec its CategoryProfile requires at publish; a page that does not is noindex and out of the sitemap"},
               "sources": {"type": "array", "items": {"$ref": "#/$defs/SourceView"}}
             },
-            "required": ["id", "slug", "name", "kind", "version", "history", "category", "vendor", "tags", "identifiers", "models", "core", "detail", "versions", "offerings", "lifecycle", "relations", "components", "media", "indexable", "sources"],
+            "required": ["id", "slug", "name", "kind", "version", "history", "category", "vendor", "identifiers", "models", "core", "detail", "versions", "offerings", "lifecycle", "relations", "components", "media", "indexable", "sources"],
             "additionalProperties": false
           },
           "RelationRow": {

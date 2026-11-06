@@ -13,14 +13,14 @@ from radar.domain.review.requests import Job, Withdrawal
 ACTOR = "radar quality report"
 
 def _coverage(coverage: Coverage) -> dict[str, object]:
-    listed = {"no_category": coverage.no_category, "untagged": coverage.untagged, "thin": coverage.thin}
+    listed = {"no_category": coverage.no_category, "thin": coverage.thin}
     return {"products": coverage.products,
             **{name: {"count": len(ids), "ids": list(ids)} for name, ids in listed.items()}}
 
 def _text(payload: dict[str, Any], coverage: Coverage, filing: bool) -> str:
     lines = [f"Provenance: {payload['products']} products, {payload['weak']} weak" + (
         f", {len(payload['filed'])} quarantines proposed" if filing else ""),
-             f"Coverage: {len(coverage.no_category)} with no category | {len(coverage.untagged)} untagged | "
+             f"Coverage: {len(coverage.no_category)} with no category | "
              f"{len(coverage.thin)} thin pages", "",
              *(f"{r['id']}  {r['claims']:>3} claims  {r['vendor_backed']:>3} vendor-backed  "
                f"{'; '.join(r['weak']) or 'ok'}" for r in payload["records"])]

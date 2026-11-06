@@ -158,7 +158,6 @@ export interface ProductCard {
   readonly category: string;
   readonly summary?: LocalizedText;
   readonly status?: TermRef;
-  readonly tags: readonly string[];
   readonly specs: Readonly<Record<string, ViewValue>>;
   readonly thumbnail_url?: string;
 }
@@ -179,7 +178,6 @@ export interface IndexView {
   readonly categories: readonly CategoryEntry[];
   readonly spec_definitions: Readonly<Record<string, SpecLabel>>;
   readonly spec_groups: Readonly<Record<string, LocalizedText>>;
-  readonly tags: readonly TermRef[];
   readonly search: SearchSettings;
   readonly news: readonly FeedBrief[];
   readonly organizations: readonly OrgBrief[];
@@ -195,7 +193,6 @@ export interface RegistryView {
   readonly categories: readonly CategoryEntry[];
   readonly spec_definitions: Readonly<Record<string, SpecLabel>>;
   readonly spec_groups: Readonly<Record<string, LocalizedText>>;
-  readonly tags: readonly TermRef[];
   readonly search: SearchSettings;
   readonly news: readonly FeedBrief[];
 }
@@ -343,7 +340,6 @@ export interface ProductView {
   readonly website_url?: string;
   readonly vendor: OrgBrief;
   readonly status?: StatusView;
-  readonly tags: readonly TermRef[];
   readonly identifiers: readonly IdentifierRow[];
   readonly aliases?: readonly string[];
   readonly thumbnail_url?: string;
@@ -415,7 +411,7 @@ export interface HistoryView {
 
 /** A field keyword search matches a query in, and its weight. */
 export interface SearchField {
-  readonly field: "name" | "vendor" | "category" | "tags" | "summary" | "specs";
+  readonly field: "name" | "vendor" | "category" | "summary" | "specs";
   readonly weight: number;
 }
 

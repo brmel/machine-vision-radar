@@ -134,7 +134,6 @@ export const ProductCardSchema: z.ZodType<M.ProductCard> = z.strictObject({
   category: z.string(),
   summary: z.lazy(() => LocalizedTextSchema).optional(),
   status: z.lazy(() => TermRefSchema).optional(),
-  tags: z.array(z.string()),
   specs: z.record(z.string(), z.lazy(() => ViewValueSchema)),
   thumbnail_url: z.string().optional(),
 });
@@ -153,7 +152,6 @@ export const IndexViewSchema: z.ZodType<M.IndexView> = z.strictObject({
   categories: z.array(z.lazy(() => CategoryEntrySchema)),
   spec_definitions: z.record(z.string(), z.lazy(() => SpecLabelSchema)),
   spec_groups: z.record(z.string(), z.lazy(() => LocalizedTextSchema)),
-  tags: z.array(z.lazy(() => TermRefSchema)),
   search: z.lazy(() => SearchSettingsSchema),
   news: z.array(z.lazy(() => FeedBriefSchema)),
   organizations: z.array(z.lazy(() => OrgBriefSchema)),
@@ -168,7 +166,6 @@ export const RegistryViewSchema: z.ZodType<M.RegistryView> = z.strictObject({
   categories: z.array(z.lazy(() => CategoryEntrySchema)),
   spec_definitions: z.record(z.string(), z.lazy(() => SpecLabelSchema)),
   spec_groups: z.record(z.string(), z.lazy(() => LocalizedTextSchema)),
-  tags: z.array(z.lazy(() => TermRefSchema)),
   search: z.lazy(() => SearchSettingsSchema),
   news: z.array(z.lazy(() => FeedBriefSchema)),
 });
@@ -300,7 +297,6 @@ export const ProductViewSchema: z.ZodType<M.ProductView> = z.strictObject({
   website_url: z.string().optional(),
   vendor: z.lazy(() => OrgBriefSchema),
   status: z.lazy(() => StatusViewSchema).optional(),
-  tags: z.array(z.lazy(() => TermRefSchema)),
   identifiers: z.array(z.lazy(() => IdentifierRowSchema)),
   aliases: z.array(z.string()).optional(),
   thumbnail_url: z.string().optional(),
@@ -366,7 +362,7 @@ export const HistoryViewSchema: z.ZodType<M.HistoryView> = z.strictObject({
 });
 
 export const SearchFieldSchema: z.ZodType<M.SearchField> = z.strictObject({
-  field: z.enum(["name", "vendor", "category", "tags", "summary", "specs"]),
+  field: z.enum(["name", "vendor", "category", "summary", "specs"]),
   weight: z.number(),
 });
 

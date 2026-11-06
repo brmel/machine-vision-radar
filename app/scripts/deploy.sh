@@ -84,7 +84,7 @@ timed 300 "production build" env -u MVR_FIRESTORE_DOCS -u MVR_READ_MODEL_DIR -u 
   MVR_PROJECT="$PROJECT" npm run build
 
 echo "=== [6/8] The search index, up to date with the project's read model ==="
-(cd "$REPO_ROOT" && timed 300 "index update" python3 -m radar --project "$PROJECT" --yes index update)
+(cd "$REPO_ROOT" && timed 900 "index update" python3 -m radar --project "$PROJECT" --yes index update)
 
 echo "=== [7/8] Preview channel and smoke ==="
 CHANNEL="$(timed 300 "preview channel" npx --no-install firebase hosting:channel:deploy preview-deploy \

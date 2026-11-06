@@ -367,7 +367,6 @@ class Product:
     spec_groups: tuple[TermId, ...] | None = None
     slug: str
     summary: LocalizedText | None = None
-    tags: tuple[TermId, ...] | None = None
     website_url: str | None = None
     variant_axes: Mapping[str, TermId] | None = None
     thumbnail: EntityId | None = None
@@ -721,7 +720,6 @@ class ProductCard:
     category: str
     summary: LocalizedText | None = None
     status: TermRef | None = None
-    tags: tuple[str, ...]
     specs: Mapping[str, ViewValue]
     thumbnail_url: str | None = None
 
@@ -742,7 +740,6 @@ class IndexView:
     categories: tuple[CategoryEntry, ...]
     spec_definitions: Mapping[str, SpecLabel]
     spec_groups: Mapping[str, LocalizedText]
-    tags: tuple[TermRef, ...]
     search: SearchSettings
     news: tuple[FeedBrief, ...]
     organizations: tuple[OrgBrief, ...]
@@ -758,7 +755,6 @@ class RegistryView:
     categories: tuple[CategoryEntry, ...]
     spec_definitions: Mapping[str, SpecLabel]
     spec_groups: Mapping[str, LocalizedText]
-    tags: tuple[TermRef, ...]
     search: SearchSettings
     news: tuple[FeedBrief, ...]
 
@@ -910,7 +906,6 @@ class ProductView:
     website_url: str | None = None
     vendor: OrgBrief
     status: StatusView | None = None
-    tags: tuple[TermRef, ...]
     identifiers: tuple[IdentifierRow, ...]
     aliases: tuple[str, ...] | None = None
     thumbnail_url: str | None = None
@@ -982,7 +977,7 @@ class HistoryView:
 @dataclass(frozen=True, slots=True, kw_only=True)
 class SearchField:
     """A field keyword search matches a query in, and its weight."""
-    field: Literal["name", "vendor", "category", "tags", "summary", "specs"]
+    field: Literal["name", "vendor", "category", "summary", "specs"]
     weight: float
 
 @dataclass(frozen=True, slots=True, kw_only=True)

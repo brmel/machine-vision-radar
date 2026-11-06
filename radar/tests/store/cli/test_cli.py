@@ -114,11 +114,9 @@ def test_quality_market_and_export_read_the_store(place: tuple[str, str], tmp_pa
     report = FX.json(place, "quality", "report")
     assert report["products"] == len(FX.rows("products.jsonl")) and report["filed"] == []
     coverage = report["coverage"]
-    untagged, thin = (sorted(v["id"] for v in VIEWS if not v["tags"]),
-                      sorted(v["id"] for v in VIEWS if not v["indexable"]))
+    thin = sorted(v["id"] for v in VIEWS if not v["indexable"])
     assert coverage["products"] == len(VIEWS)
     assert coverage["no_category"] == {"count": 0, "ids": []}
-    assert coverage["untagged"] == {"count": len(untagged), "ids": untagged} and 0 < len(untagged) < len(VIEWS)
     assert coverage["thin"] == {"count": len(thin), "ids": thin} and thin
     assert [r["id"] for r in report["records"][:report["weak"]]] == sorted(
         r["id"] for r in report["records"] if r["weak"])

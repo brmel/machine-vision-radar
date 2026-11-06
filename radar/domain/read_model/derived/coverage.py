@@ -11,7 +11,6 @@ from radar.domain.model.registry import Registry
 class Coverage:
     products: int
     no_category: tuple[str, ...]
-    untagged: tuple[str, ...]
     thin: tuple[str, ...]
 
     @staticmethod
@@ -20,7 +19,6 @@ class Coverage:
         return Coverage(
             products=len(products),
             no_category=tuple(sorted(p.id for p in products if p.category not in registry.categories)),
-            untagged=tuple(sorted(p.id for p in products if not p.tags)),
             thin=tuple(sorted(thin)),
         )
 

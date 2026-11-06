@@ -33,7 +33,7 @@ wiring loads it once and every caller takes it.
 1. **Technology-neutral:** machine-vision concepts, independent of databases, wire formats or UI state.
 2. **Provenance** ([AGENTS.md](../AGENTS.md) rule 11): every entity with `source_refs` cites at least one public
    Source, and a Change cites one when it sets a sourced fact. A record's identity and classification (names,
-   identifiers, slug, category, tags, country, summary, links) is curated, not a sourced fact. Unknown values are
+   identifiers, slug, category, country, summary, links) is curated, not a sourced fact. Unknown values are
    omitted, never defaulted; dates carry their precision, with no invented day or month.
 3. **Sparse facts:** a product stores only the facts it has, as typed claims on registry specs; no table of nulls.
 
@@ -150,14 +150,14 @@ shows.
 - Barcode verifiers and print-grading instruments are `imaging.code_readers`, told apart by specs
   (`grading_standards`) and capability terms.
 - Thermal and thermographic cameras are one category, `imaging.thermal_cameras`; spectral bands are specs
-  (`spectral_range`, `sensor_technology`, `thermal_sensitivity_netd`) and tags (`swir`).
+  (`spectral_range`, `sensor_technology`, `thermal_sensitivity_netd`).
 - A SWIR area-scan or line-scan camera stays in its camera category; its band is its `spectral_range`.
 - Vision software capabilities are term-set specs, not categories. The `ai_stack` group (methods, tasks, model
   formats, inference hardware, APIs) is taken by every category whose products build or run models; a product can
   take it through `spec_groups`. An AI agent that builds or runs a vision application belongs to its role's category,
   with `agentic` among its methods and its configuration style, and `model_context_protocol` among its APIs when it
   speaks MCP.
-- **New tech enters as a tag**, and becomes a category or profile only when its products need a spec shape no profile
+- **New tech enters as a vocabulary term**, and becomes a category or profile only when its products need a spec shape no profile
   can express.
 
 ### 5.4 The anti-overfit rule
@@ -166,8 +166,8 @@ Categories are pipeline roles; technologies are vocabulary terms and specs. Ever
 things: illuminate → acquire → transport → process → decide → act. Roles change on decade timescales; sensing
 principles, AI paradigms and interfaces change yearly and live one level down. `imaging.cameras.3d` is one category,
 and stereo, structured light, ToF, triangulation or lidar are values of its `principle` spec; an event-based camera is
-an area-scan camera with the `event_based` tag. The test for a proposed category: "Will this still be a distinct
-product kind in 20 years?" If not, it is a term or a tag. History is first-class: discontinued products keep their
+an area-scan camera whose `sensor_technology` is `event_based`. The test for a proposed category: "Will this still be a distinct
+product kind in 20 years?" If not, it is a term or a spec. History is first-class: discontinued products keep their
 records, and vocabularies keep older terms (analog, FireWire, USB2) so a 2005 camera records as faithfully as a
 current one.
 
@@ -182,17 +182,17 @@ non-vision developer tools, robotics platforms where vision is incidental, gener
 and other non-optical sensing, pure distributors, discrete photodetectors, HMIs and panel PCs, document AI, and
 broadcast capture unless marketed for machine vision. **Boundaries:**
 
-- Bare sensor modules → `imaging.sensors`; board-level camera engines → the camera category with the `board_level`
-  tag; finished cameras → the camera category.
-- A turnkey cell that bundles a robot is `systems.vision_systems` (tags `turnkey`, `robot_ready`).
+- Bare sensor modules → `imaging.sensors`; board-level camera engines → the camera category with `form_factor`
+  `board_level`; finished cameras → the camera category.
+- A turnkey cell that bundles a robot is `systems.vision_systems`; what it bundles is its `system_components`.
 - `compute.edge_ai` needs AI acceleration or explicit vision interfaces; controllers with trigger, lighting or machine
   I/O are `compute.vision_controllers`.
-- Pushbroom hyperspectral → `imaging.cameras.line_scan` + `hyperspectral`; snapshot hyperspectral →
-  `imaging.cameras.area_scan` + `hyperspectral`; point and benchtop instruments → `imaging.spectrometers`.
+- Pushbroom hyperspectral → `imaging.cameras.line_scan` with its `spectral_acquisition`; snapshot hyperspectral →
+  `imaging.cameras.area_scan` with its `spectral_acquisition`; point and benchtop instruments → `imaging.spectrometers`.
 - What a maker sells beside its lights and lenses: cables, fixtures and adapters → `accessories`; plates, films, filters
   and mirrors that shape light → `optics.optical_components`; each takes the `environment` group when its page states
   a size or a temperature. A light made for a plant-research or microscope bench, not a vision system, is out of scope.
-- A scientific camera is an area-scan camera; "smart" needs on-device processing and is a tag.
+- A scientific camera is an area-scan camera; "smart" needs on-device processing, which `onboard_processing` states.
 - A vendor with services only gets an organization record and no products.
 
 ## 6. Validation

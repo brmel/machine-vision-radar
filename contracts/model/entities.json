@@ -115,13 +115,6 @@
         "label": {"en": "Address (slug)", "fr": "Adresse (slug)"}
       },
       "summary": {"type": "LocalizedText", "optional": true, "label": {"en": "Summary", "fr": "Résumé"}},
-      "tags": {
-        "type": "array",
-        "items": "TermId",
-        "vocabulary": "tags",
-        "optional": true,
-        "label": {"en": "Tags", "fr": "Étiquettes"}
-      },
       "website_url": {"type": "string", "optional": true, "label": {"en": "Website", "fr": "Site web"}},
       "variant_axes": {
         "type": "map",
