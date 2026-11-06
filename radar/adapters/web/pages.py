@@ -99,7 +99,7 @@ class _Html(HTMLParser):
 
     def handle_data(self, data: str) -> None:
         if self._in[-1] == "title":
-            self.title += data.strip()
+            self.title += "" if "svg" in self._in else data.strip()
         elif not set(self._in) & set(SKIPPED):
             self._line.append(data)
 

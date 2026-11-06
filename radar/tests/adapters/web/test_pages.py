@@ -12,7 +12,7 @@ from radar.tests.store import stores
 DOCUMENTS = stores.fixture().model.registry.vocabularies["document_kinds"]
 NOW, SITE, BY = stores.NOW, "https://example.com", "2026-10-18T12:00:40Z"
 SPECS = ('<!doctype html><html><head><title>Widget Ten</title><meta property="og:image" '
-         'content="/media/widget-ten.jpg"></head><body>'
+         'content="/media/widget-ten.jpg"></head><body><svg><title>Icon-Contact</title></svg>'
          '<img src="/media/logo.svg"><h1>Widget Ten</h1><p>A reach of up to <b>140</b> mm,\n in two finishes.</p>'
          '<table><tr><th>Model</th><th>Reach</th></tr><tr><td>WT-1</td><td>120 '
          'mm</td></tr><tr><td>WT-2</td><td><span>140</span> mm</td></tr></table>'
