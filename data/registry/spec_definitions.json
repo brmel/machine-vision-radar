@@ -239,6 +239,18 @@
     "description": {"en": "Where the product runs: in the cloud, at the edge near the cameras, or both.", "fr": "Lieu d'exécution du produit : dans le cloud, en périphérie près des caméras, ou les deux."}
   },
   {
+    "id": "depth_of_field",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "better": "higher",
+    "label": {"en": "Depth of field", "fr": "Profondeur de champ"},
+    "description": {"en": "Range of object distances a lens keeps in acceptable focus at its working distance, as its maker states it.", "fr": "Plage de distances objet qu'un objectif garde nettes à sa distance de travail, selon son fabricant."},
+    "aliases": ["DOF", "depth of focus at object", "profondeur de champ", "Schärfentiefe"],
+    "bounds": {"min": 0.001, "max": 100000},
+    "precision": 3
+  },
+  {
     "id": "depth_range",
     "datatype": "quantity",
     "dimension": "length",
@@ -278,6 +290,14 @@
     "aliases": ["optical distortion", "TV distortion", "distorsion optique", "Verzeichnung"],
     "bounds": {"min": 0, "max": 100},
     "precision": 2
+  },
+  {
+    "id": "drive_modes",
+    "datatype": "term_set",
+    "vocabulary": "drive_modes",
+    "label": {"en": "Drive modes", "fr": "Modes de pilotage"},
+    "description": {"en": "How a lighting controller drives its lights: constant current, PWM dimming, strobe pulses or overdrive.", "fr": "Comment un contrôleur d'éclairage pilote ses éclairages : courant constant, gradation PWM, impulsions stroboscopiques ou surintensité."},
+    "aliases": ["drive method", "lighting mode", "intensity control method", "mode de pilotage"]
   },
   {
     "id": "dynamic_range",
@@ -689,6 +709,17 @@
     "description": {"en": "Operating systems the product runs on or supports.", "fr": "Systèmes d'exploitation sur lesquels le produit fonctionne ou qu'il prend en charge."}
   },
   {
+    "id": "output_current",
+    "datatype": "quantity",
+    "dimension": "electric_current",
+    "unit": "a",
+    "label": {"en": "Output current", "fr": "Courant de sortie"},
+    "description": {"en": "Largest current a lighting controller drives into a light, per channel, as its maker states it.", "fr": "Courant maximal qu'un contrôleur d'éclairage fournit à un éclairage, par canal, selon son fabricant."},
+    "aliases": ["output current", "drive current", "courant de sortie", "Ausgangsstrom"],
+    "bounds": {"min": 0.0001, "max": 1000},
+    "precision": 3
+  },
+  {
     "id": "output_power",
     "datatype": "quantity",
     "dimension": "power",
@@ -953,6 +984,18 @@
     "label": {"en": "Telecentric design", "fr": "Conception télécentrique"},
     "description": {"en": "Whether the lens is telecentric, keeping magnification constant as object distance changes within its depth of field.", "fr": "Indique si l'objectif est télécentrique, à grandissement constant quand la distance de l'objet varie dans sa profondeur de champ."},
     "aliases": ["telecentric", "telecentric lens", "bi-telecentric", "telecentricity", "télécentrique", "objectif télécentrique", "bi-télécentrique", "télécentricité", "telezentrisch", "Telezentrie", "bi-telezentrisch"]
+  },
+  {
+    "id": "telecentricity",
+    "datatype": "quantity",
+    "dimension": "angle",
+    "unit": "deg",
+    "better": "lower",
+    "label": {"en": "Telecentricity", "fr": "Télécentricité"},
+    "description": {"en": "Largest angle between a telecentric lens's chief rays and its optical axis; lower is more telecentric.", "fr": "Angle maximal entre les rayons principaux d'un objectif télécentrique et son axe optique ; plus il est faible, plus l'objectif est télécentrique."},
+    "aliases": ["telecentric slope", "telecentricity error", "télécentricité"],
+    "bounds": {"min": 0, "max": 10},
+    "precision": 3
   },
   {
     "id": "temperature_accuracy",

@@ -1,0 +1,13 @@
+{
+  "category_id": "optics.light_controllers",
+  "sections": {
+    "core": ["channels", "output_current", "drive_modes", "interfaces"],
+    "detail": ["power"],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["environment"],
+  "facets": [{"field": "channels"}, {"field": "drive_modes"}, {"field": "interfaces"}],
+  "required": ["channels"],
+  "axis_dependent_keys": []
+}
