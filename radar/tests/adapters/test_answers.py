@@ -26,7 +26,7 @@ from radar.domain.ports.ai.image_judge import CandidateImage
 from radar.domain.ports.ai.prompts import ModelRunner
 from radar.domain.ports.ai.research_agent import FileDraft, Reading, RecordsDraft
 from radar.domain.ports.ai.usage_log import Unparsed
-from radar.domain.ports.web.page_fetcher import Page
+from radar.domain.ports.web.reader import Link, Page
 from radar.domain.ports.search.retriever import Evidence
 from radar.domain.ports.search.search_engine import SearchRequest
 from radar.tests.store import stores
@@ -38,8 +38,8 @@ GEMINI = REGISTRY.ai.models[0]
 MUSE = next(m for m in REGISTRY.ai.models if isinstance(m.provider, AiProviderMeta))
 GLIMMER = next(m for m in REGISTRY.ai.models if isinstance(m.provider, AiProviderLocal))
 RECORDED = (["prd_0000000002", "prd_0000000005"], "Which widget has a glossy finish, and what replaces it?")
-PAGE = Page("https://example.com/products/widget-two", "Widget Two", "A glossy widget, 93 g.",
-            ("https://example.com/media/widget-two.pdf",), stores.NOW)
+PAGE = Page(Link("https://example.com/products/widget-two", "example.com"), "Widget Two", "A glossy widget, 93 g.",
+            (Link("https://example.com/media/widget-two.pdf", "example.com"),), (), stores.NOW)
 SOURCE = Source(id="src_0000000009", version=1, type="datasheet", url="https://example.com/media/widget-two.pdf",
                 retrieved_at=stores.NOW)
 SHEET = Datasheet("prd_0000000002", b"%PDF-1.4\nfixture_mount: socket_b\n%%EOF\n", "application/pdf", SOURCE)
@@ -192,7 +192,7 @@ def test_the_adk_research_agent_returns_the_records_a_page_states_for_the_run_to
     said = {"proposals": [{"files_on": "update", "reason": "The page gives its mass", "subject": "prd_0000000002",
                            "records": json.dumps([claim])},
                           {"files_on": "update", "reason": "The page links its datasheet", "subject": "prd_0000000002",
-                           "records": "[]", "media": PAGE.links[0]}],
+                           "records": "[]", "media": PAGE.links[0].address}],
             "follow": ["https://example.com/products/widget-nine"]}
     heard: list[str] = []
     with _vertex_saying(json.dumps(said), heard) as url:
@@ -203,12 +203,13 @@ def test_the_adk_research_agent_returns_the_records_a_page_states_for_the_run_to
                         []) as url:
         with pytest.raises(Unparsed, match="each with its id"):
             USES["research"](_adk(url))
-    assert findings.proposals == (RecordsDraft("update", "The page gives its mass", "prd_0000000002", (claim,)),
-                                  FileDraft("update", "The page links its datasheet", "prd_0000000002", PAGE.links[0]))
+    assert findings.proposals == (
+        RecordsDraft("update", "The page gives its mass", "prd_0000000002", (claim,)),
+        FileDraft("update", "The page links its datasheet", "prd_0000000002", PAGE.links[0].address))
     assert (findings.follow == ("https://example.com/products/widget-nine",) and findings.tokens_in > 0
             and findings.tokens_out > 0)
     sections = REGISTRY.profile(card.category).sections
-    assert (PAGE.text in heard[0] and PAGE.links[0] in heard[0]
+    assert (PAGE.text in heard[0] and PAGE.links[0].address in heard[0]
             and _specs_in(heard[0], {*sections.core, *sections.detail}))
     carded, uncarded = (json.loads(h)["contents"][0]["parts"][0]["text"] for h in heard)
     assert ('"id": "line_rate"' not in carded and '"id": "line_rate"' in uncarded

@@ -129,6 +129,8 @@ class Term:
     preference: int | None = None
     files_on: FilesOn | None = None
     research: bool | None = None
+    hosts: tuple[str, ...] | None = None
+    third_party: bool | None = None
     succeeds: bool | None = None
     owns: bool | None = None
     renames: bool | None = None

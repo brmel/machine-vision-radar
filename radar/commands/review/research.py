@@ -7,8 +7,8 @@ from radar.adapters.console import log, output
 from radar.adapters.console.parser import Commands
 from radar.domain.model.history.projection import ROWS, plain
 from radar.domain.ports.review.research_runs import ResearchRun, Status
-from radar.domain.review.agents.research.run import FOLLOW, PAGES, SECONDS
-from radar.domain.review.agents.research.sites import CategoryScope, MakerScope, ProductScope, RunScope
+from radar.domain.review.agents.research.run import PAGES, SECONDS
+from radar.domain.review.agents.research.frontier import FOLLOW, CategoryScope, MakerScope, ProductScope, RunScope
 from radar.domain.review.agents.runs import run_row, run_view, runs_view
 from radar.domain.review.requests import Founder
 
@@ -67,8 +67,10 @@ def register(commands: Commands) -> None:
                            "the run's bundle as it is found", func=run_run)
     scope = r.add_mutually_exclusive_group(required=True)
     scope.add_argument("--product", help="a product, by id or slug: its own page, else its maker's website, is read")
-    scope.add_argument("--maker", help="an organization, by id or slug: its website is read")
-    scope.add_argument("--category", help="a category id: the website of each maker of its products is read")
+    scope.add_argument("--maker",
+                       help="an organization, by id or slug: its website, then the pages its sitemaps list, are read")
+    scope.add_argument("--category",
+                       help="a category id: each of its makers' websites, then the pages their sitemaps list, are read")
     r.add_argument("--actor", default="founder", help="who starts it (default: founder)")
     c = commands.verb("research", "cancel", help="cancel a running research run: it stops at its next step",
                       func=run_cancel)
