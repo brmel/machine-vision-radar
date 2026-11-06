@@ -998,6 +998,16 @@ export interface ResearchLine {
   readonly detail: string;
 }
 
+/** What a research run knows of a maker's pages: how many it holds, how many are due, read and unread, and the next ones it reads. */
+export interface FrontierView {
+  readonly org: string;
+  readonly total: number;
+  readonly due: number;
+  readonly read: number;
+  readonly unread: number;
+  readonly next: readonly string[];
+}
+
 /** What a research run reads: its kind, and the product, maker or category it names by id or slug. */
 export interface RunScope {
   readonly kind: RunScopeKind;

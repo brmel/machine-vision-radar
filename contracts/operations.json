@@ -794,6 +794,14 @@
       }
     },
     {
+      "id": "research.frontier",
+      "summary": "what the runs know of a maker's pages: how many it holds, due, read and unread, and the next ones",
+      "cli": "research frontier",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["org", "total", "due", "read", "unread", "next"]}
+    },
+    {
       "id": "research.log",
       "summary": "a research run's log and the proposals it filed",
       "cli": "research log",

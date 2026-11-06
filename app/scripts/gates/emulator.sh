@@ -13,7 +13,7 @@ export MVR_MEDIA_BASE="http://${FIREBASE_STORAGE_EMULATOR_HOST}"
 # fastembed's model comes offline from a cache that outlives the run's TMPDIR: the gate downloads nothing.
 export FASTEMBED_CACHE_PATH="${FASTEMBED_CACHE_PATH:-${XDG_CACHE_HOME:-$HOME/.cache}/fastembed}" HF_HUB_OFFLINE=1
 
-step 240 "store suites" python3 -m pytest radar/tests/store radar/tests/adapters/web \
+step 240 "store suites" python3 -m pytest radar/tests/store radar/tests/adapters/web radar/tests/domain/review \
   radar/tests/commands/test_search_admin.py radar/tests/commands/test_feed.py radar/tests/domain/test_budget.py \
   radar/tests/adapters/test_answers.py radar/tests/adapters/test_search_engine.py -q
 

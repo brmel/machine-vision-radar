@@ -48,6 +48,14 @@ def run_list(args: argparse.Namespace) -> int:
 def run_log(args: argparse.Namespace) -> int:
     return _shown(args.wiring.researcher().status(args.id), args)
 
+def _frontier_lines(v: dict[str, Any]) -> str:
+    return "\n".join([f"{v['org']}: {v['total']} pages, {v['due']} due, {v['read']} read, {v['unread']} unread",
+                      *v["next"]])
+
+def run_frontier(args: argparse.Namespace) -> int:
+    return output.format_output(plain(args.wiring.researcher().frontier(args.org, args.seed)), json_mode=args.json,
+                                text_formatter=_frontier_lines)
+
 def _measured(m: dict[str, Any]) -> str:
     statuses = ", ".join(f"{n} {status}" for status, n in m["statuses"].items())
     lines = [f"since {m['since']}: {m['runs']} runs, {m['pages']} pages, {m['filed']} filed, "
@@ -88,6 +96,11 @@ def register(commands: Commands) -> None:
                       help="a research run's log: each page or file read or skipped, proposal filed or rejected, and "
                            "why it ended", func=run_log)
     g.add_argument("id", help="the run's id (research-…), from `research list`")
+    f = commands.verb("research", "frontier",
+                      help="what the runs know of a maker's pages: how many it holds, due, read and unread, and the "
+                           "next ones to read", func=run_frontier)
+    f.add_argument("org", help="an organization, by id or slug")
+    f.add_argument("--seed", action="store_true", help="add the pages its sitemaps list, one language copy each")
     m = commands.verb("research", "measure",
                       help="the research runs started since an instant, summed: pages read, what was skipped and "
                            "refused "

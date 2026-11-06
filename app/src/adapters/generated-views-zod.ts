@@ -880,6 +880,15 @@ export const ResearchLineSchema: z.ZodType<M.ResearchLine> = z.strictObject({
   detail: z.string(),
 });
 
+export const FrontierViewSchema: z.ZodType<M.FrontierView> = z.strictObject({
+  org: z.string(),
+  total: z.number().int(),
+  due: z.number().int(),
+  read: z.number().int(),
+  unread: z.number().int(),
+  next: z.array(z.string()),
+});
+
 export const RunScopeSchema: z.ZodType<M.RunScope> = z.strictObject({
   kind: z.lazy(() => RunScopeKindSchema),
   key: z.string(),

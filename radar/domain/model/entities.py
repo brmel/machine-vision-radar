@@ -1607,6 +1607,20 @@ class ResearchLine:
     detail: str
 
 @dataclass(frozen=True, slots=True, kw_only=True)
+class FrontierView:
+    """What a research run knows of a maker's pages: how many it holds, how many are due, read and unread, and the next ones it reads."""
+    org: str
+    total: int
+    due: int
+    read: int
+    unread: int
+    next: tuple[str, ...]
+
+    @property
+    def cursor(self) -> str | None:
+        return self.next
+
+@dataclass(frozen=True, slots=True, kw_only=True)
 class RunScope:
     """What a research run reads: its kind, and the product, maker or category it names by id or slug."""
     kind: RunScopeKind
@@ -1869,6 +1883,7 @@ CLASSES: Mapping[str, type] = {
     "AgentTokenList": AgentTokenList,
     "IssuedToken": IssuedToken,
     "ResearchLine": ResearchLine,
+    "FrontierView": FrontierView,
     "RunScope": RunScope,
     "ResearchRunView": ResearchRunView,
     "ResearchRunRow": ResearchRunRow,

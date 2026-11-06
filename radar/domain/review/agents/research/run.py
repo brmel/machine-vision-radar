@@ -7,7 +7,8 @@ from typing import Callable
 from radar.domain.ai.meter import Capped, Meter
 from radar.domain.model.history.changeset import Change, as_record
 from radar.domain.model.history.projection import every_page
-from radar.domain.model.entities import Instant, OrgRelation, ResearchMeasures, RunScope, Standing
+from radar.domain.model.entities import (FrontierView, Instant, OrgRelation, ResearchMeasures, RunScope, RunScopeKind,
+                                         Standing)
 from radar.domain.model.model import Model
 from radar.domain.ports.ai.image_judge import ImageJudge
 from radar.domain.ports.ai.research_agent import FileDraft, ProposalDraft, Reading, RecordsDraft, ResearchAgent
@@ -18,11 +19,12 @@ from radar.domain.ports.review.agent_tokens import AgentTokens
 from radar.domain.ports.review.proposing import Proposing
 from radar.domain.ports.review.research_runs import (Ending, Line, Outcome, ResearchRun, ResearchRunLog, RunPage,
                                                      Status, Step)
+from radar.domain.ports.web.crawl_records import CrawlRecords
 from radar.domain.ports.web.reader import Page, Reader, Unread
 from radar.domain.review.agents.drafts import corrected, minted, naming, references, resolved, terms, words
 from radar.domain.review.agents.files import Files
 from radar.domain.review.agents.research.filing import RESEARCHER, Filing
-from radar.domain.review.agents.research.frontier import Frontier, Reach, SourceTypes, sites_of
+from radar.domain.review.agents.research.frontier import Frontier, Reach, Site, SourceTypes, sites_of
 from radar.domain.review.agents.research.media import Media
 from radar.domain.review.agents.research.tables import Tables, named_card
 from radar.domain.review.agents.runs import Measure
@@ -42,9 +44,9 @@ def _read_through(run: ResearchRun) -> tuple[Ending, str]:
 class Researcher:
     def __init__(self, meter: Meter[ResearchAgent], judge: Meter[ImageJudge], reader: Reader, files: Files,
                  review: Proposing, runs: ResearchRunLog, tokens: AgentTokens, read: CatalogRepository,
-                 held: HeldRecords, model: Model, now: Callable[[], str]) -> None:
-        self._meter, self._reader, self._runs, self._tokens, self._read, self._held, self._now = (
-            meter, reader, runs, tokens, read, held, now)
+                 held: HeldRecords, crawl: CrawlRecords, model: Model, now: Callable[[], str]) -> None:
+        self._meter, self._reader, self._runs, self._tokens, self._read, self._held, self._crawl, self._now = (
+            meter, reader, runs, tokens, read, held, crawl, now)
         registry = model.registry
         self._owning = registry.marked("org_relation_types", lambda t: t.owns)
         self._terms, self._refs = terms(model), references(model.schema)
@@ -54,6 +56,7 @@ class Researcher:
         self._media = Media(reader, files, judge, self._filing, self._types, self._log, now)
         self._tables = Tables(registry, self._words)
         self._methods = registry.vocabularies["claim_methods"]
+        self._language = registry.default_language.code
         self._measure = Measure(runs, review, read, held, model)
 
     def start(self, scope: RunScope, by: Founder | Job) -> str:
@@ -65,11 +68,25 @@ class Researcher:
         run = ResearchRun(by.correlation_id, scope, by.name, now, token.id)
         self._runs.save(run)
         try:
-            self._loop(run, Frontier(self._reader, sites), Agent(token, run.id))
+            self._loop(run, self._frontier(sites), Agent(token, run.id))
         except Exception as exc:
             self._end(self._runs.get(run.id), Status.FAILED, f"{type(exc).__name__}: {exc}")
             raise
         return run.id
+
+    def _frontier(self, sites: tuple[Site, ...]) -> Frontier:
+        return Frontier(self._reader, sites, self._crawl, self._language, self._now)
+
+    def frontier(self, org: str, seed: bool) -> FrontierView:
+        scope = RunScope(kind=RunScopeKind.MAKER, key=org)
+        owning = tuple(r for t in sorted(self._owning) for r in self._held.matching(OrgRelation, "type", t))
+        [site] = sites_of(scope, self._held.organizations(), owning, self._read)
+        frontier = self._frontier((site,))
+        if seed:
+            reach = frontier.next()
+            if isinstance(reach, Reach) and (unread := frontier.seed(reach, _deadline(self._now()))):
+                raise ValueError(f"{unread.address}: {unread.reason}")
+        return frontier.view(site.org)
 
     def _settle(self, now: Instant) -> None:
         unended = [run for page in every_page(self._runs.page) for run in page.runs if not run.outcome]
@@ -137,8 +154,12 @@ class Researcher:
             run = self._skipped(run, unmapped)
         page = self._reader.page(reach.link, deadline)
         if isinstance(page, Unread):
+            frontier.unread(reach, page)
             return self._skipped(run, page), None
         run = self._log(run, Step.READ, page.link.address)
+        if frontier.unchanged(reach, page):
+            frontier.read(reach, page, ())
+            return self._log(run, Step.SKIPPED, f"{page.link.address}: unchanged since it was last read"), None
         read = self._filing.read(page, self._types.of(page.link, reach.own))
         if reach.home and reach.site.one_product:
             run, capped = self._media.photo(run, reach.site.products[0], page, read, by, deadline)

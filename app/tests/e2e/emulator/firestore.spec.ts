@@ -96,6 +96,7 @@ test("a prerendered product reads its own doc once it shows; a product opened fr
   await page.goto(`/browse?category=${encodeURIComponent(category)}`);
   const card = page.getByRole("main").getByRole("article").first().getByRole("heading").getByRole("link");
   await expect(page.getByRole("main").getByRole("article")).toHaveCount(PAGE_SIZE);
+  await page.waitForLoadState("networkidle");
   const before = seen.reads.length;
   await card.click();
   await expect(page).toHaveURL(/\/product\//);

@@ -21,6 +21,9 @@ const ZONE = "Asia/Kolkata";
 const counted = (message: string): RegExp =>
   new RegExp(message.replace(/[.*+?^$()|[\]\\]/g, "\\$&").replace(/\{\w+\}/g, "\\d+"));
 
+const forgetCrawl = () => fetch(`http://${process.env.FIRESTORE_EMULATOR_HOST ?? ""}/emulator/v1/projects/demo-mvradar`
+  + "/databases/(default)/documents/crawl_records", { method: "DELETE" });
+
 inEachLocale("agents", (locale) => {
   const T = MESSAGES[locale];
   const { intl, filed: nth, reason, shown, file, href, review } = CHECKED[locale];
@@ -104,6 +107,7 @@ inEachLocale("agents", (locale) => {
   test("the founder runs research, reads its log, reviews its bundle and sees what was approved on the product "
     + "page", async ({ page }) => {
     test.setTimeout(200_000);
+    await forgetCrawl();
     await page.goto("/admin/research");
     await expect(page.getByRole("heading", { level: 1, name: T.adminResearchTitle })).toBeVisible();
     await page.getByLabel(T.adminResearchScope).selectOption("maker");

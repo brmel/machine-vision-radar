@@ -13,6 +13,7 @@ from radar.adapters.web.api import Api, AskEndpoint, FindEndpoint, HealthEndpoin
 from radar.adapters.web.app_check import AppCheck, Unchecked
 from radar.adapters.web.mcp import McpServer, proposal_tools, read_tools
 from radar.adapters.web.pages import PoliteReader
+from radar.adapters.firestore.ledgers.agents import FirestoreCrawlRecords
 from radar.adapters.wiring.models import Models
 from radar.domain.ai.quota import Quota
 from radar.domain.model.entities import FeedItem
@@ -53,7 +54,8 @@ class Wiring(Models):
                               os.environ.get("MVR_WEB_BASE"))
         files = Files(self.blobs(), self.datasheet_meter(), model.registry.vocabularies)
         return Researcher(self.research_meter(), self.image_judge_meter(), reader, files, self.review(),
-                          self.research_runs(), self.agent_tokens(), self.repository(), self.held(), model, self.now)
+                          self.research_runs(), self.agent_tokens(), self.repository(), self.held(),
+                          FirestoreCrawlRecords(self.store()), model, self.now)
 
     def search_admin(self, review: Review, histories: Histories) -> SearchAdmin:
         return SearchAdmin(self.indexer, self.search_engine, lambda: self.ask_meter(self.search_engine()),

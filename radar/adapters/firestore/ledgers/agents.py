@@ -1,19 +1,22 @@
 from __future__ import annotations
 
+import hashlib
 from dataclasses import asdict
 from datetime import date
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from radar.adapters.console import log
 from radar.adapters.firestore.docs import list_page
 from radar.adapters.firestore.layout import newest_first
 from radar.domain.model.entities import RunScope, RunScopeKind
 from radar.domain.ports.review.research_runs import Line, Outcome, ResearchRun, RunPage, Status, Step
-from radar.domain.ports.store.docs import Docs, Increment, Put
+from radar.domain.ports.store.docs import BATCH, Docs, Increment, Put
+from radar.domain.ports.web.crawl_records import CrawlRecord, CrawlStatus, PageKind
 from radar.domain.review.agents.tokens import AgentToken, Limits, Scope, TokenUsage
 
-TOKENS, USAGE, RESEARCH, CANCELS = "agent_tokens", "agent_usage", "research_log", "research_cancels"
-COLLECTIONS = (TOKENS, USAGE, RESEARCH, CANCELS)
+TOKENS, USAGE, RESEARCH, CANCELS, CRAWL = ("agent_tokens", "agent_usage", "research_log", "research_cancels",
+                                           "crawl_records")
+COLLECTIONS = (TOKENS, USAGE, RESEARCH, CANCELS, CRAWL)
 
 class FirestoreAgentTokens:
     def __init__(self, docs: Docs) -> None:
@@ -81,6 +84,20 @@ class FirestoreResearchRuns:
         cancel_paths = [f"{CANCELS}/{f['id']}" for _, f in rows]
         cancels = {f["run"]: f["at"] for f in self._docs.get_many(cancel_paths).values() if "run" in f and "at" in f}
         return RunPage(tuple(_run(f, cancels.get(f["id"])) for _, f in rows), after, total)
+
+class FirestoreCrawlRecords:
+    def __init__(self, docs: Docs) -> None:
+        self._docs = docs
+
+    def listed(self, org: str) -> tuple[CrawlRecord, ...]:
+        return tuple(CrawlRecord(**{**f, "status": CrawlStatus(f["status"]), "kind": PageKind(f["kind"])})
+                     for _, f in self._docs.where(CRAWL, "org", [org]))
+
+    def save(self, records: Sequence[CrawlRecord]) -> None:
+        writes = [Put(f"{CRAWL}/{hashlib.sha256(r.address.encode()).hexdigest()}",
+                      {**asdict(r), "status": r.status.value, "kind": r.kind.value}) for r in records]
+        for start in range(0, len(writes), BATCH):
+            self._docs.commit(writes[start:start + BATCH])
 
 def _run(fields: Mapping[str, Any], cancelled_at: str | None) -> ResearchRun:
     lines = tuple(Line(n["at"], Step(n["step"]), n["detail"]) for n in fields["lines"])
