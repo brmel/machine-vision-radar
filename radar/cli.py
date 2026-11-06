@@ -8,7 +8,7 @@ from typing import Sequence
 
 from .adapters.console import log
 from .adapters.wiring.root import Wiring
-from .adapters.wiring.stores import NoStore
+from .adapters.wiring.stores import NoStore, RegistryDrift
 from .domain.ports.search.search_engine import IndexMismatch, NoIndex
 from .commands.catalog import ask, compare, evaluation, get, history, search, sources
 from .commands.data import category, hub, metrics, quality, validate
@@ -27,7 +27,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--project", default=os.environ.get("MVR_PROJECT"),
                     help="the Firebase project's store (.firebaserc's; default MVR_PROJECT), with the token in "
                          "MVR_ACCESS_TOKEN")
-    ap.add_argument("--yes", action="store_true", help="let a command write to --project's store")
+    ap.add_argument("--yes", action="store_true",
+                    help="let a command write to --project's store, refused while the registry here differs from the "
+                         "one the store's site serves")
 
     commands = Commands(ap.add_subparsers(dest="cmd", required=True, metavar="<noun>", parser_class=Parser,
                                           help="what the command acts on; `radar <noun> --help` lists its verbs"))
@@ -44,9 +46,13 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     args.wiring = Wiring(args.project, args.yes)
     try:
+        if args.yes and not args.publishes:
+            args.wiring.match_registry()
         return int(args.func(args) or 0)
     except (NoStore, NoIndex, IndexMismatch) as exc:
         return log.error(str(exc), code=2)
+    except RegistryDrift as exc:
+        return log.error(str(exc), fix="run from the deployed commit, or deploy first")
     except Exception as exc:
         log.debug(traceback.format_exc())
         return log.error(f"radar {args.cmd} {args.verb} failed: {exc}")

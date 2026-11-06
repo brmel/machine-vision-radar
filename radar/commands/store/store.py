@@ -111,7 +111,8 @@ def run_purge(args: argparse.Namespace) -> int:
 
 def register(commands: Commands) -> None:
     m = commands.verb("store", "load",
-                      help="validate a catalog folder and its files, then load them into an empty store", func=run_load)
+                      help="validate a catalog folder and its files, then load them into an empty store", func=run_load,
+                      publishes=True)
     m.add_argument("catalog", help="the catalog folder: one JSON Lines file per entity kind")
     m.add_argument("--blobs", help="the folder of its Documents' files, named by their sha256")
     e = commands.verb("store", "export", help="write every entity and its Change events as the catalog folder "
@@ -122,14 +123,15 @@ def register(commands: Commands) -> None:
                   func=run_validate)
     r = commands.verb("store", "replay",
                       help="rebuild the store from its Change events into an empty database and compare",
-                      func=run_replay)
+                      func=run_replay, publishes=True)
     r.add_argument("--into", default="replay", help="the empty database to rebuild into (default: replay)")
     commands.verb("store", "reproject",
                   help="write the public read model again from the store's entities, only the docs that differ",
-                  func=run_reproject)
+                  func=run_reproject, publishes=True)
     commands.verb("store", "backup", help="write every collection as JSON Lines to Storage under backups/<instant>/",
                   func=run_backup)
-    s = commands.verb("store", "restore", help="rebuild an empty database from a backup", func=run_restore)
+    s = commands.verb("store", "restore", help="rebuild an empty database from a backup", func=run_restore,
+                      publishes=True)
     s.add_argument("instant", help="the backup's instant, as `radar store backup` printed it")
     s.add_argument("--into", help="the empty database to restore into (default: the store's own)")
     p = commands.verb("store", "purge",

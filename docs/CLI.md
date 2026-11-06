@@ -10,6 +10,10 @@
   Storage with the short-lived token in `MVR_ACCESS_TOKEN` (`gcloud auth application-default print-access-token`, never
   a key file), **read-only unless `--yes`**, and refuses any emulator or fixture variable set beside it (`TEST_ONLY` in
   `radar/adapters/wiring/stores.py`).
+- **The registry the site serves:** with `--yes`, a command exits 1 before it writes when the registry here would publish
+  another RegistryView than the store's `public_index/registry`: run from the deployed commit, or deploy first. The
+  commands that publish the registry themselves (`store load`, `replay`, `reproject`, `restore`; `publishes` in
+  `Commands.verb`) are exempt.
 - **The emulators** serve the store otherwise, when `FIRESTORE_EMULATOR_HOST` and `FIREBASE_STORAGE_EMULATOR_HOST` are
   set, on a `demo-` project (`MVR_FIREBASE_PROJECT`) with no credentials. With neither, a command that needs the store
   exits 2. A file is read only when named (`model validate <path>`, `store load`).
