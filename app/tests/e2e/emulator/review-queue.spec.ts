@@ -134,7 +134,7 @@ inEachLocale("the review queue", (locale) => {
     await page.goto(`/admin/records/${made}/history`);
     await expect(page.getByRole("listitem").first()).toContainText("v3");
 
-    await attach("widget.png", "image/png", "\x89PNG\r\n\x1a\n fictional image\n", IMAGE_KIND);
+    await attach("widget.png", "image/png", `\x89PNG\r\n\x1a\n fictional image ${locale}\n`, IMAGE_KIND);
     await fileApproved(page, T, "Product photo");
 
     await page.goto(`/admin/records/${made}`);
