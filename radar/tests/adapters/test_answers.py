@@ -142,7 +142,7 @@ def test_an_answer_rests_on_at_most_the_products_search_json_names(retriever: In
     (Sentence("Widget Two is glossy.", ("prd_zzzzzzzzzz",)),
      "sentence 1 cites prd_zzzzzzzzzz, which is not in the evidence"),
     (Sentence("Widget Two reaches 9,999 mm.", ("prd_0000000002",)),
-     "sentence 1 states 9999, which is not in the evidence"),
+     "sentence 1 states 9999, which what it cites does not hold"),
 ])
 def test_an_ungrounded_sentence_refuses_the_answer_with_its_reason(
         sentence: Sentence, why: str, retriever: IndexRetriever) -> None:

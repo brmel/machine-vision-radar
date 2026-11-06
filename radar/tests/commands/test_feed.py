@@ -172,7 +172,7 @@ def test_a_draft_resting_on_more_than_the_record_never_reaches_the_queue(monkeyp
                   lambda chosen: model)
     drafter = Drafter(wiring.retriever(wiring.search_engine()), wiring.repository(), wiring.feed(), meter,
                       lambda: wiring.now()[:10])
-    with pytest.raises(ValueError, match="sentence 3 states 9999, which is not in the evidence"):
+    with pytest.raises(ValueError, match="sentence 3 states 9999, which what it cites does not hold"):
         drafter.draft(PRODUCT, "draft-test")
     assert FX.json(place, "proposal", "list") == queued
 

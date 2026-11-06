@@ -41,7 +41,7 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   carries them, the answer's `citations` every need's. The Ask page, `radar catalog ask` and the admin's console show
   them. The scripted model reads a request split by `;` as a problem, one need a part.
 - **The grounding check** (`radar/domain/ai/grounding.py`) is one, for answers and drafts alike: a sentence that cites
-  nothing, cites an id outside the evidence, or states a number the evidence (or the question) does not hold rejects the
+  nothing, cites an id outside the evidence, or states a number what it cites (or the question) does not hold rejects the
   output, with that reason, and the asker gets the `not_enough_evidence` refusal.
 - **The AI uses** (their ports: AGENTS.md rule 15) are answers, web research, its image judge (its own use, model and
   caps; each candidate's call counted), datasheet extraction and news drafts, each on its prompt (`ask`, `research`,
