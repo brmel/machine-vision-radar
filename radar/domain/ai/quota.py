@@ -18,7 +18,7 @@ ASSISTANTS = {"chatgpt.com": "chatgpt", "chat.openai.com": "chatgpt", "perplexit
 def counters(event: str, referrer: str) -> dict[str, int]:
     host = (urllib.parse.urlsplit(referrer).hostname or "").lower()
     assistant = ASSISTANTS.get(host)
-    site = re.sub(r"[^a-z0-9.-]", "", host.removeprefix("www."))[:60]
+    site = re.sub(r"[^a-z0-9-]", "_", host.removeprefix("www."))[:60]
     return {event: 1, **({f"from_{assistant}": 1} if assistant else {f"ref_{site}": 1} if site else {})}
 
 def _client(day: str, address: str) -> str:

@@ -122,7 +122,7 @@ test.describe("Search", () => {
     await expect.poll(async () => (await metrics()).zero_result ?? 0).toBeGreaterThan(before.zero_result ?? 0);
     await expect.poll(async () => (await metrics()).page_view ?? 0).toBeGreaterThan(before.page_view ?? 0);
     expect(Object.keys(await metrics())
-      .every((k) => /^(search|zero_result|result_click|page_view|answer|refusal|from_[a-z]+|ref_[a-z0-9.-]+)$/.test(k)))
+      .every((k) => /^(search|zero_result|result_click|page_view|answer|refusal|from_[a-z]+|ref_[a-z0-9_-]+)$/.test(k)))
       .toBe(true);
   });
 
