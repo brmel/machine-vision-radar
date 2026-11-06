@@ -5,7 +5,7 @@ from typing import Any, Callable, Mapping
 from radar.domain.model.history.projection import plain
 from radar.domain.ports.web.endpoint import Response
 from radar.domain.review.agents.research.run import Researcher
-from radar.domain.review.agents.research.sites import CategoryScope, MakerScope, ProductScope, RunScope
+from radar.domain.review.agents.research.frontier import CategoryScope, MakerScope, ProductScope, RunScope
 from radar.domain.review.agents.runs import run_view, runs_view
 from radar.domain.review.requests import Founder
 

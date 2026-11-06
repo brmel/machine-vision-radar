@@ -5,7 +5,7 @@ from typing import Any, Literal, Mapping, Protocol
 
 from radar.domain.model.entities import ProductCard
 from radar.domain.ports.ai.usage_log import Ended, Outcome
-from radar.domain.ports.web.page_fetcher import Page
+from radar.domain.ports.web.reader import Page
 
 Terms = Mapping[str, Mapping[str, tuple[str, ...]]]
 

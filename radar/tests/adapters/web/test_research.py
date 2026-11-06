@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import time
 from dataclasses import replace
 from pathlib import Path
 from typing import Any, Callable, Mapping, TypeVar
@@ -18,22 +17,21 @@ from radar.adapters.files.prompts import FilesPromptRegistry
 from radar.adapters.firestore.repository import StoreCatalogRepository, StoreHeldRecords
 from radar.adapters.firestore.ledgers.agents import FirestoreAgentTokens, FirestoreResearchRuns
 from radar.adapters.firestore.ledgers.ai import CALLS, FirestoreBudget, FirestoreUsageLog
-from radar.adapters.web.pages import PoliteFetcher
+from radar.adapters.web.pages import PoliteReader
 from radar.adapters.wiring.stores import Stores
 from radar.domain.ai.budget import Use
 from radar.domain.ai.meter import Meter
-from radar.domain.model.entities import AiModel, FilesOn, Organization
+from radar.domain.model.entities import AiModel, FilesOn
 from radar.domain.ports.ai.image_judge import ImageJudge
 from radar.domain.ports.ai.research_agent import ResearchAgent
 from radar.domain.ports.review.research_runs import ResearchRun, Status, Step
 from radar.domain.model.history.changeset import Changeset, PutEntity, as_record, without_version
 from radar.domain.ports.store.blob_store import BlobRef
 from radar.domain.ports.store.docs import Docs
-from radar.domain.ports.web.page_fetcher import Unfetchable
 from radar.domain.review.agents.files import Files
 from radar.domain.review.agents.research.filing import RESEARCHER
 from radar.domain.review.agents.research.run import Researcher
-from radar.domain.review.agents.research.sites import CategoryScope, MakerScope, ProductScope, RunScope, sites_of
+from radar.domain.review.agents.research.frontier import MakerScope, ProductScope, RunScope
 from radar.domain.review.agents.runs import run_view
 from radar.domain.review.proposal import Proposal
 from radar.domain.review.requests import Approval, Founder, Picked, Revision
@@ -54,7 +52,7 @@ def docs() -> tuple[Docs, Any]:
     return FX.seeded()
 
 def _run(seeded: tuple[Docs, Any], heard: Heard, waits: list[float], on_get: Callable[[str], None] = lambda path: None,
-         clock: Callable[[], float] = time.monotonic, serve: Pages = recorded_page,
+         now: Callable[[], str] = lambda: NOW, serve: Pages = recorded_page,
          agent: Callable[[str, AiModel], ResearchAgent] = lambda base, chosen: ScriptedResearchAgent(),
          model: Answer | None = None,
          judge: Callable[[str, AiModel], ImageJudge] = lambda base, chosen: ScriptedImageJudge(),
@@ -72,11 +70,11 @@ def _run(seeded: tuple[Docs, Any], heard: Heard, waits: list[float], on_get: Cal
     with serving(model, pages=page) as base:
         researcher = Researcher(meter(Use.RESEARCH, lambda chosen: agent(base, chosen)),
                                 meter(Use.RESEARCH, lambda chosen: judge(base, chosen)),
-                                PoliteFetcher(f"{SITE}/about", lambda: NOW, DOCUMENTS, base, lambda: 0.0, waits.append),
+                                PoliteReader(f"{SITE}/about", lambda: NOW, DOCUMENTS, base, lambda: 0.0, waits.append),
                                 Files(files, meter(Use.DATASHEET, lambda chosen: ScriptedDatasheetExtractor()),
                                       REGISTRY.vocabularies), FX.review(docs, files), FirestoreResearchRuns(docs),
                                 FirestoreAgentTokens(docs), StoreCatalogRepository(docs, FX.model),
-                                StoreHeldRecords(docs, FX.model), FX.model, lambda: NOW, clock)
+                                StoreHeldRecords(docs, FX.model), FX.model, now)
         return researcher.status(researcher.start(scope, Founder("founder", Stores().correlate("research"))))
 
 def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
@@ -86,11 +84,11 @@ def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
     waits: list[float] = []
     run = _run(docs, heard, waits)
 
-    assert [path for path, _ in heard] == ["/robots.txt", "/", "/widget-two", "/products/widget-two",
+    assert [path for path, _ in heard] == ["/robots.txt", "/sitemap.xml", "/", "/widget-two", "/products/widget-two",
                                            "/media/widget-two.png", "/media/widget-two.pdf", "/products/widget-nine",
                                            "/account", "/widgets.pdf", "/partner"], \
-        ("the links the model names, but one off the site, one the page does not hold and a sixth, which a later page "
-         "names again")
+        ("the site's sitemap, which it lacks, then the links the model names, but one off the site, one the page does "
+         "not hold and a sixth, which a later page names again")
     assert ({h["User-Agent"] for _, h in heard} == {f"mvradar-research/1 (+{SITE}/about)"}
             and not {"Cookie", "Authorization"} & {k for _, h in heard for k in h})
     assert waits == [1.0] * (len(heard) - 1), "one host, a second between requests"
@@ -232,8 +230,8 @@ def test_the_research_cap_stops_a_run(docs: tuple[Docs, Any]) -> None:
     assert run.said(Step.FILED) == ()
 
 def test_the_time_budget_holds_between_the_files_of_one_page(docs: tuple[Docs, Any]) -> None:
-    ticks = iter(range(0, 1000, 9))
-    run = _run(docs, [], [], clock=lambda: float(next(ticks)))
+    ticks = (f"2026-10-18T12:{n // 60:02d}:{n % 60:02d}Z" for n in range(0, 3600, 9))
+    run = _run(docs, [], [], now=lambda: next(ticks))
     outcome = run.outcome and (run.outcome.status, run.outcome.reason)
     assert (run.said(Step.READ)[-1], len(run_view(run).filed), outcome) == (
         f"{SITE}/products/widget-two", 0, (Status.PARTIAL, "its 40 s are spent")), "stopped with pages left in reach"
@@ -249,7 +247,8 @@ def test_a_crawl_delay_longer_than_the_run_has_left_is_refused_not_waited(docs: 
     run = _run(docs, heard, waits, serve=slow)
     assert (run.outcome and run.outcome.status, run.said(Step.READ), [path for path, _ in heard], waits) == (
         Status.BLOCKED, (), ["/robots.txt"], [])
-    assert run.said(Step.SKIPPED) == (f"{SITE}: its crawl delay of 600 s would pass the run's time",)
+    assert run.said(Step.SKIPPED) == (f"{SITE}/: its crawl delay of 600 s would pass the run's time",) * 2, (
+        "neither its sitemap nor its page")
 
 def test_a_cancel_stops_the_run_at_its_next_step(docs: tuple[Docs, Any]) -> None:
     runs = FirestoreResearchRuns(docs[0])
@@ -261,20 +260,6 @@ def test_a_cancel_stops_the_run_at_its_next_step(docs: tuple[Docs, Any]) -> None
     run = _run(docs, [], [], cancelling)
     assert (run.outcome and run.outcome.status, run.said(Step.READ), len(run_view(run).filed)) == (
         Status.CANCELLED, (f"{SITE}/", f"{SITE}/products/widget-two"), 6)
-
-def test_a_scope_is_a_product_a_maker_or_a_category_with_a_website() -> None:
-    orgs, index = [Organization(**o) for o in FX.rows("organizations.jsonl")], FX.read.index()
-    [site] = sites_of(MakerScope(MAKER["id"]), orgs, FX.read)
-    assert sites_of(MakerScope(MAKER["slug"]), orgs, FX.read) == (site,) and (site.org, site.url) == (MAKER["id"], SITE)
-    assert [p.id for p in site.products] == [p.id for p in index.products if p.vendor == MAKER["slug"]] != []
-    category = index.products[0].category
-    assert {s.org for s in sites_of(CategoryScope(category), orgs, FX.read)} == {
-        o.id for o in orgs if o.website and any(p.vendor == o.slug and p.category == category for p in index.products)}
-    [p_site] = sites_of(ProductScope("prd_0000000002"), orgs, FX.read)
-    assert p_site.target_product == "prd_0000000002" and p_site.org == MAKER["id"]
-    for scope in (ProductScope(MAKER["slug"]), MakerScope("prd_0000000002"), CategoryScope(MAKER["slug"])):
-        with pytest.raises(LookupError, match="no product|no organization|no category"):
-            sites_of(scope, orgs, FX.read)
 
 def test_a_product_run_proposes_the_best_photo_privately_and_what_the_page_states(docs: tuple[Docs, Any]) -> None:
     heard: Heard = []

@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import time
 from dataclasses import replace
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Callable
-from urllib.parse import urlsplit
 
 from radar.domain.ai.meter import Capped, Meter
 from radar.domain.model.history.changeset import Change
-from radar.domain.model.entities import ResearchMeasures
+from radar.domain.model.entities import Instant, OrgRelation, ResearchMeasures
 from radar.domain.model.model import Model
 from radar.domain.ports.ai.image_judge import ImageJudge
 from radar.domain.ports.ai.research_agent import FileDraft, ProposalDraft, Reading, RecordsDraft, ResearchAgent
@@ -19,52 +17,50 @@ from radar.domain.ports.review.agent_tokens import AgentTokens
 from radar.domain.ports.review.proposing import Proposing
 from radar.domain.ports.review.research_runs import (Ending, Line, Outcome, ResearchRun, ResearchRunLog, RunPage,
                                                      Status, Step)
-from radar.domain.ports.web.page_fetcher import Page, PageFetcher, Unfetchable
+from radar.domain.ports.web.reader import Page, Reader, Unread
 from radar.domain.review.agents.drafts import corrected, minted, naming, references, resolved, terms, words
 from radar.domain.review.agents.files import Files
 from radar.domain.review.agents.research.filing import RESEARCHER, Filing
+from radar.domain.review.agents.research.frontier import Frontier, Reach, RunScope, sites_of
 from radar.domain.review.agents.research.media import Media
-from radar.domain.review.agents.research.sites import RunScope, Site, sites_of
 from radar.domain.review.agents.runs import Measure
 from radar.domain.review.agents.tokens import Limits, Scope, issue
 from radar.domain.review.requests import Agent, Founder, Job
 
-PAGES, SECONDS, FOLLOW = 8, 40.0, 5
+PAGES, SECONDS = 8, 40.0
 
-def _followed(site: Site, page: Page, follow: tuple[str, ...], seen: set[str]) -> list[tuple[Site, str]]:
-    host = urlsplit(site.url).netloc
-    return [(site, link) for link in dict.fromkeys(follow) if link in page.links and urlsplit(link).netloc == host
-            and link not in seen][:FOLLOW]
+def _deadline(now: Instant) -> Instant:
+    return (datetime.fromisoformat(now) + timedelta(seconds=SECONDS)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 def _read_through(run: ResearchRun) -> tuple[Ending, str]:
     return ((Status.DONE, "every page in reach is read") if run.said(Step.READ)
             else (Status.BLOCKED, "no page in reach could be read"))
 
 class Researcher:
-    def __init__(self, meter: Meter[ResearchAgent], judge: Meter[ImageJudge], fetcher: PageFetcher, files: Files,
+    def __init__(self, meter: Meter[ResearchAgent], judge: Meter[ImageJudge], reader: Reader, files: Files,
                  review: Proposing, runs: ResearchRunLog, tokens: AgentTokens, read: CatalogRepository,
-                 held: HeldRecords, model: Model, now: Callable[[], str],
-                 clock: Callable[[], float] = time.monotonic) -> None:
-        self._meter, self._fetcher, self._runs, self._tokens, self._read, self._held = (
-            meter, fetcher, runs, tokens, read, held)
-        self._now, self._clock = now, clock
+                 held: HeldRecords, model: Model, now: Callable[[], str]) -> None:
+        self._meter, self._reader, self._runs, self._tokens, self._read, self._held, self._now = (
+            meter, reader, runs, tokens, read, held, now)
         registry = model.registry
+        self._owning = registry.marked("org_relation_types", lambda t: t.owns)
         self._page_type = next(k for k, t in registry.vocabularies["source_types"].items() if t.research)
         self._terms, self._refs = terms(model), references(model.schema)
         self._specs, self._words = registry.spec_definitions, words(registry)
         self._filing = Filing(review, model, held, self._log)
-        self._media = Media(fetcher, files, judge, self._filing, self._log, now)
+        self._media = Media(reader, files, judge, self._filing, self._log, now)
         self._measure = Measure(runs, review, read, held, model)
 
     def start(self, scope: RunScope, by: Founder | Job) -> str:
-        sites = sites_of(scope, self._held.organizations(), self._read)
+        owning = tuple(r for t in sorted(self._owning) for r in self._held.matching(OrgRelation, "type", t))
+        sites = sites_of(scope, self._held.organizations(), owning, self._read)
         now = self._now()
         token, _ = issue(RESEARCHER, Scope.PROPOSE, date.fromisoformat(now[:10]) + timedelta(days=1), Limits(), now)
         self._tokens.issue(token)
         run = ResearchRun(by.correlation_id, scope.key, by.name, now, token.id)
         self._runs.save(run)
         try:
-            self._loop(run, sites, Agent(token, run.id))
+            self._loop(run, Frontier(self._reader, sites), Agent(token, run.id))
         except Exception as exc:
             self._end(self._runs.get(run.id), Status.FAILED, f"{type(exc).__name__}: {exc}")
             raise
@@ -88,69 +84,73 @@ class Researcher:
     def measure(self, since: str, by: Founder) -> ResearchMeasures:
         return self._measure.since(since, by)
 
-    def _loop(self, run: ResearchRun, sites: tuple[Site, ...], by: Agent) -> ResearchRun:
-        started, reach, seen = self._clock(), [(s, s.url) for s in sites], set()
-        left = lambda: SECONDS - (self._clock() - started)
-        while reach:
-            site, url = reach.pop(0)
-            if url in seen:
-                continue
-            if stop := self._stop(run, left()):
+    def _loop(self, run: ResearchRun, frontier: Frontier, by: Agent) -> ResearchRun:
+        deadline = _deadline(self._now())
+        while (reach := frontier.next()) is not None:
+            if stop := self._stop(run, deadline):
                 return self._end(run, *stop)
-            seen.add(url)
-            try:
-                page = self._fetcher.fetch(url, left())
-            except Unfetchable as exc:
-                run = self._log(run, Step.SKIPPED, f"{url}: {exc}")
-                continue
-            run, read = self._log(run, Step.READ, page.url), self._filing.read(page, self._page_type)
-            seen.add(page.url)
-            if site.target_product and url == site.url:
-                run, capped = self._media.photo(run, site.products[0], page, read, by, left)
-                if capped:
-                    return self._end(run, Status.CAPPED, capped)
-            run, capped, follow = self._research(run, Reading(page, site.org, site.products, self._terms), read, by,
-                                                 left)
-            if capped:
-                return self._end(run, Status.CAPPED, capped)
-            reach += _followed(site, page, follow, seen)
+            match reach:
+                case Unread():
+                    run = self._skipped(run, reach)
+                case Reach():
+                    run, capped = self._visit(run, frontier, reach, by, deadline)
+                    if capped:
+                        return self._end(run, Status.CAPPED, capped)
         return self._end(run, *_read_through(run))
 
-    def _stop(self, run: ResearchRun, left: float) -> tuple[Ending, str] | None:
+    def _stop(self, run: ResearchRun, deadline: Instant) -> tuple[Ending, str] | None:
         stored = self._runs.get(run.id).outcome
         if stored and stored.status is Status.CANCELLED:
             return Status.CANCELLED, stored.reason
         if len(run.said(Step.READ)) >= PAGES:
             return Status.PARTIAL, f"its budget of {PAGES} pages is read"
-        return (Status.PARTIAL, f"its {SECONDS:g} s are spent") if left < 0 else None
+        return (Status.PARTIAL, f"its {SECONDS:g} s are spent") if self._now() > deadline else None
 
-    def _research(self, run: ResearchRun, reading: Reading, read: Change, by: Agent,
-                  left: Callable[[], float]) -> tuple[ResearchRun, str | None, tuple[str, ...]]:
+    def _visit(self, run: ResearchRun, frontier: Frontier, reach: Reach, by: Agent,
+               deadline: Instant) -> tuple[ResearchRun, str | None]:
+        if unmapped := frontier.mapped(reach, deadline):
+            run = self._skipped(run, unmapped)
+        page = self._reader.page(reach.link, deadline)
+        if isinstance(page, Unread):
+            return self._skipped(run, page), None
+        run = self._log(run, Step.READ, page.link.address)
+        read = self._filing.read(page, self._page_type)
+        if reach.home and reach.site.target_product:
+            run, capped = self._media.photo(run, reach.site.products[0], page, read, by, deadline)
+            if capped:
+                return run, capped
+        run, capped, follow = self._research(run, reach, page, read, by, deadline)
+        frontier.read(reach, page, follow)
+        return run, capped
+
+    def _research(self, run: ResearchRun, reach: Reach, page: Page, read: Change, by: Agent,
+                  deadline: Instant) -> tuple[ResearchRun, str | None, tuple[str, ...]]:
+        reading = Reading(page, reach.site.org, reach.site.products, self._terms)
         try:
             findings, cad = self._meter.call(self._now()[:10], lambda agent: agent.research(reading))
         except Capped as exc:
             return run, str(exc), ()
         except Unparsed as exc:
             return self._log(replace(run, cad=run.cad + exc.cad), Step.REJECTED,
-                             f"{reading.page.url}: the model's answer is refused: {exc}"), None, ()
+                             f"{page.link.address}: the model's answer is refused: {exc}"), None, ()
         run = replace(run, cad=run.cad + cad)
         for draft in findings.proposals:
-            if left() < 0:
+            if self._now() > deadline:
                 return self._log(run, Step.SKIPPED,
                                  f"{draft.url if isinstance(draft, FileDraft) else draft.reason}: its {SECONDS:g} s "
                                  "are spent"), None, ()
-            run = self._filed(run, draft, reading, read, by, left)
+            run = self._filed(run, draft, reach, page, read, by, deadline)
         return run, None, findings.follow
 
-    def _filed(self, run: ResearchRun, draft: ProposalDraft, reading: Reading, read: Change, by: Agent,
-               left: Callable[[], float]) -> ResearchRun:
+    def _filed(self, run: ResearchRun, draft: ProposalDraft, reach: Reach, page: Page, read: Change, by: Agent,
+               deadline: Instant) -> ResearchRun:
         match draft:
             case FileDraft():
-                return self._media.linked(run, draft, {card.id for card in reading.known}, reading.page, read, by, left)
+                return self._media.linked(run, draft, reach, page, read, by, deadline)
             case RecordsDraft():
                 draft = minted(corrected(resolved(draft, self._specs, self._words), self._held.ranked_first), run.id,
                                lambda i: self._held.held(i) is not None)
-                if stray := self._stray(draft, reading):
+                if stray := self._stray(draft, reach):
                     return self._log(run, Step.REJECTED, f"{draft.reason}: {stray}")
                 cited, refused = self._filing.cited(draft, read.entity)
                 if refused:
@@ -159,11 +159,14 @@ class Researcher:
                     return self._filing.filed(run, Step.FILED, draft, draft.reason, (read, *cited), by)
                 return run if refused else self._log(run, Step.SKIPPED, f"{draft.reason}: the store holds it")
 
-    def _stray(self, draft: RecordsDraft, reading: Reading) -> str | None:
-        given = {card.id for card in reading.known} | {reading.maker} | {r["id"] for r in draft.records}
+    def _stray(self, draft: RecordsDraft, reach: Reach) -> str | None:
+        given = {card.id for card in reach.site.products} | {reach.site.org} | {r["id"] for r in draft.records}
         named = [("subject", draft.subject)] + [ref for r in draft.records for ref in naming(r, self._refs)]
         return next((f"{w}: {ref} is none of the cards, the maker or the records of the proposal" for w, ref in named
                      if ref and ref not in given), None)
+
+    def _skipped(self, run: ResearchRun, unread: Unread) -> ResearchRun:
+        return self._log(run, Step.SKIPPED, f"{unread.address}: {unread.reason}")
 
     def _log(self, run: ResearchRun, step: Step, detail: str) -> ResearchRun:
         logged = run.logged(Line(self._now(), step, detail))

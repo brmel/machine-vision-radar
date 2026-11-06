@@ -11,7 +11,7 @@ from radar.domain.ports.catalog.held_records import HeldRecords
 from radar.domain.ports.ai.research_agent import ProposalDraft, RecordsDraft
 from radar.domain.ports.review.proposing import Proposing
 from radar.domain.ports.review.research_runs import ResearchRun, Step
-from radar.domain.ports.web.page_fetcher import Page
+from radar.domain.ports.web.reader import Page
 from radar.domain.review.agents.drafts import PROVENANCE, references, without
 from radar.domain.review.proposal import AlreadyProposed, Filed, Unfiled
 from radar.domain.review.requests import Agent, Bundle, Changes
@@ -27,12 +27,13 @@ class Filing:
                                  if any(f.name == "source_refs" for f in e.fields))
         self._refs = references(model.schema)
 
-    def read(self, page: Page, page_type: str) -> Change:
-        held = self._held.matching(Source, "url", page.url)
+    def read(self, page: Page, source_type: str) -> Change:
+        address = page.link.address
+        held = self._held.matching(Source, "url", address)
         source = (replace(held[0], retrieved_at=page.retrieved_at) if held
-                  else Source(id=keyed("src", page.url), version=1, type=page_type, url=page.url,
+                  else Source(id=keyed("src", address), version=1, type=source_type, url=address,
                               title=page.title or None, retrieved_at=page.retrieved_at))
-        return Change(PutEntity(source), f"Read on {page.url}", "agent", RESEARCHER, (source.id,))
+        return Change(PutEntity(source), f"Read on {address}", "agent", RESEARCHER, (source.id,))
 
     def cited(self, draft: RecordsDraft, source: str) -> tuple[tuple[Change, ...], str | None]:
         cited = ({**r, "source_refs": [source]} if self._model.schema.kind_of(r["id"]) in self._citing else r

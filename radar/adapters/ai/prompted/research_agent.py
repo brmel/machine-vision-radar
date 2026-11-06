@@ -38,10 +38,11 @@ class PromptedResearchAgent:
     def research(self, reading: Reading) -> Findings:
         known = json.dumps([plain(card) for card in reading.known], ensure_ascii=False)
         specs, profiles = _read_against(self._registry, reading.known)
-        request = self._prompt.render(maker=reading.maker, url=reading.page.url, retrieved_at=reading.page.retrieved_at,
+        page = reading.page
+        request = self._prompt.render(maker=reading.maker, url=page.link.address, retrieved_at=page.retrieved_at,
                                       known=known, terms=json.dumps(reading.terms, ensure_ascii=False), specs=specs,
-                                      profiles=profiles, page=reading.page.text[:PAGE],
-                                      links="\n".join(reading.page.links))
+                                      profiles=profiles, page=page.text[:PAGE],
+                                      links="\n".join(link.address for link in page.links))
         reply = self._runner.reply(self._prompt, request, MAX_TOKENS)
         return read(reply, lambda raw: Findings(tuple(_draft(p) for p in raw["proposals"]), tuple(raw["follow"]),
                                                reply.tokens_in, reply.tokens_out))
