@@ -18,6 +18,12 @@ from radar.domain.review.requests import Agent
 
 PHOTOS = 3
 
+def _squeezed(text: str) -> str:
+    return "".join(c for c in text.lower() if c.isalnum())
+
+def _likeliest(images: tuple[Link, ...], name: str) -> list[Link]:
+    return sorted(images, key=lambda i: _squeezed(name) not in _squeezed(i.address.rpartition("/")[2]))
+
 class Media:
     def __init__(self, reader: Reader, files: Files, judge: Meter[ImageJudge], filing: Filing, types: SourceTypes,
                  log: Log, now: Callable[[], str]) -> None:
@@ -27,7 +33,7 @@ class Media:
     def photo(self, run: ResearchRun, product: ProductCard, page: Page, read: Change, by: Agent,
               deadline: Instant) -> tuple[ResearchRun, str | None]:
         address = page.link.address
-        files, run = self._candidates(page.images[:PHOTOS], run, deadline)
+        files, run = self._candidates(_likeliest(page.images, product.name)[:PHOTOS], run, deadline)
         if not files:
             return self._log(run, Step.SKIPPED, f"{address}: no candidate images found"), None
         try:

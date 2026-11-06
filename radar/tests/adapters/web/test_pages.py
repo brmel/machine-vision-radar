@@ -12,7 +12,9 @@ from radar.tests.store import stores
 DOCUMENTS = stores.fixture().model.registry.vocabularies["document_kinds"]
 NOW, SITE, BY = stores.NOW, "https://example.com", "2026-10-18T12:00:40Z"
 SPECS = ('<!doctype html><html><head><title>Widget Ten</title><meta property="og:image" '
-         'content="/media/widget-ten.jpg"></head><body><svg><title>Icon-Contact</title></svg>'
+         'content="/media/share.jpg"><script type="application/ld+json">{"image": "/media/widget-ten.jpg"}</script>'
+         '</head><body><header><img src="/media/banner.jpg"></header><img src="/media/gallery.png">'
+         '<svg><title>Icon-Contact</title></svg>'
          '<img src="/media/logo.svg"><h1>Widget Ten</h1><p>A reach of up to <b>140</b> mm,\n in two finishes.</p>'
          '<table><tr><th>Model</th><th>Reach</th></tr><tr><td>WT-1</td><td>120 '
          'mm</td></tr><tr><td>WT-2</td><td><span>140</span> mm</td></tr></table>'
@@ -43,6 +45,8 @@ def test_the_reader_reads_a_page_as_its_reader_sees_it() -> None:
                                       "WT-1 | 120 mm", "WT-2 | 140 mm", "Matte", "Gloss"]
     assert read.links == (Link("https://docs.example.com/widget-ten.webp", "docs.example.com"),), "web links only"
     assert [i.address for i in read.images] == ["https://www.example.com/media/widget-ten.jpg",
+                                                "https://www.example.com/media/gallery.png",
+                                                "https://www.example.com/media/share.jpg",
                                                 "https://docs.example.com/widget-ten.webp"], (
         "its photos, linked or shown, never a drawing")
 

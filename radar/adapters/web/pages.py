@@ -24,6 +24,7 @@ BLOCKS = frozenset(("address", "article", "aside", "blockquote", "br", "dd", "di
                     "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hr", "li", "main", "nav", "ol",
                     "p", "pre", "section", "table", "tr", "ul"))
 CELLS = ("td", "th")
+CHROME = frozenset(("nav", "header", "footer"))
 PORTS = {"http": 80, "https": 443}
 REDIRECTS = (301, 302, 303, 307, 308)
 ROBOTS, SITEMAP = "/robots.txt", "/sitemap.xml"
@@ -70,13 +71,16 @@ def _resolved(host: str, port: int) -> list[ipaddress.IPv4Address | ipaddress.IP
     except OSError as exc:
         raise _Unreadable(f"no address: {exc}") from exc
 
-def _properties(block: str) -> list[str]:
+def _schema(block: str) -> dict[str, object]:
     try:
         data = json.loads(block)
     except ValueError:
-        return []
-    listed = data.get("additionalProperty") if isinstance(data, dict) else None
-    return [f"{str(p['name']).split('｜')[-1].strip()} | {p['value']}" for p in listed or ()
+        return {}
+    return data if isinstance(data, dict) else {}
+
+def _properties(listed: object) -> list[str]:
+    return [f"{str(p['name']).split('｜')[-1].strip()} | {p['value']}"
+            for p in (listed if isinstance(listed, list) else ())
             if isinstance(p, dict) and "name" in p and "value" in p]
 
 class _Html(HTMLParser):
@@ -84,18 +88,25 @@ class _Html(HTMLParser):
         super().__init__()
         self.title, self.lines, self.links, self.images, self._in, self._line = "", [], [], [], [""], []
         self._linked: list[str] = []
+        self._shared: list[str] = []
+        self._schema_open = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attributes = dict(attrs)
         if tag == "a" and (link := attributes.get("href")):
             self.links.append(link)
-        elif tag == "img" and (image := attributes.get("src")):
-            self.images.append(image)
-        elif tag == "meta" and attributes.get("property") == "og:image" and (image := attributes.get("content")):
-            self.images.insert(0, image)
-        elif tag == "script" and attributes.get("type") == "application/ld+json":
-            self._linked.append("")
+        elif tag in ("img", "meta"):
+            self._photo(tag, attributes)
+        elif tag == "script":
+            self._schema_open = attributes.get("type") == "application/ld+json"
+            self._linked += [""] if self._schema_open else []
         self._opened(tag)
+
+    def _photo(self, tag: str, attributes: dict[str, str | None]) -> None:
+        if tag == "img" and (image := attributes.get("src")) and not CHROME & set(self._in):
+            self.images.append(image)
+        elif attributes.get("property") == "og:image" and (image := attributes.get("content")):
+            self._shared.append(image)
 
     def _opened(self, tag: str) -> None:
         if tag in BLOCKS:
@@ -111,7 +122,7 @@ class _Html(HTMLParser):
             pass
 
     def handle_data(self, data: str) -> None:
-        if self._in[-1] == "script" and self._linked:
+        if self._in[-1] == "script" and self._schema_open:
             self._linked[-1] += data
         elif self._in[-1] == "title":
             self.title += "" if "svg" in self._in else data.strip()
@@ -121,7 +132,10 @@ class _Html(HTMLParser):
     def close(self) -> None:
         super().close()
         self._ended()
-        self.lines += [line for block in self._linked for line in _properties(block)]
+        schemas = [_schema(block) for block in self._linked]
+        self.lines += [line for schema in schemas for line in _properties(schema.get("additionalProperty"))]
+        named = [image for schema in schemas if isinstance(image := schema.get("image"), str)]
+        self.images = [*named, *self.images, *self._shared]
 
     def _ended(self) -> None:
         if line := " ".join("".join(self._line).split()):
