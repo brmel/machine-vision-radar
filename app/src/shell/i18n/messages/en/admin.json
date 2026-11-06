@@ -201,6 +201,7 @@
   "adminUseAll": "All AI",
   "adminUseAsk": "Ask",
   "adminUseResearch": "Research",
+  "adminUseImageJudge": "Image judge",
   "adminUseDatasheet": "Datasheets",
   "adminUseDraft": "News drafts",
   "adminRefusedOffTopic": "Refused: nothing in the catalog matches the question.",

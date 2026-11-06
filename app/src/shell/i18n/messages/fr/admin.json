@@ -201,6 +201,7 @@
   "adminUseAll": "Toute l'IA",
   "adminUseAsk": "Interroger",
   "adminUseResearch": "Collecte web",
+  "adminUseImageJudge": "Juge d'images",
   "adminUseDatasheet": "Fiches techniques",
   "adminUseDraft": "Brouillons d'actualités",
   "adminRefusedOffTopic": "Refusée : rien au catalogue ne correspond à la question.",

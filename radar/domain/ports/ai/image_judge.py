@@ -29,6 +29,10 @@ class ImageEvaluation:
     def ended(self) -> Ended:
         return Ended(Outcome.ANSWERED, self.tokens_in, self.tokens_out, calls=len(self.judged))
 
+    def best_photo(self) -> str | None:
+        photos = [j for j in self.judged if j.kind == "photo"]
+        return max(photos, key=lambda j: j.confidence).url if photos else None
+
 class ImageJudge(Protocol):
     def judge(self, product_name: str, candidates: tuple[CandidateImage, ...]) -> ImageEvaluation:
         ...

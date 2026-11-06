@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import Callable, Sequence, TypeVar
 
 from radar.adapters.console import log, output
-from radar.domain.ai.eval import Graded, graded_answer, graded_draft, graded_extraction, graded_solution
+from radar.domain.ai.eval import (Graded, graded_answer, graded_draft, graded_extraction, graded_judgement,
+                                  graded_solution)
 from radar.domain.ai.meter import Meter
 from radar.domain.model.entities import EvalQuery
 from radar.domain.ports.search.search_engine import SearchRequest
@@ -59,12 +60,15 @@ def _cased(args: argparse.Namespace, path: Path) -> Callable[[], float]:
     if args.use == "datasheet":
         cases = args.wiring.datasheet_cases(path)
         return lambda: _graded(args, args.wiring.datasheet_meter(), [partial(graded_extraction, c) for c in cases])
+    if args.use == "image_judge":
+        images = args.wiring.image_cases(path)
+        return lambda: _graded(args, args.wiring.image_judge_meter(), [partial(graded_judgement, c) for c in images])
     problems = args.wiring.problems(path)
     return lambda: _graded(args, args.wiring.ask_meter(args.wiring.search_engine()),
                            [partial(graded_solution, p) for p in problems])
 
 def run(args: argparse.Namespace) -> int:
-    if args.use in ("datasheet", "solve"):
+    if args.use in ("datasheet", "image_judge", "solve"):
         if not args.cases:
             return log.error(f"eval run {args.use} reads its cases from --cases FILE", code=2)
         try:
@@ -81,12 +85,13 @@ def register(commands: Commands) -> None:
     p = commands.verb("eval", "run",
                       help="score one use, read-only on the catalog: search's Hit@k and MRR, or the share of an AI "
                            "use's cases passed", func=run)
-    p.add_argument("use", choices=("search", "ask", "solve", "draft", "datasheet"),
+    p.add_argument("use", choices=("search", "ask", "solve", "draft", "datasheet", "image_judge"),
                    help="search and ask on the store's curated queries; draft on their targets; solve (application "
-                        "problems) and datasheet on --cases")
+                        "problems), datasheet and image_judge on --cases")
     p.add_argument("--k", type=int, default=5, help="search: how many results count (default 5)")
     p.add_argument("--semantic", action="store_true", help="search: blend keyword with vector similarity")
     p.add_argument("--cases", help="datasheet: the eval set's file, fictional datasheets and the claims each states; "
+                                   "image_judge: recorded candidate images per product and the photo to pick; "
                                    "solve: a catalog file of EvalQuery records, each a problem and the products its "
                                    "needs cite")
     p.add_argument("--floor", type=float, help="exit 1 when the score (Hit@k, or the share passed) is under this rate")

@@ -6,7 +6,7 @@ from typing import Callable
 from radar.domain.ai.meter import Capped, Meter
 from radar.domain.model.entities import Instant, ProductCard
 from radar.domain.model.history.changeset import Change, PutEntity
-from radar.domain.ports.ai.image_judge import CandidateImage, ImageEvaluation, ImageJudge
+from radar.domain.ports.ai.image_judge import CandidateImage, ImageJudge
 from radar.domain.ports.ai.research_agent import FileDraft
 from radar.domain.ports.ai.usage_log import Unparsed
 from radar.domain.ports.review.research_runs import ResearchRun, Step
@@ -17,10 +17,6 @@ from radar.domain.review.agents.research.frontier import Reach, SourceTypes
 from radar.domain.review.requests import Agent
 
 PHOTOS = 3
-
-def _best_photo(evaluation: ImageEvaluation) -> str | None:
-    photos = [j for j in evaluation.judged if j.kind == "photo"]
-    return max(photos, key=lambda j: j.confidence).url if photos else None
 
 class Media:
     def __init__(self, reader: Reader, files: Files, judge: Meter[ImageJudge], filing: Filing, types: SourceTypes,
@@ -43,7 +39,7 @@ class Media:
             return (self._log(replace(run, cad=run.cad + exc.cad), Step.REJECTED, f"{address}: judge error: {exc}"),
                     None)
         run = replace(run, cad=run.cad + cad)
-        best_url = _best_photo(judged)
+        best_url = judged.best_photo()
         if not best_url or best_url not in files:
             return self._log(run, Step.SKIPPED, f"{address}: no suitable product photo"), None
         best = files[best_url]
