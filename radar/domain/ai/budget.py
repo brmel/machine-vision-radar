@@ -5,8 +5,7 @@ from typing import Iterable, Mapping
 
 from radar.domain.model.entities import AiCap, AiCapRow, AiCaps, AiModel, AiSettings, FilesOn, Use
 from radar.domain.model.history.ids import keyed
-from radar.domain.model.history.projection import plain
-from radar.domain.model.history.changeset import Change, Changeset, PutEntity
+from radar.domain.model.history.changeset import UNNUMBERED, Change, Changeset, PutEntity
 from radar.domain.review.requests import Changes
 
 METERED = tuple(u for u in Use if u is not Use.ALL)
@@ -60,9 +59,9 @@ def over_cap(use: Use, caps: Mapping[Use, Cap], usage: Usage, total: Usage) -> s
     return None
 
 def cap_draft(use: Use, cap: Cap, reason: str, author: str) -> Changes:
-    record = {"id": keyed("cap", use.value), "use": use.value, **plain(cap)}
-    return Changes(FilesOn.UPDATE, reason, record["id"],
-                   Changeset((Change(PutEntity(record), reason, "human", author, ()),)))
+    held = AiCap(id=keyed("cap", use.value), version=UNNUMBERED, use=use.value, model=cap.model,
+                 month_cad=cap.month_cad, day_calls=cap.day_calls, client_calls=cap.client_calls)
+    return Changes(FilesOn.UPDATE, reason, held.id, Changeset((Change(PutEntity(held), reason, "human", author, ()),)))
 
 def caps_view(ai: AiSettings, caps: Mapping[Use, Cap], usages: Mapping[Use, Usage], prompts: Mapping[Use, str],
               day: str) -> AiCaps:

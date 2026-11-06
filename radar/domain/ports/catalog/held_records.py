@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Protocol, TypeVar
 
-from radar.domain.model.entities import Claim, Organization
+from radar.domain.model.entities import Claim, Entity, Organization
 
 T = TypeVar("T")
 
@@ -10,7 +10,7 @@ class HeldRecords(Protocol):
     def organizations(self) -> tuple[Organization, ...]:
         ...
 
-    def held(self, record_id: str) -> Mapping[str, Any] | None:
+    def held(self, record_id: str) -> Entity | None:
         ...
 
     def matching(self, kind: type[T], field: str, value: str) -> tuple[T, ...]:

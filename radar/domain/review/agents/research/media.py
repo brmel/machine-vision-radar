@@ -13,7 +13,7 @@ from radar.domain.ports.ai.usage_log import Unparsed
 from radar.domain.ports.review.research_runs import ResearchRun, Step
 from radar.domain.ports.web.page_fetcher import File, Page, PageFetcher, Unfetchable
 from radar.domain.review.agents.files import Files, Staged
-from radar.domain.review.agents.research.filing import RESEARCHER, Filing, Log, as_put
+from radar.domain.review.agents.research.filing import RESEARCHER, Filing, Log
 from radar.domain.review.requests import Agent
 
 IMAGES = (".png", ".jpg", ".jpeg", ".webp")
@@ -50,7 +50,7 @@ class Media:
             return self._log(run, Step.SKIPPED, f"{page.url}: no suitable product photo"), None
         best = files[best_url]
         draft = FileDraft("update", f"The maker's page shows a photo of {product.name}", product.id, best.url)
-        document = Change(PutEntity(as_put(self._files.staged(best, product.id).document)), draft.reason, "agent",
+        document = Change(PutEntity(self._files.staged(best, product.id).document), draft.reason, "agent",
                           RESEARCHER, read.source_refs)
         return self._filing.filed(run, Step.FILED, draft, draft.reason, (read, document), by, best.url), None
 
@@ -77,7 +77,7 @@ class Media:
         except Unfetchable as exc:
             return self._log(run, Step.SKIPPED, f"{draft.url}: {exc}")
         staged = self._files.staged(file, draft.subject)
-        document = Change(PutEntity(as_put(staged.document)), draft.reason, "agent", RESEARCHER, read.source_refs)
+        document = Change(PutEntity(staged.document), draft.reason, "agent", RESEARCHER, read.source_refs)
         return self._datasheet(self._filing.filed(run, Step.MEDIA, draft, draft.reason, (read, document), by, file.url),
                                draft, staged, by)
 
@@ -92,7 +92,7 @@ class Media:
             return (self._log(run, Step.SKIPPED, f"{staged.file.url}: the datasheet states no value under a spec key")
                     if stated else run)
         reason = f"Values stated in the datasheet {staged.file.url}"
-        changes = tuple(Change(PutEntity(as_put(r)), reason, "agent", RESEARCHER, (stated.source.id,))
+        changes = tuple(Change(PutEntity(r), reason, "agent", RESEARCHER, (stated.source.id,))
                         for r in (stated.source, *stated.claims))
         return self._filing.filed(replace(run, cad=run.cad + stated.cad), Step.DATASHEET, draft, reason, changes, by,
                                   staged.file.url)

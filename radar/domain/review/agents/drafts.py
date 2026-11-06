@@ -4,7 +4,7 @@ import json
 from dataclasses import replace
 from typing import Any, Callable, Iterator, Mapping
 
-from radar.domain.model.history.changeset import Change
+from radar.domain.model.history.changeset import Change, PutEntity, as_record
 from radar.domain.model.entities import Claim, Name, Product, ProductOrgRole, ProductVersion, Source, SpecDefinition
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.model import Model
@@ -40,7 +40,8 @@ def naming(record: Mapping[str, Any], refs: References) -> list[tuple[str, str]]
 
 def without(changes: tuple[Change, ...], refused: set[str], refs: References) -> tuple[Change, ...]:
     kept = tuple(c for c in changes if c.entity not in refused)
-    named = {c.entity for c in kept if {ref for _, ref in naming(c.action.record, refs)} & refused}
+    named = {c.entity for c in kept if isinstance(c.action, PutEntity)
+             and {ref for _, ref in naming(as_record(c.action.entity), refs)} & refused}
     return without(kept, refused | named, refs) if named else kept
 
 def said(record: Mapping[str, Any]) -> str:

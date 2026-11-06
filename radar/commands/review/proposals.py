@@ -9,10 +9,10 @@ from typing import Any
 
 from radar.adapters.console import log, output
 from radar.adapters.console.parser import Commands
-from radar.domain.model.entities import ActorKind, FilesOn, ProposalStatus, Source
+from radar.domain.model.entities import ActorKind, FilesOn, Product, ProposalStatus, Source
 from radar.domain.ports.catalog.held_records import HeldRecords
 from radar.domain.model.history.projection import ROWS, plain
-from radar.domain.model.history.changeset import Change, Changeset, PutEntity, parse_changeset
+from radar.domain.model.history.changeset import Change, Changeset, PutEntity, parse_changeset, put_of
 from radar.domain.ports.review.proposal_queue import Query
 from radar.domain.review.proposal import Outcome, Shown
 from radar.domain.review.requests import (Approval, Bundled, Changes, Founder, Picked, Rejection, Retraction, Revision,
@@ -42,7 +42,8 @@ def show(args: argparse.Namespace, shown: Shown) -> int:
                                     lines + ([f"  problem: {view['problem']}"] if "problem" in view else [])))
 
 def run_submit(args: argparse.Namespace) -> int:
-    return show(args, args.wiring.review().submit(draft_of(_read(args.draft)), _founder(args)))
+    draft = draft_of(_read(args.draft), args.wiring.model())
+    return show(args, args.wiring.review().submit(draft, _founder(args)))
 
 def run_list(args: argparse.Namespace) -> int:
     query = Query(args.status, args.files_on, args.actor_kind, args.author, args.bundle)
@@ -67,10 +68,8 @@ def _decided(args: argparse.Namespace, outcome: Outcome, founder: Founder) -> in
     return 0 if reindexed and not outcome.refused else 1
 
 def run_edit(args: argparse.Namespace) -> int:
-    founder = _founder(args)
-    return _decided(args,
-                    args.wiring.review().decide(Revision(args.id, parse_changeset(_read(args.changeset)), args.note),
-                                                founder), founder)
+    founder, changeset = _founder(args), parse_changeset(_read(args.changeset), args.wiring.model())
+    return _decided(args, args.wiring.review().decide(Revision(args.id, changeset, args.note), founder), founder)
 
 def run_decide(args: argparse.Namespace) -> int:
     if bool(args.ids) == bool(args.bundle):
@@ -100,24 +99,20 @@ def _thumbnail_sources(args: argparse.Namespace, held: HeldRecords) -> tuple[str
 def _product_thumbnail_edit(args: argparse.Namespace) -> int:
     held = args.wiring.held()
     found = held.held(args.changeset)
-    if found is None:
+    if not isinstance(found, Product):
         return log.error(f"no product '{args.changeset}'")
-    updated = dict(found)
-    if args.thumbnail:
-        updated["thumbnail"] = args.thumbnail
-    else:
-        updated.pop("thumbnail", None)
     sources = _thumbnail_sources(args, held)
     if not sources:
         return log.error(f"no Source cites '{args.thumbnail}': the change needs one", fix="pass --source <src_id>",
                          code=2)
-    change = Change(PutEntity(updated), args.reason, "human", args.actor, sources)
+    change = Change(PutEntity(replace(found, thumbnail=args.thumbnail or None)), args.reason, "human", args.actor,
+                    sources)
     return _file(args, FilesOn.UPDATE, Changeset((change,)), args.changeset)
 
 def run_put(args: argparse.Namespace) -> int:
     if args.cmd == "product" and getattr(args, "thumbnail", None) is not None:
         return _product_thumbnail_edit(args)
-    read = parse_changeset(_read(args.changeset))
+    read = parse_changeset(_read(args.changeset), args.wiring.model())
     changeset = Changeset(tuple(c if c.source_refs else replace(c, source_refs=tuple(args.source or ()))
                                 for c in read.changes))
     return _file(args, FilesOn.CREATE if args.verb == "add" else FilesOn.UPDATE, changeset,
@@ -130,8 +125,8 @@ def run_media_add(args: argparse.Namespace) -> int:
     mime = args.mime or mimetypes.guess_type(args.file)[0] or "application/octet-stream"
     stored = args.wiring.records().upload(Path(args.file).read_bytes(), mime)
     document = {**_read(args.document), "sha256": stored.sha256, "mime": stored.mime, "bytes": stored.bytes}
-    change = Change(PutEntity(document), args.reason, "human", args.actor, tuple(args.source or ()))
-    return _file(args, FilesOn.CREATE, Changeset((change,)), str(document.get("id", "")))
+    change = Change(put_of(document, args.wiring.model()), args.reason, "human", args.actor, tuple(args.source or ()))
+    return _file(args, FilesOn.CREATE, Changeset((change,)), change.entity)
 
 def _editing(commands: Commands) -> None:
     def verb(noun: str, name: str, text: str, func: Any) -> argparse.ArgumentParser:

@@ -13,10 +13,10 @@ STUDIO = DEV / "app" / "studio"
 ANY, REFLECTION, JSON_TEXT, AS_CAST = "Any", "getattr or hasattr", "JSON text", "as cast"
 UNTYPED: dict[str, dict[str, int]] = {
     ANY: {
-        "radar/domain/model/history/changeset.py": 12,
+        "radar/domain/model/history/changeset.py": 5,
         "radar/domain/model/history/projection.py": 12,
         "radar/domain/ports/ai/research_agent.py": 1,
-        "radar/domain/ports/catalog/held_records.py": 2,
+        "radar/domain/ports/catalog/held_records.py": 1,
         "radar/domain/ports/catalog/views.py": 2,
         "radar/domain/ports/history/version_store.py": 3,
         "radar/domain/ports/review/feed_reads.py": 1,
@@ -31,9 +31,8 @@ UNTYPED: dict[str, dict[str, int]] = {
         "radar/domain/read_model/read_model.py": 1,
         "radar/domain/review/agents/drafts.py": 7,
         "radar/domain/review/agents/duplicates.py": 5,
-        "radar/domain/review/agents/research/filing.py": 3,
         "radar/domain/review/feed/detector.py": 2,
-        "radar/domain/review/feed/editor.py": 4,
+        "radar/domain/review/feed/editor.py": 3,
         "radar/domain/review/feed/news.py": 1,
         "radar/domain/search/hits.py": 1,
         "radar/domain/search/sources.py": 2,

@@ -11,14 +11,15 @@ from radar.domain.ports.web.endpoint import Request, Response
 from radar.domain.ports.store.records import Records
 from radar.domain.ai.meter import Capped
 from radar.domain.model.history.projection import plain
-from radar.domain.model.entities import ActorKind, AdminModel, FilesOn, ProposalStatus
+from radar.domain.model.entities import ActorKind, FilesOn, ProposalStatus
+from radar.domain.model.model import Model
 from radar.domain.ports.review.identity import Identity
 from radar.domain.ports.review.proposal_queue import Query
 from radar.domain.read_model.history import Histories
 from radar.domain.review.agents.tokens import Refused
 from radar.domain.review.requests import Founder, decision_of, draft_of
 from radar.domain.review.review import Review
-from radar.domain.review.views import bundle_view, outcome_view, page_view, shown_view
+from radar.domain.review.views import admin_model, bundle_view, outcome_view, page_view, shown_view
 
 Body = Mapping[str, Any]
 
@@ -63,10 +64,10 @@ Route = Callable[[str, tuple[str, ...], Mapping[str, str], Body, Founder], Respo
 
 class AdminEndpoint:
     def __init__(self, review: Review, identity: Identity, records: Records, histories: Histories,
-                 model: AdminModel, correlate: Callable[[str], str], reindex: Callable[[str, str], bool],
+                 model: Model, correlate: Callable[[str], str], reindex: Callable[[str, str], bool],
                  sections: Mapping[str, Route]) -> None:
-        self._review, self._identity, self._records, self._histories, self._model = (
-            review, identity, records, histories, model)
+        self._review, self._identity, self._records, self._histories, self._model, self._shapes = (
+            review, identity, records, histories, model, admin_model(model))
         self._correlate, self._reindex, self._sections = correlate, reindex, sections
 
     def respond(self, request: Request) -> Response:
@@ -101,7 +102,7 @@ class AdminEndpoint:
 
     def _model_route(self, method: str, parts: tuple[str, ...], query: Mapping[str, str], body: Body,
                      by: Founder) -> Response | None:
-        return Response(200, plain(self._model)) if (method, parts) == ("GET", ()) else None
+        return Response(200, plain(self._shapes)) if (method, parts) == ("GET", ()) else None
 
     def _proposal_route(self, method: str, parts: tuple[str, ...], query: Mapping[str, str], body: Body,
                         by: Founder) -> Response | None:
@@ -109,7 +110,7 @@ class AdminEndpoint:
             case ("GET",):
                 return Response(200, plain(page_view(self._review.queue(_query(query), by, cursor(query)))))
             case ("POST",):
-                return Response(201, plain(shown_view(self._review.submit(draft_of(body), by))))
+                return Response(201, plain(shown_view(self._review.submit(draft_of(body, self._model), by))))
             case ("GET", pid):
                 return Response(200, plain(shown_view(self._review.proposal(pid, by))))
         return None
@@ -118,7 +119,7 @@ class AdminEndpoint:
                         by: Founder) -> Response | None:
         if (method, parts) != ("POST", ()):
             return None
-        outcome = self._review.decide(decision_of(body), by)
+        outcome = self._review.decide(decision_of(body, self._model), by)
         if outcome.changed:
             self._reindex(by.name, by.correlation_id)
         if outcome.refused and not outcome.done:

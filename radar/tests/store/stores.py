@@ -154,13 +154,13 @@ class Fixture:
         return StoreVersionStore(docs, StoreChangeLog(docs, self.model))
 
     def queue(self, docs: Docs) -> StoreProposalQueue:
-        return StoreProposalQueue(docs, self.model.registry.proposal_kinds())
+        return StoreProposalQueue(docs, self.model)
 
     def review(self, docs: Docs, files: Any) -> Review:
         ticks = iter(f"2026-10-18T13:{n // 60:02d}:{n % 60:02d}Z" for n in range(3600))
         held = lambda: layout.catalog_of(self.model, store.scan(docs, self.model.schema, tuple(HELD)))
         return Review(self.queue(docs), self.writer(docs, files), self.versions(docs), held,
-                      ProductIdentity.of(self.model.registry), self.model.schema, lambda: next(ticks))
+                      ProductIdentity.of(self.model.registry), self.model, lambda: next(ticks))
 
     def apply(self, docs: Docs, files: Any, cid: str, *changes: dict[str, Any]) -> None:
         self.writer(docs, files).apply(changeset(*changes), cid)
@@ -218,7 +218,7 @@ def retract(entity_id: str, reason: str, refs: list[str]) -> dict[str, Any]:
             "source_refs": refs}
 
 def changeset(*changes: dict[str, Any]) -> Changeset:
-    return parse_changeset({"changes": list(changes)})
+    return parse_changeset({"changes": list(changes)}, fixture().model)
 
 def file(tmp_path: Path, name: str, body: Any) -> str:
     (tmp_path / name).write_text(json.dumps(body), encoding="utf-8")

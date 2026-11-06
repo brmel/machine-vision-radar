@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 
 from radar import paths
-from radar.adapters.firestore.layout import catalog_of, record_of
 from radar.adapters.firestore.repository import StoreChangeLog, StoreFeedReads
 from radar.adapters.web.admin.agents import AgentsAdmin
 from radar.adapters.web.admin.endpoint import AdminEndpoint
@@ -26,7 +25,6 @@ from radar.domain.review.feed.drafter import Drafter
 from radar.domain.review.feed.editor import Feed
 from radar.domain.review.requests import Job
 from radar.domain.review.review import Review
-from radar.domain.review.views import admin_model
 from radar.domain.search.sources import KINDS
 
 class Wiring(Models):
@@ -46,7 +44,7 @@ class Wiring(Models):
     def mcp(self) -> McpServer:
         tools = {**read_tools(self.search_engine, self.repository(), lambda: self.catalog(KINDS),
                               self.model().registry),
-                 **proposal_tools(self.review())}
+                 **proposal_tools(self.review(), self.model())}
         return McpServer(tools, self.agent_tokens(), self.now, self.correlate)
 
     def researcher(self) -> Researcher:
@@ -67,7 +65,7 @@ class Wiring(Models):
 
     def admin_endpoint(self) -> AdminEndpoint:
         review, histories = self.review(), self.histories()
-        return AdminEndpoint(review, self.identity(), self.records(), histories, admin_model(self.model()),
+        return AdminEndpoint(review, self.identity(), self.records(), histories, self.model(),
                              self.correlate, self.reindex,
                              {"search": self.search_admin(review, histories).route,
 "news": self.news_admin(review).route, "agents": AgentsAdmin(self.agent_tokens(), self.now).route,
@@ -79,11 +77,8 @@ class Wiring(Models):
                         StoreFeedReads(docs, model.schema, self.repository()), model.schema)
 
     def feed(self, review: Review | None = None) -> Feed:
-        model = self.model()
         return Feed(review or self.review(), Job("news", self.correlate("feed")),
-                    lambda: self.catalog((FeedItem.__name__,)).all(FeedItem),
-                    lambda record: catalog_of(model, [{"version": 1, **record_of(dict(record))}]).all(FeedItem)[0],
-                    model.registry, self.instant)
+                    lambda: self.catalog((FeedItem.__name__,)).all(FeedItem), self.model().registry, self.instant)
 
     def drafter(self) -> Drafter:
         return Drafter(self.retriever(self.search_engine()), self.repository(), self.feed(), self.draft_meter(),

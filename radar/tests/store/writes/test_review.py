@@ -26,7 +26,7 @@ def _agent(name: str) -> Agent:
 
 def _changes(files_on: FilesOn, reason: str, subject: str, *records: tuple[dict[str, Any], list[str]]) -> Changes:
     return Changes(files_on, reason, subject,
-                   parse_changeset({"changes": [stores.put(r, reason, refs) for r, refs in records]}))
+                   parse_changeset({"changes": [stores.put(r, reason, refs) for r, refs in records]}, FX.model))
 
 def _claim_draft(add: float) -> Changes:
     _, claim = FX.revised_claim(add)
@@ -116,7 +116,7 @@ def test_review_refuses_what_it_cannot_apply() -> None:
     docs, files = FX.seeded()
     review, claim = FX.review(docs, files), FX.rows("claims.jsonl")[0]
     unsourced = parse_changeset(
-        {"changes": [stores.put({**claim, "source_refs": ["src_zzzzzzzzzz"]}, "No such source")]})
+        {"changes": [stores.put({**claim, "source_refs": ["src_zzzzzzzzzz"]}, "No such source")]}, FX.model)
     good, other = (review.submit(_claim_draft(add), FOUNDER).proposal for add in (40, 50))
     review.decide(Rejection(Picked((other.id,)), "Revision C is not out"), FOUNDER)
     with pytest.raises(ProposalError, match="rejected"):

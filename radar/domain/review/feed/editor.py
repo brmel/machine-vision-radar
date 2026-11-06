@@ -7,7 +7,7 @@ from typing import Any, Callable, Mapping, Sequence
 from radar.domain.model.entities import (FeedDesk, FeedDeskRow, FeedItem, FeedSentence, FilesOn, PartialDate,
                                          ProposalStatus)
 from radar.domain.model.history.ids import keyed
-from radar.domain.model.history.projection import every_page, page_of, plain
+from radar.domain.model.history.projection import every_page, page_of
 from radar.domain.model.registry import Registry
 from radar.domain.model.history.changeset import Change, Changeset, PutEntity
 from radar.domain.ports.review.proposal_queue import Query
@@ -15,8 +15,6 @@ from radar.domain.review.feed.news import published
 from radar.domain.review.proposal import Proposal
 from radar.domain.review.requests import Approval, Changes, Enactment, Founder, Job, Picked, Revision, Withdrawal
 from radar.domain.review.review import Review
-
-Parse = Callable[[Mapping[str, Any]], FeedItem]
 
 @dataclass(frozen=True, slots=True)
 class Article:
@@ -71,15 +69,16 @@ def _cites(body: Sequence[FeedSentence]) -> tuple[str, ...]:
     return tuple(dict.fromkeys(c for s in body for c in s.cites))
 
 class Feed:
-    def __init__(self, review: Review, desk: Job, published: Callable[[], Sequence[FeedItem]], parse: Parse,
-                 registry: Registry, clock: Callable[[], str]) -> None:
-        self._review, self._desk, self._published, self._parse, self._registry, self._clock = (
-            review, desk, published, parse, registry, clock)
+    def __init__(self, review: Review, desk: Job, published: Callable[[], Sequence[FeedItem]], registry: Registry,
+                 clock: Callable[[], str]) -> None:
+        self._review, self._desk, self._published, self._registry, self._clock = (
+            review, desk, published, registry, clock)
 
     def _pending(self, status: ProposalStatus | None) -> list[Pending]:
         pages = every_page(lambda cursor: self._review.queue(Query(status, FilesOn.FEED), self._desk, cursor))
-        return [Pending(p, self._parse(p.changeset.changes[0].action.record)) for page in pages for p in page.proposals
-                if p.changeset and isinstance(p.changeset.changes[0].action, PutEntity)]
+        return [Pending(p, put.entity) for page in pages for p in page.proposals
+                if p.changeset and isinstance(put := p.changeset.changes[0].action, PutEntity)
+                and isinstance(put.entity, FeedItem)]
 
     def drafts(self) -> list[Pending]:
         return sorted(self._pending(ProposalStatus.SUGGESTED), key=lambda d: (d.item.position, d.item.id))
@@ -91,7 +90,7 @@ class Feed:
         return {i.slug for i in self.items()} | {d.item.slug for d in self._pending(None)}
 
     def _change(self, item: FeedItem, reason: str, by: Founder | Job) -> Changeset:
-        return Changeset((Change(PutEntity(plain(replace(item, version=1))), reason, by.kind, by.name, ()),))
+        return Changeset((Change(PutEntity(item), reason, by.kind, by.name, ()),))
 
     def write(self, article: Article, by: Founder | Job, kind: str | None = None,
               authorship: str = "human") -> Proposal:

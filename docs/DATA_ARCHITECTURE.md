@@ -16,6 +16,10 @@ wiring loads it once and every caller takes it.
   immutable `Verdict` of `Finding`s (rule, entity, message, `Severity` error or warning). The `scope` is `Whole()`
   for the store (`store validate`) and a folder `model validate` reads, else `Part()`: a write's neighborhood, a
   catalog `store load` seeds, a catalog file or the registry alone.
+- `parse_changeset(raw, model)` (`radar/domain/model/history/changeset.py`): a changeset's JSON into a `Changeset`
+  whose `PutEntity` holds a parsed entity, its version left for the writer to number; a record that does not parse is
+  a `record_parse` finding. The domain hands changes on as entities, and `as_record` turns one back into a record only
+  to be stored, compared or shown.
 - A refused write raises `InvalidChangeset`, which holds findings only.
 
 ## 1. Principles

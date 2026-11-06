@@ -60,7 +60,7 @@ class _Value:
 class Measure:
     def __init__(self, runs: ResearchRunLog, review: Proposing, read: CatalogRepository, held: HeldRecords,
                  model: Model) -> None:
-        self._runs, self._review, self._read, self._held, self._schema = runs, review, read, held, model.schema
+        self._runs, self._review, self._read, self._held = runs, review, read, held
         profiles = model.registry.profiles
         self._filters = {p.category_id: frozenset(f.field for f in p.facets) for p in profiles}
         self._shown = {p.category_id: frozenset((*p.sections.core, *p.sections.detail)) for p in profiles}
@@ -83,14 +83,11 @@ class Measure:
                 for p in page.proposals]
 
     def _values(self, proposal: Proposal, categories: Mapping[str, str]) -> list[_Value]:
-        records = [put.record for put in puts(proposal)]
-        kinds = [self._schema.kind_of(r["id"]) for r in records]
-        made = {r["id"]: r["category"] for r, kind in zip(records, kinds) if kind == Product.__name__
-                and "category" in r}
-        return [_Value(r["subject"], r["spec_key"], frozenset(r["source_refs"]), proposal.status,
-                       r["spec_key"] in self._filters.get(made.get(r["subject"]) or categories.get(r["subject"], ""),
-                                                          ()))
-                for r, kind in zip(records, kinds) if kind == Claim.__name__]
+        entities = [put.entity for put in puts(proposal)]
+        made = {e.id: e.category for e in entities if isinstance(e, Product)}
+        return [_Value(e.subject, e.spec_key, frozenset(e.source_refs), proposal.status,
+                       e.spec_key in self._filters.get(made.get(e.subject) or categories.get(e.subject, ""), ()))
+                for e in entities if isinstance(e, Claim)]
 
     def _published(self, values: Sequence[_Value]) -> int:
         approved = [v for v in values if v.status is ProposalStatus.APPROVED]

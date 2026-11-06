@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar, Literal, Mapping, get_args
+from typing import TYPE_CHECKING, ClassVar, Literal, Mapping, get_args
 
 from radar.domain.model.history.changeset import Changeset, parse_changeset
 from radar.domain.model.entities import ActorKind, FilesOn, ProposalAction
 from radar.domain.review.agents.tokens import AgentToken
+
+if TYPE_CHECKING:
+    from radar.domain.model.model import Model
 
 @dataclass(frozen=True, slots=True)
 class Founder:
@@ -132,11 +135,11 @@ def _object(raw: object, what: str) -> Mapping[str, object]:
         raise ValueError(f"a {what} is a JSON object")
     return raw
 
-def draft_of(raw: object) -> Draft:
+def draft_of(raw: object, model: Model) -> Draft:
     shape = _object(raw, "draft")
     files_on, reason, subject = shape.get("files_on"), _text(shape, "reason"), _id(shape, "subject")
     if files_on in get_args(ChangesOn) and shape.get("changeset") is not None:
-        return Changes(FilesOn(files_on), reason, subject, parse_changeset(shape["changeset"]))
+        return Changes(FilesOn(files_on), reason, subject, parse_changeset(shape["changeset"], model))
     if files_on in (FilesOn.RETRACT, FilesOn.QUALITY) and subject:
         return Withdrawal(subject, reason, FilesOn(files_on))
     if files_on == FilesOn.ROLLBACK and subject:
@@ -153,7 +156,7 @@ def _target(shape: Mapping[str, object]) -> Target:
         return Picked(tuple(ids))
     raise ValueError("a decision names its proposals (a list of ids) or its bundle (a run's id)")
 
-def decision_of(raw: object) -> Decision:
+def decision_of(raw: object, model: Model) -> Decision:
     shape = _object(raw, "decision")
     note = _text(shape, "note")
     match shape.get("decision"):
@@ -164,5 +167,5 @@ def decision_of(raw: object) -> Decision:
         case ProposalAction.RETRACT:
             return Retraction(_target(shape), note)
         case ProposalAction.EDIT:
-            return Revision(_text(shape, "proposal"), parse_changeset(shape.get("changeset")), note)
+            return Revision(_text(shape, "proposal"), parse_changeset(shape.get("changeset"), model), note)
     raise ValueError("decision is approve, reject, retract or edit")
