@@ -4,7 +4,7 @@ set -eo pipefail
 # Git runs hooks from the repo's top level; the commands below run from the code's folder
 cd "$(dirname "$0")/.."
 
-bash app/scripts/gates/require-node.sh
+bash app/scripts/gates/require.sh node
 
 # Gate nothing twice: a deleted ref carries no code, and a tree that passed here is not run again
 needs_gate=0

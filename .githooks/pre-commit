@@ -4,22 +4,12 @@ set -eo pipefail
 # Git runs hooks from the repo's top level; the commands below run from the code's folder
 cd "$(dirname "$0")/.."
 
-bash app/scripts/gates/require-node.sh
+bash app/scripts/gates/require.sh node
 
 # The checks below read the working tree, so it must equal what gets committed.
 git diff --quiet \
   || { echo "ERROR: unstaged changes; pre-commit validates the working tree, stage or stash them" >&2; exit 1; }
 
-echo "=== [pre-commit] Validating the model, the registry and the generated files ==="
-python3 -m radar model validate
-python3 -m radar model generate --check
-
-echo "=== [pre-commit] The repo guards: layout, boundaries, untyped seams ==="
-python3 -m pytest radar/tests/repo -q -p no:cacheprovider
-
-echo "=== [pre-commit] TypeScript typecheck, the site's guards and unused code ==="
-npm --prefix app run lint
-(cd app && npx vitest run tests/guards --reporter=dot && npm run knip)
-python3 -m vulture radar --config radar/vulture.toml
+bash app/scripts/gates/verify.sh
 
 echo "=== [pre-commit] OK ==="

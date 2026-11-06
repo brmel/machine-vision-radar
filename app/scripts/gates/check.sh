@@ -5,8 +5,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$REPO_ROOT"
 
-bash "$REPO_ROOT/app/scripts/gates/require-node.sh"
-bash "$REPO_ROOT/app/scripts/gates/require-java.sh"
+bash "$REPO_ROOT/app/scripts/gates/require.sh" node java
 
 # The commit and tree this run tests, read before its first step.
 COMMIT_SHA=$(git rev-parse --short HEAD)
@@ -25,23 +24,14 @@ run_gate() {
   step "$@" || { echo "  rerun from $(pwd): ${*:3}" >&2; exit 1; }
 }
 
-run_gate 60 "[1/5] Validating the model and the registry" python3 -m radar model validate
-run_gate 60 "[2/5] Checking generated model types (fix: python3 -m radar model generate)" \
-  python3 -m radar model generate --check
-run_gate 60 "[3/5] Running Python test suite (contracts & drift)" python3 -m pytest radar/tests/ -q
+run_gate 300 "[1/4] The fast checks (app/scripts/gates/verify.sh)" bash "$REPO_ROOT/app/scripts/gates/verify.sh"
+run_gate 60 "[2/4] Running Python test suite (contracts & drift)" python3 -m pytest radar/tests/ -q
 
 cd "$REPO_ROOT/app"
-run_gate 120 "[4/5] a. Vitest suite (build, guards, integration)" npm test
-run_gate 60 "[4/5] b. TypeScript check" npx tsc --noEmit
-run_gate 60 "[4/5] c. Architecture boundaries (depcruise)" npm run arch
-run_gate 60 "[4/5] d. Unused code (knip)" npm run knip
-run_gate 60 "[4/5] e. Unused Python code (vulture, confidence 60, radar/vulture.toml)" \
-  python3 -m vulture ../radar --config ../radar/vulture.toml
-run_gate 60 "[4/5] f. No duplicated code (jscpd, its key in app/package.json)" \
-  npm run duplication
+run_gate 120 "[3/4] a. Vitest suite (build, guards, integration)" npm test
 
 # The emulators' hosting serves the gates' build from firebase.gate.json, with their hosts in the CSP.
-run_gate 60 "[4/5] g. The gates' hosting config" node --experimental-strip-types scripts/gates/test-hosting.ts
+run_gate 60 "[3/4] b. The gates' hosting config" node --experimental-strip-types scripts/gates/test-hosting.ts
 # The Storage emulator's files live under TMPDIR, which other emulator runs share and remove.
 GATE_TMP="$(mktemp -d)"
 # A crashed Firebase CLI leaves its Java emulators up: stop what this checkout left on an emulator port.
@@ -57,7 +47,7 @@ print(*(v["port"] for v in emulators if isinstance(v, dict) and "port" in v))' "
   done
 }
 trap 'sweep; rm -f "$REPO_ROOT/firebase.gate.json"; rm -rf "$GATE_TMP"' EXIT
-EMULATOR_GATE="[5/5] Emulator gate: store suites, the site built from Firestore, Playwright, perf budgets and smoke"
+EMULATOR_GATE="[4/4] Emulator gate: store suites, the site built from Firestore, Playwright, perf budgets and smoke"
 run_gate 900 "$EMULATOR_GATE (fixtures, demo-mvradar)" \
   env TMPDIR="$GATE_TMP" npx firebase emulators:exec --config ../firebase.gate.json \
     --only firestore,storage,hosting,auth --project demo-mvradar "bash scripts/gates/emulator.sh"

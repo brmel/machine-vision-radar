@@ -69,8 +69,9 @@ Local, through `.githooks/` (`npm run setup` wires them), on fixtures, in emulat
 credentials. Each step runs under its own limit, about three times its usual run (`app/scripts/limits.sh`), and is
 stopped past it with everything it started. All gates green before every push. Never commit red. Never weaken a gate.
 
-- **Pre-commit**, on a working tree equal to what is committed: `radar model validate`, `model generate --check`, the repo
-  guards (`radar/tests/repo`), tsc, the site's guards (`app/tests/guards`), knip and vulture.
+- **Pre-commit**, on a working tree equal to what is committed: `npm run verify` (`app/scripts/gates/verify.sh`, about
+  15 s): `radar model validate`, `model generate --check`, the repo guards (`radar/tests/repo`), ruff's unused-import
+  rules, vulture, tsc, the site's guards (`app/tests/guards`), knip, depcruise and jscpd.
 - **Pre-push**, on a clean tree: `npm run check` (`app/scripts/gates/check.sh`, which names each step), ending with
   `GATES: PASS (commit=<sha>, node=<version>)`. A pass is recorded for its tree; pushing a passed tree or deleting a
   ref runs no gate.

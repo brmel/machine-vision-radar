@@ -37,9 +37,7 @@ FUNCTIONS="$REPO_ROOT/dist/functions"
 mkdir -p "$FUNCTIONS"
 rsync -a --delete --exclude venv --exclude tests --exclude __pycache__ \
   "$REPO_ROOT/radar" "$REPO_ROOT/contracts" "$REPO_ROOT/data" "$REPO_ROOT/.firebaserc" "$FUNCTIONS/"
-# The function needs the runtime deps only, not the test and gate tools.
-{ grep -vE '^(pytest|vulture|pint)' "$REPO_ROOT/radar/requirements.txt"; echo "firebase-functions>=0.6.0"; } \
-  > "$FUNCTIONS/requirements.txt"
+{ cat "$REPO_ROOT/radar/requirements.txt"; echo "firebase-functions>=0.6.0"; } > "$FUNCTIONS/requirements.txt"
 cp "$REPO_ROOT/radar/adapters/web/function.py" "$FUNCTIONS/main.py"
 [[ -d "$FUNCTIONS/venv" ]] || timed 120 "the function's venv" uv venv --quiet --python 3.12 "$FUNCTIONS/venv"
 timed 300 "the function's packages" uv pip install --quiet --python "$FUNCTIONS/venv/bin/python" \

@@ -3,7 +3,8 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "setup": "git config core.hooksPath \"$(git rev-parse --show-prefix).githooks\" && npm --prefix app ci && python3 -m pip install -r radar/requirements.txt",
-    "check": "npm --prefix app run check"
+    "setup": "git config core.hooksPath \"$(git rev-parse --show-prefix).githooks\" && npm --prefix app ci && python3 -m pip install -r radar/requirements.txt -r radar/requirements-dev.txt",
+    "check": "npm --prefix app run check",
+    "verify": "bash app/scripts/gates/verify.sh"
   }
 }
