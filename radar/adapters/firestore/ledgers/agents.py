@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 from dataclasses import asdict
 from datetime import date
+from itertools import takewhile
 from typing import Any, Mapping, Sequence
 
 from radar.adapters.console import log
@@ -92,6 +93,11 @@ class FirestoreCrawlRecords:
     def listed(self, org: str) -> tuple[CrawlRecord, ...]:
         return tuple(CrawlRecord(**{**f, "status": CrawlStatus(f["status"]), "kind": PageKind(f["kind"])})
                      for _, f in self._docs.where(CRAWL, "org", [org]))
+
+    def due(self, now: str) -> tuple[str, ...]:
+        orgs = (f["org"] for _, f in takewhile(lambda row: row[1]["next_due"] <= now,
+                                               self._docs.after(CRAWL, "next_due", None)))
+        return tuple(dict.fromkeys(orgs))
 
     def save(self, records: Sequence[CrawlRecord]) -> None:
         writes = [Put(f"{CRAWL}/{hashlib.sha256(r.address.encode()).hexdigest()}",

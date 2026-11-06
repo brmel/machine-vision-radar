@@ -33,3 +33,6 @@ class CrawlRecords(Protocol):
 
     def save(self, records: Sequence[CrawlRecord]) -> None:
         ...
+
+    def due(self, now: Instant) -> tuple[str, ...]:
+        ...
