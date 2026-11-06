@@ -8,11 +8,13 @@ from radar.domain.model.entities import FilesOn, Source
 from radar.domain.model.history.ids import keyed
 from radar.domain.model.model import Model
 from radar.domain.ports.catalog.held_records import HeldRecords
+from radar.domain.ports.review.agent_tokens import AgentTokens
 from radar.domain.ports.ai.research_agent import ProposalDraft, RecordsDraft
 from radar.domain.ports.review.proposing import Proposing
 from radar.domain.ports.review.research_runs import ResearchRun, Step
 from radar.domain.ports.web.reader import Page
 from radar.domain.review.agents.drafts import PROVENANCE, references, without
+from radar.domain.review.agents.tokens import throttle
 from radar.domain.review.proposal import AlreadyProposed, Filed, Unfiled
 from radar.domain.review.requests import Agent, Bundle, Changes
 from radar.domain.validation.verdict import InvalidChangeset
@@ -21,8 +23,10 @@ RESEARCHER = "research"
 Log = Callable[[ResearchRun, Step, str], ResearchRun]
 
 class Filing:
-    def __init__(self, review: Proposing, model: Model, held: HeldRecords, log: Log) -> None:
+    def __init__(self, review: Proposing, model: Model, held: HeldRecords, log: Log, tokens: AgentTokens,
+                 now: Callable[[], str]) -> None:
         self._review, self._model, self._held, self._log = review, model, held, log
+        self._tokens, self._now = tokens, now
         self._citing = frozenset(e.name for e in model.schema.entities
                                  if any(f.name == "source_refs" for f in e.fields))
         self._refs = references(model.schema)
@@ -55,6 +59,8 @@ class Filing:
 
     def filed(self, run: ResearchRun, step: Step, draft: ProposalDraft, reason: str, changes: tuple[Change, ...],
               by: Agent, source_url: str | None = None) -> ResearchRun:
+        now = self._now()
+        throttle(by.token, self._tokens.count(by.token.id, now[:16], True), now)
         [filing] = self._review.file(Bundle(run.id,
                                             (Changes(FilesOn(draft.files_on), reason, draft.subject, Changeset(changes),
                                                      source_url),)), by)

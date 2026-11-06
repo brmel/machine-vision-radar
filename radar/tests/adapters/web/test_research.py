@@ -108,7 +108,7 @@ def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
     queue, view = FX.queue(docs[0]), run_view(run)
     filed = [queue.get(p) for p in view.filed]
     [token] = FirestoreAgentTokens(docs[0]).page()[0]
-    assert (token.id, token.name, token.revoked_at) == (run.token, RESEARCHER, NOW), "its own token, revoked at its end"
+    assert (token.id, token.name, token.revoked_at) == (run.token, RESEARCHER, None), "the day's token, kept"
     assert {(p.actor_kind, p.author, p.token, p.status) for p in filed if p} == {
         ("agent", RESEARCHER, run.token, "suggested")}
     found = [f"{SITE}/media/widget-two.png", f"{SITE}/media/widget-two.pdf", f"{SITE}/media/widget-two.pdf"]

@@ -84,7 +84,8 @@ Each token has its own, set when it is issued (the defaults are `Limits` in `rad
 counted in the store (`agent_usage`) by the UTC clock:
 
 - **requests a minute:** every message, a notification too;
-- **proposals a day:** every `submit_proposal` call, filed, merged or refused.
+- **proposals a day:** every `submit_proposal` call, filed, merged or refused. The research agent files under one
+  token a day, so its runs share the limit.
 
 Over a limit, the request is refused until the next minute or day: HTTP 429 with `Retry-After` in seconds and the
 JSON-RPC error `-32002` with the same seconds in `data.retry_after`; over stdio, the same error line.
