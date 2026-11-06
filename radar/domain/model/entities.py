@@ -253,6 +253,7 @@ class Unit:
     dimension: TermId
     ucum: str
     factor: float
+    aliases: tuple[str, ...] | None = None
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class SpecDefinition:

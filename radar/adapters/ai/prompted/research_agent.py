@@ -16,9 +16,11 @@ MAX_TOKENS, PAGE = 8000, 20_000
 
 def _draft(proposal: dict[str, Any]) -> ProposalDraft:
     files_on, reason, subject = proposal["files_on"], proposal["reason"], proposal["subject"] or None
-    if proposal.get("media"):
-        return FileDraft(files_on, reason, subject, proposal["media"])
     records = json.loads(proposal["records"] or "[]")
+    if proposal.get("media"):
+        if records:
+            raise ValueError("a proposal holds a file or records, never both")
+        return FileDraft(files_on, reason, subject, proposal["media"])
     if not isinstance(records, list) or not all(isinstance(r, dict) and isinstance(r.get("id"), str) for r in records):
         raise ValueError("records is a JSON list of records, each with its id")
     return RecordsDraft(files_on, reason, subject, tuple(records))
@@ -39,8 +41,8 @@ class PromptedResearchAgent:
         known = json.dumps([plain(card) for card in reading.known], ensure_ascii=False)
         specs, profiles = _read_against(self._registry, reading.known)
         page = reading.page
-        request = self._prompt.render(maker=reading.maker, url=page.link.address, retrieved_at=page.retrieved_at,
-                                      known=known, terms=json.dumps(reading.terms, ensure_ascii=False), specs=specs,
+        request = self._prompt.render(maker=reading.maker, url=page.link.address, known=known,
+                                      terms=json.dumps(reading.terms, ensure_ascii=False), specs=specs,
                                       profiles=profiles, page=page.text[:PAGE],
                                       links="\n".join(link.address for link in page.links))
         reply = self._runner.reply(self._prompt, request, MAX_TOKENS)

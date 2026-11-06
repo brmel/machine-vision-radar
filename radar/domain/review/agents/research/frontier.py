@@ -29,7 +29,7 @@ class Site:
     home: str
     sites: tuple[str, ...]
     products: tuple[ProductCard, ...]
-    target_product: str | None = None
+    one_product: bool = False
 
 @dataclass(frozen=True, slots=True)
 class Reach:
@@ -57,7 +57,7 @@ def _product_site(key: str, orgs: Sequence[Organization], owning: Sequence[OrgRe
     if not (url := (shown.website_url if shown else None) or maker.website):
         raise ValueError(f"{key}: has no website to read")
     sites = tuple(a for a in (url, maker.website, *_group(maker, orgs, owning)) if a)
-    return Site(maker.id, url, sites, (prod,), target_product=prod.id)
+    return Site(maker.id, url, sites, (prod,), one_product=True)
 
 def _maker_sites(makers: Sequence[Organization], orgs: Sequence[Organization], owning: Sequence[OrgRelation],
                  index: IndexView, category: str | None, key: str) -> tuple[Site, ...]:
@@ -124,7 +124,7 @@ class Frontier:
         return None
 
     def mapped(self, reach: Reach, by: Instant) -> Unread | None:
-        if reach.site.target_product or reach.link.site in self._mapped:
+        if reach.site.one_product or reach.link.site in self._mapped:
             return None
         self._mapped.add(reach.link.site)
         seeds = self._reader.sitemap(reach.link, by)

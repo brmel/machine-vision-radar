@@ -7,7 +7,6 @@ proposals for the founder to approve, edit or reject, and which of the page's li
 
 - `maker`: the maker's organization id (org_...)
 - `url`: the page's address
-- `retrieved_at`: when the page was read, an Instant
 - `known`: the catalog's cards of the maker's products as JSON: id, slug, name, kind, category, and published values by
   spec key
 - `terms`: the record types a proposal puts as JSON, each with every field it takes: a field the registry binds with
@@ -34,15 +33,15 @@ card names, a product's values, its own page, a new model or firmware or softwar
 missing proposal is always better than a wrong one: when the page states nothing new, return no proposals. Then you
 name the page's links to read next.
 Rules:
-- One proposal per product. `files_on` is `create` for a product no card names, `update` for one a card names.
+- One proposal per product, and one more for each file in `media`. `files_on` is `create` for a product no card names, `update` for one a card names.
   `subject` is the product's id: a card's id, or for a new product `prd_` and ten lowercase letters or digits. A card
   names a product family or a model: a model of a family a card names is never a new product; what the page states of
   it goes to the family's card, as below.
 - For each product the page is about, state every value the page states of the specs its category's profile lists in
-  `filters`, then of its other `specs`; never a spec its category's profile does not list. A family's value that all
-  its models share is one value. A value that differs across the models the page lists is a range from the lowest to
-  the highest for a number, every term for a `term_set` spec, and left out for a `term` spec. A lifecycle state (new,
-  not recommended for new designs, discontinued, end of life) is never a spec's value.
+  `filters`, then of its other `specs`, and only those. On a family's card, a value all the models the page lists share
+  is one value; one that differs is a range from the lowest to the highest for a number, every term for a `term_set`
+  spec, and left out for a `term` spec. A model's card takes only what the page states of that model. A lifecycle state
+  (new, not recommended for new designs, discontinued, end of life) is a product's status, outside its specs.
 - `records` is a JSON list, as text, of the records to put, each with its `id` and only the fields the page states:
   - a new product: a Product (`id`, `kind`, `category`, `slug`: the maker part the cards' slugs share before `__`
     (with no card, the maker's name in lowercase words joined by hyphens), `__`, then the product's name the same way,
@@ -53,28 +52,28 @@ Rules:
     page's address as `website_url`;
   - a value: a Claim (`id` `clm_...`, `subject`, `spec_key`, `value` as `{"quantity": {"value": number, "unit": id}}`,
     `{"range": {"min": number, "max": number, "unit": id}}` for a range, `{"term": id}` for a spec whose datatype is
-    `term`, `{"terms": [id, ...]}` for one whose datatype is `term_set`, `{"none": "none_stated"}` when the page states
-    the product has none or `{"none": "not_applicable"}` when it states the spec does not apply (never for a term set,
-    never for what the page is silent on), `method`: `website`, `recorded_at`: when the page was read, `rank`: 1).
+    `term`, `{"terms": [id, ...]}` for one whose datatype is `term_set`, `{"boolean": true}` for a `boolean`, `{"string":
+    text}` for a `string`, `{"none": "none_stated"}` when the page states the product has none or `{"none":
+    "not_applicable"}` when it states the spec does not apply (never for a term set, never for what the page is silent
+    on)).
     `spec_key` is the id of the one spec in `specs` the page names, by its label or one of its `aliases`. A
     quantity's `unit` is always given: the id, never the symbol, of the one of that spec's `units` whose symbol the
     page writes (for `"units": {"abc": "ABC"}` and a page's "5 ABC", `"unit": "abc"`), with the number as written; a
     number outside the spec's `bounds` is a misreading, left out. A term is the id, never the label, of the one of that
     spec's `terms` the page's word names (for `"terms": {"abc_de": "Abc De"}` and a page's "ABC-DE", `"abc_de"`); a
     word no term names is left out;
-  - a version: a ProductVersion (`id` `ver_...`, `product`, `kind`, `label`).
+  - a version: a ProductVersion (`id` `ver_...`, `product`, `kind`, `scheme`, `label`).
 - A record has only the fields `terms` lists for its type. A field listed with ids takes one of them, exactly as
   written (when none fits what the page states, leave the field out, or the record); a field listed with `[]` takes
   what the page states. A record has every field whose name ends with `*` (written without the `*`), or it is left
   out. A product's name is its Name record, never a field of its Product.
 - A record refers only to the maker, to a card's id, or to a record of the same proposal by the id it has there; a
   product no card names is proposed with its Product record, in that product's proposal.
-- Never invent an id of a record a card holds, a term, a value, a date or a unit the page does not state.
-- What the page does not state of this product is not filed. Never read a value or a status off a part number, a product's
-  name, its family or its sibling products, and a page existing says nothing of a product's status.
-- A figure stated as a bound ("up to", "<", ">") is left out, and so are two figures for one spec in a cell, per mode or per
-  period. A standard's version is stated only when the page names it, and a protocol only when its physical interface is on
-  the page.
+- Every value, status, unit and date comes from what the page states of this product: its part number, its name, its
+  family, its siblings and the page's existence state nothing.
+- A figure stated as a limit ("up to", "<", ">", "min.", "less than", "at least", "or more") is left out, and so are two
+  figures for one spec in a cell, per mode or per period. "Approx.", "typ." and "max." state the figure. A standard's
+  version is stated only when the page names it, and a protocol only when its physical interface is on the page.
 - A product's category comes from how the maker's own page groups it: its breadcrumb or its section. A cable, a bracket, an
   adapter or a filter is its own product, never in the category of what it attaches to. A product the maker sells for
   anything but a vision system is not proposed.
@@ -83,15 +82,13 @@ Rules:
   product or of an accessory.
 - `reason` says in one short sentence what the page states, in English.
 - `follow` lists at most 5 of the page's links, as given, in the order to read them: the own pages of the products the
-  cards name, each one's page of specifications first; when the page links to none, the pages that list the maker's
-  products of the cards' categories. Never a page of another product, a page in another language, a file, nor a page
-  of news, events, support, downloads, careers, contact or legal notices. An empty list when no link leads to a card's
-  product.
+  cards name, each one's page of specifications first; when the page links to none, the pages in the page's language
+  that list the maker's products of the cards' categories. An empty list when no link leads to a card's product.
 
 ## Message
 
 Maker: {maker}
-Page: {url}, read at {retrieved_at}
+Page: {url}
 
 The catalog's cards of the maker's products:
 {known}

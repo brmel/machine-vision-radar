@@ -127,7 +127,7 @@ class Researcher:
             return self._skipped(run, page), None
         run = self._log(run, Step.READ, page.link.address)
         read = self._filing.read(page, self._types.of(page.link, reach.own))
-        if reach.home and reach.site.target_product:
+        if reach.home and reach.site.one_product:
             run, capped = self._media.photo(run, reach.site.products[0], page, read, by, deadline)
             if capped:
                 return run, capped
@@ -137,14 +137,13 @@ class Researcher:
 
     def _tabled(self, run: ResearchRun, reach: Reach, page: Page, read: Change, by: Agent,
                 deadline: Instant) -> ResearchRun | None:
-        method = str(as_record(read.action.entity)["type"])
-        card = named_card(page, reach.site.products) if method in self._methods else None
+        card = named_card(page, reach.site.products) if self._method(read) in self._methods else None
         table = self._tables.read(page, card) if card else None
         if not card or not table or len(table.claims) < ENOUGH:
             return None
         address = page.link.address
-        records = tuple({"id": f"clm_{n}", "subject": card.id, "spec_key": key, "value": value, "method": method,
-                         "recorded_at": page.retrieved_at, "rank": 1} for n, (key, value) in enumerate(table.claims))
+        records = tuple({"id": f"clm_{card.id}_{key}", "subject": card.id, "spec_key": key, "value": value}
+                        for key, value in table.claims)
         draft = RecordsDraft("update", f"The maker's table on {address} states {len(records)} of its values", card.id,
                              records)
         run = self._filed(run, draft, reach, page, read, by, deadline)
@@ -179,8 +178,8 @@ class Researcher:
             case FileDraft():
                 return self._media.linked(run, draft, reach, page, read, by, deadline)
             case RecordsDraft():
-                draft = minted(corrected(resolved(draft, self._specs, self._words), self._held.ranked_first), run.id,
-                               lambda i: self._held.held(i) is not None)
+                draft = minted(corrected(self._stamped(resolved(draft, self._specs, self._words), page, read),
+                                         self._held.ranked_first), run.id, lambda i: self._held.held(i) is not None)
                 if stray := self._stray(draft, reach):
                     return self._log(run, Step.REJECTED, f"{draft.reason}: {stray}")
                 cited, refused = self._filing.cited(draft, read.entity)
@@ -189,6 +188,13 @@ class Researcher:
                 if cited:
                     return self._filing.filed(run, Step.FILED, draft, draft.reason, (read, *cited), by)
                 return run if refused else self._log(run, Step.SKIPPED, f"{draft.reason}: the store holds it")
+
+    def _method(self, read: Change) -> str:
+        return str(as_record(read.action.entity)["type"])
+
+    def _stamped(self, draft: RecordsDraft, page: Page, read: Change) -> RecordsDraft:
+        stamp = {"method": self._method(read), "recorded_at": page.retrieved_at, "rank": 1}
+        return replace(draft, records=tuple({**r, **stamp} if "spec_key" in r else r for r in draft.records))
 
     def _stray(self, draft: RecordsDraft, reach: Reach) -> str | None:
         given = {card.id for card in reach.site.products} | {reach.site.org} | {r["id"] for r in draft.records}

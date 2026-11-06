@@ -11,6 +11,7 @@ from radar.domain.ports.ai.research_agent import FileDraft
 from radar.domain.ports.ai.usage_log import Unparsed
 from radar.domain.ports.review.research_runs import ResearchRun, Step
 from radar.domain.ports.web.reader import File, Link, Page, Reader, Unread
+from radar.domain.review.agents.drafts import spelled
 from radar.domain.review.agents.files import Files, Staged
 from radar.domain.review.agents.research.filing import RESEARCHER, Filing, Log
 from radar.domain.review.agents.research.frontier import Reach, SourceTypes
@@ -18,11 +19,8 @@ from radar.domain.review.requests import Agent
 
 PHOTOS = 3
 
-def _squeezed(text: str) -> str:
-    return "".join(c for c in text.lower() if c.isalnum())
-
 def _likeliest(images: tuple[Link, ...], name: str) -> list[Link]:
-    return sorted(images, key=lambda i: _squeezed(name) not in _squeezed(i.address.rpartition("/")[2]))
+    return sorted(images, key=lambda i: spelled(name) not in spelled(i.address.rpartition("/")[2]))
 
 class Media:
     def __init__(self, reader: Reader, files: Files, judge: Meter[ImageJudge], filing: Filing, types: SourceTypes,
@@ -80,13 +78,15 @@ class Media:
         staged = self._files.staged(file, draft.subject)
         document = Change(PutEntity(staged.document), draft.reason, "agent", RESEARCHER, read.source_refs)
         filed = self._filing.filed(run, Step.MEDIA, draft, draft.reason, (read, document), by, file.link.address)
-        return self._datasheet(filed, draft, staged, self._types.of(file.link, reach.own, staged.document.kind), by)
+        name = next(card.name for card in reach.site.products if card.id == draft.subject)
+        return self._datasheet(filed, draft, staged, name, self._types.of(file.link, reach.own, staged.document.kind),
+                               by)
 
-    def _datasheet(self, run: ResearchRun, draft: FileDraft, staged: Staged, source_type: str,
+    def _datasheet(self, run: ResearchRun, draft: FileDraft, staged: Staged, name: str, source_type: str,
                    by: Agent) -> ResearchRun:
         address = staged.file.link.address
         try:
-            stated = self._files.stated(staged, source_type, self._now()[:10])
+            stated = self._files.stated(staged, name, source_type, self._now()[:10])
         except Capped as exc:
             return self._log(run, Step.REJECTED, f"{address}: {exc}")
         except Unparsed as exc:

@@ -14,7 +14,7 @@ from radar.domain.model.schema import ModelSchema
 from radar.domain.ports.ai.research_agent import RecordsDraft, Terms
 
 PROPOSED = (Product, Name, ProductOrgRole, ProductVersion, Claim)
-SET_BY_RUN = ("version", "source_refs")
+SET_BY_RUN = ("version", "source_refs", "method", "recorded_at", "rank")
 PROVENANCE = ("source_refs", "recorded_at", "method", "fetched_at")
 References = Mapping[str, list[tuple[str, str]]]
 Words = Mapping[str, Mapping[str, str]]
@@ -67,7 +67,7 @@ def spelled(word: str) -> str:
 def _spellings(spec: SpecDefinition, registry: Registry) -> Iterator[tuple[str, str]]:
     for unit in registry.units.values():
         if spec.datatype == "quantity" and unit.dimension == spec.dimension:
-            yield from ((unit.id, unit.id), (unit.symbol, unit.id))
+            yield from ((said, unit.id) for said in (unit.id, unit.symbol, *(unit.aliases or ())))
     for term in registry.vocabularies.get(spec.vocabulary or "", {}).values():
         yield from ((said, term.id) for said in (term.id, *term.label.values()))
 

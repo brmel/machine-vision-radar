@@ -7,8 +7,9 @@ from radar.domain.ai.prompts import Prompt
 from radar.adapters.ai.prompted.reply import read
 from radar.domain.ports.ai.prompts import ModelRunner
 from radar.adapters.ai.prompted.specs import specs_json
-from radar.domain.model.entities import (ClaimValue, ClaimValueNone, ClaimValueQuantity, ClaimValueString,
-                                         ClaimValueTerm, ClaimValueTerms, Quantity, SpecDefinition)
+from radar.domain.model.entities import (ClaimValue, ClaimValueBoolean, ClaimValueNone, ClaimValueQuantity,
+                                         ClaimValueRange, ClaimValueString, ClaimValueTerm, ClaimValueTerms, Quantity,
+                                         Range, SpecDefinition)
 from radar.domain.model.registry import Registry
 from radar.domain.ports.ai.datasheet_extractor import Datasheet, Extraction, SpecValue
 
@@ -19,14 +20,21 @@ def _value(stated: Mapping[str, Any], spec: SpecDefinition | None) -> ClaimValue
         return ClaimValueNone(none=stated["none"])
     if stated.get("quantity") is not None and stated.get("unit"):
         return ClaimValueQuantity(quantity=Quantity(value=float(stated["quantity"]), unit=stated["unit"]))
+    if stated.get("low") is not None and stated.get("high") is not None and stated.get("unit"):
+        return ClaimValueRange(range=Range(min=float(stated["low"]), max=float(stated["high"]), unit=stated["unit"]))
     if not stated.get("term"):
-        raise ValueError(f"{stated['spec_key']}: a value is a number with its unit, or a term")
-    match spec.datatype if spec else "term":
+        raise ValueError(f"{stated['spec_key']}: a value is a number with its unit, a range, or a term")
+    return _worded(stated["term"], spec.datatype if spec else "term")
+
+def _worded(word: str, datatype: str) -> ClaimValue:
+    match datatype:
         case "term_set":
-            return ClaimValueTerms(terms=(stated["term"],))
+            return ClaimValueTerms(terms=tuple(t.strip() for t in word.split(",")))
         case "string":
-            return ClaimValueString(string=stated["term"])
-    return ClaimValueTerm(term=stated["term"])
+            return ClaimValueString(string=word)
+        case "boolean":
+            return ClaimValueBoolean(boolean=word == "yes")
+    return ClaimValueTerm(term=word)
 
 def _single(values: list[dict[str, Any]]) -> list[dict[str, Any]]:
     given = Counter(v["spec_key"] for v in values)

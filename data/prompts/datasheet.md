@@ -14,7 +14,7 @@ product, as candidate Claims citing the datasheet's Source.
 ## Output
 
 ```json
-{"properties": {"values": {"items": {"properties": {"spec_key": {"type": "string"}, "quantity": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null}, "unit": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null}, "term": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null}, "none": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null}}, "required": ["spec_key"], "type": "object"}, "type": "array"}}, "required": ["values"], "type": "object"}
+{"properties": {"values": {"items": {"properties": {"spec_key": {"type": "string"}, "quantity": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null}, "unit": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null}, "low": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null}, "high": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null}, "term": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null}, "none": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null}}, "required": ["spec_key"], "type": "object"}, "type": "array"}}, "required": ["values"], "type": "object"}
 ```
 
 ## Instruction
@@ -30,10 +30,13 @@ Rules:
   spec's `units`, of the symbol it writes; a number outside the spec's `bounds` is a misreading, left out. A spec
   with `terms`: `term`, the id, never the label, of the one of them the datasheet's word names; left out when none
   does. Any other spec: `term`, the datasheet's own word or short phrase.
+- A figure the datasheet states as a range: `low`, `high` and `unit`, in place of `quantity`. A spec whose datatype is
+  `term_set`: `term`, every id the datasheet names, joined by commas. A spec whose datatype is `boolean`: `term`, `yes`
+  or `no`.
 - When the datasheet states the product has none (no lens mount, no interface of that kind), `none` is `none_stated`;
   when it states the spec does not apply to the product, `none` is `not_applicable`; never for a spec whose datatype
   is `term_set`, and never for a spec the datasheet is silent on.
-- Never convert, round, average or invent a value, a unit or a spec key; never use a range's ends as one value.
+- Each value, unit and spec key is as the datasheet writes it, with no conversion, rounding or average.
 
 ## Message
 
