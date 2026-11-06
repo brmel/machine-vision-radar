@@ -77,6 +77,9 @@ class Researcher:
     def _frontier(self, sites: tuple[Site, ...]) -> Frontier:
         return Frontier(self._reader, sites, self._crawl, self._language, self._now)
 
+    def due_makers(self) -> tuple[RunScope, ...]:
+        return tuple(RunScope(kind=RunScopeKind.MAKER, key=org) for org in self._crawl.due(self._now()))
+
     def frontier(self, org: str, seed: bool) -> FrontierView:
         scope = RunScope(kind=RunScopeKind.MAKER, key=org)
         owning = tuple(r for t in sorted(self._owning) for r in self._held.matching(OrgRelation, "type", t))

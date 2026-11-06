@@ -30,13 +30,26 @@ def _scope(args: argparse.Namespace) -> RunScope:
         return RunScope(kind=RunScopeKind.MAKER, key=args.maker)
     return RunScope(kind=RunScopeKind.CATEGORY, key=args.category)
 
-def run_run(args: argparse.Namespace) -> int:
+def _started(args: argparse.Namespace, scope: RunScope) -> ResearchRun:
     research = args.wiring.researcher()
-    run = research.status(research.start(_scope(args), Founder(args.actor, args.wiring.correlate("research"))))
+    run = research.status(research.start(scope, Founder(args.actor, args.wiring.correlate("research"))))
     if run.outcome and run.outcome.status is Status.CAPPED:
         log.warn(f"the research cap stopped the run: {run.outcome.reason}",
                  fix="radar ai-caps set research --day-calls N --month-cad X --reason …")
-    return _shown(run, args)
+    return run
+
+def _due(args: argparse.Namespace) -> int:
+    rows = []
+    for scope in args.wiring.researcher().due_makers():
+        run = _started(args, scope)
+        rows.append(plain(run_row(run)))
+        if run.outcome and run.outcome.status is Status.CAPPED:
+            break
+    return output.format_output({"runs": rows}, json_mode=args.json,
+                                text_formatter=lambda v: "\n".join(map(_line, v["runs"])) or "no maker has a page due")
+
+def run_run(args: argparse.Namespace) -> int:
+    return _due(args) if args.due else _shown(_started(args, _scope(args)), args)
 
 def run_cancel(args: argparse.Namespace) -> int:
     return _shown(args.wiring.researcher().cancel(args.id), args)
@@ -83,6 +96,8 @@ def register(commands: Commands) -> None:
                        help="an organization, by id or slug: its website, then the pages its sitemaps list, are read")
     scope.add_argument("--category",
                        help="a category id: each of its makers' websites, then the pages their sitemaps list, are read")
+    scope.add_argument("--due", action="store_true",
+                       help="one run per maker with a page due, oldest first, until the research cap stops one")
     r.add_argument("--actor", default="founder", help="who starts it (default: founder)")
     c = commands.verb("research", "cancel", help="cancel a running research run: it stops at its next step",
                       func=run_cancel)

@@ -7,7 +7,7 @@ from radar.domain.model.entities import AiModel
 from radar.domain.ports.ai.research_agent import Findings, Reading
 from radar.domain.ports.review.research_runs import Step
 from radar.domain.ports.store.docs import Docs
-from radar.domain.ports.web.crawl_records import CrawlStatus
+from radar.domain.ports.web.crawl_records import CrawlRecord, CrawlStatus, PageKind
 from radar.tests.adapters.web.test_research import MAKER, SITE, _run, docs  # noqa: F401
 from radar.tests.fixtures.fixture_category import recorded_page
 
@@ -49,3 +49,10 @@ def test_runs_read_a_maker_s_pages_in_order_continue_and_skip_what_has_not_chang
     assert set(second.said(Step.READ)[1:]) == pages - set(read), "it continues where the first stopped"
     assert f"{read[0]}: unchanged since it was last read" in second.said(Step.SKIPPED)
     assert Quiet.calls - called == len(second.said(Step.READ)) - 1, "an unchanged page reaches no model"
+
+def test_makers_with_a_page_due_come_oldest_first(docs: tuple[Docs, Any]) -> None:  # noqa: F811
+    crawl = FirestoreCrawlRecords(docs[0])
+    crawl.save([CrawlRecord(f"{SITE}/{org}", SITE, org, PageKind.OTHER, CrawlStatus.DUE, at)
+                for org, at in (("org_b", "2026-10-02T00:00:00Z"), ("org_a", "2026-10-01T00:00:00Z"),
+                                ("org_c", "2026-12-01T00:00:00Z"))])
+    assert crawl.due("2026-11-01T00:00:00Z") == ("org_a", "org_b")
