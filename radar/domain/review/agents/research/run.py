@@ -6,7 +6,8 @@ from typing import Callable
 
 from radar.domain.ai.meter import Capped, Meter
 from radar.domain.model.history.changeset import Change, as_record
-from radar.domain.model.entities import Instant, OrgRelation, ResearchMeasures, Standing
+from radar.domain.model.history.projection import every_page
+from radar.domain.model.entities import Instant, OrgRelation, ResearchMeasures, RunScope, Standing
 from radar.domain.model.model import Model
 from radar.domain.ports.ai.image_judge import ImageJudge
 from radar.domain.ports.ai.research_agent import FileDraft, ProposalDraft, Reading, RecordsDraft, ResearchAgent
@@ -21,7 +22,7 @@ from radar.domain.ports.web.reader import Page, Reader, Unread
 from radar.domain.review.agents.drafts import corrected, minted, naming, references, resolved, terms, words
 from radar.domain.review.agents.files import Files
 from radar.domain.review.agents.research.filing import RESEARCHER, Filing
-from radar.domain.review.agents.research.frontier import Frontier, Reach, RunScope, SourceTypes, sites_of
+from radar.domain.review.agents.research.frontier import Frontier, Reach, SourceTypes, sites_of
 from radar.domain.review.agents.research.media import Media
 from radar.domain.review.agents.research.tables import Tables, named_card
 from radar.domain.review.agents.runs import Measure
@@ -29,6 +30,7 @@ from radar.domain.review.agents.tokens import AgentToken, Limits, Scope, Throttl
 from radar.domain.review.requests import Agent, Founder, Job
 
 PAGES, SECONDS, ENOUGH = 8, 40.0, 3
+DEAD_AFTER = SECONDS + 60
 
 def _deadline(now: Instant) -> Instant:
     return (datetime.fromisoformat(now) + timedelta(seconds=SECONDS)).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -58,8 +60,9 @@ class Researcher:
         owning = tuple(r for t in sorted(self._owning) for r in self._held.matching(OrgRelation, "type", t))
         sites = sites_of(scope, self._held.organizations(), owning, self._read)
         now = self._now()
+        self._settle(now)
         token = self._day_token(now)
-        run = ResearchRun(by.correlation_id, scope.key, by.name, now, token.id)
+        run = ResearchRun(by.correlation_id, scope, by.name, now, token.id)
         self._runs.save(run)
         try:
             self._loop(run, Frontier(self._reader, sites), Agent(token, run.id))
@@ -67,6 +70,15 @@ class Researcher:
             self._end(self._runs.get(run.id), Status.FAILED, f"{type(exc).__name__}: {exc}")
             raise
         return run.id
+
+    def _settle(self, now: Instant) -> None:
+        unended = [run for page in every_page(self._runs.page) for run in page.runs if not run.outcome]
+        read = [run.as_of(now, DEAD_AFTER) for run in unended]
+        live = {run.token for run in read if not run.outcome}
+        for run in filter(lambda r: r.outcome, read):
+            self._runs.save(run)
+            if run.token not in live:
+                self._tokens.revoke(run.token, now)
 
     def _day_token(self, now: str) -> AgentToken:
         today = date.fromisoformat(now[:10])
@@ -78,7 +90,7 @@ class Researcher:
         return token
 
     def status(self, run: str) -> ResearchRun:
-        return self._runs.get(run)
+        return self._runs.get(run).as_of(self._now(), DEAD_AFTER)
 
     def cancel(self, run: str) -> ResearchRun:
         found = self._runs.get(run)
@@ -88,7 +100,8 @@ class Researcher:
         return self._runs.get(run)
 
     def runs(self, cursor: str | None = None) -> RunPage:
-        return self._runs.page(cursor)
+        page = self._runs.page(cursor)
+        return replace(page, runs=tuple(run.as_of(self._now(), DEAD_AFTER) for run in page.runs))
 
     def measure(self, since: str, by: Founder) -> ResearchMeasures:
         return self._measure.since(since, by)

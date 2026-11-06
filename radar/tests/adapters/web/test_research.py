@@ -29,7 +29,8 @@ from radar.domain.ports.store.docs import Docs
 from radar.domain.review.agents.files import Files
 from radar.domain.review.agents.research.filing import RESEARCHER
 from radar.domain.review.agents.research.run import Researcher
-from radar.domain.review.agents.research.frontier import MakerScope, ProductScope, RunScope
+from radar.domain.model.entities import RunScope
+from radar.tests.fixtures.fixture_category import MakerScope, ProductScope
 from radar.domain.review.agents.runs import run_view
 from radar.domain.review.proposal import Proposal
 from radar.domain.review.requests import Approval, Founder, Picked, Revision

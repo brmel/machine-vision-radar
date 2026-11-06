@@ -82,6 +82,12 @@ class Standing(str, Enum):
     EXPIRED = "expired"
     REVOKED = "revoked"
 
+class RunScopeKind(str, Enum):
+    """What a research run reads: one product's pages, one maker's, or those of each maker in a category."""
+    PRODUCT = "product"
+    MAKER = "maker"
+    CATEGORY = "category"
+
 class ResearchStatus(str, Enum):
     """Where a research run stands: running; done, every page in reach read; partial, its page or time budget spent with pages left; blocked, no page in reach read; stopped by the founder, stopped by an AI cap, or failed."""
     RUNNING = "running"
@@ -1601,10 +1607,16 @@ class ResearchLine:
     detail: str
 
 @dataclass(frozen=True, slots=True, kw_only=True)
+class RunScope:
+    """What a research run reads: its kind, and the product, maker or category it names by id or slug."""
+    kind: RunScopeKind
+    key: str
+
+@dataclass(frozen=True, slots=True, kw_only=True)
 class ResearchRunView:
     """A research run as `radar research log` and the admin show it: its id is its correlation id, which every log line and proposal of the run carries; the pages it read, the proposals it filed (among them the files it staged and the datasheets it read) and why others were rejected, what its model calls cost, and each step."""
     id: str
-    scope: str
+    scope: RunScope
     actor: str
     started_at: str
     ended_at: str | None = None
@@ -1622,7 +1634,7 @@ class ResearchRunView:
 class ResearchRunRow:
     """A research run as its list shows it: how many pages it read, proposals it filed (its files and datasheets among them) and had rejected, and its cost; its page shows what they were."""
     id: str
-    scope: str
+    scope: RunScope
     actor: str
     started_at: str
     ended_at: str | None = None
@@ -1857,6 +1869,7 @@ CLASSES: Mapping[str, type] = {
     "AgentTokenList": AgentTokenList,
     "IssuedToken": IssuedToken,
     "ResearchLine": ResearchLine,
+    "RunScope": RunScope,
     "ResearchRunView": ResearchRunView,
     "ResearchRunRow": ResearchRunRow,
     "ResearchRunList": ResearchRunList,

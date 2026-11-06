@@ -6,11 +6,13 @@ from typing import Any, Mapping
 
 from radar.adapters.console import log
 from radar.adapters.firestore.docs import list_page
+from radar.adapters.firestore.layout import newest_first
+from radar.domain.model.entities import RunScope, RunScopeKind
 from radar.domain.ports.review.research_runs import Line, Outcome, ResearchRun, RunPage, Status, Step
 from radar.domain.ports.store.docs import Docs, Increment, Put
 from radar.domain.review.agents.tokens import AgentToken, Limits, Scope, TokenUsage
 
-TOKENS, USAGE, RESEARCH, CANCELS = "agent_tokens", "agent_usage", "research_runs", "research_cancels"
+TOKENS, USAGE, RESEARCH, CANCELS = "agent_tokens", "agent_usage", "research_log", "research_cancels"
 COLLECTIONS = (TOKENS, USAGE, RESEARCH, CANCELS)
 
 class FirestoreAgentTokens:
@@ -56,26 +58,27 @@ class FirestoreResearchRuns:
 
     def save(self, run: ResearchRun) -> None:
         if run.lines:
-            log.info(f"research: {run.lines[-1].step.value}", scope=run.scope, detail=run.lines[-1].detail)
+            log.info(f"research: {run.lines[-1].step.value}", scope=run.scope.key, detail=run.lines[-1].detail)
         else:
-            log.info("research: started", scope=run.scope)
+            log.info("research: started", scope=run.scope.key)
         ended = ({"outcome": run.outcome.status.value, "ended_at": run.outcome.at} if run.outcome
                  else {"outcome": Status.RUNNING.value})
-        fields = {**asdict(run), **ended, "lines": [{**asdict(n), "step": n.step.value} for n in run.lines]}
-        self._docs.commit([Put(f"{RESEARCH}/{run.id}", fields)])
+        fields = {**asdict(run), **ended, "scope": {"kind": run.scope.kind.value, "key": run.scope.key},
+                  "lines": [{**asdict(n), "step": n.step.value} for n in run.lines]}
+        self._docs.commit([Put(f"{RESEARCH}/{newest_first(run.started_at)}-{run.id}", fields)])
 
     def cancel(self, run_id: str, at: str) -> None:
         self._docs.commit([Put(f"{CANCELS}/{run_id}", {"run": run_id, "at": at})])
 
     def get(self, run_id: str) -> ResearchRun:
-        found = self._docs.get(f"{RESEARCH}/{run_id}")
-        if found is None:
+        found = self._docs.where(RESEARCH, "id", [run_id])
+        if not found:
             raise LookupError(f"no research run {run_id}")
-        return _run(found, (self._docs.get(f"{CANCELS}/{run_id}") or {}).get("at"))
+        return _run(found[0][1], (self._docs.get(f"{CANCELS}/{run_id}") or {}).get("at"))
 
     def page(self, cursor: str | None = None) -> RunPage:
         rows, after, total = list_page(self._docs, RESEARCH, cursor)
-        cancel_paths = [f"{CANCELS}/{p.rsplit('/', 1)[1]}" for p, _ in rows]
+        cancel_paths = [f"{CANCELS}/{f['id']}" for _, f in rows]
         cancels = {f["run"]: f["at"] for f in self._docs.get_many(cancel_paths).values() if "run" in f and "at" in f}
         return RunPage(tuple(_run(f, cancels.get(f["id"])) for _, f in rows), after, total)
 
@@ -86,5 +89,6 @@ def _run(fields: Mapping[str, Any], cancelled_at: str | None) -> ResearchRun:
         outcome = Outcome(status, next(n.detail for n in reversed(lines) if n.step is Step.ENDED), fields["ended_at"])
     else:
         outcome = Outcome(Status.CANCELLED, "cancelled by the founder", cancelled_at) if cancelled_at else None
-    return ResearchRun(fields["id"], fields["scope"], fields["actor"], fields["started_at"], fields["token"],
+    scope = RunScope(kind=RunScopeKind(fields["scope"]["kind"]), key=fields["scope"]["key"])
+    return ResearchRun(fields["id"], scope, fields["actor"], fields["started_at"], fields["token"],
                        float(fields["cad"]), lines, outcome)

@@ -27,6 +27,8 @@ export const ScopeSchema: z.ZodType<M.Scope> = z.enum(["read", "propose"]);
 
 export const StandingSchema: z.ZodType<M.Standing> = z.enum(["active", "expired", "revoked"]);
 
+export const RunScopeKindSchema: z.ZodType<M.RunScopeKind> = z.enum(["product", "maker", "category"]);
+
 export const ResearchStatusSchema: z.ZodType<M.ResearchStatus> = z.enum(["running", "done", "partial", "blocked", "cancelled", "capped", "failed"]);
 
 export const ResearchStepSchema: z.ZodType<M.ResearchStep> = z.enum(["read", "skipped", "filed", "media", "datasheet", "rejected", "ended"]);
@@ -878,9 +880,14 @@ export const ResearchLineSchema: z.ZodType<M.ResearchLine> = z.strictObject({
   detail: z.string(),
 });
 
+export const RunScopeSchema: z.ZodType<M.RunScope> = z.strictObject({
+  kind: z.lazy(() => RunScopeKindSchema),
+  key: z.string(),
+});
+
 export const ResearchRunViewSchema: z.ZodType<M.ResearchRunView> = z.strictObject({
   id: z.string(),
-  scope: z.string(),
+  scope: z.lazy(() => RunScopeSchema),
   actor: z.string(),
   started_at: z.string(),
   ended_at: z.string().optional(),
@@ -897,7 +904,7 @@ export const ResearchRunViewSchema: z.ZodType<M.ResearchRunView> = z.strictObjec
 
 export const ResearchRunRowSchema: z.ZodType<M.ResearchRunRow> = z.strictObject({
   id: z.string(),
-  scope: z.string(),
+  scope: z.lazy(() => RunScopeSchema),
   actor: z.string(),
   started_at: z.string(),
   ended_at: z.string().optional(),

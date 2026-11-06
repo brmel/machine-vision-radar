@@ -57,6 +57,12 @@
     "description": "Where an agent token stands: active, expired past its date, or revoked by the founder."
   },
   {
+    "id": "RunScopeKind",
+    "kind": "enum",
+    "values": ["product", "maker", "category"],
+    "description": "What a research run reads: one product's pages, one maker's, or those of each maker in a category."
+  },
+  {
     "id": "ResearchStatus",
     "kind": "enum",
     "values": ["running", "done", "partial", "blocked", "cancelled", "capped", "failed"],

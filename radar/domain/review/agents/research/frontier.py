@@ -3,25 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Mapping, Sequence
 
-from radar.domain.model.entities import IndexView, Instant, OrgRelation, Organization, ProductCard, Term
+from radar.domain.model.entities import (IndexView, Instant, OrgRelation, Organization, ProductCard, RunScope,
+                                         RunScopeKind, Term)
 from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.ports.web.reader import Link, Page, Reader, Unread
 
 FOLLOW = 5
-
-@dataclass(frozen=True, slots=True)
-class ProductScope:
-    key: str
-
-@dataclass(frozen=True, slots=True)
-class MakerScope:
-    key: str
-
-@dataclass(frozen=True, slots=True)
-class CategoryScope:
-    key: str
-
-RunScope = ProductScope | MakerScope | CategoryScope
 
 @dataclass(frozen=True, slots=True)
 class Site:
@@ -81,12 +68,13 @@ def _category_makers(key: str, orgs: Sequence[Organization], index: IndexView) -
 
 def sites_of(scope: RunScope, orgs: Sequence[Organization], owning: Sequence[OrgRelation],
              read: CatalogRepository) -> tuple[Site, ...]:
-    match scope:
-        case ProductScope(key):
+    key = scope.key
+    match scope.kind:
+        case RunScopeKind.PRODUCT:
             return (_product_site(key, orgs, owning, read),)
-        case MakerScope(key):
+        case RunScopeKind.MAKER:
             return _maker_sites(_named_makers(key, orgs), orgs, owning, read.index(), None, key)
-        case CategoryScope(key):
+        case RunScopeKind.CATEGORY:
             index = read.index()
             return _maker_sites(_category_makers(key, orgs, index), orgs, owning, index, key, key)
 

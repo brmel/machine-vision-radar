@@ -3,8 +3,7 @@ import type { ResearchScope } from "../../../domain/ports/review/agents/Research
 import type { ResearchRunRow } from "../../../domain/views.ts";
 import { Button, CONTROL, Field, PageHeader, Section, formatNumber } from "../../../ui/index.ts";
 import { useI18n } from "../../../shell/i18n/index.tsx";
-import type { MessageKey } from "../../../shell/i18n/messages.ts";
-import { useAdmin } from "../model.ts";
+import { RUN_SCOPE, useAdmin } from "../model.ts";
 import { usePaged, useSubmit } from "../useLoad.tsx";
 import { AdminTable } from "../search/AdminTable.tsx";
 import { RunRow, WIDE } from "./RunRow.tsx";
@@ -12,10 +11,8 @@ import { RunRow, WIDE } from "./RunRow.tsx";
 const COLUMNS = [["adminResearchStarted"], ["adminResearchScope"], ["adminResearchPages", `text-left ${WIDE}`],
   ["adminResearchFiledCount"], ["adminResearchRejected", `text-left ${WIDE}`], ["adminResearchCost"]] as const;
 
-const KINDS = { product: "adminResearchProduct", maker: "adminResearchMaker",
-  category: "adminResearchCategory" } as const satisfies Readonly<Record<string, MessageKey>>;
-type Kind = keyof typeof KINDS;
-const isKind = (value: string): value is Kind => Object.hasOwn(KINDS, value);
+type Kind = keyof typeof RUN_SCOPE;
+const isKind = (value: string): value is Kind => Object.hasOwn(RUN_SCOPE, value);
 
 const scopeOf = (kind: Kind, key: string): ResearchScope => {
   if (kind === "product") return { product: key };
@@ -42,7 +39,7 @@ export const ResearchView: FC<{ search: string }> = ({ search }) => {
         <div className="grid gap-3 sm:grid-cols-[minmax(10rem,auto)_1fr]">
           <Field label={t("adminResearchScope")}>
             <select className={CONTROL} value={kind} onChange={onKind}>
-              {Object.entries(KINDS).map(([k, label]) => <option key={k} value={k}>{t(label)}</option>)}
+              {Object.entries(RUN_SCOPE).map(([k, label]) => <option key={k} value={k}>{t(label)}</option>)}
             </select>
           </Field>
           <Field label={t("adminResearchKey")}><input className={CONTROL} value={key} onChange={onKey} required

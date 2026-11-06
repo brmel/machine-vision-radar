@@ -21,6 +21,7 @@ from radar.adapters.files.model_json import load_model
 from radar.adapters.storage.blobs import media_url
 from radar.adapters.storage.memory_change_log import MemoryChangeLog
 from radar.domain.model.entities import (CategoryPage, Change, HistoryView, IndexView, MarketView, ProductCard,
+                                         RunScope, RunScopeKind,
                                          ProductView)
 from radar.domain.model.model import Model
 from radar.domain.read_model import read_model
@@ -185,3 +186,12 @@ def built() -> Path:
 
 if __name__ == "__main__":
     print(build(Path(sys.argv[1]), int(sys.argv[2]) if len(sys.argv) > 2 else 0))
+
+def ProductScope(key: str) -> RunScope:
+    return RunScope(kind=RunScopeKind.PRODUCT, key=key)
+
+def MakerScope(key: str) -> RunScope:
+    return RunScope(kind=RunScopeKind.MAKER, key=key)
+
+def CategoryScope(key: str) -> RunScope:
+    return RunScope(kind=RunScopeKind.CATEGORY, key=key)
