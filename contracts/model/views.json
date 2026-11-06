@@ -118,7 +118,6 @@
       "category": {"type": "string"},
       "summary": {"type": "LocalizedText", "optional": true},
       "status": {"type": "TermRef", "optional": true},
-      "tags": {"type": "array", "items": "string"},
       "specs": {"type": "map", "items": "ViewValue"},
       "thumbnail_url": {"type": "string", "optional": true}
     }
@@ -145,7 +144,6 @@
       "categories": {"type": "array", "items": "CategoryEntry"},
       "spec_definitions": {"type": "map", "items": "SpecLabel"},
       "spec_groups": {"type": "map", "items": "LocalizedText", "description": "Each spec group's label"},
-      "tags": {"type": "array", "items": "TermRef"},
       "search": {"type": "SearchSettings"},
       "news": {"type": "array", "items": "FeedBrief", "description": "The latest published articles, for the home teaser"},
       "organizations": {"type": "array", "items": "OrgBrief"},
@@ -164,7 +162,6 @@
       "categories": {"type": "array", "items": "CategoryEntry"},
       "spec_definitions": {"type": "map", "items": "SpecLabel"},
       "spec_groups": {"type": "map", "items": "LocalizedText", "description": "Each spec group's label"},
-      "tags": {"type": "array", "items": "TermRef"},
       "search": {"type": "SearchSettings"},
       "news": {"type": "array", "items": "FeedBrief", "description": "The latest published articles, for the home teaser"}
     }
@@ -347,7 +344,6 @@
       "website_url": {"type": "string", "optional": true},
       "vendor": {"type": "OrgBrief"},
       "status": {"type": "StatusView", "optional": true},
-      "tags": {"type": "array", "items": "TermRef"},
       "identifiers": {"type": "array", "items": "IdentifierRow", "description": "Its identifiers, in their schemes' registry order"},
       "aliases": {"type": "array", "items": "string", "optional": true, "description": "The AltNames and other-than-primary Names of the product and its vendor: search terms only, never shown"},
       "thumbnail_url": {"type": "string", "optional": true},
@@ -434,7 +430,7 @@
     "kind": "record",
     "description": "A field keyword search matches a query in, and its weight.",
     "fields": {
-      "field": {"type": "enum", "values": ["name", "vendor", "category", "tags", "summary", "specs"]},
+      "field": {"type": "enum", "values": ["name", "vendor", "category", "summary", "specs"]},
       "weight": {"type": "number"}
     }
   },

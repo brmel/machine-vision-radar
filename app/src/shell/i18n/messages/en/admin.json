@@ -176,7 +176,6 @@
   "adminSettingsKnobsWhat": "These change by a registry change (data/registry/search.json) and a deploy: the site and the server read the same file.",
   "adminSearchFieldVendor": "Vendor",
   "adminSearchFieldCategory": "Category",
-  "adminSearchFieldTags": "Tags",
   "adminSearchFieldSummary": "Summary",
   "adminKnobFields": "Field weights",
   "adminKnobFieldsWhat": "How much a query word found in each field counts.",

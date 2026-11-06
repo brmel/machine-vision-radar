@@ -3,7 +3,6 @@
     {"field": "name", "weight": 10},
     {"field": "vendor", "weight": 6},
     {"field": "category", "weight": 5},
-    {"field": "tags", "weight": 5},
     {"field": "summary", "weight": 4},
     {"field": "specs", "weight": 2}
   ],

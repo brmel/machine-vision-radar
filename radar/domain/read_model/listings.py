@@ -24,15 +24,15 @@ def parse_card(c: Mapping[str, Any]) -> ProductCard:
     return ProductCard(id=c["id"], slug=c["slug"], name=c["name"], kind=c["kind"],
                        vendor=c["vendor"], vendor_name=c["vendor_name"], category=c["category"],
                        summary=c.get("summary"), status=TermRef(**c["status"]) if c.get("status") else None,
-                       tags=tuple(c["tags"]), specs=c["specs"],
+                       specs=c["specs"],
                        thumbnail_url=c.get("thumbnail_url"))
 
 def card(view: ProductView, keys: tuple[str, ...]) -> ProductCard:
     return ProductCard(id=view.id, slug=view.slug, name=view.name, kind=view.kind, vendor=view.vendor.slug,
                        vendor_name=view.vendor.name, category=view.category,
                        summary=dict(view.summary) if view.summary else None,
-                       status=view.status.term if view.status else None, tags=tuple(t.id for t in view.tags),
-                       specs=_card_specs(view, keys), thumbnail_url=view.thumbnail_url)
+                       status=view.status.term if view.status else None, specs=_card_specs(view, keys),
+                       thumbnail_url=view.thumbnail_url)
 
 def index_card(view: ProductView) -> ProductCard:
     return card(view, tuple([c.key for c in view.core if c.value is not None][:CARD_SPECS]))
@@ -100,22 +100,20 @@ def index(registry: Registry, cards: Sequence[ProductCard], orgs: Sequence[OrgBr
         categories=_category_entries(registry, Counter(c.category for c in cards), pages),
         spec_definitions=_spec_defs(registry),
         spec_groups={g.id: dict(g.label) for g in registry.spec_groups.values()},
-        tags=tuple(TermRef(id=t.id, label=dict(t.label)) for t in registry.vocabularies["tags"].values()),
         search=registry.search, news=tuple(news[:registry.feed.teaser]), organizations=tuple(orgs),
         products=tuple(sorted(cards, key=lambda c: c.slug)))
 
 def registry_view(index: IndexView) -> RegistryView:
     return RegistryView(data_as_of=index.data_as_of, counts=index.counts, pipeline_stages=index.pipeline_stages,
                         domains=index.domains, categories=index.categories, spec_definitions=index.spec_definitions,
-                        spec_groups=index.spec_groups, tags=index.tags, search=index.search, news=index.news)
+                        spec_groups=index.spec_groups, search=index.search, news=index.news)
 
 def republished(registry: Registry, stored: RegistryView) -> RegistryView:
     fresh = index(registry, (), (), {}, Tally(), ())
     counted = Counter({c.id: c.products for c in stored.categories})
     return replace(stored, pipeline_stages=fresh.pipeline_stages, domains=fresh.domains,
                    categories=_category_entries(registry, counted, {c.id: c.pages for c in stored.categories}),
-                   spec_definitions=fresh.spec_definitions, spec_groups=fresh.spec_groups, tags=fresh.tags,
-                   search=fresh.search)
+                   spec_definitions=fresh.spec_definitions, spec_groups=fresh.spec_groups, search=fresh.search)
 
 def comparison(index: IndexView, views: list[ProductView]) -> dict[str, Any]:
     return {"products": [{"id": p.id, "name": p.name, "vendor": p.vendor.slug, "category": p.category} for p in views],

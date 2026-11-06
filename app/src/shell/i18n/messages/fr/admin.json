@@ -176,7 +176,6 @@
   "adminSettingsKnobsWhat": "Ils se changent par une modification du registre (data/registry/search.json) et un déploiement : le site et le serveur lisent le même fichier.",
   "adminSearchFieldVendor": "Fabricant",
   "adminSearchFieldCategory": "Catégorie",
-  "adminSearchFieldTags": "Étiquettes",
   "adminSearchFieldSummary": "Résumé",
   "adminKnobFields": "Poids des champs",
   "adminKnobFieldsWhat": "Ce que compte un mot de la requête trouvé dans chaque champ.",

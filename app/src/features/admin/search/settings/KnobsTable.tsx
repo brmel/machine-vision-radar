@@ -18,7 +18,7 @@ const KNOBS: Readonly<Record<Knob, readonly [MessageKey, MessageKey]>> = {
 
 const FIELD: Readonly<Record<SearchField["field"], MessageKey>> = {
   name: "adminName", vendor: "adminSearchFieldVendor", category: "adminSearchFieldCategory",
-  tags: "adminSearchFieldTags", summary: "adminSearchFieldSummary", specs: "adminSpecs",
+  summary: "adminSearchFieldSummary", specs: "adminSpecs",
 };
 
 const isKnob = (entry: [string, unknown]): entry is [Knob, number] => typeof entry[1] === "number";

@@ -67,9 +67,6 @@
     "vocabularies/fixture_mounts.json": [
       {"id": "socket_a", "label": {"en": "Socket A", "fr": "Douille A"}},
       {"id": "socket_b", "label": {"en": "Socket B", "fr": "Douille B"}}
-    ],
-    "vocabularies/tags.json": [
-      {"id": "fixture_sealed", "label": {"en": "Sealed", "fr": "Scellé"}, "description": {"en": "A fictional tag for a widget sealed against dust.", "fr": "Un tag fictif pour un widget scellé contre la poussière."}}
     ]
   },
   "data": {
@@ -89,7 +86,7 @@
     "products.jsonl": [
       {"id": "prd_0000000001", "version": 1, "kind": "family", "category": "fixture_domain.widgets", "slug": "example-devices__widget-one", "summary": {"en": "A fictional widget family with a long reach.", "fr": "Une famille fictive de widgets à longue portée."}, "website_url": "https://example.com/widget-one"},
       {"id": "prd_0000000002", "version": 3, "kind": "family", "category": "fixture_domain.widgets", "slug": "example-devices__widget-two", "summary": {"en": "A fictional widget with a glossy finish.", "fr": "Un widget fictif à finition brillante."}, "website_url": "https://example.com/widgets/two"},
-      {"id": "prd_0000000003", "version": 1, "kind": "model", "parent": "prd_0000000001", "category": "fixture_domain.widgets", "slug": "example-devices__widget-one-s", "tags": ["fixture_sealed"]},
+      {"id": "prd_0000000003", "version": 1, "kind": "model", "parent": "prd_0000000001", "category": "fixture_domain.widgets", "slug": "example-devices__widget-one-s"},
       {"id": "prd_0000000004", "version": 1, "kind": "model", "parent": "prd_0000000001", "category": "fixture_domain.widgets", "slug": "example-devices__widget-one-l"},
       {"id": "prd_0000000005", "version": 1, "kind": "model", "category": "fixture_domain.widgets", "slug": "example-devices__widget-three", "summary": {"en": "A fictional widget that replaces Widget Two.", "fr": "Un widget fictif qui remplace Widget Two."}, "website_url": "https://example.com/widgets/three"}
     ],

@@ -41,10 +41,6 @@ def render_llms_txt(index: IndexView, base: str, language: str) -> str:
         "",
         *(f"- `{c.id}` — {c.label.get(language, '')}" for c in sorted(index.categories, key=lambda c: c.id)),
         "",
-        "### Tags",
-        "",
-        *(f"- `{t.id}` — {t.label.get(language, '')}" for t in sorted(index.tags, key=lambda t: t.id)),
-        "",
         "## How agents should consume it",
         "",
         f"- MCP server: POST /api/mcp, streamable HTTP under a bearer token; setup at {base}/agents.",
@@ -68,7 +64,6 @@ def render_llms_txt(index: IndexView, base: str, language: str) -> str:
 
 def render_llms_full_txt(index: IndexView, views: Sequence[ProductView], base: str, language: str) -> str:
     counts = index.counts
-    tags = {t.id: t.label.get(language, "") for t in index.tags}
     labels = {k: d.label.get(language, "") for k, d in index.spec_definitions.items()}
     lines = [
         "# Machine Vision Radar — Full Catalog",
@@ -78,14 +73,12 @@ def render_llms_full_txt(index: IndexView, views: Sequence[ProductView], base: s
         "",
     ]
     for v in sorted(views, key=lambda v: v.id):
-        lines += _section(v, tags, labels, language)
+        lines += _section(v, labels, language)
     return "\n".join(lines)
 
-def _section(v: ProductView, tags: Mapping[str, str], labels: Mapping[str, str], language: str) -> list[str]:
+def _section(v: ProductView, labels: Mapping[str, str], language: str) -> list[str]:
     lines = [f"## {v.name}", "", f"- ID: `{v.id}`", f"- Vendor: {v.vendor.name}", f"- Category: `{v.category}`",
              f"- URL: {v.website_url or ''}"]
-    if v.tags:
-        lines.append(f"- Tags: {', '.join(tags[t.id] for t in v.tags)}")
     if v.summary:
         lines.append(f"- Summary: {v.summary.get(language, '')}")
     cells = [(c.key, c.value) for c in (*v.core, *v.detail) if c.value is not None]

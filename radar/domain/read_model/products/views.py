@@ -77,7 +77,7 @@ class ProductViews:
         return ProductView(
             id=p.id, slug=p.slug, name=names[p.id], kind=p.kind, version=p.version, history=history,
             category=p.category, summary=dict(p.summary) if p.summary else None, website_url=p.website_url or None,
-            vendor=vendor, status=self._status(p, cited), tags=tuple(self.terms.term("tags", t) for t in p.tags or ()),
+            vendor=vendor, status=self._status(p, cited),
             identifiers=self._identifiers(p), aliases=self._aliases((p.id, vendor.id)),
             thumbnail_url=self._thumbnail_url(p), family=self._family(p, names), models=models, core=core,
             detail=detail, versions=self._versions(p, profile, cited), offerings=self._offerings(p, profile, cited),

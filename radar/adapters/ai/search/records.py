@@ -17,12 +17,11 @@ from radar.domain.search.terms import terms
 @dataclass(frozen=True, slots=True)
 class Labels:
     categories: Mapping[str, Mapping[str, str]]
-    tags: Mapping[str, Mapping[str, str]]
     aliases: Mapping[str, tuple[str, ...]]
 
     @classmethod
     def of(cls, index: IndexView, registry: Registry) -> Labels:
-        return cls({c.id: c.label for c in index.categories}, {t.id: t.label for t in index.tags},
+        return cls({c.id: c.label for c in index.categories},
                    {s.id: s.aliases for s in registry.spec_definitions.values() if s.aliases})
 
 @dataclass(frozen=True, slots=True)
@@ -75,7 +74,6 @@ def record_of(card: ProductCard, view: ProductView, labels: Labels) -> Record:
         "name": terms(" ".join([card.name, *(view.aliases or ())])),
         "vendor": terms(card.vendor_name),
         "category": terms(_all_languages(labels.categories.get(card.category))),
-        "tags": terms(" ".join(f"{t} {_all_languages(labels.tags.get(t))}" for t in card.tags)),
         "summary": terms(_all_languages(card.summary)),
     }
     return Record(card.id, card.slug, card.name, card.category, card,
@@ -92,8 +90,6 @@ def embedding_text(record: Record, view: ProductView, labels: Labels) -> str:
     specs = [f"{k}: {' '.join(value_words(v))}" for k, v in record.values.items()][:12]
     if specs:
         parts.append("Key specs: " + "; ".join(specs))
-    if record.card.tags:
-        parts.append("Tags: " + ", ".join(next(iter(labels.tags.get(t, {}).values()), t) for t in record.card.tags))
     return " ".join(parts)
 
 def fingerprint(record: Record, text: str) -> str:

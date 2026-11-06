@@ -33,7 +33,7 @@ wiring loads it once and every caller takes it.
 1. **Technology-neutral:** machine-vision concepts, independent of databases, wire formats or UI state.
 2. **Provenance** ([AGENTS.md](../AGENTS.md) rule 11): every entity with `source_refs` cites at least one public
    Source, and a Change cites one when it sets a sourced fact. A record's identity and classification (names,
-   identifiers, slug, category, tags, country, summary, links) is curated, not a sourced fact. Unknown values are
+   identifiers, slug, category, country, summary, links) is curated, not a sourced fact. Unknown values are
    omitted, never defaulted; dates carry their precision, with no invented day or month.
 3. **Sparse facts:** a product stores only the facts it has, as typed claims on registry specs; no table of nulls.
 
@@ -150,7 +150,7 @@ shows.
 - Barcode verifiers and print-grading instruments are `imaging.code_readers`, told apart by specs
   (`grading_standards`) and capability terms.
 - Thermal and thermographic cameras are one category, `imaging.thermal_cameras`; spectral bands are specs
-  (`spectral_range`, `sensor_technology`, `thermal_sensitivity_netd`) and tags (`swir`).
+  (`spectral_range`, `sensor_technology`, `thermal_sensitivity_netd`).
 - A SWIR area-scan or line-scan camera stays in its camera category; its band is its `spectral_range`.
 - Vision software capabilities are term-set specs, not categories. The `ai_stack` group (methods, tasks, model
   formats, inference hardware, APIs) is taken by every category whose products build or run models; a product can
@@ -182,9 +182,9 @@ non-vision developer tools, robotics platforms where vision is incidental, gener
 and other non-optical sensing, pure distributors, discrete photodetectors, HMIs and panel PCs, document AI, and
 broadcast capture unless marketed for machine vision. **Boundaries:**
 
-- Bare sensor modules → `imaging.sensors`; board-level camera engines → the camera category with the `board_level`
-  tag; finished cameras → the camera category.
-- A turnkey cell that bundles a robot is `systems.vision_systems` (tags `turnkey`, `robot_ready`).
+- Bare sensor modules → `imaging.sensors`; board-level camera engines → the camera category with `form_factor`
+  `board_level`; finished cameras → the camera category.
+- A turnkey cell that bundles a robot is `systems.vision_systems`; what it bundles is its `system_components`.
 - `compute.edge_ai` needs AI acceleration or explicit vision interfaces; controllers with trigger, lighting or machine
   I/O are `compute.vision_controllers`.
 - Pushbroom hyperspectral → `imaging.cameras.line_scan` + `hyperspectral`; snapshot hyperspectral →
