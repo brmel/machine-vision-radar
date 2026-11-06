@@ -1,0 +1,6 @@
+[
+  {"id": "constant_current", "label": {"en": "Constant current", "fr": "Courant constant"}},
+  {"id": "pwm", "label": {"en": "PWM dimming", "fr": "Gradation PWM"}},
+  {"id": "strobe", "label": {"en": "Strobe (pulsed)", "fr": "Stroboscope (impulsionnel)"}},
+  {"id": "overdrive", "label": {"en": "Overdrive", "fr": "Surintensité (overdrive)"}}
+]

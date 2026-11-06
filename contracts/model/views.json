@@ -87,7 +87,7 @@
       "domain": {"type": "string"},
       "pipeline": {"type": "array", "items": "string"},
       "glyph": {"type": "string"},
-      "sections": {"type": "SectionKeys"},
+      "core": {"type": "array", "items": "string", "description": "Its profile's core specs, the columns its cards and tables show"},
       "products": {"type": "integer"},
       "pages": {"type": "integer"},
       "component_hub": {"type": "string", "optional": true, "description": "The path segment the hubs of its products other products use live under"}

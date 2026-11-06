@@ -131,7 +131,7 @@ export function decodeFilters(query: string, vocab: FilterVocabulary): { filters
   const domain = pick("domain", (v): v is string => vocab.categories.some((c) => c.domain === v));
   const stage = pick("stage", (v): v is string => vocab.stages.includes(v));
   const page = pick("page", (v): v is string => /^[1-9]\d*$/.test(v));
-  const columns = vocab.categories.find((c) => c.id === category)?.sections.core ?? [];
+  const columns = vocab.categories.find((c) => c.id === category)?.core ?? [];
   const layout = pick("view", (v): v is "table" => category !== null && v === "table") ?? "cards";
   const q = (params.get("q") ?? "").trim();
   const { sort, column } = decodeSort(params.get("sort"), q, columns, dropped);

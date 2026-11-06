@@ -12,7 +12,7 @@ const isNumber = (vals: Map<string, string>, key: string): boolean =>
 function pick(): { ids: string[]; key: string } {
   for (const c of index.categories) {
     const members = index.products.filter((p) => p.category === c.id).map((p) => ({ id: p.id, vals: values(p.id) }));
-    for (const key of c.sections.core) {
+    for (const key of c.core) {
       for (const a of members.filter((p) => isNumber(p.vals, key))) {
         const b = members.find((p) => isNumber(p.vals, key) && p.vals.get(key) !== a.vals.get(key)
           && [...a.vals].some(([k, v]) => p.vals.get(k) === v));

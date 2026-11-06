@@ -86,7 +86,15 @@
     "domain": "optics",
     "pipeline": ["illuminate"],
     "glyph": "lens",
-    "description": {"en": "LED ring lights, bar lights, dome lights, coaxial lights, line lights, and strobe controllers.", "fr": "Éclairages LED annulaires, barres, dômes, coaxiaux et linéaires, et contrôleurs de stroboscope."}
+    "description": {"en": "LED ring lights, bar lights, dome lights, coaxial lights, line lights and backlights.", "fr": "Éclairages LED annulaires, barres, dômes, coaxiaux, linéaires et rétroéclairages."}
+  },
+  {
+    "id": "optics.light_controllers",
+    "label": {"en": "Lighting controllers", "fr": "Contrôleurs d'éclairage"},
+    "domain": "optics",
+    "pipeline": ["illuminate"],
+    "glyph": "lens",
+    "description": {"en": "Controllers and power supplies that drive machine-vision lights: constant current, PWM, strobe and overdrive, over one or more channels.", "fr": "Contrôleurs et alimentations qui pilotent les éclairages de vision : courant constant, PWM, stroboscope et surintensité, sur un ou plusieurs canaux."}
   },
   {
     "id": "optics.optical_components",

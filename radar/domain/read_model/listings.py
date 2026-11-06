@@ -7,7 +7,7 @@ from dataclasses import dataclass, field, replace
 from typing import Any, Mapping, Sequence
 
 from radar.domain.model.entities import (CategoryEntry, CategoryPage, FeedBrief, IndexCounts, IndexView, OrgBrief,
-                                         ProductCard, ProductView, RegistryView, SectionKeys, SpecCell, SpecLabel,
+                                         ProductCard, ProductView, RegistryView, SpecCell, SpecLabel,
                                          TermEntry, TermRef, ViewValue)
 from radar.domain.model.history.projection import plain
 from radar.domain.model.registry import Registry
@@ -77,8 +77,7 @@ def _category_entries(registry: Registry, counted: Counter[str],
     profiles = {p.category_id: p for p in registry.profiles}
     return tuple(CategoryEntry(id=c.id, label=dict(c.label), description=dict(c.description), domain=c.domain,
                                pipeline=c.pipeline, glyph=c.glyph,
-                               sections=SectionKeys(core=profiles[c.id].sections.core,
-                                                    detail=profiles[c.id].sections.detail),
+                               core=profiles[c.id].sections.core,
                                products=counted[c.id], pages=pages.get(c.id, 0),
                                component_hub=c.component_hub.path if c.component_hub else None)
                  for c in registry.categories.values())
