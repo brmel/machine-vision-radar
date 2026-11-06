@@ -123,6 +123,17 @@
     "precision": 1
   },
   {
+    "id": "cable_length",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "label": {"en": "Cable length", "fr": "Longueur du câble"},
+    "description": {"en": "Length of the cable, connector to connector.", "fr": "Longueur du câble, d'un connecteur à l'autre."},
+    "aliases": ["length of cable", "longueur de câble", "Kabellänge"],
+    "bounds": {"min": 1, "max": 200000},
+    "precision": 1
+  },
+  {
     "id": "camera_support",
     "datatype": "term_set",
     "vocabulary": "camera_types",
@@ -438,6 +449,17 @@
     "label": {"en": "Integrated illumination", "fr": "Éclairage intégré"},
     "description": {"en": "Light source built into the reader to light the codes it reads, such as LEDs.", "fr": "Source de lumière intégrée au lecteur pour éclairer les codes qu'il lit, par exemple des LED."},
     "aliases": ["illumination", "lighting", "built-in illumination", "integrated light", "internal lighting", "éclairage", "éclairage interne", "Beleuchtung", "integrierte Beleuchtung", "interne Beleuchtung"]
+  },
+  {
+    "id": "image_circle",
+    "datatype": "quantity",
+    "dimension": "length",
+    "unit": "mm",
+    "label": {"en": "Image circle", "fr": "Cercle image"},
+    "description": {"en": "Diameter of the image the lens forms on the sensor plane.", "fr": "Diamètre de l'image que l'objectif forme sur le plan du capteur."},
+    "aliases": ["image circle diameter", "diamètre du cercle image", "Bildkreis"],
+    "bounds": {"min": 0.1, "max": 500},
+    "precision": 2
   },
   {
     "id": "industries",

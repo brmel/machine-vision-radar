@@ -8,5 +8,11 @@
   {"id": "backlight", "label": {"en": "Backlight", "fr": "Rétroéclairage"}},
   {"id": "structured", "label": {"en": "Structured light", "fr": "Lumière structurée"}},
   {"id": "dark_field", "label": {"en": "Dark field", "fr": "Fond noir"}},
-  {"id": "dome", "label": {"en": "Dome light", "fr": "Dôme"}}
+  {"id": "dome", "label": {"en": "Dome light", "fr": "Dôme"}},
+  {"id": "telecentric", "label": {"en": "Telecentric illuminator", "fr": "Éclairage télécentrique"}},
+  {"id": "tunnel", "label": {"en": "Tunnel light", "fr": "Éclairage tunnel"}},
+  {
+    "id": "light_source",
+    "label": {"en": "Light source for a fiber or an optic", "fr": "Source lumineuse pour fibre ou optique"}
+  }
 ]

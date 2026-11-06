@@ -2,7 +2,7 @@
   "category_id": "optics.lenses",
   "sections": {
     "core": ["focal_length", "f_number", "lens_mount", "max_sensor_format", "lens_kind"],
-    "detail": ["working_distance", "magnification", "telecentric", "iris_type", "focus_type", "distortion", "depth_of_field", "telecentricity"],
+    "detail": ["working_distance", "magnification", "telecentric", "iris_type", "focus_type", "distortion", "depth_of_field", "telecentricity", "image_circle"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
