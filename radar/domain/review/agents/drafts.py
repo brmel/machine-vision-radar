@@ -59,7 +59,7 @@ def corrected(draft: RecordsDraft, first: Callable[[Mapping[str, Any]], str | No
     ids = {r["id"]: held for r in draft.records if (held := first(r)) and held != r["id"]}
     return replace(draft, records=tuple(swapped(dict(r), ids) for r in draft.records)) if ids else draft
 
-def _key(word: str) -> str:
+def spelled(word: str) -> str:
     return "".join(ch for ch in word.casefold() if ch.isalnum())
 
 def _spellings(spec: SpecDefinition, registry: Registry) -> Iterator[tuple[str, str]]:
@@ -72,14 +72,14 @@ def _spellings(spec: SpecDefinition, registry: Registry) -> Iterator[tuple[str, 
 def _unique(spellings: Iterator[tuple[str, str]]) -> dict[str, str]:
     found: dict[str, set[str]] = {}
     for said, held in spellings:
-        found.setdefault(_key(said), set()).add(held)
+        found.setdefault(spelled(said), set()).add(held)
     return {key: next(iter(ids)) for key, ids in found.items() if key and len(ids) == 1}
 
 def words(registry: Registry) -> Words:
     return {spec.id: _unique(_spellings(spec, registry)) for spec in registry.spec_definitions.values()}
 
 def _held(said: Mapping[str, str], word: object) -> object:
-    return said.get(_key(word), word) if isinstance(word, str) else word
+    return said.get(spelled(word), word) if isinstance(word, str) else word
 
 def _value(value: object, datatype: str, said: Mapping[str, str]) -> object:
     match value:

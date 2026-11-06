@@ -62,6 +62,10 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   extraction read the registry's specs (`radar/adapters/ai/prompted/specs.py`): each one's label, aliases, and a quantity's
   units and bounds; research reads only the profiles of its cards' categories (every one for a maker with no card yet),
   their specs and filters, and names the links its run reads next.
+  A page that names one card and holds at least three values in its table or its schema.org properties files them with
+  no model call (`radar/domain/review/agents/research/tables.py`): a label finds its spec through the registry's labels
+  and aliases, a value is read by its datatype, and a bound or two figures for one spec file nothing. The labels no
+  spec names are kept in the run's log.
 - **Each use's model and caps** (`radar/domain/ai/budget.py`, `meter.py`). `data/registry/ai.json` lists the
   models a use may run, each with its provider (a Vertex AI region or the Meta Model API's base URL) and its price per
   million tokens in and out, with its source and
