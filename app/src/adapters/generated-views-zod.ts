@@ -21,7 +21,7 @@ export const RiskSchema: z.ZodType<M.Risk> = z.enum(["withdraws", "changes", "ad
 
 export const FilesOnSchema: z.ZodType<M.FilesOn> = z.enum(["create", "update", "merge", "retract", "report", "quality", "feed", "rollback"]);
 
-export const UseSchema: z.ZodType<M.Use> = z.enum(["all", "ask", "research", "datasheet", "draft"]);
+export const UseSchema: z.ZodType<M.Use> = z.enum(["all", "ask", "research", "image_judge", "datasheet", "draft"]);
 
 export const ScopeSchema: z.ZodType<M.Scope> = z.enum(["read", "propose"]);
 

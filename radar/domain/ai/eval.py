@@ -8,6 +8,7 @@ from radar.domain.ports.ai.usage_log import Ended
 from radar.domain.model.entities import Claim, EvalQuery
 from radar.domain.ports.ai.article_model import ArticleModel
 from radar.domain.ports.ai.datasheet_extractor import Datasheet, DatasheetExtractor, SpecValue
+from radar.domain.ports.ai.image_judge import CandidateImage, ImageJudge
 from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.ports.search.retriever import Retriever
 from radar.domain.review.feed.drafter import drafted
@@ -26,6 +27,13 @@ class DatasheetCase:
     id: str
     datasheet: Datasheet
     expected: tuple[Claim, ...]
+
+@dataclass(frozen=True, slots=True)
+class ImageCase:
+    id: str
+    product: str
+    candidates: tuple[CandidateImage, ...]
+    photo: str | None
 
 def graded_answer(read_model: CatalogRepository, query: EvalQuery, locale: str, answerer: Answerer) -> Graded:
     asked = answerer.ask(query.query, locale)
@@ -56,6 +64,12 @@ def _extraction_failure(case: DatasheetCase, values: Sequence[SpecValue]) -> str
     if missed:
         return f"missed {', '.join(missed)}"
     return f"states {', '.join(invented)}, which the datasheet does not" if invented else None
+
+def graded_judgement(case: ImageCase, judge: ImageJudge) -> Graded:
+    evaluation = judge.judge(case.product, case.candidates)
+    best = evaluation.best_photo()
+    return Graded(case.id, None if best == case.photo else f"picked {best or 'no photo'}, not {case.photo or 'none'}",
+                  evaluation.ended())
 
 def graded_extraction(case: DatasheetCase, extractor: DatasheetExtractor) -> Graded:
     extraction = extractor.extract(case.datasheet)

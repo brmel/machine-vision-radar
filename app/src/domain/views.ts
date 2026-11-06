@@ -24,8 +24,8 @@ export type Risk = "withdraws" | "changes" | "adds";
 /** The event that files a proposal: a record added, changed, merged or withdrawn, a reader's report, a quality check, a news draft, a rollback. */
 export type FilesOn = "create" | "update" | "merge" | "retract" | "report" | "quality" | "feed" | "rollback";
 
-/** An AI use in the system: ask, research, datasheet extraction, news drafting, or all uses together. */
-export type Use = "all" | "ask" | "research" | "datasheet" | "draft";
+/** An AI use in the system: ask, research, its image judge, datasheet extraction, news drafting, or all uses together. */
+export type Use = "all" | "ask" | "research" | "image_judge" | "datasheet" | "draft";
 
 /** What an outside agent token permits: reading catalog data, or reading and proposing changes. */
 export type Scope = "read" | "propose";

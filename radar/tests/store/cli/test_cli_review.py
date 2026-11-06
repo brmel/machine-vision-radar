@@ -15,7 +15,8 @@ from radar.domain.review.requests import Reader, Report
 from radar.tests.store import stores
 
 FX = stores.fixture()
-DATASHEETS = Path(__file__).parents[2] / "fixtures" / "datasheets.json"
+EVALS = Path(__file__).parents[2] / "fixtures" / "evals"
+DATASHEETS, IMAGES = EVALS / "datasheets.json", EVALS / "images.json"
 PROBLEMS = {"eval_queries": [
     {"id": f"evq_00000000p{n}", "version": 1, "query": query, "language": language, "targets": ["prd_0000000002"]}
     for n, (query, language) in enumerate((("a glossy finish; a long reach", "en"),
@@ -38,6 +39,16 @@ def test_each_ai_use_s_eval_runs_on_the_scripted_models_under_its_caps(tmp_path:
                      "--floor", "1", "--json", check=False)
     assert (run.returncode == 1
             and json.loads(run.stdout)["failures"] == [{"case": case["id"], "why": f"missed {claim['spec_key']}"}])
+    images = json.loads(IMAGES.read_text(encoding="utf-8"))
+    assert FX.json(place, "eval", "run", "image_judge", "--cases", str(IMAGES), "--floor", "1")["passed"] == 2
+    images["cases"][0]["photo"] = images["cases"][0]["candidates"][1]["url"]
+    judged = stores.cli(FX, place, "eval", "run", "image_judge", "--cases", stores.file(tmp_path, "logo.json", images),
+                        "--floor", "1", "--json", check=False)
+    assert judged.returncode == 1 and json.loads(judged.stdout)["failures"] == [{
+        "case": images["cases"][0]["id"], "why": "picked https://example.com/media/widget-two-photo.png, not "
+                                                 "https://example.com/assets/logo.png"}]
+    spent = FX.json(place, "ai-caps", "get")["uses"]
+    assert [(u["use"], u["calls_today"]) for u in spent[2:4]] == [("research", 0), ("image_judge", 10)]
 
 def test_the_ai_caps_from_the_cli() -> None:
     place = FX.loaded()

@@ -7,7 +7,7 @@ export type Route =
   | { name: "vendor-detail"; vendorSlug: string; page: number }
   | { name: "hub"; path: string; slug: string; page: number }
   | { name: "search"; ask: string }
-  | { name: "compare"; query: string }
+  | { name: "compare"; query: string; family?: string }
   | { name: "news"; query: string }
   | { name: "article"; slug: string }
   | { name: "market" }

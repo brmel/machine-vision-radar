@@ -117,6 +117,7 @@ export const RouteView: FC<{
           onOpenHub={(path, slug) => go.navigate({ name: "hub", path, slug, page: 1 })}
           onToggleCompare={toggleCompare}
           comparedIds={comparedIds}
+          onCompareFamily={(family) => go.navigate({ name: "compare", query: "", family })}
         />
       );
     case "product-history":
@@ -149,7 +150,8 @@ export const RouteView: FC<{
           comparedIds={comparedIds}
           onComparedIdsChange={setComparedIds}
           query={route.query}
-          onQueryChange={(query) => go.navigate({ name: "compare", query })}
+          family={route.family}
+          onQueryChange={(query, family) => go.navigate({ name: "compare", query, ...(family ? { family } : {}) })}
           onSelectProduct={go.product}
           onBrowseMore={() => go.browse()}
         />

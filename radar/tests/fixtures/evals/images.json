@@ -1,0 +1,42 @@
+{
+  "cases": [
+    {
+      "id": "widget two: photo among a logo and a banner",
+      "product": "Widget Two",
+      "photo": "https://example.com/media/widget-two-photo.png",
+      "candidates": [
+        {
+          "url": "https://example.com/media/widget-two-photo.png",
+          "mime": "image/png",
+          "base64": "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEElEQVR42mNwaDgARwzEcQBoUhgBhiya8gAAAABJRU5ErkJggg=="
+        },
+        {
+          "url": "https://example.com/assets/logo.png",
+          "mime": "image/png",
+          "base64": "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAD0lEQVR42mP4jwQYiOMAANuQL9HXPgz1AAAAAElFTkSuQmCC"
+        },
+        {
+          "url": "https://example.com/assets/banner.png",
+          "mime": "image/png",
+          "base64": "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAADklEQVR42mNQQAIMxHEAnDQGAQi1YvsAAAAASUVORK5CYII="
+        }
+      ]
+    },
+    {
+      "id": "widget one: no photo on the page",
+      "product": "Widget One",
+      "candidates": [
+        {
+          "url": "https://example.com/assets/logo.png",
+          "mime": "image/png",
+          "base64": "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAD0lEQVR42mP4jwQYiOMAANuQL9HXPgz1AAAAAElFTkSuQmCC"
+        },
+        {
+          "url": "https://example.com/assets/diagram.png",
+          "mime": "image/png",
+          "base64": "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAADklEQVR42mNQQAIMxHEAnDQGAQi1YvsAAAAASUVORK5CYII="
+        }
+      ]
+    }
+  ]
+}

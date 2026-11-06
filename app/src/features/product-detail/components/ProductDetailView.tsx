@@ -20,10 +20,11 @@ interface ProductDetailViewProps extends Omit<ProductHeaderProps, "product" | "c
   productId: string;
   prerendered: ProductView | null;
   reports: ReportInbox;
+  onCompareFamily: (slug: string) => void;
 }
 
 export const ProductDetailView: FC<ProductDetailViewProps> = ({ repository, productId, prerendered, reports,
-  ...header }) => {
+  onCompareFamily, ...header }) => {
   const { t } = useI18n();
   const registry = useRegistry();
   const { value: product, isLoading, error } = useProduct(repository, productId, prerendered);
@@ -47,7 +48,7 @@ export const ProductDetailView: FC<ProductDetailViewProps> = ({ repository, prod
   return (
     <div className="space-y-3">
       <ProductHeader product={product} category={category} {...header} />
-      <ProductTabs product={product} onSelectProduct={header.onSelectProduct} />
+      <ProductTabs product={product} onSelectProduct={header.onSelectProduct} onCompareFamily={onCompareFamily} />
       <ReportError inbox={reports} subject={product.id} />
     </div>
   );

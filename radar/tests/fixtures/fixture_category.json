@@ -200,7 +200,8 @@
     "ai_caps.jsonl": [
       {"id": "cap_z18n8130rc", "version": 1, "use": "draft", "month_cad": 0.01, "day_calls": 50, "note": "Fictional: the fixture's scripted drafts may run (#209)"},
       {"id": "cap_ebcdjn6fhf", "version": 1, "use": "datasheet", "month_cad": 0.01, "day_calls": 50, "note": "Fictional: the fixture's scripted datasheets may run (#209)"},
-      {"id": "cap_yhmm2wrmf4", "version": 1, "use": "research", "month_cad": 0.01, "day_calls": 50, "note": "Fictional: the fixture's scripted research runs may run (#265)"}
+      {"id": "cap_yhmm2wrmf4", "version": 1, "use": "research", "month_cad": 0.01, "day_calls": 50, "note": "Fictional: the fixture's scripted research runs may run (#265)"},
+      {"id": "cap_d7q18e2y7b", "version": 1, "use": "image_judge", "month_cad": 0.01, "day_calls": 50, "note": "Fictional: the fixture's scripted image judge may run (#548)"}
     ]
   },
   "pages": {

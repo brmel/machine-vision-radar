@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import Any, Collection, Iterable, Mapping
 
@@ -96,6 +97,9 @@ class FirestoreCatalogStore:
             if before is None or (before.get("rights") in self.public) != public:
                 out.append((BlobRef(after["sha256"], after["mime"]), public))
         return out
+
+    def transaction(self) -> AbstractContextManager[None]:
+        return self.docs.transaction()
 
     def write(self, held: StoreHeld, plan: Plan) -> int:
         if not plan.changed:

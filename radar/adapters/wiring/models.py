@@ -89,7 +89,7 @@ class Models(Stores):
                            ScriptedResearchAgent())
 
     def image_judge_meter(self) -> Meter[ImageJudge]:
-        return self._meter(Use.RESEARCH, PromptedImageJudge, ScriptedImageJudge(), prompt_id="image_judge")
+        return self._meter(Use.IMAGE_JUDGE, PromptedImageJudge, ScriptedImageJudge())
 
     def datasheet_meter(self) -> Meter[DatasheetExtractor]:
         registry = self.model().registry

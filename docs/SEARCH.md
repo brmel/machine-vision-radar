@@ -43,9 +43,9 @@ How the catalog is searched and asked, and how every AI use is built. The store 
 - **The grounding check** (`radar/domain/ai/grounding.py`) is one, for answers and drafts alike: a sentence that cites
   nothing, cites an id outside the evidence, or states a number the evidence (or the question) does not hold rejects the
   output, with that reason, and the asker gets the `not_enough_evidence` refusal.
-- **The AI uses** (their ports: AGENTS.md rule 15) are answers, web research with its image judge (on research's model
-  and caps, each candidate's call counted), datasheet extraction and news drafts, each on its prompt (`ask`, `research`, `image_judge`, `datasheet`,
-  `draft`) and its registry model, run through the `ModelRunner` port (`radar/domain/ports/ai/prompts.py`). A model's
+- **The AI uses** (their ports: AGENTS.md rule 15) are answers, web research, its image judge (its own use, model and
+  caps; each candidate's call counted), datasheet extraction and news drafts, each on its prompt (`ask`, `research`,
+  `image_judge`, `datasheet`, `draft`) and its registry model, run through the `ModelRunner` port (`radar/domain/ports/ai/prompts.py`). A model's
   `provider` picks its runner (`radar/adapters/wiring/models.py`). `meta` runs on the Meta Model API
   (`radar/adapters/ai/meta/runner.py`): its OpenAI-compatible chat completions, the prompt's instruction as the system
   message, its output schema as `response_format`, a datasheet as a `file` part and an image as an `image_url` part,
@@ -78,7 +78,8 @@ How the catalog is searched and asked, and how every AI use is built. The store 
 - **Evals per use** (`radar eval run <use>`). `ask` answers the curated queries (`EvalQuery`) in each of the site's
   languages, whatever their own, and passes one that cites a target or, as Hit@k counts it, a product of its category.
   `solve` asks the problems of a `--cases` catalog file (`EvalQuery` records) and passes one solved with every target
-  cited by a need.
+  cited by a need. `image_judge` judges the recorded candidate images of a `--cases` file (each case a product, its
+  images as base64 and the photo to pick, or none) and passes one whose best photo is that one.
   The store suites run each use on the fixture and the scripted models with `--floor 1`, under the fixture's `AiCap`
   records, which open the uses the registry caps at 0.
 - **The admin's search routes** (`radar/adapters/web/admin/search.py`, under `/api/admin/search/`) each answer what

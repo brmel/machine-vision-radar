@@ -9,7 +9,7 @@ interface CompareHeadProps {
   product: ProductView;
   glyph: string;
   onOpen: (productSlug: string) => void;
-  onRemove: () => void;
+  onRemove?: () => void;
 }
 
 export const CompareHead: FC<CompareHeadProps> = ({ product, glyph, onOpen, onRemove }) => {
@@ -26,11 +26,13 @@ export const CompareHead: FC<CompareHeadProps> = ({ product, glyph, onOpen, onRe
           </AppLink>
           <p className="text-caption text-muted">{product.vendor.name}</p>
         </div>
-        <button type="button" onClick={onRemove}
-          className="p-1 text-muted hover:text-fg transition-colors cursor-pointer shrink-0"
-          aria-label={t("removeFromCompare")}>
-          <X className="w-4 h-4" aria-hidden="true" />
-        </button>
+        {onRemove && (
+          <button type="button" onClick={onRemove}
+            className="p-1 text-muted hover:text-fg transition-colors cursor-pointer shrink-0"
+            aria-label={t("removeFromCompare")}>
+            <X className="w-4 h-4" aria-hidden="true" />
+          </button>
+        )}
       </div>
       {product.status && <StatusBadge status={product.status.term} locale={locale} />}
     </div>

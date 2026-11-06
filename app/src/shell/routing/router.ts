@@ -1,6 +1,6 @@
 import type { Route } from "./routes.ts";
-import { NEWS_PATH, articlePath, browsePath, categoryPath, historyPath, hubPath, pageOf, productPath,
-  vendorPath } from "../../domain/paths.ts";
+import { NEWS_PATH, articlePath, browsePath, categoryPath, familyComparePath, historyPath, hubPath, pageOf,
+  productPath, vendorPath } from "../../domain/paths.ts";
 import type { MessageKey } from "../i18n/messages.ts";
 import { ENABLE_ADMIN } from "../admin/flags.ts";
 
@@ -60,6 +60,11 @@ function vendorRoute(rest: string, search: string): Route | null {
   return vendorSlug ? { name: "vendor-detail", vendorSlug, page: pageOf(search) } : null;
 }
 
+function compareRoute(rest: string, search: string): Route | null {
+  const family = decodeURIComponent(rest).trim();
+  return !family || family.includes("/") ? null : { name: "compare", query: queryOf(search), family };
+}
+
 function articleRoute(rest: string): Route | null {
   const slug = decodeURIComponent(rest).trim();
   return !slug || slug.includes("/") ? null : { name: "article", slug };
@@ -69,6 +74,7 @@ const PREFIXED: readonly (readonly [string, (rest: string, search: string) => Ro
   ["/category/", categoryRoute],
   ["/product/", productRoute],
   ["/vendor/", vendorRoute],
+  ["/compare/", compareRoute],
   [`${NEWS_PATH}/`, articleRoute],
 ];
 
@@ -98,7 +104,7 @@ const PATHS: { [K in keyof RouteByName]: (route: RouteByName[K]) => string } = {
   "vendor-detail": (route) => withPage(vendorPath(route.vendorSlug), route.page),
   hub: (route) => withPage(hubPath(route.path, route.slug), route.page),
   search: (route) => (route.ask ? `/search?ask=${encodeURIComponent(route.ask)}` : "/search"),
-  compare: (route) => withQuery("/compare", route.query),
+  compare: (route) => withQuery(route.family ? familyComparePath(route.family) : "/compare", route.query),
   market: () => "/market",
   about: () => "/about",
   agents: () => "/agents",

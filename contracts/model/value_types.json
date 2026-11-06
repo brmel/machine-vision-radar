@@ -41,8 +41,8 @@
   {
     "id": "Use",
     "kind": "enum",
-    "values": ["all", "ask", "research", "datasheet", "draft"],
-    "description": "An AI use in the system: ask, research, datasheet extraction, news drafting, or all uses together."
+    "values": ["all", "ask", "research", "image_judge", "datasheet", "draft"],
+    "description": "An AI use in the system: ask, research, its image judge, datasheet extraction, news drafting, or all uses together."
   },
   {
     "id": "Scope",

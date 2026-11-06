@@ -41,6 +41,6 @@ production store's snapshot in their private data repo.
 
 ## Gotchas
 
-- **AI spend.** `catalog ask`, `eval run ask|solve|draft|datasheet`, `research run` and `feed draft --ai` call the
+- **AI spend.** `catalog ask`, `eval run ask|solve|draft|datasheet|image_judge`, `research run` and `feed draft --ai` call the
   use's model under the caps ([SEARCH.md](SEARCH.md)), recorded in `ai_calls`; on the project they need `--yes`. The
   emulators run the scripted models.

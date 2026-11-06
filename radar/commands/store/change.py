@@ -7,8 +7,10 @@ from typing import Sequence
 
 from radar.adapters.console import log, output
 from radar.domain.validation.verdict import Finding, InvalidChangeset
-from radar.domain.model.history.changeset import parse_changeset
-from radar.domain.model.history.plan import Refused, Stamp
+from radar.domain.model.history.changeset import Changeset, parse_changeset
+from radar.domain.model.history.plan import Plan, Refused, Stamp
+from radar.domain.model.model import Model
+from radar.domain.ports.catalog.catalog_store import CatalogStore, Contended
 from radar.domain.review.requests import Founder, Rollback
 from radar.domain.model.history.projection import plain
 from radar.domain.review.views import shown_view
@@ -21,17 +23,27 @@ def run_apply(args: argparse.Namespace) -> int:
         changeset = parse_changeset(json.loads(Path(args.changeset).read_text(encoding="utf-8")), model)
     except InvalidChangeset as exc:
         return _refused(exc.findings)
-    held = store.around(changeset)
-    planned = model.change(held, changeset, Stamp(args.wiring.now(), cid))
+    try:
+        planned, writes = _written(store, model, changeset, Stamp(args.wiring.now(), cid))
+    except Contended as exc:
+        return log.error(f"nothing written, {exc}", fix="run it again on the new state")
     if isinstance(planned, Refused):
         return _refused(planned.findings)
-    writes, events = store.write(held, planned), [plain(e) for e in planned.events]
+    events = [plain(e) for e in planned.events]
     log.info(f"change: {len(events)} event(s), {writes} doc(s) written")
-    lines = [f"{e.entity} v{e.version}: {op.op} {op.path}" + (f" = {op.value}" if op.value is not None else "")
-             for e in planned.events for op in e.patch]
     output.format_output({"correlation_id": cid, "events": events, "writes": writes},
-                         json_mode=args.json, text_formatter=lambda _: "\n".join(lines) or "no change: nothing written")
+                         json_mode=args.json, text_formatter=lambda _: _lines(planned) or "no change: nothing written")
     return 0 if not events or args.wiring.reindex(changeset.changes[0].actor, cid) else 1
+
+def _lines(planned: Plan) -> str:
+    return "\n".join(f"{e.entity} v{e.version}: {op.op} {op.path}" + (f" = {op.value}" if op.value is not None else "")
+                     for e in planned.events for op in e.patch)
+
+def _written(store: CatalogStore, model: Model, changeset: Changeset, stamp: Stamp) -> tuple[Plan | Refused, int]:
+    with store.transaction():
+        held = store.around(changeset)
+        planned = model.change(held, changeset, stamp)
+        return planned, store.write(held, planned) if isinstance(planned, Plan) else 0
 
 def _refused(findings: Sequence[Finding]) -> int:
     for f in findings:

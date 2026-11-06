@@ -33,7 +33,7 @@ from radar.domain.ports.history.version_store import VersionStore
 from radar.domain.ports.review.agent_tokens import AgentTokens
 from radar.domain.ports.review.research_runs import ResearchRunLog
 from radar.domain.ports.store.docs import Docs
-from radar.domain.ai.eval import DatasheetCase
+from radar.domain.ai.eval import DatasheetCase, ImageCase
 from radar.domain.read_model.history import Histories
 from radar.domain.read_model.listings import republished
 from radar.domain.read_model.products.values import Terms
@@ -185,6 +185,9 @@ class Stores:
 
     def datasheet_cases(self, path: Path) -> tuple[DatasheetCase, ...]:
         return json_parser.parse_datasheet_set(json_parser.read_json(path), self.model())
+
+    def image_cases(self, path: Path) -> tuple[ImageCase, ...]:
+        return json_parser.parse_image_set(json_parser.read_json(path))
 
     def problems(self, path: Path) -> tuple[EvalQuery, ...]:
         return tuple(json_parser.load_catalog_file(path, self.model()).all(EvalQuery))

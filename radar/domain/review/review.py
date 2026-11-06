@@ -10,7 +10,7 @@ from radar.domain.model.history.ids import keyed
 from radar.domain.model.history.projection import every_page
 from radar.domain.model.model import Model
 from radar.domain.ports.catalog.catalog import Catalog
-from radar.domain.ports.catalog.catalog_store import CatalogStore
+from radar.domain.ports.catalog.catalog_store import CatalogStore, Contended
 from radar.domain.ports.history.version_store import VersionStore
 from radar.domain.ports.review.proposal_queue import ProposalQueue, Query, QueuePage
 from radar.domain.read_model.derived.identity import ProductIdentity
@@ -153,9 +153,16 @@ class Review:
         return _unrefused(self._planned(changeset, "check")[1]).changes
 
     def _applied(self, changeset: Changeset, by: Founder) -> tuple[AppliedChange, ...]:
-        held, planned = self._planned(changeset, by.correlation_id)
-        written = _unrefused(planned)
-        self._store.write(held, written)
+        try:
+            return self._written(changeset, by)
+        except Contended:
+            return self._written(changeset, by)
+
+    def _written(self, changeset: Changeset, by: Founder) -> tuple[AppliedChange, ...]:
+        with self._store.transaction():
+            held, planned = self._planned(changeset, by.correlation_id)
+            written = _unrefused(planned)
+            self._store.write(held, written)
         return tuple(AppliedChange(e.id, e.entity, e.version) for e in written.events)
 
     def _sourced(self, changeset: Changeset) -> None:

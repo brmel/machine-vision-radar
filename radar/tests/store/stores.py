@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import copy
 import functools
 import json
@@ -257,6 +258,9 @@ class MemoryCatalogStore:
         for e in self.catalog.all(Change):
             last[e.entity] = max(last.get(e.entity, 0), e.version)
         return Held(self.catalog, last, self.kept, ())
+
+    def transaction(self) -> contextlib.AbstractContextManager[None]:
+        return contextlib.nullcontext()
 
     def write(self, held: Held, plan: Plan) -> int:
         after = {**{i: a for i, (_, a) in plan.changed.items()}, **{e.id: e for e in plan.events}}

@@ -35,6 +35,8 @@ const ROUTES: [string, string, Route, string?][] = [
   ["/news/first-words", "", { name: "article", slug: "first-words" }],
   ["/news/first-words/more", "", { name: "not-found", path: "/news/first-words/more" }],
   ["/compare", "?ids=a,b&diff=1", { name: "compare", query: "ids=a,b&diff=1" }],
+  ["/compare/widget-one", "?diff=1", { name: "compare", query: "diff=1", family: "widget-one" }],
+  ["/compare/a/b", "", { name: "not-found", path: "/compare/a/b" }],
   ["/about", "", { name: "about" }],
   ["/non-existent", "", { name: "not-found", path: "/non-existent" }],
 ];

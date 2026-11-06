@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import Any, Collection, Iterator, Mapping, Protocol, Sequence
 
@@ -51,6 +52,9 @@ class Docs(Protocol):
         ...
 
     def commit(self, writes: Sequence[Write]) -> None:
+        ...
+
+    def transaction(self) -> AbstractContextManager[None]:
         ...
 
     def collections(self) -> list[str]:

@@ -42,6 +42,7 @@
     {"use": "all", "month_cad": 60, "day_calls": 1000},
     {"use": "ask", "model": "muse-spark-1.3", "month_cad": 15, "day_calls": 200, "client_calls": 20},
     {"use": "research", "model": "muse-spark-1.3", "month_cad": 30, "day_calls": 600},
+    {"use": "image_judge", "model": "muse-spark-1.3", "month_cad": 5, "day_calls": 300},
     {"use": "datasheet", "model": "muse-spark-1.3", "month_cad": 10, "day_calls": 150},
     {"use": "draft", "model": "muse-spark-1.3", "month_cad": 2, "day_calls": 20}
   ]

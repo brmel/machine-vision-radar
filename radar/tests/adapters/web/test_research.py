@@ -67,7 +67,7 @@ def _run(seeded: tuple[Docs, Any], heard: Heard, waits: list[float], on_get: Cal
 
     with serving(model, pages=page) as base:
         researcher = Researcher(meter(Use.RESEARCH, lambda chosen: agent(base, chosen)),
-                                meter(Use.RESEARCH, lambda chosen: judge(base, chosen)),
+                                meter(Use.IMAGE_JUDGE, lambda chosen: judge(base, chosen)),
                                 PoliteReader(f"{SITE}/about", lambda: NOW, DOCUMENTS, base, lambda: 0.0, waits.append),
                                 Files(files, meter(Use.DATASHEET, lambda chosen: ScriptedDatasheetExtractor()),
                                       REGISTRY.vocabularies), FX.review(docs, files), FirestoreResearchRuns(docs),

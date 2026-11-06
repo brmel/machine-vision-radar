@@ -58,8 +58,8 @@ export const RISK = {
   adds: ["adminRiskAdds", "neutral"],
 } as const satisfies Readonly<Record<Risk, readonly [MessageKey, string]>>;
 export const USE: Readonly<Record<AiCapRow["use"], MessageKey>> = {
-  all: "adminUseAll", ask: "adminUseAsk", research: "adminUseResearch", datasheet: "adminUseDatasheet",
-  draft: "adminUseDraft",
+  all: "adminUseAll", ask: "adminUseAsk", research: "adminUseResearch", image_judge: "adminUseImageJudge",
+  datasheet: "adminUseDatasheet", draft: "adminUseDraft",
 };
 
 export function kindLabel(model: AdminModel, filesOn: FilesOn, locale: string): string {

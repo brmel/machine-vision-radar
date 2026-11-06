@@ -59,10 +59,11 @@ class FilesOn(str, Enum):
     ROLLBACK = "rollback"
 
 class Use(str, Enum):
-    """An AI use in the system: ask, research, datasheet extraction, news drafting, or all uses together."""
+    """An AI use in the system: ask, research, its image judge, datasheet extraction, news drafting, or all uses together."""
     ALL = "all"
     ASK = "ask"
     RESEARCH = "research"
+    IMAGE_JUDGE = "image_judge"
     DATASHEET = "datasheet"
     DRAFT = "draft"
 
