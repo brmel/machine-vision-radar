@@ -61,9 +61,5 @@ class Checker:
     def __init__(self, model: Model) -> None:
         self._model = model
 
-    def __call__(self, view: dict[str, Any], type_name: str, where: str) -> dict[str, Any]:
-        self._model.parse(view, entities.CLASSES[type_name], where)
-        return view
-
     def parse(self, raw: Any, view_type: type[T], where: str) -> T:
         return self._model.parse(raw, view_type, where)

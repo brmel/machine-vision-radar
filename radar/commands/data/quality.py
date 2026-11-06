@@ -28,7 +28,7 @@ def _text(payload: dict[str, Any], coverage: Coverage, filing: bool) -> str:
 
 def run(args: argparse.Namespace) -> int:
     model = args.wiring.model()
-    found = read_model.quality(args.wiring.catalog(), model, *args.wiring.views(), args.wiring.today())
+    found = read_model.quality(args.wiring.catalog(), model, args.wiring.media(), args.wiring.today())
     weak = [f for f in found.provenance if f.weak]
     filed: list[str] = []
     if args.file:

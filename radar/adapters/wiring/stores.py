@@ -27,7 +27,7 @@ from radar.domain.model.model import Model, ParseError
 from radar.domain.ports.catalog.catalog_repository import CatalogRepository
 from radar.domain.ports.catalog.catalog_store import CatalogStore
 from radar.domain.ports.catalog.held_records import HeldRecords
-from radar.domain.ports.catalog.views import Check, MediaUrl
+from radar.domain.ports.catalog.views import MediaUrl
 from radar.domain.ports.store.records import Records
 from radar.domain.ports.history.version_store import VersionStore
 from radar.domain.ports.review.agent_tokens import AgentTokens
@@ -189,8 +189,8 @@ class Stores:
     def problems(self, path: Path) -> tuple[EvalQuery, ...]:
         return tuple(json_parser.load_catalog_file(path, self.model()).all(EvalQuery))
 
-    def views(self) -> tuple[Check, MediaUrl]:
-        return json_parser.Checker(self.model()), media_url
+    def media(self) -> MediaUrl:
+        return media_url
 
     def versions(self) -> VersionStore:
         docs = self.store()

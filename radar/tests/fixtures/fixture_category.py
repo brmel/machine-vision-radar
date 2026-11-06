@@ -116,19 +116,19 @@ def export_bundle(catalog_dir: Path, dist: Path, registry_dir: Path) -> None:
     shutil.rmtree(public, ignore_errors=True)
     model = load_model(registry_dir)
     catalog = json_store.load_catalog(catalog_dir, model)
-    rm = read_model.build(catalog, model, MemoryChangeLog(catalog.all(Change)), Checker(model), media_url)
+    rm = read_model.build(catalog, model, MemoryChangeLog(catalog.all(Change)), media_url)
     for folder, views in (("products", rm.products), ("organizations", rm.organizations), ("history", rm.histories),
                           ("news", rm.news)):
         for key, view in views.items():
             _write_view(public / folder / f"{key}.json", view)
     for category, pages in rm.pages.items():
         for page in pages:
-            _write_view(public / "categories" / category / f"{page['page']}.json", page)
+            _write_view(public / "categories" / category / f"{page.page}.json", page)
     _write_view(public / "news.json", rm.feed)
     _write_view(public / "market.json", rm.market)
     _write_view(public / "index.json", rm.index)
     _write_view(public / "registry.json", rm.registry)
-    _write_view(public / "organizations.json", rm.index["organizations"])
+    _write_view(public / "organizations.json", rm.index.organizations)
     log.info(f"exported the read model: {len(rm.products)} products, {len(rm.organizations)} organizations to {public}")
 
 T = TypeVar("T")
