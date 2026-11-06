@@ -56,7 +56,7 @@ echo "cold start: the function's first answer took ${cold_start} s"
 # another process could read.
 export MVR_ACCESS_TOKEN="$(timed 60 "access token" gcloud auth application-default print-access-token)"
 echo "=== [4/8] The public read model, up to date with the views ==="
-(cd "$REPO_ROOT" && timed 300 "reproject" python3 -m radar --project "$PROJECT" --yes store reproject)
+(cd "$REPO_ROOT" && timed 900 "reproject" python3 -m radar --project "$PROJECT" --yes store reproject)
 
 # Nothing the emulators or the fixtures use may reach this build.
 echo "=== [5/8] Production build from the project's Firestore ==="
