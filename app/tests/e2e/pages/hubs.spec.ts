@@ -98,6 +98,11 @@ test("every hub is prerendered with its JSON-LD and listed in the sitemap with a
     expect(html, c.id).toContain(`>${label(c.label, "en")}</h1>`);
     expect(html, c.id).toContain('"@type":"ItemList"');
     expect(html, c.id).toContain('"@type":"BreadcrumbList"');
+    expect(html, c.id).toMatch(new RegExp(`<link rel="alternate" type="application/atom\\+xml" href="[^"]+/category/`
+      + `${escape(c.id)}/feed\\.atom" />`));
+    const feed = await request.get(`/category/${c.id}/feed.atom`);
+    expect(feed.status(), c.id).toBe(200);
+    expect(feed.headers()["content-type"], c.id).toContain("application/atom+xml");
     expect(sitemap, c.id)
       .toMatch(new RegExp(`/category/${escape(c.id)}</loc>\\s*<lastmod>\\d{4}-\\d{2}-\\d{2}</lastmod>`));
   }

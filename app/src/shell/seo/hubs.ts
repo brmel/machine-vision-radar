@@ -12,6 +12,7 @@ interface HubInput {
   readonly trail: readonly { readonly name: string; readonly path: string }[];
   readonly items: readonly { readonly name: string; readonly path: string }[];
   readonly total: number;
+  readonly feeds?: string;
 }
 
 const TRAIL = [{ name: messages.navHome, path: "/" }, { name: messages.catalogTitle, path: "/browse" }];
@@ -23,7 +24,7 @@ const usersLead = (total: number, name: string): string =>
 export function categoryHub(category: CategoryEntry, cards: readonly ProductCard[]): HubInput {
   return { path: categoryPath(category.id), name: localized(category.label, DEFAULT_LANGUAGE.code),
     lead: localized(category.description, DEFAULT_LANGUAGE.code), trail: TRAIL, items: listed(cards),
-    total: category.products };
+    total: category.products, feeds: categoryPath(category.id) };
 }
 
 export function componentHub(product: { readonly slug: string; readonly name: string }, category: CategoryEntry,
@@ -41,6 +42,7 @@ export function buildHubHeadMeta(hub: HubInput, origin: string): PageHeadMeta {
     canonicalUrl: `${origin}${hub.path}`,
     description: formatMetaDescription(hub.lead),
     ogType: "website",
+    ...(hub.feeds ? { feeds: hub.feeds } : {}),
     jsonLd: {
       "@context": "https://schema.org",
       "@graph": [

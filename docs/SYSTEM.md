@@ -21,7 +21,9 @@ snapshot (`radar store export`) stays in the maintainers' private data repo. Pag
   `#mvr-product`) and its history, vendor, article and static route; each category's hub (`/category/<id>`, with its
   first listing page) and component's hub (`/<path>/<slug>`, the products that use it, at the path its category's
   `component_hub` names); /news's first page and its feed of the latest 50 articles (`/news/feed.atom`,
-  `/news/feed.json` in JSON Feed 1.1); the home, the 404, `robots.txt` and the sitemap (§3). The browser's state
+  `/news/feed.json` in JSON Feed 1.1), and by the same step a feed per category (`/category/<id>/feed.atom`, `.json`,
+  the articles citing its products) and per maker (`/vendor/<slug>/feed.atom`, `.json`, the articles citing it), each
+  linked from its page's head; the home, the 404, `robots.txt` and the sitemap (§3). The browser's state
   (location, saved language, theme, compared products) enters the app once, at `app/src/shell/root/start.ts`. A
   production build serves the registry and the organizations as files under `/read-model/`, so they cost no read; the
   app's Firestore adapter is REST over `fetch`, lazy and code-split. The build guards: `app/scripts/build-guards.ts`.
