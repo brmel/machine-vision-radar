@@ -60,6 +60,10 @@ const RadarApp: FC<Ports> = ({ start, repository: injectedReader }) => {
   const reports = useMemo(() => new HttpReportInbox(appCheck()), []);
 
   const { route, navigate } = useRoute(start.route);
+  useEffect(() => {
+    if (route.name === "admin") return;
+    answers.count("page_view").catch((err: unknown) => logger.warn("a page view was not counted", {}, err));
+  }, [route, answers]);
   const compare = useComparedIds(route.name === "compare", start.compared);
   useHeadSync(route, t);
 

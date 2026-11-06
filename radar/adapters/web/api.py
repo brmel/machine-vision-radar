@@ -19,7 +19,7 @@ from radar.domain.review.requests import Reader, Report
 from radar.domain.review.review import Review
 from radar.domain.search.hits import found
 
-EVENTS = ("search", "zero_result", "result_click")
+EVENTS = ("search", "zero_result", "result_click", "page_view")
 MAX_QUESTION = 300
 MAX_MESSAGE, MAX_SOURCE = 2000, 500
 NOT_FILED = {"error": "the report was not filed: try again later"}
