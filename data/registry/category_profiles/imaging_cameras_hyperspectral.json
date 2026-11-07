@@ -2,7 +2,7 @@
   "category_id": "imaging.cameras.hyperspectral",
   "sections": {
     "core": ["spectral_acquisition", "spectral_range", "bands", "frame_rate", "interfaces"],
-    "detail": ["lens_mount", "power"],
+    "detail": ["lens_mount", "power", "measurement_rate", "dynamic_range"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },

@@ -6,10 +6,6 @@
   {"id": "test_equipment", "label": {"en": "Test equipment", "fr": "Équipement de test"}},
   {"id": "adapter", "label": {"en": "Adapter", "fr": "Adaptateur"}},
   {"id": "power_supply", "label": {"en": "Power supply", "fr": "Alimentation"}},
-  {
-    "id": "optical_pattern",
-    "label": {"en": "Calibration or projection pattern", "fr": "Mire de calibration ou de projection"}
-  },
   {"id": "lens_accessory", "label": {"en": "Lens accessory", "fr": "Accessoire d'objectif"}},
   {"id": "calibration_target", "label": {"en": "Calibration target", "fr": "Mire d'étalonnage"}},
   {"id": "projection_pattern", "label": {"en": "Projection pattern", "fr": "Motif de projection"}}

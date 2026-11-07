@@ -2,7 +2,7 @@
   "category_id": "optics.lighting",
   "sections": {
     "core": ["light_form", "illumination_technique", "color", "power", "controller_integrated"],
-    "detail": ["light_type", "wavelength", "working_distance", "beam_angle", "color_temperature", "cable_length"],
+    "detail": ["wavelength", "working_distance", "beam_angle", "color_temperature", "cable_length"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },

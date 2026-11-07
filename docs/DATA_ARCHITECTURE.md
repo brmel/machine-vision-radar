@@ -157,6 +157,18 @@ shows.
   take it through `spec_groups`. An AI agent that builds or runs a vision application belongs to its role's category,
   with `agentic` among its methods and its configuration style, and `model_context_protocol` among its APIs when it
   speaks MCP.
+- A camera that runs its own inspection is `imaging.smart_cameras`: sensor, processing and tools in one device. A camera
+  that only sends images is a camera category, whatever its onboard features.
+- A camera imaging a scene in many spectral bands is `imaging.cameras.hyperspectral`, by pushbroom, snapshot or filter. A
+  point spectrometer stays `imaging.spectrometers`.
+- **One meaning per term.** A vocabulary holds one concept, so a value never answers two questions:
+  - `interfaces` is the physical link; `vision_standards` is the standard it carries, by version when the maker names one;
+    `compliance` is the regulatory mark; `poe` is a boolean.
+  - `light_form` is the light's shape; `illumination_technique` is how it lights the scene, and one light can serve several;
+    `illumination` is its source technology.
+  - One fact has one spec: a range of distances is `measuring_range` and a rate of lines or profiles is `line_rate`, on every
+    category.
+  - A term means a thing a maker states. "Unknown" is never a term: an absent value is an absence reason or no claim.
 - **New tech enters as a vocabulary term**, and becomes a category or profile only when its products need a spec shape no profile
   can express.
 
@@ -187,8 +199,8 @@ broadcast capture unless marketed for machine vision. **Boundaries:**
 - A turnkey cell that bundles a robot is `systems.vision_systems`; what it bundles is its `system_components`.
 - `compute.edge_ai` needs AI acceleration or explicit vision interfaces; controllers with trigger, lighting or machine
   I/O are `compute.vision_controllers`.
-- Pushbroom hyperspectral → `imaging.cameras.line_scan` with its `spectral_acquisition`; snapshot hyperspectral →
-  `imaging.cameras.area_scan` with its `spectral_acquisition`; point and benchtop instruments → `imaging.spectrometers`.
+- Hyperspectral and multispectral cameras → `imaging.cameras.hyperspectral` with their `spectral_acquisition`; point and
+  benchtop instruments → `imaging.spectrometers`.
 - What a maker sells beside its lights and lenses: cables, fixtures and adapters → `accessories`; plates, films, filters
   and mirrors that shape light → `optics.optical_components`; each takes the `environment` group when its page states
   a size or a temperature. A light made for a plant-research or microscope bench, not a vision system, is out of scope.

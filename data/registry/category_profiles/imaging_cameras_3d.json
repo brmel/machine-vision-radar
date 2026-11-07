@@ -1,8 +1,8 @@
 {
   "category_id": "imaging.cameras.3d",
   "sections": {
-    "core": ["principle", "interfaces", "accuracy", "working_range", "frame_rate"],
-    "detail": ["depth_range", "points_per_sec", "baseline", "scan_rate", "scan_width", "lateral_resolution", "vertical_resolution", "field_of_view", "line_rate", "power", "measuring_range"],
+    "core": ["principle", "interfaces", "accuracy", "measuring_range", "frame_rate"],
+    "detail": ["points_per_sec", "baseline", "line_rate", "scan_width", "lateral_resolution", "vertical_resolution", "field_of_view", "power"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
@@ -11,7 +11,7 @@
     {"field": "principle"},
     {"field": "interfaces"},
     {"field": "accuracy"},
-    {"field": "working_range"},
+    {"field": "measuring_range"},
     {"field": "frame_rate"},
     {"field": "points_per_sec"},
     {"field": "ip_rating"},

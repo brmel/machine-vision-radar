@@ -1,20 +1,29 @@
 from __future__ import annotations
 
 import argparse
+import json
+import re
 from collections import Counter
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 from radar.adapters.console import log, output
 from radar.adapters.files import json_store
 from radar.adapters.files.blob_files import kept_files, kept_path
 from radar.adapters.firestore import layout, store
 from radar.domain.ports.catalog.catalog import Catalog
-from radar.domain.model.entities import Document
+from radar.domain.model.entities import Change, Document
+from radar.domain.model.history.changeset import Changeset, PutEntity, Retract
+from radar.domain.model.history.migration import migrated, parse_plan
+from radar.domain.model.history.projection import plain
+from radar.domain.model.model import ParseError
 from radar.domain.model.registry import Registry
 from radar.domain.validation.context import Part, Whole
 from radar.domain.validation.verdict import Verdict
 from radar.adapters.console.parser import Commands
+
+SOURCE = "src_"
 
 def _errors(verdict: Verdict) -> int:
     for e in verdict.errors:
@@ -39,6 +48,35 @@ def run_load(args: argparse.Namespace) -> int:
     written = store.load(docs, blobs, model, layout.records_of(catalog, model.schema), media, cid, now)
     log.info(f"load: {sum(written.values())} docs in {len(written)} collections, {len(media)} file(s)")
     return output.format_output({"correlation_id": cid, "docs": written, "blobs": len(media)}, json_mode=True)
+
+def _sourced(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    text = json.dumps([r for r in records if not str(r["id"]).startswith(SOURCE)])
+    cited = set(re.findall(rf'"({SOURCE}[a-z0-9]+)"', text))
+    return [r for r in records if not str(r["id"]).startswith(SOURCE) or r["id"] in cited]
+
+def _applied(records: list[dict[str, Any]], changeset: Changeset) -> list[dict[str, Any]]:
+    held = {r["id"]: {**r, "version": 1} for r in records}
+    for change in changeset.changes:
+        match change.action:
+            case PutEntity(entity=entity):
+                held[entity.id] = {**plain(entity), "version": 1}
+            case Retract(id=gone):
+                held.pop(gone, None)
+    return _sourced(list(held.values()))
+
+def run_rewrite(args: argparse.Namespace) -> int:
+    model = args.wiring.model()
+    try:
+        plan = parse_plan(json.loads(Path(args.plan).read_text(encoding="utf-8")), model)
+        catalog = json_store.load_catalog(Path(args.catalog), model)
+    except (OSError, ValueError, ParseError) as exc:
+        return log.error(f"{exc}", code=2)
+    changeset, counts = migrated(catalog, plan, model)
+    records = [r for r in layout.records_of(catalog, model.schema)
+               if model.schema.kind_of(r["id"]) != Change.__name__]
+    written = json_store.write_catalog(Path(args.into), model.schema, _applied(records, changeset))
+    return output.format_output({"changes": len(changeset.changes), "counts": dict(counts), "written": written},
+                                json_mode=True)
 
 def run_export(args: argparse.Namespace) -> int:
     cid = args.wiring.correlate("export")
@@ -115,6 +153,13 @@ def register(commands: Commands) -> None:
                       publishes=True)
     m.add_argument("catalog", help="the catalog folder: one JSON Lines file per entity kind")
     m.add_argument("--blobs", help="the folder of its Documents' files, named by their sha256")
+    r = commands.verb("store", "rewrite",
+                      help="apply a migration plan to a catalog folder offline and write a clean one: every record at "
+                           "version 1, no change history, no source nothing cites, ready for `store load`",
+                      func=run_rewrite)
+    r.add_argument("plan", help="the plan JSON, as `model migrate` takes it")
+    r.add_argument("catalog", help="the catalog folder, from `store export`")
+    r.add_argument("into", help="the folder to write")
     e = commands.verb("store", "export", help="write every entity and its Change events as the catalog folder "
                       "`store load` reads", func=run_export)
     e.add_argument("catalog", help="the folder to write: one JSON Lines file per entity kind, others removed")
