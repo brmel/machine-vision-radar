@@ -5,7 +5,7 @@ How the catalog is searched and asked, and how every AI use is built. The store 
 
 - **The search engine** is one port, `SearchEngine` (`radar/domain/ports/search/search_engine.py`): `index` (an update
   or a rebuild), `last_indexed` and `search`. It is implemented by `radar/adapters/ai/search/` (`ShardedSearch`, its
-  ranking, records, files and the fastembed embedder); another engine replaces that folder with no domain change. The
+  ranking, records, files and the fastembed embedder); another engine replaces that folder with no domain change. Its measured cold start, the function's first answer after a deploy, is about 2 s (1.70 to 2.00 s over five deploys), so the embedder stays in the function. The
   index is built from the public read model only: `radar index rebuild` embeds every product, `radar index update`
   those whose fingerprint changed, and every applied change runs an update. A product's record: its card, the terms of
   its name and aliases, vendor, category and tag labels, summary and published values (each with its spec's registry

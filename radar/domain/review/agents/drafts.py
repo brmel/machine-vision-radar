@@ -19,6 +19,7 @@ PROVENANCE = ("source_refs", "recorded_at", "method", "fetched_at")
 References = Mapping[str, list[tuple[str, str]]]
 Words = Mapping[str, Mapping[str, str]]
 FRACTION = re.compile(r"(?<=\d)/(?=\d)")
+DECIMAL = re.compile(r"(?<=\d)\.(?=\d)")
 
 def terms(model: Model) -> Terms:
     return {kind.__name__: {f.name + ("" if f.optional else "*"): tuple(model.registry.items(v))
@@ -62,14 +63,18 @@ def corrected(draft: RecordsDraft, first: Callable[[Mapping[str, Any]], str | No
     return replace(draft, records=tuple(swapped(dict(r), ids) for r in draft.records)) if ids else draft
 
 def spelled(word: str) -> str:
-    return "".join(ch for ch in FRACTION.sub("÷", word.casefold()) if ch.isalnum() or ch in "÷%")
+    marked = DECIMAL.sub("·", FRACTION.sub("÷", word.casefold()))
+    return "".join(ch for ch in marked if ch.isalnum() or ch in "÷·%")
 
 def _spellings(spec: SpecDefinition, registry: Registry) -> Iterator[tuple[str, str]]:
     for unit in registry.units.values():
         if spec.datatype == "quantity" and unit.dimension == spec.dimension:
             yield from ((said, unit.id) for said in (unit.id, unit.symbol, *(unit.aliases or ())))
     for term in registry.vocabularies.get(spec.vocabulary or "", {}).values():
-        yield from ((said, term.id) for said in (term.id, *term.label.values()))
+        yield from ((said, term.id) for said in term.label.values())
+
+def _ids(spec: SpecDefinition, registry: Registry) -> Iterator[tuple[str, str]]:
+    yield from ((term.id, term.id) for term in registry.vocabularies.get(spec.vocabulary or "", {}).values())
 
 def _unique(spellings: Iterator[tuple[str, str]]) -> dict[str, str]:
     found: dict[str, set[str]] = {}
@@ -78,7 +83,8 @@ def _unique(spellings: Iterator[tuple[str, str]]) -> dict[str, str]:
     return {key: next(iter(ids)) for key, ids in found.items() if key and len(ids) == 1}
 
 def words(registry: Registry) -> Words:
-    return {spec.id: _unique(_spellings(spec, registry)) for spec in registry.spec_definitions.values()}
+    return {spec.id: {**_unique(_ids(spec, registry)), **_unique(_spellings(spec, registry))}
+            for spec in registry.spec_definitions.values()}
 
 def _held(said: Mapping[str, str], word: object) -> object:
     return said.get(spelled(word), word) if isinstance(word, str) else word
