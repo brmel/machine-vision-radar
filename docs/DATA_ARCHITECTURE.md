@@ -274,12 +274,12 @@ runs: an unknown or missing field, a wrong type, a bad id, an enum value outside
 The model and the registry change in place; there are no dataset releases, and the Change log keeps who changed
 what. No code keeps an earlier shape ([AGENTS.md](../AGENTS.md) rule 10). A registry entry carries no status: it is
 removed once nothing uses it (no record, fixture, code or other entry), after a changeset moves the records holding
-it. That changeset is a **migration plan**, never a script: `radar model migrate PLAN.json` reads the plan's rules
-(`drop_field` today; a rule joins when a move needs it), derives one changeset over the whole store, each change
-citing the record's own sources, and files it through review as proposals of 500 records, which the founder approves
-under one note; `--dry-run` prints what would move and files nothing. The order of a structural move is: the
-additive change to the registry or the contracts and its deploy, the migration, then the removal and its deploy
-(`radar store validate` at 0 errors before and after). The registry lives with the data, in `data/registry/`; `radar model generate` lays out its JSON with the
+it. That changeset is a **migration plan**, never a script: sealed rules over explicit records (`drop_field`,
+`rename_spec`, `move_terms`, `map_term`, `true_as_term`, `move_category`). While there are no users, `radar store rewrite
+PLAN.json EXPORT INTO` applies it offline to a `store export`, every record at version 1 with no history, and the emptied
+store loads INTO; otherwise `radar model migrate PLAN.json` files it through review as proposals of 500 records. The
+order: the additive registry change and its deploy, the migration, then the removal and its deploy (`radar store
+validate` at 0 errors before and after). The registry lives with the data, in `data/registry/`; `radar model generate` lays out its JSON with the
 contracts', and `--check` fails on a file off that layout.
 
 ## 8. Permanent ids
