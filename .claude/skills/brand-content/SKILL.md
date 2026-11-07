@@ -41,10 +41,9 @@ The voice is `docs/BRAND.md` (Voice). The npm commands run in `app/`; each post 
    4:5 alone). Done when it renders with no finding and you have looked at the footage's stills and the card.
 4. **Text.** Write `<post>/post.md`: what the live page shows today, one fact with its source, the page's address.
    `npm run studio:check -- studio/out/<post>`. Done when it passes; fix the text, never the check.
-5. **Hand-off.** `gh issue create --label post --title "Post: <idea>"` (or comment on the idea's issue) with the text,
-   the folder's path, each image's alt text, the `.srt`, the data date and the pages the facts come from. Done when
-   the issue holds everything the founder needs to post without asking. Posting waits for the founder's go
-   (`docs/BRAND.md`, Announcing).
+5. **Hand-off.** Copy the text into the post's folder in the private repo's `marketing/posts/`, and the images kept
+   into its `media/`, each with its alt text in `before posting`. Done when the founder can post from the desk without
+   asking. Posting waits for the founder's go (`docs/BRAND.md`, Announcing).
 
 ## Cost
 
