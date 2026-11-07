@@ -132,7 +132,7 @@ inEachLocale("the review queue", (locale) => {
     await page.getByRole("button", { name: T.adminRollbackTo.replace("{version}", "1") }).last().click();
     await decide(page, T, `Back to v1 (${locale})`);
     await page.goto(`/admin/records/${made}/history`);
-    await expect(page.getByRole("listitem").first()).toContainText("v3");
+    await expect(page.getByRole("main").getByRole("listitem").first()).toContainText("v3");
 
     await attach("widget.png", "image/png", `\x89PNG\r\n\x1a\n fictional image ${locale}\n`, IMAGE_KIND);
     await fileApproved(page, T, "Product photo");
@@ -262,8 +262,8 @@ inEachLocale("the review queue", (locale) => {
       await expect(page.getByRole("heading", { level: 3, name: kindLabel(entity, locale), exact: true })).toBeVisible();
     await remove(`/admin/records/${org}`, "Not a maker after all");
     await page.goto(`/admin/records/${org}/history`);
-    await expect(page.getByRole("listitem").first()).toContainText("Not a maker after all");
-    await expect(page.getByRole("listitem")).toHaveCount(3);
+    await expect(page.getByRole("main").getByRole("listitem").first()).toContainText("Not a maker after all");
+    await expect(page.getByRole("main").getByRole("listitem")).toHaveCount(3);
 
     await page.goto(`/admin/records/${versioned?.product}`);
     await add("ProductVersion", "product");
@@ -277,6 +277,6 @@ inEachLocale("the review queue", (locale) => {
     await fileApproved(page, T, "Its release date");
     await remove(`/admin/records/${version}`, "Never shipped");
     await page.goto(`/admin/records/${version}/history`);
-    await expect(page.getByRole("listitem").first()).toContainText("Never shipped");
+    await expect(page.getByRole("main").getByRole("listitem").first()).toContainText("Never shipped");
   });
 });

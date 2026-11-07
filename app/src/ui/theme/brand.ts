@@ -21,7 +21,7 @@ export const BRAND_CONFIG: BrandConfig = {
   wordmark: "Machine Vision Radar",
   shortWordmark: "MV radar",
   tagline: "All machine vision knowledge, in one place.",
-  profiles: [{ network: "LinkedIn", url: "" }],
+  profiles: [{ network: "LinkedIn", url: "https://www.linkedin.com/company/machine-vision-radar" }],
   contact: [{ role: "corrections", address: "" }, { role: "privacy", address: "" }, { role: "press", address: "" }],
   licence: { name: "CC BY-NC 4.0", url: "https://creativecommons.org/licenses/by-nc/4.0/" },
 };
