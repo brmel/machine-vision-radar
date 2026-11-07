@@ -7,6 +7,7 @@ from radar.adapters.ai.prompted.specs import specs_json
 from radar.domain.ai.prompts import Prompt
 from radar.adapters.ai.prompted.reply import read
 from radar.domain.ports.ai.prompts import ModelRunner
+from radar.adapters.files.model_json import DEFAULT_LANGUAGE
 from radar.domain.model.entities import ProductCard
 from radar.domain.model.history.projection import plain
 from radar.domain.model.registry import Registry
@@ -40,9 +41,12 @@ class PromptedResearchAgent:
     def research(self, reading: Reading) -> Findings:
         known = json.dumps([plain(card) for card in reading.known], ensure_ascii=False)
         specs, profiles = _read_against(self._registry, reading.known)
+        categories = {c.id: c.description.get(DEFAULT_LANGUAGE.code, "") if c.description else ""
+                      for c in self._registry.categories.values()}
         page = reading.page
         request = self._prompt.render(maker=reading.maker, url=page.link.address, known=known,
                                       terms=json.dumps(reading.terms, ensure_ascii=False), specs=specs,
+                                      categories=json.dumps(categories, ensure_ascii=False),
                                       profiles=profiles, page=page.text[:PAGE],
                                       links="\n".join(link.address for link in page.links))
         reply = self._runner.reply(self._prompt, request, MAX_TOKENS)
