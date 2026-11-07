@@ -14,6 +14,7 @@ proposals for the founder to approve, edit or reject, and which of the page's li
 - `specs`: the specs of the cards' categories (of every category when there is no card) as JSON: id, English label,
   datatype, what it means (`means`, which decides between two specs that sound alike), the words datasheets use for it (`aliases`), for a quantity its `units` (id to the symbol a page writes,
   the spec's own first) and its `bounds`, and for a term spec its `terms` (id to English label)
+- `categories`: every category of the catalog as JSON, its id to what it holds
 - `profiles`: the profile of each of those categories as JSON: the category id to the ids of the specs its products
   take (`specs`) and of those its listings filter on (`filters`)
 - `page`: the page's visible text, a line per block and a table row's cells on one line, ` | ` between them
@@ -74,8 +75,9 @@ Rules:
 - A figure stated as a limit ("up to", "<", ">", "min.", "less than", "at least", "or more") is left out, and so are two
   figures for one spec in a cell, per mode or per period. "Approx.", "typ." and "max." state the figure. A standard's
   version is stated only when the page names it, and a protocol only when its physical interface is on the page.
-- A product's category comes from how the maker's own page groups it: its breadcrumb or its section. A cable, a bracket, an
-  adapter or a filter is its own product, never in the category of what it attaches to. A product the maker sells for
+- A product's category is the one in `categories` whose meaning fits what the maker's own page says it is, by its breadcrumb
+  or its section. A camera that runs its own inspection is a smart camera, whatever the page's group. A cable, a bracket,
+  an adapter or a filter is its own product, never in the category of what it attaches to. A product the maker sells for
   anything but a vision system is not proposed.
 - `media` is the address of an image or datasheet file of a card's product, the proposal's `subject`, that the page
   links to, one of its links as given, with `records` an empty list `[]`; null otherwise, and for a file of any other
@@ -98,6 +100,9 @@ The catalog's terms, by record type and field:
 
 The specs:
 {specs}
+
+The categories:
+{categories}
 
 The profiles, by category:
 {profiles}

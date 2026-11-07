@@ -176,7 +176,7 @@ def test_a_run_on_its_model_gives_it_the_catalog_s_terms_and_refuses_a_draft_nam
         "every category and spec key")
     assert '"slug*": []' in asked and '"name' not in asked.split('"Product"', 1)[1].split("}", 1)[0], (
         "every Product field, required ones marked")
-    specs = json.loads(asked.split("The specs:\n", 1)[1].split("\n\nThe profiles", 1)[0])
+    specs = json.loads(asked.split("The specs:\n", 1)[1].split("\n\nThe categories", 1)[0])
     assert [s["id"] for s in specs] == ["fixture_reach", "fixture_finish", "fixture_mount", "fixture_mass",
                                         "fixture_label", "fixture_adapters"], (
         "the specs of the cards' categories only")
