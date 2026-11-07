@@ -1,13 +1,14 @@
 {
   "category_id": "software.application",
   "sections": {
-    "core": ["config_style", "camera_support", "industries"],
+    "core": ["application", "config_style", "camera_support", "industries"],
     "detail": [],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
   "groups": ["software_runtime", "connectivity", "ai_stack"],
   "facets": [
+    {"field": "application"},
     {"field": "config_style"},
     {"field": "camera_support"},
     {"field": "industries"},

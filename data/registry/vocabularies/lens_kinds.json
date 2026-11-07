@@ -1,5 +1,9 @@
 [
   {"id": "fixed_focal", "label": {"en": "Fixed focal", "fr": "Focale fixe"}},
   {"id": "macro", "label": {"en": "Macro", "fr": "Optique macro"}},
-  {"id": "zoom", "label": {"en": "Zoom", "fr": "Zoom optique"}}
+  {"id": "zoom", "label": {"en": "Zoom", "fr": "Zoom optique"}},
+  {"id": "telecentric", "label": {"en": "Telecentric", "fr": "Télécentrique"}},
+  {"id": "bi_telecentric", "label": {"en": "Bi-telecentric", "fr": "Bi-télécentrique"}},
+  {"id": "pericentric", "label": {"en": "Pericentric", "fr": "Péricentrique"}},
+  {"id": "fisheye", "label": {"en": "Fisheye", "fr": "Fisheye"}}
 ]

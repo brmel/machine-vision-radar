@@ -2,7 +2,7 @@
   "category_id": "optics.light_controllers",
   "sections": {
     "core": ["channels", "output_current", "drive_modes", "interfaces"],
-    "detail": ["power"],
+    "detail": ["power", "vision_standards", "poe"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },

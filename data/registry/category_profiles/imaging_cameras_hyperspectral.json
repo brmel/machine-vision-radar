@@ -1,0 +1,18 @@
+{
+  "category_id": "imaging.cameras.hyperspectral",
+  "sections": {
+    "core": ["spectral_acquisition", "spectral_range", "bands", "frame_rate", "interfaces"],
+    "detail": ["lens_mount", "power"],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["image_sensor", "connectivity", "environment"],
+  "facets": [
+    {"field": "spectral_acquisition"},
+    {"field": "spectral_range"},
+    {"field": "bands"},
+    {"field": "interfaces"}
+  ],
+  "required": ["spectral_range"],
+  "axis_dependent_keys": []
+}

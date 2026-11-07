@@ -8,5 +8,6 @@
   {"id": "microbolometer", "label": {"en": "Microbolometer", "fr": "Microbolomètre"}},
   {"id": "insb", "label": {"en": "InSb", "fr": "InSb"}},
   {"id": "mct", "label": {"en": "MCT (HgCdTe)", "fr": "MCT (HgCdTe)"}},
-  {"id": "event_based", "label": {"en": "Event-based", "fr": "Événementiel"}}
+  {"id": "event_based", "label": {"en": "Event-based", "fr": "Événementiel"}},
+  {"id": "xray_scintillator", "label": {"en": "X-ray, scintillator", "fr": "Rayons X, scintillateur"}}
 ]

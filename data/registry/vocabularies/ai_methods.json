@@ -6,5 +6,6 @@
   {"id": "vision_language", "label": {"en": "Vision language", "fr": "Modèles vision-langage"}},
   {"id": "agentic", "label": {"en": "Agentic AI", "fr": "IA agentique"}},
   {"id": "few_shot", "label": {"en": "Few-shot learning", "fr": "Apprentissage à partir de peu d'exemples"}},
-  {"id": "zero_shot", "label": {"en": "Zero-shot (no training)", "fr": "Sans entraînement (zero-shot)"}}
+  {"id": "zero_shot", "label": {"en": "Zero-shot (no training)", "fr": "Sans entraînement (zero-shot)"}},
+  {"id": "rule_based", "label": {"en": "Rule-based vision", "fr": "Vision à base de règles"}}
 ]

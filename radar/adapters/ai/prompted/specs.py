@@ -19,6 +19,7 @@ def _terms(spec: SpecDefinition, registry: Registry) -> dict[str, object]:
 
 def specs_json(registry: Registry, keys: Collection[str]) -> str:
     return json.dumps([{"id": s.id, "label": s.label.get(DEFAULT_LANGUAGE.code, ""), "datatype": s.datatype,
+                        **({"means": s.description.get(DEFAULT_LANGUAGE.code, "")} if s.description else {}),
                         **({"aliases": list(s.aliases)} if s.aliases else {}),
                         **(_measure(s, registry) if s.datatype == "quantity" else _terms(s, registry))}
                        for s in registry.spec_definitions.values() if s.id in keys], ensure_ascii=False)

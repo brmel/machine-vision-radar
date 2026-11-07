@@ -58,5 +58,25 @@
     "id": "usb3_vision_1_2",
     "label": {"en": "USB3 Vision 1.2", "fr": "USB3 Vision 1.2"},
     "description": {"en": "The AIA USB3 Vision interface standard, version 1.2.", "fr": "La norme d'interface USB3 Vision de l'AIA, version 1.2."}
+  },
+  {
+    "id": "ukca",
+    "label": {"en": "UKCA", "fr": "UKCA"},
+    "description": {"en": "UK conformity marking.", "fr": "Marquage de conformité du Royaume-Uni."}
+  },
+  {
+    "id": "kc",
+    "label": {"en": "KC", "fr": "KC"},
+    "description": {"en": "Korean product safety and EMC certification.", "fr": "Certification coréenne de sécurité et de CEM."}
+  },
+  {
+    "id": "ccc",
+    "label": {"en": "CCC", "fr": "CCC"},
+    "description": {"en": "China Compulsory Certification.", "fr": "Certification obligatoire chinoise."}
+  },
+  {
+    "id": "weee",
+    "label": {"en": "WEEE", "fr": "DEEE"},
+    "description": {"en": "EU directive on the disposal of electrical and electronic equipment.", "fr": "Directive européenne sur les déchets d'équipements électriques et électroniques."}
   }
 ]

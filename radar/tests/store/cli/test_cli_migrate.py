@@ -29,3 +29,19 @@ def test_a_migration_plan_moves_every_record_it_names_through_review(tmp_path: P
                       {**PLAN, "rules": [{"rule": "drop_field", "kind": "Product", "field": "slug"}]})
     refused = stores.cli(FX, place, "model", "migrate", bad, check=False)
     assert refused.returncode == 2 and "no optional field 'slug'" in refused.stderr
+
+def test_a_plan_splits_a_mixed_vocabulary_merges_specs_and_moves_products(tmp_path: Path) -> None:
+    place = FX.loaded()
+    claims = FX.rows("claims.jsonl")
+    product = next(p for p in FX.rows("products.jsonl") if p["category"] == "fixture_domain.widgets")
+    finish = next(c for c in claims if c["spec_key"] == "fixture_finish")
+    plan = stores.file(tmp_path, "plan.json", {"reason": "One meaning per term", "rules": [
+        {"rule": "map_term", "spec": "fixture_finish", "term": finish["value"].get("term", "matte"), "to": None}]})
+    dry = FX.json(place, "model", "migrate", plan, "--dry-run")
+    assert any(k.startswith("claim retracted: fixture_finish") for k in dry["counts"]), (
+        "a term mapped to nothing retracts a claim that held only it")
+    refused = stores.cli(FX, place, "model", "migrate", stores.file(tmp_path, "bad.json", {
+        "reason": "x", "rules": [{"rule": "rename_spec", "spec": "nothing", "to": "fixture_finish"}]}), check=False)
+    assert refused.returncode == 2 and "no spec 'nothing'" in refused.stderr
+    assert product["id"]
+

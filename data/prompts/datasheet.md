@@ -25,7 +25,8 @@ wrong one: when the datasheet does not state a spec, leave it out; when it state
 values.
 Rules:
 - One value per spec key, as the datasheet states it for this product, not for another model on the same sheet.
-- `spec_key` is the id of the one spec the datasheet names, by its label or one of its `aliases`.
+- `spec_key` is the id of the one spec the datasheet names, by its label or one of its `aliases`; `means` decides between
+  two specs that sound alike.
 - A spec whose datatype is `quantity`: `quantity` is the number as the datasheet writes it and `unit` the id, among the
   spec's `units`, of the symbol it writes; a number outside the spec's `bounds` is a misreading, left out. A spec
   with `terms`: `term`, the id, never the label, of the one of them the datasheet's word names; left out when none

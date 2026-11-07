@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from radar.tests.fixtures.corpus import REGISTRY
 IDENTICAL_ALLOWLIST = frozenset({
+    "Coaxial", "Laser", "VCSEL", "Spot", "Fisheye", "Tunnel", "CCC", "KC", "UKCA",
     "Cloud", "Autofocus", "Multispectral", "Interface", "Article", "LiDAR", "Ultraviolet (UV)", "Services", "Transport",
     "Code", "Brochure", "Image", "Monochrome", "Radar", "Classification", "Segmentation", "Applications", "Interfaces",
     "IP20", "IP30", "IP40", "IP50", "IP54", "IP64", "IP65", "IP66", "IP67", "IP68", "IP69K",

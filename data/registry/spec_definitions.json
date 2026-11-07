@@ -1169,5 +1169,36 @@
     "aliases": ["detection range", "max range", "maximum range", "distance range", "measuring distance", "portée", "portée de détection", "portée maximale", "plage de distance", "Reichweite", "Arbeitsbereich", "Erfassungsbereich", "Messreichweite"],
     "bounds": {"min": 0, "max": 2000},
     "precision": 2
+  },
+  {
+    "id": "vision_standards",
+    "datatype": "term_set",
+    "vocabulary": "vision_standards",
+    "label": {"en": "Vision standards", "fr": "Normes de vision"},
+    "description": {"en": "The machine-vision and interface standards the product's maker states it follows, by version when the maker names one.", "fr": "Les normes de vision et d'interface que le fabricant déclare suivre, avec leur version quand il la nomme."},
+    "aliases": ["standards", "protocol", "machine vision standard", "normes"]
+  },
+  {
+    "id": "poe",
+    "datatype": "boolean",
+    "label": {"en": "Power over Ethernet", "fr": "Alimentation par Ethernet"},
+    "description": {"en": "Whether the device takes its power over its Ethernet cable.", "fr": "Indique si l'appareil est alimenté par son câble Ethernet."},
+    "aliases": ["PoE", "power over ethernet", "POE support"]
+  },
+  {
+    "id": "light_form",
+    "datatype": "term",
+    "vocabulary": "light_forms",
+    "label": {"en": "Light form", "fr": "Forme de l'éclairage"},
+    "description": {"en": "The light's physical form: ring, bar, line, spot, flat panel, dome or tunnel, or a bare light source.", "fr": "La forme physique de l'éclairage : anneau, barre, ligne, spot, panneau plat, dôme ou tunnel, ou une source nue."},
+    "aliases": ["type of light", "shape", "form", "light type"]
+  },
+  {
+    "id": "illumination_technique",
+    "datatype": "term_set",
+    "vocabulary": "illumination_techniques",
+    "label": {"en": "Illumination technique", "fr": "Technique d'éclairage"},
+    "description": {"en": "How the light is applied to the scene: backlight, coaxial, dark field, structured or telecentric. One light can serve several.", "fr": "La manière d'éclairer la scène : rétroéclairage, coaxial, fond noir, structuré ou télécentrique. Un éclairage peut en servir plusieurs."},
+    "aliases": ["lighting method", "illumination method", "technique", "méthode d'éclairage"]
   }
 ]

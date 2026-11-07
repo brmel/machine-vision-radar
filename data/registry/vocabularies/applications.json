@@ -14,5 +14,6 @@
     "label": {"en": "Code and text identification", "fr": "Identification de codes et de textes"}
   },
   {"id": "ndt", "label": {"en": "Non-destructive testing", "fr": "Contrôle non destructif"}},
-  {"id": "general_inspection", "label": {"en": "General visual inspection", "fr": "Inspection visuelle générale"}}
+  {"id": "general_inspection", "label": {"en": "General visual inspection", "fr": "Inspection visuelle générale"}},
+  {"id": "robot_guidance", "label": {"en": "Robot guidance", "fr": "Guidage de robot"}}
 ]

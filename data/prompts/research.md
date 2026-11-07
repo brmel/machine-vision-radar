@@ -12,7 +12,7 @@ proposals for the founder to approve, edit or reject, and which of the page's li
 - `terms`: the record types a proposal puts as JSON, each with every field it takes: a field the registry binds with
   its term ids, any other with an empty list; a required field's name ends with `*`
 - `specs`: the specs of the cards' categories (of every category when there is no card) as JSON: id, English label,
-  datatype, the words datasheets use for it (`aliases`), for a quantity its `units` (id to the symbol a page writes,
+  datatype, what it means (`means`, which decides between two specs that sound alike), the words datasheets use for it (`aliases`), for a quantity its `units` (id to the symbol a page writes,
   the spec's own first) and its `bounds`, and for a term spec its `terms` (id to English label)
 - `profiles`: the profile of each of those categories as JSON: the category id to the ids of the specs its products
   take (`specs`) and of those its listings filter on (`filters`)

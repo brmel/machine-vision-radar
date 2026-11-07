@@ -34,7 +34,7 @@ def run_migrate(args: argparse.Namespace) -> int:
         plan = parse_plan(json.loads(Path(args.plan).read_text(encoding="utf-8")), wiring.model())
     except (OSError, ValueError, ParseError) as exc:
         return log.error(f"{args.plan}: {exc}", code=2)
-    changeset, counts = migrated(wiring.catalog(()), plan)
+    changeset, counts = migrated(wiring.catalog(()), plan, wiring.model())
     proposals: list[str] = []
     if not args.dry_run:
         review, job = wiring.review(), Job(MIGRATION, cid)
@@ -54,6 +54,6 @@ def register(commands: Commands) -> None:
                       help="derive one changeset from a migration plan over the whole store and file it through "
                            f"review, {BATCH} records a proposal; the founder approves the proposals under one note",
                       func=run_migrate)
-    m.add_argument("plan", help='the plan JSON: {"reason": ..., "rules": [{"rule": "drop_field", "kind": ..., '
-                                '"field": ...}]}')
+    m.add_argument("plan", help='the plan JSON: {"reason": ..., "rules": [...]}, each rule one of drop_field, '
+                                "rename_spec, move_terms, map_term, true_as_term and move_category")
     m.add_argument("--dry-run", action="store_true", help="print what would move and file nothing")

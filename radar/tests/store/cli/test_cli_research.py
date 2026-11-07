@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from pathlib import Path
 
 import pytest
@@ -68,7 +68,7 @@ def test_research_from_the_cli_and_the_admin(monkeypatch: pytest.MonkeyPatch, tm
 def test_two_runs_in_a_day_share_the_research_token_and_its_proposal_cap(monkeypatch: pytest.MonkeyPatch) -> None:
     where = FX.loaded()
     FX.wire(where, monkeypatch)
-    tomorrow = (date.today() + timedelta(days=1)).isoformat()
+    tomorrow = (datetime.now(UTC).date() + timedelta(days=1)).isoformat()
     FX.json(where, "agent-token", "create", "research", "--scope", "propose", "--expires", tomorrow,
             "--proposals-per-day", "1")
     maker = next(o for o in FX.rows("organizations.jsonl") if o["website"] == "https://example.com")["slug"]
