@@ -1,0 +1,47 @@
+[
+  {
+    "id": "genicam",
+    "label": {"en": "GenICam", "fr": "GenICam"},
+    "description": {"en": "The EMVA GenICam generic programming interface: a camera described by its XML file and SFNC feature names.", "fr": "L'interface de programmation générique GenICam de l'EMVA : une caméra décrite par son fichier XML et les noms de fonctions SFNC."}
+  },
+  {
+    "id": "gige_vision",
+    "label": {"en": "GigE Vision", "fr": "GigE Vision"},
+    "description": {"en": "The GigE Vision camera interface standard, version unstated.", "fr": "La norme d'interface GigE Vision, version non précisée."}
+  },
+  {
+    "id": "gige_vision_2_2",
+    "label": {"en": "GigE Vision 2.2", "fr": "GigE Vision 2.2"},
+    "description": {"en": "The AIA GigE Vision interface standard, version 2.2.", "fr": "La norme d'interface GigE Vision de l'AIA, version 2.2."}
+  },
+  {
+    "id": "usb3_vision",
+    "label": {"en": "USB3 Vision", "fr": "USB3 Vision"},
+    "description": {"en": "The USB3 Vision camera interface standard, version unstated.", "fr": "La norme d'interface USB3 Vision, version non précisée."}
+  },
+  {
+    "id": "usb3_vision_1_2",
+    "label": {"en": "USB3 Vision 1.2", "fr": "USB3 Vision 1.2"},
+    "description": {"en": "The AIA USB3 Vision interface standard, version 1.2.", "fr": "La norme d'interface USB3 Vision de l'AIA, version 1.2."}
+  },
+  {
+    "id": "coaxpress_2_1",
+    "label": {"en": "CoaXPress 2.1", "fr": "CoaXPress 2.1"},
+    "description": {"en": "The JIIA CoaXPress interface standard, version 2.1.", "fr": "La norme d'interface CoaXPress de la JIIA, version 2.1."}
+  },
+  {
+    "id": "camera_link_hs_1_2",
+    "label": {"en": "Camera Link HS 1.2", "fr": "Camera Link HS 1.2"},
+    "description": {"en": "The AIA Camera Link HS interface standard, version 1.2.", "fr": "La norme d'interface Camera Link HS de l'AIA, version 1.2."}
+  },
+  {
+    "id": "emva_1288_4_0",
+    "label": {"en": "EMVA 1288 4.0", "fr": "EMVA 1288 4.0"},
+    "description": {"en": "Camera and sensor performance measured and reported under the EMVA 1288 standard, release 4.0.", "fr": "Performances de caméra et de capteur mesurées et publiées selon la norme EMVA 1288, version 4.0."}
+  },
+  {
+    "id": "opc_ua_mv_1_0",
+    "label": {"en": "OPC UA Machine Vision 1.0", "fr": "OPC UA Vision industrielle 1.0"},
+    "description": {"en": "The OPC UA companion specification for machine vision systems, part 1, version 1.0.", "fr": "La spécification compagnon OPC UA pour les systèmes de vision industrielle, partie 1, version 1.0."}
+  }
+]

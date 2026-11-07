@@ -1,0 +1,7 @@
+[
+  {"id": "backlight", "label": {"en": "Backlight", "fr": "Rétroéclairage"}},
+  {"id": "coaxial", "label": {"en": "Coaxial", "fr": "Coaxial"}},
+  {"id": "dark_field", "label": {"en": "Dark field", "fr": "Fond noir"}},
+  {"id": "structured", "label": {"en": "Structured light", "fr": "Lumière structurée"}},
+  {"id": "telecentric", "label": {"en": "Telecentric", "fr": "Télécentrique"}}
+]

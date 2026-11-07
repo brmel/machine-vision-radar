@@ -1,0 +1,10 @@
+[
+  {"id": "ring", "label": {"en": "Ring", "fr": "Anneau"}},
+  {"id": "bar", "label": {"en": "Bar", "fr": "Barre"}},
+  {"id": "line", "label": {"en": "Line", "fr": "Ligne"}},
+  {"id": "spot", "label": {"en": "Spot", "fr": "Spot"}},
+  {"id": "flat", "label": {"en": "Flat panel", "fr": "Panneau plat"}},
+  {"id": "dome", "label": {"en": "Dome", "fr": "Dôme"}},
+  {"id": "tunnel", "label": {"en": "Tunnel", "fr": "Tunnel"}},
+  {"id": "light_source", "label": {"en": "Light source", "fr": "Source de lumière"}}
+]

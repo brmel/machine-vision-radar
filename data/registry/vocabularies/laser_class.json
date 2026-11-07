@@ -2,5 +2,8 @@
   {"id": "class_1", "label": {"en": "Class 1", "fr": "Classe 1"}, "aliases": ["1"]},
   {"id": "class_2", "label": {"en": "Class 2", "fr": "Classe 2"}, "aliases": ["2"]},
   {"id": "class_2m", "label": {"en": "Class 2M", "fr": "Classe 2M"}, "aliases": ["2M"]},
-  {"id": "class_3r", "label": {"en": "Class 3R", "fr": "Classe 3R"}, "aliases": ["3R"]}
+  {"id": "class_3r", "label": {"en": "Class 3R", "fr": "Classe 3R"}, "aliases": ["3R"]},
+  {"id": "class_1m", "label": {"en": "Class 1M", "fr": "Classe 1M"}},
+  {"id": "class_3b", "label": {"en": "Class 3B", "fr": "Classe 3B"}},
+  {"id": "class_4", "label": {"en": "Class 4", "fr": "Classe 4"}}
 ]

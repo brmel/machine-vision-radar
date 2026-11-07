@@ -1,0 +1,22 @@
+{
+  "category_id": "imaging.smart_cameras",
+  "sections": {
+    "core": ["resolution_megapixels", "frame_rate", "vision_tasks", "interfaces"],
+    "detail": ["lens_mount", "form_factor", "spectral_range", "power", "config_style", "onboard_processing"],
+    "versions": ["label", "channel", "released", "end_of_support"],
+    "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
+  },
+  "groups": ["image_sensor", "connectivity", "environment", "ai_stack", "compute"],
+  "facets": [
+    {"field": "interfaces"},
+    {"field": "resolution_megapixels"},
+    {"field": "frame_rate"},
+    {"field": "vision_tasks"},
+    {"field": "lens_mount"},
+    {"field": "ip_rating"},
+    {"field": "fieldbus"},
+    {"field": "config_style"}
+  ],
+  "required": ["interfaces"],
+  "axis_dependent_keys": []
+}

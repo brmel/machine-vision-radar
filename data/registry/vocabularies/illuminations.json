@@ -1,1 +1,7 @@
-[{"id": "led", "label": {"en": "LED", "fr": "DEL (LED)"}}]
+[
+  {"id": "led", "label": {"en": "LED", "fr": "DEL (LED)"}},
+  {"id": "laser", "label": {"en": "Laser", "fr": "Laser"}},
+  {"id": "vcsel", "label": {"en": "VCSEL", "fr": "VCSEL"}},
+  {"id": "xenon", "label": {"en": "Xenon", "fr": "Xénon"}},
+  {"id": "halogen", "label": {"en": "Halogen", "fr": "Halogène"}}
+]

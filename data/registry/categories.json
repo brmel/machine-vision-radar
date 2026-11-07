@@ -183,5 +183,21 @@
     "pipeline": ["act"],
     "glyph": "cell",
     "description": {"en": "Integrated direct part marking (DPM) laser markers paired with inline visual verification.", "fr": "Marqueurs laser intégrés pour le marquage direct de pièces (DPM), associés à une vérification visuelle en ligne."}
+  },
+  {
+    "id": "imaging.smart_cameras",
+    "label": {"en": "Smart cameras & vision sensors", "fr": "Caméras intelligentes et capteurs de vision"},
+    "domain": "imaging",
+    "pipeline": ["acquire", "process", "decide"],
+    "glyph": "matrix",
+    "description": {"en": "A camera that runs its own inspection: sensor, processing and tools in one device.", "fr": "Une caméra qui exécute elle-même son inspection : capteur, traitement et outils dans un seul appareil."}
+  },
+  {
+    "id": "imaging.cameras.hyperspectral",
+    "label": {"en": "Hyperspectral & multispectral cameras", "fr": "Caméras hyperspectrales et multispectrales"},
+    "domain": "imaging",
+    "pipeline": ["acquire"],
+    "glyph": "matrix",
+    "description": {"en": "Cameras imaging a scene in many spectral bands, by pushbroom, snapshot or filter.", "fr": "Caméras qui imagent une scène en de nombreuses bandes spectrales, par balayage, instantané ou filtre."}
   }
 ]

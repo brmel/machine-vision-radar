@@ -2,7 +2,7 @@
   "category_id": "imaging.sensors",
   "sections": {
     "core": ["resolution_megapixels", "pixel_size", "shutter_type", "frame_rate"],
-    "detail": ["interfaces"],
+    "detail": ["interfaces", "vision_standards"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },

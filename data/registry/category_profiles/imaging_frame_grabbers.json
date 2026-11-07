@@ -2,7 +2,7 @@
   "category_id": "imaging.frame_grabbers",
   "sections": {
     "core": ["interfaces", "channels", "pcie_generation", "pcie_lanes", "device_kind"],
-    "detail": ["form_factor", "onboard_processing", "power"],
+    "detail": ["form_factor", "onboard_processing", "power", "vision_standards", "poe"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },

@@ -1,19 +1,20 @@
 {
   "category_id": "optics.lighting",
   "sections": {
-    "core": ["light_type", "color", "power", "controller_integrated"],
-    "detail": ["wavelength", "working_distance", "beam_angle", "color_temperature", "cable_length"],
+    "core": ["light_form", "illumination_technique", "color", "power", "controller_integrated"],
+    "detail": ["light_type", "wavelength", "working_distance", "beam_angle", "color_temperature", "cable_length"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
   "groups": ["environment"],
   "facets": [
-    {"field": "light_type"},
+    {"field": "light_form"},
+    {"field": "illumination_technique"},
     {"field": "color"},
     {"field": "controller_integrated"},
     {"field": "power"},
     {"field": "ip_rating"}
   ],
-  "required": ["light_type"],
+  "required": [],
   "axis_dependent_keys": ["color"]
 }
