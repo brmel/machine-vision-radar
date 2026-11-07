@@ -95,6 +95,8 @@ def test_rows_as_makers_write_them() -> None:
         "operating_humidity": {"range": {"min": 35.0, "max": 85.0, "unit": "percent"}}}
     assert _maker_rows("optics.lighting", "Operating relative humidity | (%) | 20-85, non condensing") == {
         "operating_humidity": {"range": {"min": 20.0, "max": 85.0, "unit": "percent"}}}
+    assert _maker_rows("imaging.cameras.area_scan", "Interface | 2.5GigE") == {"interfaces": {"terms": ["2_5gige"]}}
+    assert _maker_rows("imaging.cameras.area_scan", "Interface | 25GigE") == {"interfaces": {"terms": ["25gige"]}}
     camera = _maker_rows("imaging.cameras.area_scan", "Sensor model | | IMX265", "Exposure time | 12 μs to 10 ms",
                          "Frame rate | 9.5 fps", "Pixel size | 2 x 3 µm", "Weight | 90 g", "Weight | 95 g")
     assert camera == {"sensor_model": {"string": "IMX265"}, "frame_rate": {"quantity": {"value": 9.5, "unit": "hz"}}}, (

@@ -467,7 +467,7 @@
     "vocabulary": "interfaces",
     "label": {"en": "Interfaces", "fr": "Interfaces"},
     "description": {"en": "The physical links the device connects over, such as GigE, USB3, CoaXPress, Camera Link, MIPI or serial lines. The vision standard a link carries is in vision_standards.", "fr": "Les liaisons physiques de l'appareil, comme GigE, USB3, CoaXPress, Camera Link, MIPI ou les lignes série. La norme de vision portée par une liaison est dans vision_standards."},
-    "aliases": ["data interface", "camera interface", "connectivity", "I/O interface", "interface de données", "connectique", "connectivité", "Schnittstelle", "Schnittstellen", "Datenschnittstelle", "Kameraschnittstelle", "image data interface", "communication interface"]
+    "aliases": ["interface", "data interface", "camera interface", "connectivity", "I/O interface", "interface de données", "connectique", "connectivité", "Schnittstelle", "Schnittstellen", "Datenschnittstelle", "Kameraschnittstelle", "image data interface", "communication interface"]
   },
   {
     "id": "ip_rating",
