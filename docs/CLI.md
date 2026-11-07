@@ -37,8 +37,8 @@
 `radar --help` lists the nouns, and `radar <noun> <verb> --help` each verb's arguments, flags and limits;
 `contracts/operations.json` gives every command its `--json` shape, its admin screen and its MCP tool.
 `store export <dir>` writes the store as the catalog folder `store load` reads; the maintainers keep the
-production store's snapshot in their private data repo. `model migrate PLAN.json` files a structural move over the
-whole store through review (DATA_ARCHITECTURE.md §7).
+production store's snapshot in their private data repo. A structural move is a plan that `store rewrite` applies to an
+export offline, or `model migrate` files through review (DATA_ARCHITECTURE.md §7).
 
 ## Gotchas
 
