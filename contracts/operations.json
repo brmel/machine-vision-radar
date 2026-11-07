@@ -538,6 +538,14 @@
       "output": {"type": "object", "required": ["correlation_id", "changes", "counts", "proposals"]}
     },
     {
+      "id": "store.rewrite",
+      "summary": "apply a migration plan to a catalog folder offline and write a clean one, with no change history",
+      "cli": "store rewrite",
+      "admin": null,
+      "mcp": null,
+      "output": {"type": "object", "required": ["changes", "counts", "written"]}
+    },
+    {
       "id": "site.export",
       "summary": "write the site's agent files",
       "cli": "site export",

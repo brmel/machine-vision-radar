@@ -2,7 +2,6 @@
   {"id": "deep_learning", "label": {"en": "Deep learning", "fr": "Apprentissage profond"}},
   {"id": "generative_ai", "label": {"en": "Generative ai", "fr": "IA générative"}},
   {"id": "machine_learning", "label": {"en": "Machine learning", "fr": "Apprentissage automatique"}},
-  {"id": "synthetic_data", "label": {"en": "Synthetic data", "fr": "Génération de données synthétiques"}},
   {"id": "vision_language", "label": {"en": "Vision language", "fr": "Modèles vision-langage"}},
   {"id": "agentic", "label": {"en": "Agentic AI", "fr": "IA agentique"}},
   {"id": "few_shot", "label": {"en": "Few-shot learning", "fr": "Apprentissage à partir de peu d'exemples"}},

@@ -99,3 +99,19 @@ def test_unknown_version_scheme_is_refused() -> None:
         v["scheme"] = "lunar"
     with pytest.raises(ValueError, match="no ordering for version scheme 'lunar'"):
         parse_catalog(raw, MODEL).versions_of("prd_0000000002")
+
+def test_a_rewrite_writes_a_clean_catalog_with_no_history(tmp_path: Path) -> None:
+    held = tmp_path / "held"
+    held.mkdir()
+    for collection, rows in CORPUS.items():
+        (held / f"{collection}.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    plan = tmp_path / "plan.json"
+    plan.write_text(json.dumps({"reason": "One meaning per term", "rules": [
+        {"rule": "map_term", "spec": "compliance", "term": "ce", "to": None},
+        {"rule": "rename_spec", "spec": "dynamic_range", "to": "line_rate"}]}), encoding="utf-8")
+    into = tmp_path / "clean"
+    done = json.loads(_cli("store", "rewrite", str(plan), str(held), str(into), "--json").stdout)
+    assert done["counts"]["claim retracted: compliance"] == 1 and done["counts"]["claim put: line_rate"] == 1
+    claims = [json.loads(line) for line in (into / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert {c["spec_key"] for c in claims} & {"compliance", "dynamic_range"} == set()
+    assert all(c["version"] == 1 for c in claims) and not (into / "changes.jsonl").exists()

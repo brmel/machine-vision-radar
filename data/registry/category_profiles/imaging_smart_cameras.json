@@ -2,7 +2,7 @@
   "category_id": "imaging.smart_cameras",
   "sections": {
     "core": ["resolution_megapixels", "frame_rate", "vision_tasks", "interfaces"],
-    "detail": ["lens_mount", "form_factor", "spectral_range", "power", "config_style", "onboard_processing"],
+    "detail": ["lens_mount", "form_factor", "spectral_range", "power", "config_style", "onboard_processing", "line_rate"],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },

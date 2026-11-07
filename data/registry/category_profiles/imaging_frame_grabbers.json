@@ -6,7 +6,7 @@
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
-  "groups": [],
+  "groups": ["environment"],
   "facets": [
     {"field": "interfaces"},
     {"field": "device_kind"},

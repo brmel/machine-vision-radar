@@ -7,6 +7,5 @@
   },
   {"id": "ros2", "label": {"en": "ROS 2", "fr": "ROS 2"}},
   {"id": "opc_ua", "label": {"en": "OPC UA", "fr": "OPC UA"}},
-  {"id": "mqtt", "label": {"en": "MQTT", "fr": "MQTT"}},
-  {"id": "api_unstated", "label": {"en": "API, kind not stated", "fr": "API, type non précisé"}}
+  {"id": "mqtt", "label": {"en": "MQTT", "fr": "MQTT"}}
 ]

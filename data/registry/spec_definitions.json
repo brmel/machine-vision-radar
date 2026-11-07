@@ -198,8 +198,8 @@
     "id": "compliance",
     "datatype": "term_set",
     "vocabulary": "standards",
-    "label": {"en": "Standards and compliance", "fr": "Normes et conformité"},
-    "description": {"en": "The interface standards, by version, and the compliance marks the product's maker states it meets.", "fr": "Les normes d'interface, par version, et les marquages de conformité que le fabricant déclare respectés par le produit."},
+    "label": {"en": "Regulatory marks", "fr": "Marquages réglementaires"},
+    "description": {"en": "The regulatory and safety marks the product's maker states it carries, such as CE, FCC, UL or RoHS.", "fr": "Les marquages réglementaires et de sécurité que le fabricant déclare, comme CE, FCC, UL ou RoHS."},
     "aliases": ["GenICam compliant", "GenICam support", "standards compliance", "certifications", "approvals", "conformité", "Normen", "Zulassungen", "GenICam-konform", "conformity", "conformité", "Konformität"]
   },
   {
@@ -262,33 +262,12 @@
     "precision": 3
   },
   {
-    "id": "depth_range",
-    "datatype": "quantity",
-    "dimension": "length",
-    "unit": "mm",
-    "label": {"en": "Depth working range", "fr": "Plage de profondeur"},
-    "description": {"en": "Distances along the optical axis (Z) over which the device returns depth, nearest to farthest, or its Z measuring span.", "fr": "Distances le long de l'axe optique (Z) où l'appareil fournit la profondeur, de la plus proche à la plus lointaine, ou son étendue de mesure en Z."},
-    "aliases": ["Z range", "depth range", "measuring range Z", "Z measuring range", "plage Z", "plage de mesure Z", "étendue de mesure en Z", "Messbereich Z", "Z-Messbereich", "Tiefenbereich"],
-    "bounds": {"min": 0, "max": 1000000},
-    "precision": 1
-  },
-  {
     "id": "device_kind",
     "datatype": "term_set",
     "vocabulary": "device_kinds",
     "label": {"en": "Device kind", "fr": "Type de périphérique"},
     "description": {"en": "Kind of acquisition hardware: capture card, interface board, bridge or extender.", "fr": "Type de matériel d'acquisition : carte de capture, carte d'interface, pont ou prolongateur."},
     "aliases": ["device type", "board type", "card type", "type de carte", "type d'appareil", "Gerätetyp", "Kartentyp"]
-  },
-  {
-    "id": "dimensions_size",
-    "datatype": "quantity",
-    "dimension": "length",
-    "unit": "mm",
-    "label": {"en": "Physical enclosure dimensions", "fr": "Dimensions physiques du boîtier"},
-    "description": {"en": "Largest outer dimension of the component, such as the diameter of a round optic or the longer side of a rectangular one.", "fr": "Plus grande dimension extérieure du composant, par exemple le diamètre d'une optique ronde ou le plus grand côté d'une optique rectangulaire."},
-    "bounds": {"min": 0.1, "max": 5000},
-    "precision": 1
   },
   {
     "id": "distortion",
@@ -359,7 +338,7 @@
     "id": "fieldbus",
     "datatype": "term_set",
     "vocabulary": "fieldbuses",
-    "label": {"en": "Fieldbus", "fr": "Bus de terrain"},
+    "label": {"en": "Industrial protocols", "fr": "Protocoles industriels"},
     "description": {"en": "Industrial network protocols the device uses to talk to PLCs, such as PROFINET, EtherNet/IP, EtherCAT, Modbus or OPC UA.", "fr": "Protocoles de réseau industriel que l'appareil utilise avec les automates, par exemple PROFINET, EtherNet/IP, EtherCAT, Modbus ou OPC UA."},
     "aliases": ["industrial Ethernet", "industrial protocols", "PLC protocols", "industrial communication", "protocoles industriels", "Ethernet industriel", "réseau de terrain", "Feldbus", "Industrieprotokolle"]
   },
@@ -446,8 +425,8 @@
     "id": "illumination",
     "datatype": "term_set",
     "vocabulary": "illuminations",
-    "label": {"en": "Integrated illumination", "fr": "Éclairage intégré"},
-    "description": {"en": "Light source built into the reader to light the codes it reads, such as LEDs.", "fr": "Source de lumière intégrée au lecteur pour éclairer les codes qu'il lit, par exemple des LED."},
+    "label": {"en": "Light source technology", "fr": "Technologie de la source de lumière"},
+    "description": {"en": "The technology of the light a device builds in or a light uses, such as LED, laser or VCSEL.", "fr": "La technologie de la lumière intégrée à l'appareil ou de l'éclairage, comme LED, laser ou VCSEL."},
     "aliases": ["illumination", "lighting", "built-in illumination", "integrated light", "internal lighting", "éclairage", "éclairage interne", "Beleuchtung", "integrierte Beleuchtung", "interne Beleuchtung"]
   },
   {
@@ -487,7 +466,7 @@
     "datatype": "term_set",
     "vocabulary": "interfaces",
     "label": {"en": "Interfaces", "fr": "Interfaces"},
-    "description": {"en": "Data and control interfaces of the device, such as GigE Vision, USB3 Vision, CoaXPress, Camera Link, MIPI or serial lines.", "fr": "Interfaces de données et de commande de l'appareil, par exemple GigE Vision, USB3 Vision, CoaXPress, Camera Link, MIPI ou liaisons série."},
+    "description": {"en": "The physical links the device connects over, such as GigE, USB3, CoaXPress, Camera Link, MIPI or serial lines. The vision standard a link carries is in vision_standards.", "fr": "Les liaisons physiques de l'appareil, comme GigE, USB3, CoaXPress, Camera Link, MIPI ou les lignes série. La norme de vision portée par une liaison est dans vision_standards."},
     "aliases": ["data interface", "camera interface", "connectivity", "I/O interface", "interface de données", "connectique", "connectivité", "Schnittstelle", "Schnittstellen", "Datenschnittstelle", "Kameraschnittstelle", "image data interface", "communication interface"]
   },
   {
@@ -569,22 +548,14 @@
     "aliases": ["mount", "mount type", "optical interface", "lens interface", "monture", "type de monture", "fixation d'objectif", "Objektivanschluss", "Objektivgewinde", "Bajonett", "camera mount"]
   },
   {
-    "id": "light_type",
-    "datatype": "term",
-    "vocabulary": "light_types",
-    "label": {"en": "Illumination geometry", "fr": "Géométrie d'éclairage"},
-    "description": {"en": "Geometry of the light, such as ring, bar, spot, dome, coaxial, backlight or dark field.", "fr": "Géométrie de l'éclairage, par exemple annulaire, barre, spot, dôme, coaxial, rétroéclairage ou fond noir."},
-    "aliases": ["light type", "illumination type", "lighting type", "light shape", "type d'éclairage", "forme d'éclairage", "Beleuchtungsart", "Beleuchtungstyp", "Leuchtentyp"]
-  },
-  {
     "id": "line_rate",
     "datatype": "quantity",
     "dimension": "frequency",
     "unit": "khz",
     "better": "higher",
-    "label": {"en": "Line rate", "fr": "Fréquence de ligne"},
-    "description": {"en": "Maximum number of lines per second a line-scan sensor reads out at full line width; for a 3D laser profiler, its profile rate.", "fr": "Nombre maximal de lignes par seconde lues par un capteur linéaire sur toute sa largeur ; pour un profilomètre laser 3D, sa cadence de profils."},
-    "aliases": ["line frequency", "lines per second", "max line rate", "line scan rate", "fréquence ligne", "lignes par seconde", "cadence ligne", "Zeilenrate", "Zeilenfrequenz", "Zeilen pro Sekunde"],
+    "label": {"en": "Line or profile rate", "fr": "Fréquence de ligne ou de profil"},
+    "description": {"en": "Maximum number of lines a line-scan sensor reads per second at full width, or of profiles or sweeps a 3D device completes.", "fr": "Nombre maximal de lignes qu'un capteur linéaire lit par seconde sur toute sa largeur, ou de profils ou de balayages d'un appareil 3D."},
+    "aliases": ["line frequency", "lines per second", "max line rate", "line scan rate", "fréquence ligne", "lignes par seconde", "cadence ligne", "Zeilenrate", "Zeilenfrequenz", "Zeilen pro Sekunde", "Scan frequency", "scan rate", "profile rate", "profiles per second", "profile frequency", "scan speed", "cadence de balayage", "fréquence de profil", "profils par seconde", "Profilfrequenz", "Profilrate", "Profile pro Sekunde", "Scanrate"],
     "bounds": {"min": 0.01, "max": 2000},
     "precision": 2,
     "external": {"sfnc": "AcquisitionLineRate"}
@@ -681,10 +652,11 @@
     "datatype": "quantity",
     "dimension": "length",
     "unit": "mm",
-    "label": {"en": "Measurement range", "fr": "Plage de mesure"},
-    "description": {"en": "Distances a displacement sensor measures, from start to end of its range, or its span when the source gives only that.", "fr": "Plage de distances mesurée par un capteur de déplacement, du début à la fin, ou sa seule étendue quand la source ne donne qu'elle."},
+    "label": {"en": "Measuring range", "fr": "Plage de mesure"},
+    "description": {"en": "Distances from the device over which it returns measurements, nearest to farthest, or its span or maximum range when the source gives only that.", "fr": "Distances auxquelles l'appareil fournit des mesures, de la plus proche à la plus lointaine, ou son étendue ou sa portée maximale quand la source ne donne que cela."},
     "bounds": {"min": 0, "max": 1000000},
-    "precision": 2
+    "precision": 2,
+    "aliases": ["Depth working range", "Z range", "depth range", "measuring range Z", "Z measuring range", "plage Z", "plage de mesure Z", "étendue de mesure en Z", "Messbereich Z", "Z-Messbereich", "Tiefenbereich", "Working range", "detection range", "max range", "maximum range", "distance range", "measuring distance", "portée", "portée de détection", "portée maximale", "plage de distance", "Reichweite", "Arbeitsbereich", "Erfassungsbereich", "Messreichweite"]
   },
   {
     "id": "memory",
@@ -892,18 +864,6 @@
     "precision": 1
   },
   {
-    "id": "scan_rate",
-    "datatype": "quantity",
-    "dimension": "frequency",
-    "unit": "hz",
-    "better": "higher",
-    "label": {"en": "Scan frequency", "fr": "Fréquence de balayage"},
-    "description": {"en": "Maximum number of scans per second a 3D device completes: profiles for a profiler, sweeps for a scanner, revolutions for a rotating lidar.", "fr": "Nombre maximal de balayages par seconde d'un appareil 3D : profils pour un profilomètre, passes pour un scanner, tours pour un lidar rotatif."},
-    "aliases": ["scan rate", "profile rate", "profiles per second", "profile frequency", "scan speed", "cadence de balayage", "fréquence de profil", "profils par seconde", "Profilfrequenz", "Profilrate", "Profile pro Sekunde", "Scanrate"],
-    "bounds": {"min": 0.01, "max": 1000000},
-    "precision": 1
-  },
-  {
     "id": "scan_width",
     "datatype": "quantity",
     "dimension": "length",
@@ -1019,13 +979,6 @@
     "vocabulary": "laser_functions",
     "label": {"en": "Turnkey system function", "fr": "Fonction du système clé en main"},
     "description": {"en": "What the laser system does: marking parts, or projecting outlines onto a work surface to guide assembly.", "fr": "Fonction du système laser : marquer des pièces, ou projeter des contours sur un plan de travail pour guider l'assemblage."}
-  },
-  {
-    "id": "telecentric",
-    "datatype": "boolean",
-    "label": {"en": "Telecentric design", "fr": "Conception télécentrique"},
-    "description": {"en": "Whether the lens is telecentric, keeping magnification constant as object distance changes within its depth of field.", "fr": "Indique si l'objectif est télécentrique, à grandissement constant quand la distance de l'objet varie dans sa profondeur de champ."},
-    "aliases": ["telecentric", "telecentric lens", "bi-telecentric", "telecentricity", "télécentrique", "objectif télécentrique", "bi-télécentrique", "télécentricité", "telezentrisch", "Telezentrie", "bi-telezentrisch"]
   },
   {
     "id": "telecentricity",
@@ -1158,17 +1111,6 @@
     "aliases": ["WD", "object distance", "MOD", "minimum object distance", "distance objet", "distance minimale de mise au point", "Arbeitsabstand", "Objektabstand", "Mindestobjektabstand", "minimum WD"],
     "bounds": {"min": 0.01, "max": 100000},
     "precision": 1
-  },
-  {
-    "id": "working_range",
-    "datatype": "quantity",
-    "dimension": "length",
-    "unit": "m",
-    "label": {"en": "Working range", "fr": "Portée opérationnelle"},
-    "description": {"en": "Distances from the device at which a time-of-flight camera or lidar returns valid measurements, nearest to farthest, or its maximum range.", "fr": "Distances auxquelles une caméra temps de vol ou un lidar fournit des mesures valides, de la plus proche à la plus lointaine, ou sa portée maximale."},
-    "aliases": ["detection range", "max range", "maximum range", "distance range", "measuring distance", "portée", "portée de détection", "portée maximale", "plage de distance", "Reichweite", "Arbeitsbereich", "Erfassungsbereich", "Messreichweite"],
-    "bounds": {"min": 0, "max": 2000},
-    "precision": 2
   },
   {
     "id": "vision_standards",

@@ -2,7 +2,7 @@
   "category_id": "optics.optical_components",
   "sections": {
     "core": ["component_type", "spectral_range", "coating"],
-    "detail": ["dimensions_size"],
+    "detail": [],
     "versions": ["label", "channel", "released", "end_of_support"],
     "offerings": ["licence_type", "term", "binding", "price", "valid_from", "valid_to"]
   },
