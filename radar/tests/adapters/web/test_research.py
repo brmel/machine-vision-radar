@@ -8,7 +8,7 @@ import pytest
 
 from radar import paths
 from radar.adapters.ai.prompted.research_agent import PromptedResearchAgent
-from radar.adapters.ai.meta.runner import MetaRunner
+from radar.adapters.ai.runners.chat_completions import ChatCompletionsRunner
 from radar.adapters.ai.scripted import ScriptedDatasheetExtractor, ScriptedImageJudge, ScriptedResearchAgent
 from radar.adapters.console import log
 from radar.adapters.files.prompts import FilesPromptRegistry
@@ -142,7 +142,7 @@ def test_a_run_reads_the_maker_s_public_pages_politely_and_files_through_review(
             and {n["correlation_id"] for n in lines} == {run.id})
 
 def _on_runner(base: str, chosen: AiModel) -> ResearchAgent:
-    runner = MetaRunner(chosen.id, f"{base}/v1", "recorded")
+    runner = ChatCompletionsRunner(chosen.id, f"{base}/v1", "recorded")
     return PromptedResearchAgent(FilesPromptRegistry(paths.PROMPTS).prompt("research"), runner, REGISTRY)
 
 def test_a_reply_cut_short_refuses_its_page_and_counts_in_the_run_s_cost(docs: tuple[Docs, Any]) -> None:

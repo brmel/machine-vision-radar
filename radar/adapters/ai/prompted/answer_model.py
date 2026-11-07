@@ -7,7 +7,7 @@ from radar.domain.ai.prompts import Prompt
 from radar.adapters.ai.prompted.reply import read
 from radar.domain.ports.ai.prompts import ModelRunner
 from radar.adapters.files.model_json import LANGUAGES as CONTRACT_LANGUAGES
-from radar.domain.ports.ai.answer_model import AnswerText, NeedText, Sentence
+from radar.domain.ports.ai.answer_model import Answered, AnswerText, NeedText, Sentence, Solved
 from radar.domain.ports.search.retriever import Evidence
 
 LANGUAGES = {l.code: l.name for l in CONTRACT_LANGUAGES}
@@ -25,7 +25,7 @@ def sentences_of(raw: Any) -> tuple[Sentence, ...]:
 
 def _text(raw: Any, tokens_in: int, tokens_out: int) -> AnswerText:
     needs = tuple(NeedText(n["need"], sentences_of(n)) for n in raw.get("needs", ()))
-    return AnswerText(() if needs else sentences_of(raw), tokens_in, tokens_out, needs)
+    return Solved(needs, tokens_in, tokens_out) if needs else Answered(sentences_of(raw), tokens_in, tokens_out)
 
 class PromptedAnswerModel:
     def __init__(self, prompt: Prompt, runner: ModelRunner) -> None:

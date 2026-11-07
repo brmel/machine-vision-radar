@@ -58,9 +58,9 @@ SEAM_CALLS = {"getattr": REFLECTION, "hasattr": REFLECTION, "json_text": JSON_TE
 PROVIDERS = re.compile(
     r"^(firebase|firebase_admin|firebase_functions|google\.cloud|google\.auth|google\.oauth2|googleapiclient|"
     r"google\.adk|google\.genai|fastembed|mcp|requests|httpx|urllib\.request|http\.client)(\.|$)")
-SDK_HOMES = {re.compile(r"^(google\.adk|google\.genai)(\.|$)"): {"radar/adapters/ai/adk/runner.py"},
+SDK_HOMES = {re.compile(r"^(google\.adk|google\.genai)(\.|$)"): {"radar/adapters/ai/runners/adk.py"},
              re.compile(r"^(google\.oauth2|google\.auth)(\.|$)"): {
-                 "radar/adapters/ai/adk/runner.py", "radar/adapters/web/admin/identity.py"},
+                 "radar/adapters/ai/runners/adk.py", "radar/adapters/web/admin/identity.py"},
              re.compile(r"^fastembed(\.|$)"): {"radar/adapters/ai/search/fastembed_embedder.py"},
              re.compile(r"^firebase_functions(\.|$)"): {"radar/adapters/web/function.py"},
              re.compile(r"^mcp(\.|$)"): set()}

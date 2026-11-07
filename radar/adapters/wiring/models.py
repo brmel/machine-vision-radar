@@ -10,8 +10,8 @@ from radar.adapters.ai.prompted.article_model import PromptedArticleModel
 from radar.adapters.ai.prompted.datasheet_extractor import PromptedDatasheetExtractor
 from radar.adapters.ai.prompted.image_judge import PromptedImageJudge
 from radar.adapters.ai.prompted.research_agent import PromptedResearchAgent
-from radar.adapters.ai.adk.runner import AdkRunner
-from radar.adapters.ai.meta.runner import MetaRunner
+from radar.adapters.ai.runners.adk import AdkRunner
+from radar.adapters.ai.runners.chat_completions import ChatCompletionsRunner
 from radar.adapters.ai.scripted import (ScriptedAnswerModel, ScriptedArticleModel, ScriptedDatasheetExtractor,
                                         ScriptedImageJudge, ScriptedResearchAgent)
 from radar.adapters.ai.search.engine import ShardedSearch
@@ -64,9 +64,9 @@ class Models(Stores):
                 key = os.environ.get("MODEL_API_KEY")
                 if not key:
                     raise RuntimeError(f"{model.id} runs on the Meta Model API: set MODEL_API_KEY in the environment")
-                return MetaRunner(model.id, base_url, key)
+                return ChatCompletionsRunner(model.id, base_url, key)
             case AiProviderLocal(local=base_url):
-                return MetaRunner(model.id, base_url, None)
+                return ChatCompletionsRunner(model.id, base_url, None)
 
     def _meter(self, use: Use, prompted: Callable[[Prompt, ModelRunner], M], scripted: M,
                prompt_id: str | None = None) -> Meter[M]:

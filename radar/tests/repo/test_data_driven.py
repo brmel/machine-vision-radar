@@ -36,7 +36,7 @@ HOMONYMS: dict[str, tuple[str, ...]] = {
     "image": ("radar/adapters/web/pages.py",),
     "model": ("app/src/adapters/review/HttpAdminApi.ts", "app/src/features/admin/search/settings/KnobsTable.tsx",
               "app/src/features/admin/search/settings/UseForm.tsx", "app/src/shell/admin/AdminView.tsx",
-              "radar/adapters/ai/meta/runner.py", "radar/adapters/ai/search/fastembed_embedder.py",
+              "radar/adapters/ai/runners/chat_completions.py", "radar/adapters/ai/search/fastembed_embedder.py",
               "radar/adapters/console/parser.py", "radar/adapters/web/admin/endpoint.py",
               "radar/adapters/web/admin/search.py", "radar/commands/build/gen_model.py",
               "radar/commands/data/validate.py", "radar/paths.py"),

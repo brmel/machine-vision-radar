@@ -3,6 +3,18 @@
 How the catalog is searched and asked, and how every AI use is built. The store and read model they build on:
 [SYSTEM.md](SYSTEM.md); the commands: [CLI.md](CLI.md).
 
+**The agents.** Each is one domain entry whose loop is code: its model makes one structured judgement a step, and its
+tools are ports the loop calls (AGENTS.md rule 15). Each model port runs on the runner its registry model's `provider`
+picks. A better crawler is another `Reader` adapter
+(`radar/domain/ports/web/reader.py`), picked in the wiring.
+
+| agent | entry | loop | model port (prompt) | tools | measure |
+|---|---|---|---|---|---|
+| research | `Researcher` (`radar/domain/review/agents/research/run.py`) | frontier, read, table or model, file; 8 pages, 40 s | `ResearchAgent` (`research`), `ImageJudge` (`image_judge`), `DatasheetExtractor` (`datasheet`) | `Reader`, `CrawlRecords`, `HeldRecords`, `Files`, `Proposing` | `research measure` |
+| search | `SearchEngine`, `Indexer`, `Retriever` | none | none: the `Embedder` | none | `eval run search` |
+| ask and solve | `Answerer` (`radar/domain/ai/answerer.py`) | retrieve, answer, ground | `AnswerModel` (`ask`): `Answered` or `Solved` | `Retriever` | `eval run ask`, `eval run solve` |
+| news drafts | `Drafter` (`radar/domain/review/feed/drafter.py`) | subject, draft, ground, propose | `ArticleModel` (`draft`) | `Retriever`, `Feed` | `eval run draft` |
+
 - **The search engine** is one port, `SearchEngine` (`radar/domain/ports/search/search_engine.py`): `index` (an update
   or a rebuild), `last_indexed` and `search`. It is implemented by `radar/adapters/ai/search/` (`ShardedSearch`, its
   ranking, records, files and the fastembed embedder); another engine replaces that folder with no domain change. Its measured cold start, the function's first answer after a deploy, is about 2 s (1.70 to 2.00 s over five deploys), so the embedder stays in the function. The
@@ -35,11 +47,11 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   (`evidence` in search.json) and gives their published values and sources as `Evidence`; the `AnswerModel`, which
   writes `Sentence`s, each citing ids of that evidence; and the `Answerer` (`radar/domain/ai/answerer.py`), which
   refuses a question nothing matches before any model call and keeps the answer only when the grounding check passes.
-- **Solving.** The same call solves an application problem: the `ask` prompt returns either sentences or, for a
-  problem, at most three needs, each a few words and the sentences naming the products of the evidence that meet it.
-  Every sentence of every need is grounded; a need no product meets has none, and the site says so. `AskAnswer.needs`
-  carries them, the answer's `citations` every need's. The Ask page, `radar catalog ask` and the admin's console show
-  them. The scripted model reads a request split by `;` as a problem, one need a part.
+- **Solving.** The same call solves an application problem: the `ask` prompt returns either sentences (`Answered`) or,
+  for a problem (`Solved`), at most three needs, each a few words and the sentences naming the products of the
+  evidence that meet it. Every sentence of every need is grounded; a need no product meets has none, and the site says
+  so. `AskAnswer.needs` carries them, the answer's `citations` every need's. The Ask page, `radar catalog ask` and the
+  admin's console show them. The scripted model reads a request split by `;` as a problem, one need a part.
 - **The grounding check** (`radar/domain/ai/grounding.py`) is one, for answers and drafts alike: a sentence that cites
   nothing, cites an id outside the evidence, or states a number what it cites (or the question) does not hold rejects the
   output, with that reason, and the asker gets the `not_enough_evidence` refusal.
@@ -47,13 +59,13 @@ How the catalog is searched and asked, and how every AI use is built. The store 
   caps; each candidate's call counted), datasheet extraction and news drafts, each on its prompt (`ask`, `research`,
   `image_judge`, `datasheet`, `draft`) and its registry model, run through the `ModelRunner` port (`radar/domain/ports/ai/prompts.py`). A model's
   `provider` picks its runner (`radar/adapters/wiring/models.py`). `meta` runs on the Meta Model API
-  (`radar/adapters/ai/meta/runner.py`): its OpenAI-compatible chat completions, the prompt's instruction as the system
+  (`radar/adapters/ai/runners/chat_completions.py`): its OpenAI-compatible chat completions, the prompt's instruction as the system
   message, its output schema as `response_format`, a datasheet as a `file` part and an image as an `image_url` part,
   with minimal reasoning, and the key `MODEL_API_KEY` from the environment, never a file. `local` runs on the same
   runner against an OpenAI-compatible server the caller runs, with no key: Muse Glimmer, Meta's open-weight model
   distilled from Muse Spark, served by Ollama (`ollama run muse-glimmer`) at `localhost:11434`, for the CLI on that
   machine; it reads text and images, not PDFs, so the datasheet use stays on a model that reads files. `vertex` runs
-  on Gemini on the project's Vertex AI through ADK (`radar/adapters/ai/adk/runner.py`), with the service account's
+  on Gemini on the project's Vertex AI through ADK (`radar/adapters/ai/runners/adk.py`), with the service account's
   credentials or the CLI's access token. The full request is logged at debug level only. On
   the emulators, for the tests, the gates and the CLI, the scripted models (`radar/adapters/ai/scripted.py`) stand
   in, metered at the use's model's price.

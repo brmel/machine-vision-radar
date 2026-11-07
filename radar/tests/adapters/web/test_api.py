@@ -23,7 +23,7 @@ from radar.adapters.firestore.ledgers.ai import (CALLS, FirestoreAskLedger, Fire
                                                  usage_collection)
 from radar.adapters.wiring.root import Wiring
 from radar.adapters.ai.prompted.answer_model import PromptedAnswerModel
-from radar.adapters.ai.meta.runner import MetaRunner
+from radar.adapters.ai.runners.chat_completions import ChatCompletionsRunner
 from radar.adapters.ai.scripted import ScriptedAnswerModel
 from radar.adapters.files.prompts import FilesPromptRegistry
 from radar.domain.ai.answerer import Answerer
@@ -130,7 +130,7 @@ def test_a_reply_out_of_shape_is_unavailable_and_charged_as_billed(
     FX.wire(place, monkeypatch)
     model = model_of(FX.model.registry.ai, Use.ASK, None)
     with serving(meta_saying(said, []), keep_alive=True) as url:
-        runner = MetaRunner(model.id, f"{url}/v1", "recorded")
+        runner = ChatCompletionsRunner(model.id, f"{url}/v1", "recorded")
         model = PromptedAnswerModel(FilesPromptRegistry(paths.PROMPTS).prompt("ask"), runner)
         res = _ask(_endpoint(ledger, "api-00001", model), "glossy widget")
     [call] = [f for _, f in ledger.list(CALLS)]

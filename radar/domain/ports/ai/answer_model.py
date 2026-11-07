@@ -16,14 +16,24 @@ class NeedText:
     sentences: tuple[Sentence, ...]
 
 @dataclass(frozen=True, slots=True)
-class AnswerText:
+class Answered:
     sentences: tuple[Sentence, ...]
     tokens_in: int
     tokens_out: int
-    needs: tuple[NeedText, ...] = ()
 
     def every_sentence(self) -> tuple[Sentence, ...]:
-        return (*self.sentences, *(s for n in self.needs for s in n.sentences))
+        return self.sentences
+
+@dataclass(frozen=True, slots=True)
+class Solved:
+    needs: tuple[NeedText, ...]
+    tokens_in: int
+    tokens_out: int
+
+    def every_sentence(self) -> tuple[Sentence, ...]:
+        return tuple(s for n in self.needs for s in n.sentences)
+
+AnswerText = Answered | Solved
 
 class AnswerModel(Protocol):
     def answer(self, question: str, evidence: Evidence, locale: str) -> AnswerText:

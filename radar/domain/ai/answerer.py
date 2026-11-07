@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Sequence, assert_never
 
 from radar.domain.ai.grounding import ungrounded
 from radar.domain.ports.ai.usage_log import Ended, Outcome
 from radar.domain.model.entities import AskAnswer, AskNeed, Citation
-from radar.domain.ports.ai.answer_model import AnswerModel, AnswerText, NeedText, Sentence
+from radar.domain.ports.ai.answer_model import AnswerModel, Answered, AnswerText, NeedText, Solved, Sentence
 from radar.domain.ports.search.retriever import Evidence, EvidenceProduct, Retriever
 
 def refusal(reason: str) -> AskAnswer:
@@ -32,12 +32,16 @@ def _need(need: NeedText, evidence: Evidence) -> AskNeed:
     return AskNeed(need=need.need, answer=answer, citations=citations)
 
 def cited(text: AnswerText, evidence: Evidence) -> AskAnswer:
-    if not text.needs:
-        answer, citations = _cited(text.sentences, evidence)
-        return AskAnswer(answer=answer, citations=citations, refused=False)
-    needs = tuple(_need(n, evidence) for n in text.needs)
-    every = tuple(dict.fromkeys(c for n in needs for c in n.citations))
-    return AskAnswer(answer="", citations=every, needs=needs, refused=False)
+    match text:
+        case Answered(sentences=sentences):
+            answer, citations = _cited(sentences, evidence)
+            return AskAnswer(answer=answer, citations=citations, refused=False)
+        case Solved(needs=solved):
+            needs = tuple(_need(n, evidence) for n in solved)
+            every = tuple(dict.fromkeys(c for n in needs for c in n.citations))
+            return AskAnswer(answer="", citations=every, needs=needs, refused=False)
+        case _:
+            assert_never(text)
 
 @dataclass(frozen=True, slots=True)
 class Asked:
