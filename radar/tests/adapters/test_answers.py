@@ -14,13 +14,13 @@ from radar.adapters.ai.prompted.datasheet_extractor import PromptedDatasheetExtr
 from radar.adapters.ai.prompted.image_judge import PromptedImageJudge
 from radar.adapters.ai.prompted.research_agent import PromptedResearchAgent
 from radar.adapters.files.prompts import FilesPromptRegistry
-from radar.adapters.ai.adk.runner import AdkRunner
-from radar.adapters.ai.meta.runner import MetaRunner
+from radar.adapters.ai.runners.adk import AdkRunner
+from radar.adapters.ai.runners.chat_completions import ChatCompletionsRunner
 from radar.domain.ai.answerer import Answerer
 from radar.domain.search.retriever import IndexRetriever, evidence_of
 from radar.domain.model.entities import (AiProviderLocal, AiProviderMeta, ClaimValueQuantity, ClaimValueTerm, Quantity,
                                          Source)
-from radar.domain.ports.ai.answer_model import AnswerModel, AnswerText, NeedText, Sentence
+from radar.domain.ports.ai.answer_model import Answered, AnswerModel, AnswerText, NeedText, Sentence, Solved
 from radar.domain.ports.ai.datasheet_extractor import Datasheet, SpecValue
 from radar.domain.ports.ai.image_judge import CandidateImage
 from radar.domain.ports.ai.prompts import ModelRunner
@@ -80,19 +80,19 @@ def _vertex_saying(text: str, heard: list[str]) -> Iterator[str]:
 def _adk(url: str) -> AdkRunner:
     return AdkRunner(GEMINI.id, "mvradar", "us-central1", "recorded", url)
 
-def _muse(url: str) -> MetaRunner:
-    return MetaRunner(MUSE.id, f"{url}v1", "recorded")
+def _muse(url: str) -> ChatCompletionsRunner:
+    return ChatCompletionsRunner(MUSE.id, f"{url}v1", "recorded")
 
 RUNNERS: dict[str, tuple[Callable[[str, list[str]], Answer], Callable[[str], ModelRunner]]] = {
     "adk": (vertex_saying, _adk), "meta": (meta_saying, _muse),
-    "local": (meta_saying, lambda url: MetaRunner(GLIMMER.id, f"{url}v1", None))}
+    "local": (meta_saying, lambda url: ChatCompletionsRunner(GLIMMER.id, f"{url}v1", None))}
 
 class Scripted:
     def __init__(self, *sentences: Sentence, needs: tuple[NeedText, ...] = ()) -> None:
         self.sentences, self.needs = sentences, needs
 
     def answer(self, question: str, evidence: Evidence, locale: str) -> AnswerText:
-        return AnswerText(self.sentences, 1, 1, self.needs)
+        return Solved(self.needs, 1, 1) if self.needs else Answered(self.sentences, 1, 1)
 
 class Unreachable:
     def answer(self, question: str, evidence: Evidence, locale: str) -> AnswerText:
@@ -287,7 +287,7 @@ def test_the_meta_runner_sends_a_datasheet_as_a_file_and_an_image_inline() -> No
 def test_a_refused_meta_call_names_its_status_never_the_key() -> None:
     refusing: Answer = lambda path, sent: (401, b'{"error": {"message": "invalid key"}}')
     with serving(refusing, keep_alive=True) as url, pytest.raises(OSError, match="HTTP 401") as refused:
-        MetaRunner(MUSE.id, f"{url}/v1", "mk-secret").reply(PROMPTS.prompt("ask"), "w", 10)
+        ChatCompletionsRunner(MUSE.id, f"{url}/v1", "mk-secret").reply(PROMPTS.prompt("ask"), "w", 10)
     assert "mk-secret" not in str(refused.value)
 
 def test_a_refused_adk_call_is_an_os_error_naming_its_status() -> None:

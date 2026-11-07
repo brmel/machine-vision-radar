@@ -5,7 +5,7 @@ import json
 
 from radar.domain.model.entities import ClaimValue, ClaimValueNone, ClaimValueQuantity, ClaimValueTerm, Quantity
 from radar.adapters.files.model_json import DEFAULT_LANGUAGE, LANGUAGES
-from radar.domain.ports.ai.answer_model import AnswerText, NeedText, Sentence
+from radar.domain.ports.ai.answer_model import Answered, AnswerText, NeedText, Sentence, Solved
 from radar.domain.ports.ai.article_model import ArticleText
 from radar.domain.ports.ai.datasheet_extractor import Datasheet, Extraction, SpecValue
 from radar.domain.ports.ai.image_judge import CandidateImage, ImageEvaluation, ImageKind, JudgedImage
@@ -34,10 +34,10 @@ def _need(need: str, evidence: Evidence, locale: str) -> NeedText:
 
 class ScriptedAnswerModel:
     def answer(self, question: str, evidence: Evidence, locale: str) -> AnswerText:
-        needs = (tuple(_need(n, evidence, locale) for n in question.split(NEEDS) if n.strip()) if NEEDS in question
-                 else ())
-        sentences = () if needs else _sentences(evidence, locale, 2)
-        text = AnswerText(sentences, len(question.split()) + sum(len(p.facts) for p in evidence.products), 0, needs)
+        tokens_in = len(question.split()) + sum(len(p.facts) for p in evidence.products)
+        text: AnswerText = (Solved(tuple(_need(n, evidence, locale) for n in question.split(NEEDS) if n.strip()),
+                                   tokens_in, 0) if NEEDS in question
+                            else Answered(_sentences(evidence, locale, 2), tokens_in, 0))
         return dataclasses.replace(text, tokens_out=_tokens(*(s.text for s in text.every_sentence())))
 
 def _stated(product: EvidenceProduct, locale: str) -> tuple[Sentence, ...]:

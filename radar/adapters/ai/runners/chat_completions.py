@@ -18,7 +18,7 @@ def _part(file: tuple[bytes, str]) -> dict[str, Any]:
         return {"type": "image_url", "image_url": {"url": url}}
     return {"type": "file", "file": {"filename": f"source.{mime.rsplit('/', 1)[-1]}", "file_data": url}}
 
-class MetaRunner:
+class ChatCompletionsRunner:
     def __init__(self, model: str, base_url: str, key: str | None) -> None:
         self.model, self._base_url, self._key = model, base_url, key
 
